@@ -41,6 +41,7 @@ nav:
     - Introduction: sims/index.md
     - Learning Graph: sims/learning-graph/index.md
     - Pascal's Law: sims/pascals-law/index.md
+  - FAQ: faq.md
   - Glossary: glossary.md
   - How We Built This Site: how-we-built-this-site.md
   - References: references.md
