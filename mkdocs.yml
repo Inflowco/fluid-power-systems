@@ -41,6 +41,12 @@ nav:
     - Introduction: sims/index.md
     - Learning Graph: sims/learning-graph/index.md
     - Pascal's Law: sims/pascals-law/index.md
+    - Valve Types Guide: sims/valve-types-guide/index.md
+    - Pump Types Comparison: sims/pump-types-comparison/index.md
+    - Filter Pressure Monitor: sims/filter-pressure-monitor/index.md
+    - PLC Control Loop: sims/plc-control-loop/index.md
+    - Data Decision Pipeline: sims/data-decision-pipeline/index.md
+    - Maintenance Workflow Comparison: sims/maintenance-workflow-comparison/index.md
   - FAQ: faq.md
   - Glossary: glossary.md
   - How We Built This Site: how-we-built-this-site.md

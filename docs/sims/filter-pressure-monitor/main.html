@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filter Differential Pressure Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ── Filter Differential Pressure Monitor MicroSim ──
+    // All simulation state and p5.js code is self-contained.
+
+    // Canvas dimensions
+    let drawHeight = 450;
+    let controlHeight = 100;
+    let canvasHeight = drawHeight + controlHeight;
+    let aspectRatio = 1.91;
+    let canvasWidth = canvasHeight * aspectRatio;
+
+    // Simulation state
+    let simRunning = true;
+    let simTime = 0;            // simulated days elapsed
+    let diffPressure = 0.3;     // inches of water column (baseline)
+    let basePressure = 0.3;     // clean filter baseline
+    let filterLoading = 0;      // 0 = clean, 1 = fully loaded
+    let particles = [];         // visual particles on the filter
+    let pressureHistory = [];   // {day, pressure} records for the trend chart
+    let alertActive = false;
+    let alertFlashTimer = 0;
+    let bypassActive = false;
+
+    // Controls
+    let contaminationSlider;
+    let mervSlider;
+    let alertThresholdInput;
+    let startPauseBtn;
+    let replaceFilterBtn;
+
+    // Contamination and MERV labels
+    let contaminationLabels = ['Low', 'Medium', 'High'];
+    let mervValues = [8, 10, 12, 14];
+
+    // Simulation speed: 1 simulated day per second at 60fps
+    let simDayPerFrame;
+
+    // Derived layout regions (computed in updateLayout)
+    let filterX, filterY, filterW, filterH;
+    let gaugeX, gaugeY, gaugeR;
+    let chartX, chartY, chartW, chartH;
+    let controlY;
+
+    function updateLayout() {
+        // Filter cross-section region (top-left)
+        filterX = canvasWidth * 0.03;
+        filterY = 10;
+        filterW = canvasWidth * 0.42;
+        filterH = drawHeight * 0.42;
+
+        // Gauge region (top-right)
+        gaugeR = min(canvasWidth * 0.15, drawHeight * 0.18);
+        gaugeX = canvasWidth * 0.72;
+        gaugeY = filterY + gaugeR + 25;
+
+        // Trend chart region (middle)
+        chartX = canvasWidth * 0.03;
+        chartY = filterY + filterH + 30;
+        chartW = canvasWidth * 0.56;
+        chartH = drawHeight - chartY - 10;
+
+        // Info / particle count region is right of chart
+        // Controls region
+        controlY = drawHeight + 5;
+    }
+
+    function setup() {
+        const canvas = createCanvas(canvasWidth, canvasHeight);
+        var mainElement = document.querySelector('main');
+        canvas.parent(mainElement);
+
+        updateLayout();
+
+        simDayPerFrame = 1.0 / 60.0;
+
+        // Record initial pressure point
+        pressureHistory.push({ day: 0, pressure: basePressure });
+
+        // Create controls after canvas so they sit below
+        createControls();
+    }
+
+    function createControls() {
+        // We draw controls on the canvas itself rather than using DOM elements
+        // to keep everything self-contained in the p5 canvas.
+        // Interaction is handled via mousePressed / mouseReleased.
+    }
+
+    // ── Simulation logic ──
+
+    function updateSimulation() {
+        if (!simRunning) return;
+
+        let contaminationRate = [0.003, 0.008, 0.018][contaminationSliderVal]; // loading per day
+        let mervIndex = mervSliderVal; // 0-3
+        // Higher MERV captures more particles -> filter loads faster
+        let mervFactor = [0.7, 1.0, 1.4, 1.85][mervIndex];
+
+        let loadingIncrement = contaminationRate * mervFactor * simDayPerFrame;
+        filterLoading = min(filterLoading + loadingIncrement, 1.0);
+
+        simTime += simDayPerFrame;
+
+        // Differential pressure model: exponential rise as filter loads
+        // Clean baseline ~ 0.3 inWC, fully loaded ~ 10 inWC
+        diffPressure = basePressure + (10 - basePressure) * pow(filterLoading, 1.6);
+
+        // Bypass above 8 inWC
+        bypassActive = diffPressure > 8.0;
+
+        // Alert
+        alertActive = diffPressure >= alertThresholdVal;
+        if (alertActive) {
+            alertFlashTimer += 1;
+        }
+
+        // Add particles visually (proportional to loading rate)
+        if (random() < loadingIncrement * 40) {
+            addParticle();
+        }
+
+        // Record pressure history every ~0.5 simulated days
+        if (pressureHistory.length === 0 ||
+            simTime - pressureHistory[pressureHistory.length - 1].day >= 0.5) {
+            pressureHistory.push({ day: simTime, pressure: diffPressure });
+            // Keep a manageable number of points
+            if (pressureHistory.length > 600) {
+                pressureHistory.splice(0, 1);
+            }
+        }
+    }
+
+    function addParticle() {
+        // Particle accumulates on the upstream (left) side of the filter media
+        let px = filterX + 10 + random(filterW * 0.35);
+        let py = filterY + 30 + random(filterH - 50);
+        let sz = random(2, 5);
+        let c = color(
+            random(90, 140),  // brownish / gray
+            random(70, 110),
+            random(40, 70),
+            random(150, 230)
+        );
+        particles.push({ x: px, y: py, size: sz, col: c });
+    }
+
+    function replaceFilter() {
+        filterLoading = 0;
+        diffPressure = basePressure;
+        particles = [];
+        simTime = 0;
+        pressureHistory = [{ day: 0, pressure: basePressure }];
+        alertActive = false;
+        alertFlashTimer = 0;
+        bypassActive = false;
+    }
+
+    // ── Slider / button values (managed manually on canvas) ──
+    let contaminationSliderVal = 1; // 0=Low, 1=Medium, 2=High
+    let mervSliderVal = 1;          // 0=MERV8, 1=MERV10, 2=MERV12, 3=MERV14
+    let alertThresholdVal = 5.0;
+
+    // Button hit zones (computed each frame)
+    let btnStartPause = {};
+    let btnReplace = {};
+    let sliderContam = {};
+    let sliderMerv = {};
+    let btnAlertMinus = {};
+    let btnAlertPlus = {};
+
+    // ── Drawing ──
+
+    function draw() {
+        updateSimulation();
+
+        background(245);
+
+        drawFilterCrossSection();
+        drawGauge();
+        drawTrendChart();
+        drawInfoPanel();
+        drawControls();
+
+        // Alert overlay
+        if (alertActive && (alertFlashTimer % 40 < 20)) {
+            drawAlert();
+        }
+    }
+
+    function drawFilterCrossSection() {
+        push();
+        // Section label
+        fill(30);
+        noStroke();
+        textSize(13);
+        textAlign(LEFT, TOP);
+        text('Filter Cross-Section', filterX, filterY);
+
+        // Housing outline
+        stroke(80);
+        strokeWeight(2);
+        fill(240);
+        rect(filterX, filterY + 20, filterW, filterH - 20, 4);
+
+        // Flow arrow labels
+        fill(50);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, CENTER);
+        text('Upstream (dirty)', filterX + filterW * 0.2, filterY + filterH + 12);
+        text('Downstream (clean)', filterX + filterW * 0.8, filterY + filterH + 12);
+
+        // Filter media — vertical pleated section in the middle
+        let mediaX = filterX + filterW * 0.4;
+        let mediaW = filterW * 0.12;
+        let mediaY = filterY + 24;
+        let mediaH = filterH - 28;
+
+        // Media background (white = clean)
+        noStroke();
+        fill(255);
+        rect(mediaX, mediaY, mediaW, mediaH);
+
+        // Coloring the media based on loading (gradient from upstream side)
+        let loadColor = lerpColor(color(255), color(120, 95, 60), filterLoading * 0.85);
+        fill(loadColor);
+        rect(mediaX, mediaY, mediaW, mediaH);
+
+        // Draw pleat lines
+        stroke(180);
+        strokeWeight(0.5);
+        let numPleats = 12;
+        for (let i = 1; i < numPleats; i++) {
+            let yy = mediaY + (mediaH / numPleats) * i;
+            line(mediaX, yy, mediaX + mediaW, yy);
+        }
+
+        // Upstream fluid (blue, gets murkier)
+        let upstreamColor = lerpColor(color(100, 160, 230, 180), color(140, 120, 90, 180), filterLoading * 0.6);
+        noStroke();
+        fill(upstreamColor);
+        rect(filterX + 4, mediaY, mediaX - filterX - 4, mediaH);
+
+        // Downstream fluid (stays cleaner)
+        let mervEff = [0.7, 0.8, 0.9, 0.95][mervSliderVal];
+        let downDirty = filterLoading * (1 - mervEff) * 0.5;
+        let downstreamColor = lerpColor(color(100, 170, 240, 150), color(140, 130, 100, 150), downDirty);
+        fill(downstreamColor);
+        rect(mediaX + mediaW, mediaY, filterX + filterW - mediaX - mediaW - 4, mediaH);
+
+        // Draw accumulated particles on upstream side
+        for (let p of particles) {
+            fill(p.col);
+            noStroke();
+            ellipse(p.x, p.y, p.size, p.size);
+        }
+
+        // Flow arrows
+        stroke(50, 50, 200);
+        strokeWeight(1.5);
+        let arrowY = filterY + 20 + (filterH - 20) / 2;
+        // Left arrow
+        drawArrow(filterX + 10, arrowY, filterX + filterW * 0.35, arrowY);
+        // Right arrow
+        let rightArrowAlpha = bypassActive ? 80 : 255;
+        stroke(50, 50, 200, rightArrowAlpha);
+        drawArrow(mediaX + mediaW + 8, arrowY, filterX + filterW - 10, arrowY);
+
+        // Bypass indicator
+        if (bypassActive) {
+            fill(200, 50, 50);
+            noStroke();
+            textSize(11);
+            textAlign(CENTER, CENTER);
+            text('BYPASS', filterX + filterW / 2, filterY + filterH - 8);
+        }
+
+        pop();
+    }
+
+    function drawArrow(x1, y1, x2, y2) {
+        line(x1, y1, x2, y2);
+        let angle = atan2(y2 - y1, x2 - x1);
+        let arrowSize = 6;
+        line(x2, y2, x2 - arrowSize * cos(angle - PI / 6), y2 - arrowSize * sin(angle - PI / 6));
+        line(x2, y2, x2 - arrowSize * cos(angle + PI / 6), y2 - arrowSize * sin(angle + PI / 6));
+    }
+
+    function drawGauge() {
+        push();
+        // Label
+        fill(30);
+        noStroke();
+        textSize(13);
+        textAlign(CENTER, TOP);
+        text('Differential Pressure', gaugeX, filterY);
+
+        let cx = gaugeX;
+        let cy = gaugeY + 5;
+        let r = gaugeR;
+
+        // Draw gauge background arc (180 degrees, bottom half)
+        noFill();
+        strokeWeight(r * 0.28);
+
+        // Green zone: 0-3 inWC (0 to 54 degrees of 180)
+        stroke(80, 190, 80);
+        arc(cx, cy, r * 1.6, r * 1.6, PI, PI + (PI * 3 / 10));
+
+        // Yellow zone: 3-6 inWC
+        stroke(220, 200, 40);
+        arc(cx, cy, r * 1.6, r * 1.6, PI + (PI * 3 / 10), PI + (PI * 6 / 10));
+
+        // Red zone: 6-10 inWC
+        stroke(210, 60, 60);
+        arc(cx, cy, r * 1.6, r * 1.6, PI + (PI * 6 / 10), TWO_PI);
+
+        // Gauge border
+        noFill();
+        stroke(60);
+        strokeWeight(2);
+        arc(cx, cy, r * 1.8, r * 1.8, PI, TWO_PI);
+        line(cx - r * 0.9, cy, cx + r * 0.9, cy);
+
+        // Tick marks and labels
+        textSize(9);
+        fill(40);
+        noStroke();
+        textAlign(CENTER, CENTER);
+        for (let v = 0; v <= 10; v += 2) {
+            let angle = PI + (PI * v / 10);
+            let tx = cx + cos(angle) * r * 0.97;
+            let ty = cy + sin(angle) * r * 0.97;
+            text(v, tx, ty);
+
+            stroke(60);
+            strokeWeight(1);
+            let ix = cx + cos(angle) * r * 0.82;
+            let iy = cy + sin(angle) * r * 0.82;
+            let ox = cx + cos(angle) * r * 0.88;
+            let oy = cy + sin(angle) * r * 0.88;
+            line(ix, iy, ox, oy);
+            noStroke();
+        }
+
+        // Needle
+        let needleAngle = PI + (PI * constrain(diffPressure, 0, 10) / 10);
+        stroke(30);
+        strokeWeight(2.5);
+        let nx = cx + cos(needleAngle) * r * 0.72;
+        let ny = cy + sin(needleAngle) * r * 0.72;
+        line(cx, cy, nx, ny);
+
+        // Center dot
+        fill(40);
+        noStroke();
+        ellipse(cx, cy, 8, 8);
+
+        // Digital readout
+        textSize(16);
+        textAlign(CENTER, TOP);
+        fill(30);
+        text(nf(diffPressure, 1, 2) + ' inWC', cx, cy + 10);
+
+        // Unit label
+        textSize(9);
+        fill(100);
+        text('inches water column', cx, cy + 28);
+
+        // Alert threshold marker on gauge
+        let threshAngle = PI + (PI * constrain(alertThresholdVal, 0, 10) / 10);
+        stroke(255, 120, 0);
+        strokeWeight(2);
+        let mx = cx + cos(threshAngle) * r * 0.78;
+        let my = cy + sin(threshAngle) * r * 0.78;
+        let mx2 = cx + cos(threshAngle) * r * 0.92;
+        let my2 = cy + sin(threshAngle) * r * 0.92;
+        line(mx, my, mx2, my2);
+
+        pop();
+    }
+
+    function drawTrendChart() {
+        push();
+        // Label
+        fill(30);
+        noStroke();
+        textSize(13);
+        textAlign(LEFT, TOP);
+        text('Pressure Trend (over time)', chartX, chartY - 16);
+
+        // Chart background
+        fill(255);
+        stroke(180);
+        strokeWeight(1);
+        rect(chartX, chartY, chartW, chartH, 3);
+
+        // Grid lines and Y-axis labels
+        textSize(9);
+        fill(130);
+        noStroke();
+        textAlign(RIGHT, CENTER);
+        for (let v = 0; v <= 10; v += 2) {
+            let yy = chartY + chartH - (v / 10) * chartH;
+            // Grid line
+            stroke(220);
+            strokeWeight(0.5);
+            line(chartX + 1, yy, chartX + chartW - 1, yy);
+            noStroke();
+            text(v, chartX - 4, yy);
+        }
+
+        // Y-axis title
+        push();
+        textSize(9);
+        fill(80);
+        translate(chartX - 22, chartY + chartH / 2);
+        rotate(-HALF_PI);
+        textAlign(CENTER, CENTER);
+        text('inWC', 0, 0);
+        pop();
+
+        // X-axis label
+        textSize(9);
+        fill(80);
+        textAlign(CENTER, TOP);
+        text('Simulated Days', chartX + chartW / 2, chartY + chartH + 3);
+
+        // Colored zones behind chart
+        noStroke();
+        // Green zone (0-3)
+        fill(80, 190, 80, 30);
+        rect(chartX + 1, chartY + chartH * 0.7, chartW - 2, chartH * 0.3);
+        // Yellow zone (3-6)
+        fill(220, 200, 40, 30);
+        rect(chartX + 1, chartY + chartH * 0.4, chartW - 2, chartH * 0.3);
+        // Red zone (6-10)
+        fill(210, 60, 60, 30);
+        rect(chartX + 1, chartY, chartW - 2, chartH * 0.4);
+
+        // Alert threshold line
+        let threshY = chartY + chartH - (alertThresholdVal / 10) * chartH;
+        stroke(255, 120, 0);
+        strokeWeight(1);
+        drawingContext.setLineDash([4, 3]);
+        line(chartX + 1, threshY, chartX + chartW - 1, threshY);
+        drawingContext.setLineDash([]);
+        noStroke();
+        fill(255, 120, 0);
+        textSize(8);
+        textAlign(LEFT, BOTTOM);
+        text('Alert: ' + nf(alertThresholdVal, 1, 1), chartX + chartW - 50, threshY - 2);
+
+        // Plot pressure history
+        if (pressureHistory.length > 1) {
+            let maxDay = max(pressureHistory[pressureHistory.length - 1].day, 1);
+            let minDay = pressureHistory[0].day;
+            stroke(30, 80, 180);
+            strokeWeight(1.5);
+            noFill();
+            beginShape();
+            for (let pt of pressureHistory) {
+                let px = chartX + ((pt.day - minDay) / (maxDay - minDay)) * chartW;
+                let py = chartY + chartH - (constrain(pt.pressure, 0, 10) / 10) * chartH;
+                vertex(px, py);
+            }
+            endShape();
+        }
+
+        // X-axis tick labels
+        if (pressureHistory.length > 1) {
+            let maxDay = pressureHistory[pressureHistory.length - 1].day;
+            let minDay = pressureHistory[0].day;
+            textSize(8);
+            fill(100);
+            noStroke();
+            textAlign(CENTER, TOP);
+            let numTicks = 5;
+            for (let i = 0; i <= numTicks; i++) {
+                let d = minDay + (maxDay - minDay) * (i / numTicks);
+                let px = chartX + (i / numTicks) * chartW;
+                text(nf(d, 1, 0), px, chartY + chartH + 13);
+            }
+        }
+
+        pop();
+    }
+
+    function drawInfoPanel() {
+        push();
+        let panelX = chartX + chartW + 20;
+        let panelY = chartY - 16;
+        let panelW = canvasWidth - panelX - 10;
+
+        fill(30);
+        noStroke();
+        textSize(13);
+        textAlign(LEFT, TOP);
+        text('Status', panelX, panelY);
+
+        textSize(11);
+        let yy = panelY + 22;
+        let lineH = 20;
+
+        // Sim time
+        fill(60);
+        text('Day: ' + nf(simTime, 1, 1), panelX, yy);
+        yy += lineH;
+
+        // Particle count
+        text('Particles captured: ' + particles.length, panelX, yy);
+        yy += lineH;
+
+        // Filter loading percentage
+        text('Filter loading: ' + nf(filterLoading * 100, 1, 1) + '%', panelX, yy);
+        yy += lineH;
+
+        // MERV efficiency
+        let mervEff = [70, 80, 90, 95][mervSliderVal];
+        text('MERV ' + mervValues[mervSliderVal] + ' eff: ' + mervEff + '%', panelX, yy);
+        yy += lineH;
+
+        // Contamination rate label
+        text('Contam. rate: ' + contaminationLabels[contaminationSliderVal], panelX, yy);
+        yy += lineH;
+
+        // Pressure reading with color
+        let pColor = diffPressure < 3 ? color(40, 160, 40) :
+                     diffPressure < 6 ? color(190, 170, 20) : color(200, 40, 40);
+        fill(pColor);
+        textSize(14);
+        text('dP: ' + nf(diffPressure, 1, 2) + ' inWC', panelX, yy);
+        yy += lineH + 4;
+
+        // Status message
+        textSize(11);
+        if (bypassActive) {
+            fill(200, 40, 40);
+            text('WARNING: Filter bypass!', panelX, yy);
+            yy += lineH;
+            text('Replace filter immediately.', panelX, yy);
+        } else if (alertActive) {
+            fill(220, 140, 20);
+            text('Maintenance alert:', panelX, yy);
+            yy += lineH;
+            text('Schedule filter change.', panelX, yy);
+        } else {
+            fill(40, 140, 40);
+            text('Filter OK', panelX, yy);
+        }
+
+        // Simulation state
+        yy += lineH + 6;
+        fill(80);
+        textSize(10);
+        text(simRunning ? 'Simulation running' : 'Simulation paused', panelX, yy);
+
+        pop();
+    }
+
+    function drawAlert() {
+        push();
+        noStroke();
+        fill(255, 60, 60, 45);
+        rect(0, 0, canvasWidth, drawHeight);
+
+        fill(255, 255, 255, 220);
+        rectMode(CENTER);
+        rect(canvasWidth / 2, drawHeight / 2 - 30, 320, 50, 8);
+
+        fill(200, 40, 40);
+        textSize(18);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        text('MAINTENANCE ALERT', canvasWidth / 2, drawHeight / 2 - 30);
+        textStyle(NORMAL);
+        pop();
+    }
+
+    function drawControls() {
+        push();
+        // Background for controls area
+        noStroke();
+        fill(230);
+        rect(0, controlY - 2, canvasWidth, controlHeight + 2);
+
+        stroke(180);
+        strokeWeight(1);
+        line(0, controlY - 2, canvasWidth, controlY - 2);
+
+        let cx = 15;
+        let cy = controlY + 12;
+        let sliderW = 140;
+        let sliderH = 8;
+        let spacing = canvasWidth / 5;
+
+        // ── Contamination Rate Slider ──
+        noStroke();
+        fill(60);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text('Contamination Rate', cx, cy - 10);
+
+        // Track
+        fill(200);
+        noStroke();
+        rect(cx, cy + 10, sliderW, sliderH, 4);
+
+        // Knob position
+        let contamKnobX = cx + (contaminationSliderVal / 2) * sliderW;
+        fill(70, 130, 210);
+        ellipse(contamKnobX, cy + 10 + sliderH / 2, 16, 16);
+
+        // Labels under slider
+        textSize(8);
+        fill(100);
+        textAlign(CENTER, TOP);
+        for (let i = 0; i < 3; i++) {
+            text(contaminationLabels[i], cx + (i / 2) * sliderW, cy + 24);
+        }
+
+        sliderContam = { x: cx, y: cy + 4, w: sliderW, h: 22 };
+
+        // ── MERV Rating Slider ──
+        cx += spacing;
+        fill(60);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text('Filter MERV Rating', cx, cy - 10);
+
+        fill(200);
+        noStroke();
+        rect(cx, cy + 10, sliderW, sliderH, 4);
+
+        let mervKnobX = cx + (mervSliderVal / 3) * sliderW;
+        fill(70, 130, 210);
+        ellipse(mervKnobX, cy + 10 + sliderH / 2, 16, 16);
+
+        textSize(8);
+        fill(100);
+        textAlign(CENTER, TOP);
+        for (let i = 0; i < 4; i++) {
+            text(mervValues[i], cx + (i / 3) * sliderW, cy + 24);
+        }
+
+        sliderMerv = { x: cx, y: cy + 4, w: sliderW, h: 22 };
+
+        // ── Alert Threshold ──
+        cx += spacing;
+        fill(60);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text('Alert Threshold (inWC)', cx, cy - 10);
+
+        // Minus button
+        let btnW = 28;
+        let btnH = 22;
+        fill(180);
+        stroke(140);
+        strokeWeight(1);
+        rect(cx, cy + 8, btnW, btnH, 4);
+        fill(40);
+        noStroke();
+        textSize(14);
+        textAlign(CENTER, CENTER);
+        text('-', cx + btnW / 2, cy + 8 + btnH / 2);
+        btnAlertMinus = { x: cx, y: cy + 8, w: btnW, h: btnH };
+
+        // Value display
+        fill(255);
+        stroke(140);
+        strokeWeight(1);
+        rect(cx + btnW + 4, cy + 8, 50, btnH, 4);
+        fill(40);
+        noStroke();
+        textSize(12);
+        text(nf(alertThresholdVal, 1, 1), cx + btnW + 4 + 25, cy + 8 + btnH / 2);
+
+        // Plus button
+        fill(180);
+        stroke(140);
+        strokeWeight(1);
+        rect(cx + btnW + 58, cy + 8, btnW, btnH, 4);
+        fill(40);
+        noStroke();
+        textSize(14);
+        text('+', cx + btnW + 58 + btnW / 2, cy + 8 + btnH / 2);
+        btnAlertPlus = { x: cx + btnW + 58, y: cy + 8, w: btnW, h: btnH };
+
+        // ── Start / Pause Button ──
+        cx += spacing;
+        let spBtnW = 90;
+        let spBtnH = 30;
+        fill(simRunning ? color(200, 170, 50) : color(50, 170, 80));
+        stroke(100);
+        strokeWeight(1);
+        rect(cx, cy + 4, spBtnW, spBtnH, 6);
+        fill(255);
+        noStroke();
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        text(simRunning ? 'Pause' : 'Start', cx + spBtnW / 2, cy + 4 + spBtnH / 2);
+        btnStartPause = { x: cx, y: cy + 4, w: spBtnW, h: spBtnH };
+
+        // ── Replace Filter Button ──
+        cx += spacing * 0.7;
+        let rfBtnW = 110;
+        fill(70, 140, 210);
+        stroke(100);
+        strokeWeight(1);
+        rect(cx, cy + 4, rfBtnW, spBtnH, 6);
+        fill(255);
+        noStroke();
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        text('Replace Filter', cx + rfBtnW / 2, cy + 4 + spBtnH / 2);
+        btnReplace = { x: cx, y: cy + 4, w: rfBtnW, h: spBtnH };
+
+        pop();
+    }
+
+    // ── Mouse interaction ──
+
+    let draggingContam = false;
+    let draggingMerv = false;
+
+    function mousePressed() {
+        // Check Start/Pause button
+        if (isInside(mouseX, mouseY, btnStartPause)) {
+            simRunning = !simRunning;
+            return;
+        }
+
+        // Check Replace Filter button
+        if (isInside(mouseX, mouseY, btnReplace)) {
+            replaceFilter();
+            return;
+        }
+
+        // Check Alert threshold buttons
+        if (isInside(mouseX, mouseY, btnAlertMinus)) {
+            alertThresholdVal = max(1, alertThresholdVal - 0.5);
+            return;
+        }
+        if (isInside(mouseX, mouseY, btnAlertPlus)) {
+            alertThresholdVal = min(9, alertThresholdVal + 0.5);
+            return;
+        }
+
+        // Check sliders
+        if (isInside(mouseX, mouseY, sliderContam)) {
+            draggingContam = true;
+            updateContamSlider();
+        }
+        if (isInside(mouseX, mouseY, sliderMerv)) {
+            draggingMerv = true;
+            updateMervSlider();
+        }
+    }
+
+    function mouseDragged() {
+        if (draggingContam) updateContamSlider();
+        if (draggingMerv) updateMervSlider();
+    }
+
+    function mouseReleased() {
+        draggingContam = false;
+        draggingMerv = false;
+    }
+
+    function updateContamSlider() {
+        let frac = constrain((mouseX - sliderContam.x) / sliderContam.w, 0, 1);
+        contaminationSliderVal = round(frac * 2);
+    }
+
+    function updateMervSlider() {
+        let frac = constrain((mouseX - sliderMerv.x) / sliderMerv.w, 0, 1);
+        mervSliderVal = round(frac * 3);
+    }
+
+    function isInside(mx, my, btn) {
+        return mx >= btn.x && mx <= btn.x + btn.w &&
+               my >= btn.y && my <= btn.y + btn.h;
+    }
+
+    // ── Responsive resize ──
+
+    function windowResized() {
+        canvasWidth = max(600, windowWidth);
+        canvasHeight = canvasWidth / aspectRatio;
+        drawHeight = canvasHeight - controlHeight;
+
+        resizeCanvas(canvasWidth, canvasHeight);
+        updateLayout();
+
+        // Remap existing particles into new filter region
+        particles = [];
+    }
+    </script>
+</body>
+</html>
