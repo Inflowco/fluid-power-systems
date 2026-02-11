@@ -134,6 +134,106 @@ The relationship between airflow, duct size, and velocity is expressed by the co
 
 where \( Q \) is the airflow in CFM, \( A \) is the cross-sectional area of the duct in square feet, and \( V \) is the air velocity in feet per minute (FPM). If you know any two of these values, you can calculate the third.
 
+#### Worked Example: Duct Airflow Calculation
+
+**Given:**
+
+- A rectangular duct measures 24 inches wide by 18 inches tall
+- Air velocity in the duct is 800 FPM (feet per minute)
+
+**Find:** The airflow through the duct in CFM
+
+**Solution:**
+
+1. Convert duct dimensions from inches to feet:
+
+\[ A = \frac{24}{12} \times \frac{18}{12} = 2.0 \times 1.5 = 3.0 \text{ ft}^2 \]
+
+2. Apply the continuity equation:
+
+\[ Q = A \times V = 3.0 \times 800 = 2{,}400 \text{ CFM} \]
+
+**Answer:** The duct delivers **2,400 CFM** of airflow.
+
+> **Practical note:** Always convert duct dimensions to feet before calculating area. A common mistake is using inches, which gives an answer 144 times too large. In the field, verify your calculated CFM against the design specifications on the mechanical drawings — a significant difference may indicate a blocked damper, disconnected duct, or incorrect fan speed.
+
+### 3.2.3 Sensible Cooling Load
+
+The amount of cooling an HVAC system delivers can be calculated using the sensible cooling formula:
+
+\[ Q = 1.08 \times CFM \times \Delta T \]
+
+where \( Q \) is the sensible cooling load in BTU/hr, \( CFM \) is the supply airflow, and \( \Delta T \) is the temperature difference between the return air and the supply air in degrees Fahrenheit. The constant 1.08 accounts for the density and specific heat of standard air (0.075 lb/ft³ × 0.24 BTU/lb·°F × 60 min/hr).
+
+#### Worked Example: Sensible Cooling Load
+
+**Given:**
+
+- Supply airflow is 5,000 CFM
+- Return air temperature is 75°F
+- Supply air temperature is 55°F
+
+**Find:** The cooling capacity in BTU/hr and tons of refrigeration
+
+**Solution:**
+
+1. Calculate the temperature difference:
+
+\[ \Delta T = 75 - 55 = 20°F \]
+
+2. Apply the sensible cooling formula:
+
+\[ Q = 1.08 \times 5{,}000 \times 20 = 108{,}000 \text{ BTU/hr} \]
+
+3. Convert to tons of refrigeration (1 ton = 12,000 BTU/hr):
+
+\[ \text{Tons} = \frac{108{,}000}{12{,}000} = 9.0 \text{ tons} \]
+
+**Answer:** The system delivers **108,000 BTU/hr** of sensible cooling, equivalent to **9.0 tons** of refrigeration.
+
+> **Practical note:** This formula calculates only sensible cooling (temperature change). Total cooling also includes latent cooling (moisture removal), which adds 10 to 30 percent to the total load in humid climates. A 20°F temperature drop from 75°F to 55°F is typical for commercial HVAC systems. If the measured delta-T is significantly less, suspect low refrigerant charge, dirty coils, or excessive airflow.
+
+### 3.2.4 Fan Energy Savings with Variable Frequency Drives
+
+The fan affinity laws describe the relationship between fan speed, airflow, pressure, and power. The most important relationship for energy savings is the cubic law for power:
+
+\[ \text{Power Ratio} = \left(\frac{RPM_2}{RPM_1}\right)^3 \]
+
+This means that reducing fan speed by just 20 percent cuts power consumption by nearly half — making Variable Frequency Drives (VFDs) one of the most cost-effective energy efficiency upgrades for HVAC systems.
+
+#### Worked Example: Fan Energy Savings with VFD
+
+**Given:**
+
+- An air handling unit (AHU) fan running at 100% speed draws 15 HP
+- A VFD is installed and reduces fan speed to 80%
+- Electricity costs $0.10 per kWh
+- The fan operates 8,760 hours per year (continuous)
+
+**Find:** The new power draw, percent energy savings, and annual dollar savings
+
+**Solution:**
+
+1. Calculate the power ratio using the cubic law:
+
+\[ \text{Power Ratio} = \left(\frac{80}{100}\right)^3 = (0.80)^3 = 0.512 \]
+
+2. Calculate the new power draw:
+
+\[ \text{New Power} = 15 \times 0.512 = 7.68 \text{ HP} \]
+
+3. Calculate the power savings and convert to kW:
+
+\[ \text{Savings} = 15 - 7.68 = 7.32 \text{ HP} = 7.32 \times 0.746 = 5.46 \text{ kW} \]
+
+4. Calculate the annual dollar savings:
+
+\[ \text{Annual Savings} = 5.46 \times 8{,}760 \times \$0.10 = \$4{,}783 \]
+
+**Answer:** The VFD reduces fan power from 15 HP to **7.68 HP** — a **48.8% reduction** in energy use. The annual energy savings is **$4,783**.
+
+> **Practical note:** The cubic relationship between speed and power is why VFDs are so effective on fans and pumps. Even a small speed reduction yields large savings. Most HVAC systems are designed for peak conditions that occur only a few days per year, so fans can run at reduced speed most of the time. A VFD on a 15 HP fan typically pays for itself in 1 to 2 years.
+
 ## 3.3 The Cooling Cycle: Coils, Refrigerant, and Condensation
 
 Cooling is often the most energy-intensive function of an HVAC system. Understanding how the cooling cycle works helps technicians diagnose problems, maintain equipment, and appreciate why AI optimization of cooling delivers such large energy savings.
@@ -657,7 +757,46 @@ Responsive design: Must respond to window resize events. Columns stack on narrow
 Implementation: HTML/CSS/JavaScript with Chart.js for bar/line charts and interactive parameter controls
 </details>
 
-## 3.9 Lab Preview: Service an HVAC Unit and Use an AI Tool to Adjust Settings
+## 3.9 Utility Rebates, Incentives, and Building the Business Case
+
+Many of the energy efficiency upgrades discussed in this chapter qualify for **utility rebate programs** and **government incentives** that can dramatically reduce upfront costs and shorten payback periods. For HVAC systems — which represent 40 to 60 percent of building energy use — the financial incentives are especially generous because the potential energy savings are so large.
+
+### Available Incentive Programs
+
+| Program Type | Examples | Typical Benefit |
+|-------------|----------|----------------|
+| Utility prescriptive rebates | VFDs on AHU supply/return fans, high-efficiency chillers, ECM fan motors | $50–$200 per horsepower (VFDs); $25–$75 per ton (chillers) |
+| Utility custom/calculated rebates | Building automation system upgrades, economizer controls, demand-controlled ventilation | $0.03–$0.12 per kWh saved annually |
+| Federal tax credits (IRA §179D) | Energy-efficient commercial building deduction for HVAC improvements meeting ASHRAE 90.1 targets | Up to $5.00/sq ft for qualifying whole-building improvements |
+| State/local programs | Commercial PACE financing, state energy office grants, municipal green building incentives | Varies by state — often 10–30% of project cost |
+| DOE programs | Better Buildings Challenge, 50001 Ready, Combined Heat and Power Technical Assistance | Technical assistance, recognition, implementation support |
+
+### How to Find Available Rebates
+
+1. **Check your utility's website** — search for "[utility name] commercial HVAC rebates" or "business energy incentives." Most utilities maintain a downloadable rebate catalog listing eligible equipment and dollar amounts per unit.
+2. **Use the DSIRE database** — the Database of State Incentives for Renewables and Efficiency ([dsireusa.org](https://www.dsireusa.org)) catalogs federal, state, and local incentive programs searchable by state and technology type.
+3. **Contact your utility account representative** — large commercial customers often have dedicated account managers who can identify applicable programs and help navigate the application process.
+4. **Get pre-approval before starting work** — many programs require pre-approval, a baseline energy audit, and documentation of existing equipment before new equipment is purchased or installed. Starting work before pre-approval can disqualify the project.
+5. **Work with qualified contractors** — some rebate programs require installation by a certified contractor or participation in a utility-approved trade ally network.
+
+### Common HVAC Upgrades and Rebate Potential
+
+| Upgrade | Typical Cost | Annual Energy Savings | Typical Rebate | Net Payback |
+|---------|-------------|----------------------|----------------|-------------|
+| VFD retrofit on AHU supply fan (25 HP) | $8,000–$12,000 | $3,500–$5,000/yr (30–40% fan energy reduction) | $2,500–$5,000 | 1.2–2.5 years |
+| High-efficiency chiller replacement (200-ton) | $150,000–$220,000 | $18,000–$30,000/yr (0.55 vs. 0.65 kW/ton) | $10,000–$20,000 | 5–8 years |
+| Smart thermostats / BAS upgrade (50-zone) | $25,000–$50,000 | $8,000–$15,000/yr (15–25% HVAC savings) | $5,000–$12,000 | 2–4 years |
+| Economizer controls retrofit | $3,000–$6,000 per AHU | $2,000–$4,000/yr per AHU (free cooling hours) | $1,000–$2,500 per AHU | 0.5–1.5 years |
+
+### Building the Business Case
+
+When proposing HVAC efficiency upgrades to management, frame the project in terms they care about: **total cost of ownership, risk reduction, and return on investment**. Start with the annual energy cost of the current system, then show the projected savings from the upgrade, subtract the rebate from the project cost, and calculate the net simple payback. For example, a $10,000 VFD retrofit with a $3,500 annual savings and a $3,000 rebate has a net cost of $7,000 and a payback of just 2.0 years — after which the savings flow directly to the bottom line for the remaining 15+ year life of the equipment.
+
+Go beyond simple payback by presenting the **lifecycle savings**. A VFD that saves $3,500 per year for 15 years delivers $52,500 in cumulative savings on a $7,000 net investment. Include the effect of **utility rate escalation** — if electricity rates increase 3% per year (the historical average), those 15-year savings grow to over $65,000. Mention the **non-energy benefits** as well: reduced maintenance costs from softer motor starts, extended belt and bearing life, improved occupant comfort from better temperature control, and reduced carbon emissions that support the organization's sustainability goals.
+
+Finally, address risk. Energy prices historically trend upward, so every dollar spent on efficiency is a hedge against future rate increases. Rebate programs have finite budgets and deadlines — utilities frequently reduce rebate amounts or discontinue programs as their energy-saving targets are met. Presenting the project as "act now or lose the rebate" creates urgency. Include a simple risk statement: "If we delay this project by one year, we forgo $3,500 in energy savings, risk losing $3,000 in available rebates, and face potentially higher equipment costs due to inflation."
+
+## 3.10 Lab Preview: Service an HVAC Unit and Use an AI Tool to Adjust Settings
 
 In this week's hands-on lab, you will apply the concepts from this chapter by performing actual maintenance on an HVAC unit and using an AI-based optimization tool to adjust system settings.
 

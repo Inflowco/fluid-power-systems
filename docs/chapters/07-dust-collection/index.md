@@ -186,6 +186,30 @@ SP_{total} = SP_{hood} + SP_{duct} + SP_{fittings} + SP_{filter} + SP_{exit}
 
 Where each term represents the pressure loss in inches of water gauge for that component. A typical dust collection system operates between 4 and 10 in. w.g. total static pressure.
 
+#### Worked Example: Total System Static Pressure
+
+**Given:**
+
+- Hood entry loss = 1.5 in. w.g.
+- Duct friction = 3.2 in. w.g.
+- Fitting losses = 1.8 in. w.g.
+- Filter pressure drop = 4.0 in. w.g.
+- Exit loss = 0.5 in. w.g.
+
+**Find:** Total system static pressure for fan selection
+
+**Solution:**
+
+1. Sum all static pressure losses along the longest duct run:
+
+\[ SP_{total} = SP_{hood} + SP_{duct} + SP_{fittings} + SP_{filter} + SP_{exit} \]
+
+\[ SP_{total} = 1.5 + 3.2 + 1.8 + 4.0 + 0.5 = 11.0 \text{ in. w.g.} \]
+
+**Answer:** The total system static pressure is **11.0 in. w.g.**
+
+> **Practical note:** Select a fan rated at 11.0 in. w.g. at the required CFM. Add 10-15% safety factor for field conditions, giving a specification of approximately 12.5 in. w.g. Also note that the filter ΔP of 4.0 in. w.g. represents the "dirty filter" condition; a clean filter may be only 2.0 in. w.g. The fan must be able to operate across this range without entering an unstable region of its performance curve.
+
 ## 7.4 System Balancing
 
 A dust collection system with multiple branch connections must be **balanced** so that each branch receives the correct airflow. Without balancing, branches closer to the fan receive too much air while distant branches starve.
@@ -438,6 +462,33 @@ V = 4005 \times \sqrt{VP}
 
 Where \( V \) is the air velocity in ft/min and \( VP \) is the velocity pressure in inches of water gauge. The constant 4005 applies to standard air conditions (70°F, 29.92 in. Hg).
 
+#### Worked Example: Duct Air Velocity from Velocity Pressure
+
+**Given:**
+
+- Pitot tube reading = 0.75 in. w.g. velocity pressure
+- Duct diameter = 12 inches (round duct)
+
+**Find:** Air velocity in FPM, then airflow in CFM
+
+**Solution:**
+
+1. Calculate air velocity from velocity pressure:
+
+\[ V = 4{,}005 \times \sqrt{VP} = 4{,}005 \times \sqrt{0.75} = 4{,}005 \times 0.866 = 3{,}468 \text{ FPM} \]
+
+2. Calculate duct cross-sectional area (12-inch diameter = 1-foot diameter):
+
+\[ A = \frac{\pi \times d^2}{4} = \frac{\pi \times (1)^2}{4} = 0.785 \text{ ft}^2 \]
+
+3. Calculate airflow:
+
+\[ \text{CFM} = V \times A = 3{,}468 \times 0.785 = 2{,}722 \text{ CFM} \]
+
+**Answer:** The air velocity is **3,468 FPM** and the airflow is **2,722 CFM**.
+
+> **Practical note:** For dust collection, maintain minimum duct velocity of 3,500-4,500 FPM to prevent material settling. At 3,468 FPM, this duct is slightly below minimum for most industrial dusts — increase fan speed or reduce duct diameter to raise velocity. A 10-inch duct at the same flow rate would yield approximately 5,000 FPM, well within the safe transport range.
+
 - **Magnehelic gauge:** A differential pressure gauge permanently mounted on the collector to display ΔP across the filters. Technicians read this gauge during routine inspections.
 - **Smoke tubes:** Glass tubes that release a visible smoke stream, used to verify capture velocity at hoods and check for air leaks at duct joints.
 
@@ -553,6 +604,37 @@ Fan performance follows three fundamental relationships known as the **fan laws*
 
 The power law is the most important for energy savings. Because power varies with the **cube** of fan speed, a small reduction in speed produces a large reduction in energy consumption. Reducing fan speed by just 20% cuts power consumption by nearly 50%.
 
+#### Worked Example: Fan Laws Applied to Dust Collector
+
+**Given:**
+
+- Fan running at 1,750 RPM delivers 8,000 CFM at 10 in. w.g. and draws 20 HP
+- VFD reduces speed to 1,400 RPM
+
+**Find:** New CFM, static pressure, and horsepower
+
+**Solution:**
+
+1. Calculate the speed ratio:
+
+\[ \text{Speed ratio} = \frac{N_2}{N_1} = \frac{1{,}400}{1{,}750} = 0.80 \]
+
+2. Apply the first fan law (flow is proportional to speed):
+
+\[ Q_2 = Q_1 \times \frac{N_2}{N_1} = 8{,}000 \times 0.80 = 6{,}400 \text{ CFM} \]
+
+3. Apply the second fan law (pressure is proportional to speed squared):
+
+\[ SP_2 = SP_1 \times \left(\frac{N_2}{N_1}\right)^2 = 10 \times (0.80)^2 = 10 \times 0.64 = 6.4 \text{ in. w.g.} \]
+
+4. Apply the third fan law (power is proportional to speed cubed):
+
+\[ HP_2 = HP_1 \times \left(\frac{N_2}{N_1}\right)^3 = 20 \times (0.80)^3 = 20 \times 0.512 = 10.24 \text{ HP} \]
+
+**Answer:** At 1,400 RPM the fan delivers **6,400 CFM** at **6.4 in. w.g.** and draws **10.24 HP**.
+
+> **Practical note:** Reducing speed by 20% cuts power by nearly half (48.8% reduction). However, verify that 6,400 CFM still provides adequate transport velocity in all duct branches to prevent material accumulation. If any branch drops below the minimum transport velocity for the dust being conveyed, settling will occur and could eventually block the duct or create a combustible dust hazard.
+
 ### Variable Frequency Drives
 
 A **Variable Frequency Drive (VFD)** controls the fan motor speed by adjusting the electrical frequency. Instead of running the fan at full speed and using blast gates to restrict airflow, a VFD-equipped system adjusts the fan speed to match the actual demand. When fewer machines are running and less airflow is needed, the VFD slows the fan — saving energy according to the cube law.
@@ -641,7 +723,46 @@ Sustainable dust collection practices reduce environmental impact while often cu
 !!! warning "Dust Disposal Regulations"
     Some collected dusts are classified as hazardous waste under EPA regulations (e.g., lead dust from battery recycling, hexavalent chromium dust from stainless steel grinding). These require special handling, documentation, and disposal through licensed hazardous waste facilities. Always identify the dust composition before choosing a disposal method.
 
-## 7.14 Key Takeaways
+## 7.14 Utility Rebates, Incentives, and Building the Business Case
+
+Many of the energy efficiency upgrades discussed in this chapter qualify for **utility rebate programs** and **government incentives** that can dramatically reduce upfront costs and shorten payback periods. Dust collection systems are excellent candidates for incentive programs because the collector fan is a large, continuously running motor load, and proven technologies like VFDs and automated controls deliver measurable, verifiable energy savings.
+
+### Available Incentive Programs
+
+| Program Type | Examples | Typical Benefit |
+|-------------|----------|----------------|
+| Utility prescriptive rebates | VFD on collector fan motor, premium-efficiency fan motors, automated blast gate controls | $50–$150 per HP for VFDs; $10–$25 per HP for premium motors |
+| Utility custom/calculated rebates | Ductwork redesign, heat recovery from exhaust, AI-driven optimization | $0.03–$0.12 per kWh saved annually |
+| Federal tax credits (IRA §179D) | Energy-efficient commercial building deduction for qualifying industrial ventilation upgrades | Up to $5.00/sq ft for whole-building projects |
+| State/local programs | Industrial energy efficiency grants, manufacturing competitiveness programs | Varies by state — $1,000 to $75,000+ per project |
+| DOE programs | Better Plants, Industrial Assessment Centers (IACs), 50001 Ready | Free energy assessments for qualifying facilities, technical assistance |
+
+### How to Find Available Rebates
+
+1. **Check your utility's website** — Search for "[utility name] commercial rebates" or "industrial energy incentives." VFD rebates for fan and blower motors are among the most widely available prescriptive programs because utilities recognize the enormous savings potential of the cubic fan law. Many utilities also offer custom incentives for more complex projects like ductwork redesign or heat recovery systems.
+2. **Use the DSIRE database** — The Database of State Incentives for Renewables and Efficiency ([dsireusa.org](https://www.dsireusa.org)) catalogs federal, state, and local incentive programs. Filter by "industrial process efficiency," "motor and drive systems," or "custom commercial" to find programs applicable to dust collection upgrades.
+3. **Request an Industrial Assessment Center (IAC) audit** — The DOE funds university-based IACs that provide free energy assessments to small and mid-sized manufacturers. IAC engineers visit your facility, analyze your systems (including dust collection), and provide a written report with specific upgrade recommendations and calculated savings. This report can serve as the engineering basis for rebate applications.
+4. **Get pre-approval before starting work** — Most rebate programs require pre-approval and baseline energy documentation before equipment is purchased or installed. For VFD projects, this typically means recording the current motor nameplate data, annual operating hours, and current energy consumption before ordering the drive.
+
+### Common Dust Collection System Upgrades and Rebate Potential
+
+| Upgrade | Typical Cost | Annual Savings | Typical Rebate | Net Payback |
+|---------|-------------|----------------|----------------|-------------|
+| VFD on collector fan motor (25 HP) | $5,000–$8,000 | $3,500–$6,000/yr | $2,000–$4,000 | 0.5–1.5 years |
+| Automated blast gate controls | $8,000–$15,000 | $2,500–$5,000/yr | $2,000–$5,000 | 1.0–2.5 years |
+| High-efficiency filter media upgrade | $3,000–$7,000 | $1,000–$2,500/yr (energy + filter life) | $500–$2,000 | 1.0–3.0 years |
+| Ductwork redesign for lower pressure drop | $10,000–$25,000 | $3,000–$7,000/yr | $3,000–$8,000 | 1.5–3.0 years |
+| Heat recovery from exhaust air | $15,000–$35,000 | $5,000–$15,000/yr (heating savings) | $4,000–$10,000 | 1.0–2.5 years |
+
+### Building the Business Case
+
+When presenting a dust collection efficiency project to management, lead with the **cubic power law** — it is the most compelling argument for VFD investment. A 25 HP collector fan running at full speed 4,000 hours per year at $0.12/kWh consumes approximately $9,000 in electricity annually. If automated blast gates and a VFD allow the fan to run at 70% speed on average, power consumption drops to roughly 34% of full-speed power, saving over $5,800 per year. With a utility rebate covering $2,500–$4,000 of the installation cost, the net payback can be under 12 months. Present this as an investment with a 100%+ annual return — far better than almost any capital project the company could undertake.
+
+Include **non-energy benefits** in your business case. A VFD-equipped dust collection system starts and stops smoothly, reducing mechanical stress on ductwork, filters, and fan bearings. This extends equipment life, reduces maintenance costs, and decreases the frequency of filter replacements — all of which translate to additional dollar savings. Automated blast gates ensure that capture velocity is maintained at active workstations even when other branches are closed, improving worker health protection and regulatory compliance with OSHA permissible exposure limits.
+
+Finally, quantify the **risk of inaction**. Rising electricity costs (historically 2–4% per year) mean that the savings from efficiency upgrades grow every year, while the cost of doing nothing increases. OSHA citations for inadequate dust capture can carry penalties exceeding $15,000 per violation, and combustible dust incidents can result in fatalities, facility destruction, and liability claims in the millions. Framing the VFD and controls upgrade as both a cost-savings measure and a risk-mitigation investment strengthens the business case for management approval.
+
+## 7.15 Key Takeaways
 
 This chapter covered the essential knowledge and skills for maintaining and optimizing dust collection systems with modern AI and automation tools:
 

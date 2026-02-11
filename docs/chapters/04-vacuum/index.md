@@ -659,6 +659,104 @@ To manage vacuum system energy effectively, track these key metrics:
 
 where \( V_{\text{system}} \) is the system volume in cubic feet, \( \Delta P \) is the pressure rise in the same units as \( P_{\text{atm}} \), \( T \) is the time in minutes, and \( P_{\text{atm}} \) is atmospheric pressure.
 
+#### Worked Example: Leak Rate Calculation
+
+**Given:**
+
+- System volume is 50 ft³
+- With the pump isolated, pressure rises 2 inHg in 5 minutes
+- Atmospheric pressure is 29.92 inHg
+
+**Find:** The leak rate in CFM (cubic feet per minute of atmospheric air leaking in)
+
+**Solution:**
+
+1. Apply the leak rate formula:
+
+\[ \text{Leak Rate} = \frac{V_{\text{system}} \times \Delta P}{T \times P_{\text{atm}}} = \frac{50 \times 2}{5 \times 29.92} \]
+
+2. Calculate the numerator and denominator:
+
+\[ \text{Leak Rate} = \frac{100}{149.6} = 0.668 \text{ CFM} \]
+
+**Answer:** The system leak rate is **0.668 CFM**.
+
+> **Practical note:** A leak rate exceeding 10% of pump capacity indicates the system needs leak repair. If this system uses a 10 CFM pump, the 0.668 CFM leak represents 6.7% of capacity — approaching the action threshold. Even this moderate leak forces the pump to work continuously to maintain vacuum, wasting energy and accelerating pump wear.
+
+### 4.8.4 Evacuation Time
+
+The theoretical time to evacuate a chamber from one pressure to another is given by:
+
+\[ t = \frac{V}{S} \times \ln\left(\frac{P_1}{P_2}\right) \]
+
+where \( t \) is the evacuation time in minutes, \( V \) is the chamber volume in cubic feet, \( S \) is the pump speed in CFM, \( P_1 \) is the starting pressure, and \( P_2 \) is the target pressure (both in the same units). The natural logarithm accounts for the fact that pumping becomes progressively harder as pressure decreases.
+
+#### Worked Example: Evacuation Time
+
+**Given:**
+
+- Chamber volume is 100 ft³
+- Starting pressure is 760 Torr (atmospheric)
+- Target pressure is 1 Torr
+- Pump speed is 50 CFM
+
+**Find:** The theoretical evacuation time in minutes
+
+**Solution:**
+
+1. Calculate the volume-to-speed ratio:
+
+\[ \frac{V}{S} = \frac{100}{50} = 2.0 \text{ minutes} \]
+
+2. Calculate the natural logarithm of the pressure ratio:
+
+\[ \ln\left(\frac{P_1}{P_2}\right) = \ln\left(\frac{760}{1}\right) = \ln(760) = 6.63 \]
+
+3. Calculate the evacuation time:
+
+\[ t = 2.0 \times 6.63 = 13.3 \text{ minutes} \]
+
+**Answer:** The theoretical evacuation time is **13.3 minutes**.
+
+> **Practical note:** Real evacuation always takes longer than the theoretical calculation predicts. Outgassing from chamber walls, moisture desorption, and reduced pump efficiency at lower pressures all slow the process. For planning and scheduling purposes, multiply the theoretical time by 1.5 to 2.0. In this example, expect 20 to 27 minutes in practice.
+
+### 4.8.5 Vacuum Pump Annual Energy Cost
+
+The annual electricity cost for running a vacuum pump can be calculated as:
+
+\[ \text{Annual Cost} = \frac{HP \times 0.746}{\eta} \times \text{Hours} \times \text{Rate} \]
+
+where \( HP \) is the motor horsepower, 0.746 converts HP to kW, \( \eta \) is the motor efficiency (as a decimal), Hours is the annual operating hours, and Rate is the electricity cost per kWh.
+
+#### Worked Example: Vacuum Pump Annual Energy Cost
+
+**Given:**
+
+- A 25 HP vacuum pump motor
+- Motor efficiency is 91% (\( \eta = 0.91 \))
+- The pump operates 6,000 hours per year
+- Electricity costs $0.10 per kWh
+
+**Find:** The annual electricity cost to operate the vacuum pump
+
+**Solution:**
+
+1. Calculate the electrical input power (accounting for motor efficiency losses):
+
+\[ \text{Input kW} = \frac{HP \times 0.746}{\eta} = \frac{25 \times 0.746}{0.91} = \frac{18.65}{0.91} = 20.5 \text{ kW} \]
+
+2. Calculate the annual energy consumption:
+
+\[ \text{Annual kWh} = 20.5 \times 6{,}000 = 123{,}000 \text{ kWh} \]
+
+3. Calculate the annual electricity cost:
+
+\[ \text{Annual Cost} = 123{,}000 \times \$0.10 = \$12{,}300 \]
+
+**Answer:** The vacuum pump costs **$12,300 per year** in electricity.
+
+> **Practical note:** At $12,300 per year, the electricity cost over a 15-year pump life ($184,500) far exceeds the purchase price of the pump itself (typically $8,000 to $20,000). This is why energy efficiency matters so much for vacuum systems — a 10% efficiency improvement saves $1,230 per year, or $18,450 over the pump's lifetime. Always evaluate lifecycle energy cost, not just purchase price, when selecting vacuum equipment.
+
 #### Diagram: Vacuum Energy Comparison
 
 <iframe src="../../sims/vacuum-energy-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
@@ -719,7 +817,46 @@ Responsive design: Must respond to window resize events. Panels stack vertically
 Implementation: HTML/CSS/JavaScript with Chart.js for bar/line charts and interactive parameter controls
 </details>
 
-## 4.9 Lab Preview: Test a Vacuum System and Interpret AI-Generated Maintenance Alerts
+## 4.9 Utility Rebates, Incentives, and Building the Business Case
+
+Many of the vacuum system energy efficiency upgrades discussed in this chapter qualify for **utility rebate programs** and **government incentives** that can significantly reduce upfront costs and shorten payback periods. Although vacuum systems receive less attention than HVAC or compressed air in rebate catalogs, the same underlying technologies — VFDs, premium-efficiency motors, and heat recovery — are eligible for substantial incentives.
+
+### Available Incentive Programs
+
+| Program Type | Examples | Typical Benefit |
+|-------------|----------|----------------|
+| Utility prescriptive rebates | VFDs on vacuum pump motors, premium-efficiency motors (IE3/IE4), pump replacements | $50–$150 per horsepower (VFDs); $10–$25 per HP (premium motors) |
+| Utility custom/calculated rebates | Centralized vacuum system with demand control, pump technology upgrades, heat recovery installations | $0.03–$0.10 per kWh saved annually |
+| Federal tax credits (IRA §179D) | Energy-efficient commercial building deduction covering industrial process improvements that reduce overall building energy use | Up to $5.00/sq ft for qualifying whole-building improvements |
+| State/local programs | State manufacturing energy efficiency grants, industrial assessment center (IAC) recommendations, PACE financing for process upgrades | Varies by state — often 10–25% of project cost |
+| DOE programs | Better Plants program (commitment to 25% energy reduction over 10 years), Industrial Assessment Centers (free energy audits for qualifying SMEs), 50001 Ready | Technical assistance, free audits, implementation support |
+
+### How to Find Available Rebates
+
+1. **Check your utility's website** — search for "[utility name] industrial rebates" or "process equipment incentives." VFDs and premium motors are nearly universal prescriptive rebate items, even when vacuum systems are not specifically listed.
+2. **Use the DSIRE database** — the Database of State Incentives for Renewables and Efficiency ([dsireusa.org](https://www.dsireusa.org)) lists programs by state and technology, including industrial motor and drive incentives.
+3. **Contact your utility account representative** — for vacuum system upgrades that do not fit a prescriptive rebate category, ask about the utility's **custom or calculated rebate program**. These programs pay based on verified kWh savings rather than specific equipment types, making them applicable to almost any efficiency project.
+4. **Request a DOE Industrial Assessment** — small and medium-sized manufacturers (annual energy bills between $100,000 and $3.5 million) can receive a free energy audit from a university-based Industrial Assessment Center. These audits frequently identify vacuum system improvements and estimate savings.
+5. **Get pre-approval before starting work** — most rebate programs require documentation of existing equipment and projected savings before new equipment is ordered. Purchasing equipment before applying can disqualify the project.
+
+### Common Vacuum System Upgrades and Rebate Potential
+
+| Upgrade | Typical Cost | Annual Energy Savings | Typical Rebate | Net Payback |
+|---------|-------------|----------------------|----------------|-------------|
+| VFD on rotary vane pump (15 HP) | $5,000–$8,000 | $2,400–$4,000/yr (35–50% at partial load) | $1,500–$3,000 | 0.8–2.0 years |
+| Upgrade to variable-speed screw pump (25 HP) | $18,000–$28,000 | $6,000–$10,000/yr (higher efficiency + VFD) | $3,000–$6,000 | 1.5–3.0 years |
+| Centralized vacuum with demand controls (replacing 4 point-of-use pumps) | $30,000–$50,000 | $10,000–$16,000/yr (eliminated redundancy + staging) | $5,000–$10,000 | 1.8–3.5 years |
+| Heat recovery system (capturing pump compression heat for process water or space heating) | $8,000–$15,000 | $3,000–$6,000/yr (displaced gas or electric heating) | $2,000–$5,000 | 1.5–2.5 years |
+
+### Building the Business Case
+
+When presenting vacuum system efficiency projects to management, quantify the **total cost impact** rather than focusing on the equipment price alone. Start with the annual electricity cost of running the current vacuum system — a 25 HP pump running continuously costs approximately $16,000 to $20,000 per year at $0.10 to $0.12/kWh. Then show the projected savings, subtract the rebate, and calculate the net payback. A $20,000 variable-speed screw pump replacement with $8,000 in annual savings and a $4,000 utility rebate has a net cost of $16,000 and a payback of 2.0 years, after which the savings continue for the 15 to 20 year life of the equipment.
+
+Strengthen the business case by including **non-energy benefits** that vacuum system upgrades deliver. VFDs reduce mechanical stress on pump components, extending bearing and vane life by 25 to 40 percent and reducing maintenance labor and spare parts costs. Demand-based controls eliminate unnecessary run hours, reducing oil consumption and disposal costs for lubricated pumps. Heat recovery displaces natural gas or electric heating costs that appear on a different budget line — capturing these cross-utility savings makes the project more compelling. Also highlight the **production reliability improvement**: a properly sized, well-controlled vacuum system with predictive maintenance reduces unplanned downtime that can cost $5,000 to $50,000 per hour in lost production, depending on the industry.
+
+Finally, create urgency. Utility rebate budgets are allocated annually and frequently run out before the fiscal year ends — early applicants capture the funds. Energy prices trend upward over time, so every year of delay is a year of avoidable energy cost. Frame the decision clearly: "This project costs $16,000 net after rebates, saves $8,000 per year in energy, saves an estimated $3,000 per year in maintenance, and pays for itself in under 18 months. Delaying one year forfeits $11,000 in savings and risks losing the $4,000 rebate."
+
+## 4.10 Lab Preview: Test a Vacuum System and Interpret AI-Generated Maintenance Alerts
 
 In this week's hands-on lab, you will apply the concepts from this chapter by testing a vacuum system, performing leak detection, and interpreting AI-generated maintenance alerts.
 

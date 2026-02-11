@@ -334,6 +334,30 @@ Proper piping layout minimizes pressure drop and ensures adequate air delivery:
 
 where \( \Delta P \) is pressure drop in psi, \( C \) is a friction factor based on pipe material, \( L \) is equivalent pipe length in feet (including fittings), \( Q \) is flow rate in CFM, \( d \) is inside pipe diameter in inches, and \( P \) is operating pressure in psia.
 
+#### Worked Example: Pressure Drop in Piping
+
+**Given:**
+
+- 500 ft of 2" Schedule 40 pipe
+- 100 CFM flow rate
+- 100 psi operating pressure
+
+**Find:** Approximate pressure drop through the pipe segment
+
+**Solution:**
+
+1. Apply the empirical pressure drop formula for compressed air piping. For 2" Schedule 40 pipe (inside diameter approximately 2.067 inches) at 100 CFM and 100 psig over 500 ft of equivalent length:
+
+\[ \Delta P = \frac{C \times L \times Q^{1.85}}{d^5 \times P} \]
+
+2. Using published friction factor tables for Schedule 40 steel pipe with the given parameters:
+
+\[ \Delta P \approx 1.8 \text{ psi} \]
+
+**Answer:** The approximate pressure drop through the pipe segment is **1.8 psi**.
+
+> **Practical note:** Rule of thumb — total system pressure drop from compressor to point of use should be less than 10% of operating pressure (10 psi for a 100 psig system). The 1.8 psi through this pipe segment is acceptable, but always account for fittings, filters, dryers, and FRLs which add significantly more. Each 90-degree elbow adds equivalent length of 5 to 10 feet of straight pipe, and a loaded coalescing filter can add 3 to 5 psi by itself.
+
 ### 5.4.3 Air Line Maintenance
 
 Regular maintenance of the distribution system prevents energy waste and air quality degradation:
@@ -697,7 +721,54 @@ To manage compressed air energy effectively, track these key metrics:
 
 \[ \text{Specific Power (kW/100 CFM)} = \frac{\text{Total compressor input power (kW)}}{\text{Total delivered air flow (CFM)}} \times 100 \]
 
+#### Worked Example: Specific Power
+
+**Given:**
+
+- 150 kW compressor
+- Delivering 700 CFM at rated pressure
+
+**Find:** Specific power in kW/100 CFM
+
+**Solution:**
+
+1. Apply the specific power formula:
+
+\[ \text{Specific Power} = \frac{150 \text{ kW}}{700 \text{ CFM}} \times 100 = 21.4 \text{ kW/100 CFM} \]
+
+**Answer:** The specific power is **21.4 kW/100 CFM**.
+
+> **Practical note:** Best-in-class rotary screw compressors achieve 16-18 kW/100 CFM at 100 psig. At 21.4 kW/100 CFM, this compressor is running about 19% above optimal. Potential causes include age, inadequate cooling, or operation at elevated pressure. Tracking specific power over time helps identify when a compressor is degrading and whether maintenance or replacement is justified.
+
 \[ \text{Leak Rate (\%)} = \frac{T_{\text{loaded}}}{T_{\text{loaded}} + T_{\text{unloaded}}} \times 100 \quad \text{(during no-demand period)} \]
+
+#### Worked Example: Leak Rate Percentage and Cost
+
+**Given:**
+
+- During a no-production test, the compressor loads for 30 seconds and unloads for 10 seconds repeatedly
+- Compressor power: 150 kW
+- Electricity cost: $0.10/kWh
+
+**Find:** Leak rate as a percentage of capacity, and annual cost of leaks
+
+**Solution:**
+
+1. Calculate the leak rate percentage using the load/unload timing:
+
+\[ \text{Leak Rate} = \frac{T_{\text{loaded}}}{T_{\text{loaded}} + T_{\text{unloaded}}} \times 100 = \frac{30}{30 + 10} \times 100 = 75\% \]
+
+2. Calculate the power wasted on leaks:
+
+\[ \text{Leak Power} = 150 \text{ kW} \times 0.75 = 112.5 \text{ kW} \]
+
+3. Calculate annual waste assuming continuous operation (8,760 hours/year):
+
+\[ \text{Annual Waste} = 112.5 \text{ kW} \times 8{,}760 \text{ hr} \times \$0.10/\text{kWh} = \$98{,}550 \]
+
+**Answer:** The leak rate is **75% of system capacity**, wasting approximately **$98,550 per year**.
+
+> **Practical note:** A 75% leak rate is extreme but not unheard of in neglected systems. Even a "typical" poorly maintained system at 25-30% leaks wastes tens of thousands of dollars annually. This test is simple to perform — run the compressor during a weekend or shutdown when no production demand exists and time the load/unload cycles. The results often provide the strongest justification for a leak repair program.
 
 #### Diagram: Compressed Air Energy Comparison
 
@@ -771,7 +842,47 @@ Compressed air sustainability extends beyond energy efficiency to encompass the 
 - **Noise reduction** — compressor noise contributes to occupational noise exposure and community noise. Enclosed compressor rooms, inlet silencers, and vibration isolation reduce noise impact.
 - **Lifecycle cost analysis** — when purchasing new compressors, evaluate the total cost of ownership (purchase price + installation + energy + maintenance + disposal) over the expected life of the equipment, not just the initial purchase price. Energy cost typically represents 75-80% of the total lifecycle cost of a compressor.
 
-## 5.9 Lab Preview: Troubleshoot an Air System with AI Diagnostics
+## 5.9 Utility Rebates, Incentives, and Building the Business Case
+
+Many of the compressed air efficiency upgrades discussed in this chapter qualify for **utility rebate programs** and **government incentives** that can dramatically reduce upfront costs and shorten payback periods. Because compressed air is the most energy-intensive utility in many plants — with energy representing 75 to 80 percent of lifecycle cost — utilities and government agencies offer some of their most generous incentives for compressed air improvements.
+
+### Available Incentive Programs
+
+| Program Type | Examples | Typical Benefit |
+|-------------|----------|----------------|
+| Utility prescriptive rebates | VFD compressors, cycling refrigerated dryers, zero-loss condensate drains, low-pressure-drop filters | $50–$200 per HP (VFD compressors); $200–$500 per drain (zero-loss) |
+| Utility custom/calculated rebates | Leak repair programs, pressure reduction projects, heat recovery installations, compressor sequencing controls | $0.04–$0.15 per kWh saved annually |
+| Federal tax credits (IRA §179D) | Energy-efficient commercial building deduction — compressed air improvements that contribute to meeting ASHRAE 90.1 energy targets | Up to $5.00/sq ft for qualifying whole-building improvements |
+| State/local programs | State manufacturing competitiveness grants, industrial energy efficiency loan programs, PACE financing for equipment upgrades | Varies by state — often 10–30% of project cost |
+| DOE programs | Better Plants program, Compressed Air Challenge (CAC) partner training, Industrial Assessment Centers (free audits for qualifying SMEs) | Technical assistance, free audits, best-practice training |
+
+### How to Find Available Rebates
+
+1. **Check your utility's website** — search for "[utility name] compressed air rebates" or "industrial process incentives." Compressed air is one of the most commonly targeted systems in utility efficiency programs, and many utilities have specific compressed air rebate categories.
+2. **Use the DSIRE database** — the Database of State Incentives for Renewables and Efficiency ([dsireusa.org](https://www.dsireusa.org)) catalogs federal, state, and local incentive programs searchable by state and technology type.
+3. **Contact your utility account representative** — describe your planned improvements and ask about both prescriptive rebates (fixed dollar amounts per unit) and custom/calculated rebates (based on verified energy savings). Custom programs are especially valuable for leak repair and pressure reduction projects where savings are measured rather than estimated from equipment specifications.
+4. **Attend a Compressed Air Challenge seminar** — the DOE's Compressed Air Challenge program offers training that helps identify savings opportunities and connects participants with utility incentive programs. Many utilities sponsor these seminars and offer bonus rebates to attendees who implement recommendations.
+5. **Get pre-approval before starting work** — most programs require a pre-project application, baseline energy measurements, and documentation of existing equipment. Some utilities will fund a professional compressed air audit (typically $5,000–$15,000 value) as part of the incentive package.
+
+### Common Compressed Air Upgrades and Rebate Potential
+
+| Upgrade | Typical Cost | Annual Energy Savings | Typical Rebate | Net Payback |
+|---------|-------------|----------------------|----------------|-------------|
+| VFD rotary screw compressor (50 HP, replacing load/unload unit) | $25,000–$40,000 | $6,000–$12,000/yr (25–40% at variable loads) | $5,000–$10,000 | 2.0–3.5 years |
+| Compressed air leak repair program (facility-wide survey and repair) | $3,000–$8,000 (labor and materials) | $8,000–$25,000/yr (reducing 30% leak rate to 10%) | $2,000–$8,000 (custom rebate on verified kWh savings) | 0.2–0.5 years |
+| Heat recovery for space/water heating (100 HP compressor) | $10,000–$20,000 | $5,000–$12,000/yr (displacing gas or electric heat) | $3,000–$7,000 | 0.5–2.0 years |
+| Pressure reduction from 125 psi to 100 psi (controls upgrade + storage) | $5,000–$12,000 | $4,000–$8,000/yr (~12.5% energy reduction, since each 2 psi saves ~1%) | $2,000–$5,000 | 0.5–1.5 years |
+| Zero-loss condensate drains (replacing timer drains, 6 units) | $2,400–$4,200 ($400–$700 each) | $1,200–$2,400/yr (eliminating wasted air from stuck-open drains) | $1,200–$3,000 | 0.2–1.0 years |
+
+### Building the Business Case
+
+Compressed air offers one of the strongest business cases of any energy efficiency investment because the savings are large, the paybacks are fast, and the rebates are generous. Start the conversation with a simple fact: **energy accounts for 75 to 80 percent of a compressor's total lifecycle cost**. A 100 HP compressor that costs $30,000 to purchase will consume over $500,000 in electricity over its 15-year life at $0.10/kWh. Any percentage reduction in that energy cost dwarfs the equipment purchase price.
+
+Present a **bundled project** rather than individual measures. A comprehensive compressed air efficiency project that combines leak repair, pressure reduction, VFD installation, and heat recovery typically delivers 30 to 50 percent total energy savings. Bundling the quick-payback measures (leak repair at 3-month payback) with the longer-payback measures (VFD compressor at 3-year payback) brings the combined project payback to an attractive 1 to 2 years. Utility rebate programs often reward comprehensive projects with higher incentive levels — some utilities offer a 25 to 50 percent bonus on custom rebates for facilities that implement a full system optimization rather than individual measures.
+
+Include **utility rate escalation** in your projections. If electricity costs $0.10/kWh today and increases 3% annually (a conservative assumption based on 20-year historical averages), a project saving $15,000/year today will save over $20,000/year in ten years. Over a 15-year compressor life, cumulative savings at 3% escalation are approximately 30% higher than constant-rate projections. Also quantify the **risk of inaction**: every month without leak repair is another month of wasting 20 to 30 percent of your compressed air — and that money cannot be recovered. Rebate programs have annual budgets that can be exhausted, and several major utilities have reduced their compressed air rebate levels in recent years as they shift focus to electrification programs. The message to management is clear: the combination of fast payback, generous rebates, and rising energy costs makes compressed air efficiency one of the highest-return capital investments available to the facility.
+
+## 5.10 Lab Preview: Troubleshoot an Air System with AI Diagnostics
 
 In this week's hands-on lab, you will apply the concepts from this chapter by operating a compressed air system, performing leak detection, evaluating air quality, and interpreting AI-generated diagnostic reports.
 

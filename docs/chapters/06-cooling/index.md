@@ -193,6 +193,40 @@ Understanding cooling tower performance requires familiarity with these terms:
 
 \[ \text{Makeup} = \text{Evaporation} + \text{Drift} + \text{Blowdown} \]
 
+The heat rejected by a cooling tower can be calculated from the water flow rate and temperature change:
+
+\[ Q \text{ (BTU/hr)} = \text{GPM} \times 500 \times \Delta T \]
+
+where GPM is the condenser water flow rate, \( \Delta T \) is the temperature difference in °F, and the constant 500 accounts for water's density (8.33 lb/gal) multiplied by specific heat (1.0 BTU/lb·°F) multiplied by 60 min/hr (= 499.8, rounded to 500).
+
+#### Worked Example: Heat Rejection
+
+**Given:**
+
+- Cooling tower handling 800 GPM condenser water
+- 85°F supply temperature to chiller
+- 95°F return temperature from chiller
+
+**Find:** Heat rejection in BTU/hr and tons of cooling
+
+**Solution:**
+
+1. Calculate the temperature difference:
+
+\[ \Delta T = 95°F - 85°F = 10°F \]
+
+2. Calculate heat rejection using the cooling water heat equation:
+
+\[ Q = 800 \text{ GPM} \times 500 \times 10°F = 4{,}000{,}000 \text{ BTU/hr} \]
+
+3. Convert to tons of cooling (1 ton = 12,000 BTU/hr):
+
+\[ \text{Tons} = \frac{4{,}000{,}000}{12{,}000} = 333 \text{ tons} \]
+
+**Answer:** The heat rejection is **4,000,000 BTU/hr**, equivalent to **333 tons** of cooling.
+
+> **Practical note:** The "500" constant is one of the most useful numbers in HVAC and cooling water calculations. It accounts for water's density (8.33 lb/gal) times specific heat (1.0 BTU/lb·°F) times 60 min/hr = 499.8, rounded to 500. This constant only applies to water — for glycol solutions or other fluids, the density and specific heat must be adjusted.
+
 ## 6.3 Cooling Water Distribution
 
 The distribution system connects the cooling tower to the heat-producing equipment. It includes circulating pumps, piping, valves, and heat exchangers that work together to deliver cool water where it is needed and return warm water to the tower for cooling.
@@ -326,6 +360,29 @@ Higher COC means less water waste (less makeup and blowdown needed), but more co
 \[ \text{Makeup (GPM)} = \text{Evaporation} + \text{Blowdown} + \text{Drift} \]
 
 Most facilities operate between 3 and 6 cycles of concentration as the best balance between water savings and treatment cost.
+
+#### Worked Example: Cycles of Concentration and Blowdown
+
+**Given:**
+
+- Evaporation rate = 100 GPM
+- Target COC = 5
+
+**Find:** Blowdown GPM and total makeup GPM
+
+**Solution:**
+
+1. Calculate blowdown from the evaporation rate and COC:
+
+\[ \text{Blowdown} = \frac{\text{Evaporation}}{\text{COC} - 1} = \frac{100}{5 - 1} = 25 \text{ GPM} \]
+
+2. Calculate total makeup water (neglecting drift, which is typically less than 0.001% of circulation):
+
+\[ \text{Makeup} = \text{Evaporation} + \text{Blowdown} = 100 + 25 = 125 \text{ GPM} \]
+
+**Answer:** The required blowdown is **25 GPM** and the total makeup water is **125 GPM**.
+
+> **Practical note:** Increasing COC from 3 to 5 reduces blowdown from 50 GPM to 25 GPM — cutting water waste in half. But higher COC increases mineral concentration, requiring better chemical treatment to prevent scaling. Every facility must find the balance point where water savings justify the additional treatment cost.
 
 ### 6.4.4 Biological Control and Legionella Prevention
 
@@ -493,6 +550,31 @@ where pH is the measured water pH and pHs is calculated from water temperature, 
 | -0.5 to +0.5 | Balanced (target zone) | Maintain current treatment program |
 | +0.5 to +2.0 | Moderately scale-forming | Add scale inhibitor, increase blowdown, consider acid feed |
 | Above +2.0 | Severely scale-forming | Reduce COC, add acid, add scale inhibitor |
+
+#### Worked Example: Langelier Saturation Index
+
+**Given:**
+
+- Measured pH = 8.2
+- Calculated saturation pH (pHs) = 7.8
+
+**Find:** LSI value and water tendency
+
+**Solution:**
+
+1. Calculate the LSI:
+
+\[ \text{LSI} = \text{pH} - \text{pH}_s = 8.2 - 7.8 = +0.4 \]
+
+2. Interpret the result using the LSI table:
+
+    - LSI > 0: Scale-forming tendency
+    - LSI = 0: Balanced
+    - LSI < 0: Corrosive tendency
+
+**Answer:** The LSI is **+0.4**, indicating a **mildly scale-forming** water condition.
+
+> **Practical note:** At +0.4, the water is at the upper edge of the balanced zone and trending toward scale formation. Treatment options include increasing blowdown to reduce mineral concentration, adding a scale inhibitor, or lowering pH with acid feed. The best response depends on the specific system — in a system with copper alloy heat exchangers, a slightly positive LSI is often preferred because it forms a thin protective calcium carbonate film that reduces copper corrosion.
 
 !!! tip "LSI Is Your Compass"
     Think of the LSI as a compass that tells you which direction your water chemistry is heading. Negative LSI means the water wants to dissolve metal (corrosion). Positive LSI means the water wants to deposit minerals (scale). The treatment program's job is to keep the LSI near zero — balanced — so the water does neither. Checking the LSI should be part of every routine water quality test.
@@ -787,6 +869,30 @@ To manage cooling water sustainability effectively, track these key metrics:
 
 \[ \text{Energy Intensity} = \frac{\text{Total Cooling System Energy (kWh)}}{\text{Total Cooling Delivered (ton-hours)}} \]
 
+#### Worked Example: Water and Energy Use Intensity
+
+**Given:**
+
+- Annual makeup water = 2,000,000 gallons
+- Annual energy consumption for cooling system = 500,000 kWh
+- Total cooling delivered = 50,000 ton-hours
+
+**Find:** Water Use Intensity (WUI) and Energy Use Intensity (EUI)
+
+**Solution:**
+
+1. Calculate WUI:
+
+\[ \text{WUI} = \frac{2{,}000{,}000 \text{ gal}}{50{,}000 \text{ ton-hr}} = 40 \text{ gal/ton-hr} \]
+
+2. Calculate EUI:
+
+\[ \text{EUI} = \frac{500{,}000 \text{ kWh}}{50{,}000 \text{ ton-hr}} = 10 \text{ kWh/ton-hr} \]
+
+**Answer:** The Water Use Intensity is **40 gal/ton-hr** and the Energy Use Intensity is **10 kWh/ton-hr**.
+
+> **Practical note:** Industry benchmarks for water-cooled systems: WUI of 25-35 gal/ton-hr is good; above 45 suggests excessive blowdown or drift. EUI below 0.8 kWh/ton-hr is excellent for the chiller alone; the 10 kWh/ton-hr here includes pumps, fans, and auxiliary loads across the full cooling plant. Tracking these intensities month-over-month normalizes for seasonal variation and production changes, making it possible to detect efficiency degradation independent of load fluctuations.
+
 #### Diagram: Cooling Energy Comparison
 
 <iframe src="../../sims/cooling-energy-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
@@ -854,7 +960,46 @@ Responsive design: Must respond to window resize events. Panels stack vertically
 Implementation: HTML/CSS/JavaScript with Chart.js for bar/line charts and interactive parameter controls
 </details>
 
-## 6.10 Lab Preview: Inspect a Cooling System and Analyze Water Data
+## 6.10 Utility Rebates, Incentives, and Building the Business Case
+
+Many of the energy efficiency and water conservation upgrades discussed in this chapter qualify for **utility rebate programs** and **government incentives** that can dramatically reduce upfront costs and shorten payback periods. Cooling water systems are prime targets for incentive programs because they consume significant electricity (pumps and fans) and water, and proven efficiency technologies like VFDs and free cooling deliver measurable, verifiable savings.
+
+### Available Incentive Programs
+
+| Program Type | Examples | Typical Benefit |
+|-------------|----------|----------------|
+| Utility prescriptive rebates | VFD on cooling tower fan, VFD on circulating pump, premium-efficiency motors | $50–$150 per HP for VFDs; $10–$25 per HP for premium motors |
+| Utility custom/calculated rebates | Free cooling (waterside economizer), condenser water reset, automated water treatment | $0.03–$0.12 per kWh saved annually |
+| Federal tax credits (IRA §179D) | Energy-efficient commercial building deduction for qualifying HVAC/cooling upgrades | Up to $5.00/sq ft for whole-building projects |
+| State/local programs | Water conservation rebates, industrial process efficiency grants | Varies by state — $500 to $50,000+ per project |
+| DOE programs | Better Plants, 50001 Ready, CHP Technical Assistance | Technical assistance, recognition, no-cost energy assessments |
+
+### How to Find Available Rebates
+
+1. **Check your utility's website** — Search for "[utility name] commercial rebates" or "business energy incentives." Most large utilities offer both prescriptive rebates (fixed dollar amounts per qualifying unit) and custom/calculated rebates (based on verified energy savings). Cooling tower VFD rebates and pump VFD rebates are among the most commonly available prescriptive programs.
+2. **Use the DSIRE database** — The Database of State Incentives for Renewables and Efficiency ([dsireusa.org](https://www.dsireusa.org)) catalogs federal, state, and local incentive programs. Search by state and technology type (e.g., "variable speed drives," "HVAC efficiency," "water conservation") to find applicable programs.
+3. **Contact your utility account representative** — Large commercial and industrial customers often have dedicated account managers who can identify applicable programs, walk you through the application process, and help coordinate pre-installation inspections.
+4. **Get pre-approval before starting work** — Many rebate programs require pre-approval and baseline energy or water usage documentation before equipment is purchased or installed. Starting a project without pre-approval can disqualify you from receiving the rebate.
+
+### Common Cooling Water System Upgrades and Rebate Potential
+
+| Upgrade | Typical Cost | Annual Savings | Typical Rebate | Net Payback |
+|---------|-------------|----------------|----------------|-------------|
+| VFD on cooling tower fans (50 HP) | $8,000–$12,000 | $4,500–$7,000/yr | $3,000–$6,000 | 0.8–1.8 years |
+| Water-side economizer (free cooling) | $25,000–$60,000 | $8,000–$20,000/yr | $5,000–$15,000 | 1.5–3.5 years |
+| Premium-efficiency cooling tower motors | $2,500–$5,000 | $600–$1,200/yr | $500–$1,200 | 1.5–3.5 years |
+| Automated water treatment controls | $15,000–$30,000 | $5,000–$12,000/yr (water + chemicals) | $3,000–$8,000 | 1.5–3.0 years |
+| Condenser water reset controls | $5,000–$10,000 | $3,000–$6,000/yr | $2,000–$4,000 | 0.5–1.5 years |
+
+### Building the Business Case
+
+When presenting a cooling water efficiency project to management, focus on **total lifecycle cost** rather than just the initial purchase price. A VFD on a 50 HP cooling tower fan may cost $10,000 to install, but it saves $5,000–$7,000 per year in electricity, and a utility rebate of $4,000–$6,000 can reduce the net out-of-pocket cost to as little as $4,000. That translates to a simple payback of less than one year — far exceeding the typical corporate hurdle rate of 2–3 years. The VFD will then continue saving $5,000+ per year for its 15–20 year service life, delivering a total return many times the initial investment.
+
+Frame efficiency upgrades in terms that resonate with financial decision-makers. Calculate and present the **internal rate of return (IRR)** and **net present value (NPV)**, not just simple payback. Include the value of rebates and tax credits as reductions to the initial investment. Quantify avoided risks — for example, the cost of an unplanned chiller shutdown due to fouled condensers versus the cost of automated water treatment controls that prevent fouling. Mention that energy prices have historically risen 2–4% per year, which means savings grow over time while the equipment cost is fixed.
+
+Finally, include environmental and regulatory benefits. Many organizations have corporate sustainability goals, greenhouse gas reduction targets, or ESG (Environmental, Social, and Governance) reporting requirements. A cooling water optimization project that reduces electricity consumption by 20% and water consumption by 30% delivers measurable progress toward these goals. Documenting the avoided CO₂ emissions (using EPA eGRID emission factors) and water savings strengthens the business case and may qualify the project for additional internal funding from sustainability budgets.
+
+## 6.11 Lab Preview: Inspect a Cooling System and Analyze Water Data
 
 In this week's hands-on lab, you will apply the concepts from this chapter by inspecting a cooling water system, testing water quality, calculating key indices, and interpreting AI-generated monitoring data.
 

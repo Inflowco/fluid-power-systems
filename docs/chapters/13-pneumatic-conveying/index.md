@@ -88,6 +88,38 @@ Where \( \dot{m}_{\text{solids}} \) is the mass flow rate of solids (lb/min or k
 
 Higher SLR means less air is needed per unit of material conveyed, which reduces energy consumption but requires more careful system design.
 
+#### Worked Example: Solids Loading Ratio and System Classification
+
+**Given:**
+
+- Material flow rate: 10,000 lb/hr
+- Conveying air flow rate: 2,000 lb/hr
+
+**Find:** Solids Loading Ratio and system classification
+
+**Solution:**
+
+1. Calculate the Solids Loading Ratio:
+
+\[
+\text{SLR} = \frac{\dot{m}_{\text{solids}}}{\dot{m}_{\text{air}}} = \frac{10{,}000}{2{,}000} = 5
+\]
+
+2. Classify the system using standard SLR ranges:
+
+| SLR Range | Classification |
+|-----------|---------------|
+| < 1 | Very dilute (pneumatic transport) |
+| 1–15 | Dilute phase |
+| 15–30 | Transition zone |
+| > 30 | Dense phase |
+
+At SLR = 5, this is a **dilute phase** system. Material is suspended in the air stream and conveyed at high velocity (typically 3,500–5,000 FPM).
+
+**Answer:** The Solids Loading Ratio is **5**, classifying this as a **dilute phase** conveying system.
+
+> **Practical note:** Dilute phase systems are simpler and cheaper but cause more product degradation and pipe wear due to high velocities. For fragile materials or abrasive products, consider dense phase conveying (SLR > 30) which operates at lower velocities.
+
 ## 13.2 Conveying Modes
 
 Pneumatic conveying systems operate in one of two primary modes — dilute phase or dense phase — depending on the air velocity, pressure, material properties, and system design. Choosing the right conveying mode is critical because it determines the air source size, pipeline diameter, material degradation level, pipe wear rate, and energy consumption.
@@ -358,6 +390,63 @@ The minimum transport velocity depends on the material:
 | Pellets (plastic, grain) | 4,000–5,000 ft/min |
 | Heavy/coarse particles (sand, gravel) | 5,000–7,000 ft/min |
 | Fibers (wood chips, paper trim) | 4,500–5,500 ft/min |
+
+### Conveying Air Velocity Formula
+
+The air velocity in a conveying pipeline is determined by the air volume flow rate and the pipe cross-sectional area:
+
+\[
+V = \frac{Q}{A}
+\]
+
+Where \( V \) is velocity in feet per minute (FPM), \( Q \) is air volume in cubic feet per minute (CFM), and \( A \) is the pipe cross-sectional area in square feet.
+
+#### Worked Example: Conveying Air Velocity Check
+
+**Given:**
+
+- Air volume: 500 CFM
+- Conveying pipe: 6-inch diameter
+
+**Find:** Air velocity in FPM and comparison to minimum transport velocity
+
+**Solution:**
+
+1. Calculate the pipe cross-sectional area (convert diameter to feet):
+
+\[
+A = \frac{\pi \times d^2}{4} = \frac{\pi \times (6/12)^2}{4} = \frac{\pi \times 0.25}{4} = 0.196 \text{ ft}^2
+\]
+
+2. Calculate the air velocity:
+
+\[
+V = \frac{Q}{A} = \frac{500}{0.196} = 2{,}551 \text{ FPM}
+\]
+
+3. Compare to minimum transport velocities:
+
+| Material Type | Minimum Velocity |
+|---------------|-----------------|
+| Grain, flour, light powders | 2,800–3,500 FPM |
+| Pellets, granules | 3,500–4,500 FPM |
+| Heavy materials (sand, cement) | 4,500–6,000 FPM |
+
+At 2,551 FPM, velocity is **below minimum** for most materials — risk of saltation (material settling in pipe).
+
+4. Evaluate a remedy — reduce pipe size to 5 inches:
+
+\[
+A_{5"} = \frac{\pi \times (5/12)^2}{4} = 0.136 \text{ ft}^2
+\]
+
+\[
+V_{5"} = \frac{500}{0.136} = 3{,}676 \text{ FPM}
+\]
+
+**Answer:** The air velocity in a 6-inch pipe is **2,551 FPM**, which is below minimum transport velocity for most materials. Reducing to a **5-inch pipe** increases velocity to **3,676 FPM**, which is adequate for light powders and granules.
+
+> **Practical note:** Always verify conveying velocity against the minimum transport velocity for the specific material. Undersized velocity causes saltation and pipeline blockages — one of the most common and disruptive problems in pneumatic conveying. When in doubt, reduce pipe diameter to increase velocity rather than increasing air volume, which wastes blower energy.
 
 !!! warning "Velocity Increases Along the Pipeline"
     As air travels through the pipeline, pressure drops due to friction and material transport. Because air is compressible, a drop in pressure causes the air to expand and accelerate. In a long pipeline, the air velocity at the end of the line can be 2 to 3 times the velocity at the beginning. This means a system designed for 4,000 ft/min at the pickup point may have velocities of 8,000–12,000 ft/min at the end — causing severe wear, noise, and material degradation at the destination. Proper design accounts for this velocity increase by selecting the initial velocity carefully and sometimes using stepped (increasing diameter) pipelines.
@@ -767,6 +856,61 @@ The major factors affecting energy consumption in pneumatic conveying are:
 - **Air volume** — dilute-phase systems move large volumes of air per ton of material. Dense-phase systems move less air per ton, reducing energy consumption.
 - **System leaks** — air leaks at rotary valves, flanges, and pipe joints waste energy. A poorly maintained system can lose 15–25% of its air through leaks.
 
+### Blower Power Formula
+
+The horsepower required to drive a pneumatic conveying blower can be estimated using the same formula as fan BHP, but with pressure converted to inches of water gauge:
+
+\[
+HP = \frac{CFM \times \Delta P_{\text{in. w.g.}}}{6{,}356 \times \eta}
+\]
+
+Where \( CFM \) is the air volume in cubic feet per minute, \( \Delta P_{\text{in. w.g.}} \) is the system pressure drop in inches of water gauge, and \( \eta \) is the blower efficiency (expressed as a decimal). To convert psi to inches of water gauge: \( 1 \text{ psi} = 27.7 \text{ in. w.g.} \)
+
+#### Worked Example: Blower Power Estimate and Energy Cost
+
+**Given:**
+
+- Air volume: 1,200 CFM
+- System pressure drop: 8 psi = 221.6 in. w.g.
+- Blower efficiency: 70%
+- Electricity cost: $0.10/kWh, operating 6,000 hr/yr
+
+**Find:** Required horsepower and annual energy cost
+
+**Solution:**
+
+1. Convert pressure to inches of water gauge:
+
+\[
+\Delta P = 8 \text{ psi} \times 27.7 \text{ in. w.g./psi} = 221.6 \text{ in. w.g.}
+\]
+
+2. Calculate the required horsepower:
+
+\[
+HP = \frac{1{,}200 \times 221.6}{6{,}356 \times 0.70} = \frac{265{,}920}{4{,}449} = 59.8 \text{ HP}
+\]
+
+3. Select a **75 HP motor** to provide margin for startup, pressure spikes, and wear.
+
+4. Calculate the annual energy cost:
+
+\[
+\text{Input kW} = 59.8 \times 0.746 = 44.6 \text{ kW}
+\]
+
+\[
+\text{Annual kWh} = 44.6 \times 6{,}000 = 267{,}600 \text{ kWh}
+\]
+
+\[
+\text{Annual cost} = 267{,}600 \times \$0.10 = \$26{,}760/\text{yr}
+\]
+
+**Answer:** The required blower power is **59.8 HP** (select a **75 HP motor**). Annual energy cost is **$26,760/yr**.
+
+> **Practical note:** Pneumatic conveying is energy-intensive — that 75 HP blower costs over $26,000/yr in electricity alone. This is why mechanical conveying (screw conveyors, belt conveyors, bucket elevators) is preferred for short distances and high throughput. Pneumatic conveying's advantages are flexibility in routing, enclosed dust-free transport, and ability to handle multiple pickup and delivery points.
+
 ### 13.10.2 Energy Efficiency Strategies
 
 1. **VFD control on the blower** — the single highest-return energy investment. A VFD allows the blower speed to match actual demand, avoiding the energy waste of running at full speed when the system is partially loaded or conveying lighter materials. Combined with AI optimization, VFD control typically reduces energy consumption by 15–30%.
@@ -832,11 +976,59 @@ Responsive design: Chart scales to container width. Must respond to window resiz
 Implementation: Chart.js with interactive input controls and dynamic data updates
 </details>
 
-## 13.11 Dust Explosion Prevention and Safety
+## 13.11 Utility Rebates, Incentives, and Building the Business Case
+
+Many of the energy efficiency upgrades discussed in this chapter qualify for **utility rebate programs** and **government incentives** that can substantially reduce upfront costs and shorten payback periods. Pneumatic conveying systems are excellent candidates for incentive programs because they consume large amounts of compressed air and blower energy, and the savings from optimization are significant and measurable.
+
+### Available Incentive Programs
+
+| Program Type | Examples | Typical Benefit |
+|-------------|----------|----------------|
+| Utility prescriptive rebates | VFD on conveying blower, premium-efficiency blower motor | $75–$250 per HP for VFDs; $15–$35 per HP for motors |
+| Utility custom/calculated rebates | Dense-phase conversion, pipeline optimization, automated controls | $0.04–$0.12 per kWh saved annually |
+| Federal tax credits (IRA §179D) | Energy-efficient industrial process systems including conveying | Up to $1.00/sq ft or 30% of project cost |
+| State/local programs | State manufacturing efficiency grants, industrial assessment centers | Varies by state — often 15–40% of project cost |
+| DOE programs | Better Plants, Industrial Assessment Centers (IACs), Combined Heat and Power | Free energy assessments for qualifying facilities, technical assistance |
+
+Utility rebates for pneumatic conveying improvements often fall under **compressed air and industrial process** incentive categories. Because blowers and compressors that power conveying systems can draw 50–500 HP or more, adding a VFD to a conveying blower is one of the highest-return prescriptive rebates available — utilities commonly pay $75–$250 per horsepower for VFD installations on industrial blowers. For more complex projects such as converting from dilute-phase to dense-phase conveying or optimizing pipeline layout, **custom or calculated rebates** based on measured energy savings are typically available and can cover 25–40% of total project cost.
+
+The **DOE Industrial Assessment Center (IAC) program** provides free energy assessments to small and medium-sized manufacturing facilities (those with annual energy bills under $3.5 million). IAC teams from partnering universities evaluate the entire facility, including pneumatic conveying systems, and deliver detailed recommendations with payback calculations. Historically, IAC assessments identify an average of $130,000 in annual savings per facility.
+
+The **Inflation Reduction Act (IRA)** extended and expanded incentives for industrial energy efficiency. The §179D deduction applies to process energy improvements in qualifying commercial and industrial buildings, and the §48C Advanced Energy Manufacturing Tax Credit provides up to 30% investment tax credits for qualifying clean energy manufacturing equipment upgrades, which can include high-efficiency blowers and controls for conveying systems.
+
+### How to Find Available Rebates
+
+1. **Check your utility's website** — Search for "[utility name] industrial rebates" or "compressed air incentives." Pneumatic conveying blower VFDs often qualify under compressed air or industrial motor programs.
+2. **Use the DSIRE database** — The Database of State Incentives for Renewables and Efficiency ([dsireusa.org](https://www.dsireusa.org)) catalogs federal, state, and local incentive programs searchable by zip code and technology type.
+3. **Contact your utility account representative** — Industrial customers with large electricity loads typically have dedicated utility representatives who can identify all applicable programs, including custom rebate tracks for process optimization projects.
+4. **Request a DOE IAC assessment** — If your facility qualifies, visit the IAC website ([iac.university](https://iac.university)) to request a free energy assessment that will include a detailed analysis of conveying system efficiency opportunities.
+5. **Get pre-approval before starting work** — Many utility programs require a pre-installation application, baseline energy measurements, and program approval before any equipment is purchased or installed. Starting work before pre-approval can forfeit thousands of dollars in available rebates.
+
+### Common Pneumatic Conveying Upgrades and Rebate Potential
+
+| Upgrade | Typical Cost | Annual Savings | Typical Rebate | Net Payback |
+|---------|-------------|----------------|----------------|-------------|
+| VFD on 75 HP conveying blower | $8,000–$14,000 | $8,000–$15,000/yr | $5,600–$10,000 | 0.3–0.8 years |
+| Dilute-to-dense phase conversion | $40,000–$80,000 | $20,000–$40,000/yr | $10,000–$25,000 | 1.0–2.0 years |
+| Rotary airlock valve upgrade (reduce air leakage) | $3,000–$6,000 | $2,000–$4,500/yr | $1,000–$2,500 | 0.5–1.0 years |
+| Pipeline optimization/redesign (reduce bends) | $10,000–$25,000 | $5,000–$12,000/yr | $3,000–$8,000 | 0.8–1.5 years |
+| Automated conveying controls (AI + sensors) | $15,000–$30,000 | $10,000–$20,000/yr | $5,000–$12,000 | 0.5–1.2 years |
+
+### Building the Business Case
+
+Pneumatic conveying energy costs are often underestimated because the blower electricity is buried in the plant's overall utility bill. Begin by **isolating the conveying system's energy consumption** — install a power meter on the blower motor for 30 days to establish a baseline. For a 100 HP blower running 6,000 hours per year at $0.10/kWh, annual electricity cost is approximately $45,000. A 25% reduction through VFD control and AI optimization saves over $11,000 per year — and with a utility rebate covering half the VFD cost, the net payback can be under six months.
+
+When presenting the project to management, frame the investment in terms of **cost per ton of material conveyed** rather than just total energy cost. This metric resonates with operations managers who think in terms of production costs. If a VFD and AI optimization reduce the conveying energy cost from $0.35 per ton to $0.22 per ton on a system moving 50,000 tons per year, the annual savings is $6,500 per ton-cent saved — a number that translates directly to improved product margins.
+
+Include the **full range of benefits** beyond energy savings: reduced material degradation from AI-optimized velocity control (fewer product quality rejects), extended pipeline life from lower velocities (reduced capital replacement costs for elbows and pipe sections), reduced unplanned downtime from predictive maintenance (each hour of unplanned downtime in a production facility can cost $5,000–$50,000), and lower maintenance labor from automated monitoring replacing manual inspection rounds. Present an **energy cost escalation analysis** showing that at 3% annual utility rate increases, today's $45,000 annual blower cost becomes $60,000 within ten years — making the case for acting now rather than deferring the investment. Emphasize that utility rebate programs have annual budgets that are fully subscribed in many regions; early applications have the best chance of receiving full incentive amounts.
+
+---
+
+## 13.12 Dust Explosion Prevention and Safety
 
 Pneumatic conveying systems transport combustible dusts through enclosed pipelines — creating the exact conditions needed for a dust explosion if proper safety measures are not in place. Understanding combustible dust hazards and NFPA standards is essential for anyone working with pneumatic conveying systems.
 
-### 13.11.1 Combustible Dust Hazards
+### 13.12.1 Combustible Dust Hazards
 
 A **dust explosion** occurs when five conditions are present simultaneously (the "dust explosion pentagon"):
 
@@ -860,7 +1052,7 @@ Materials commonly conveyed that are combustible dusts:
 !!! warning "Combustible Dust Is Not Obvious"
     Many materials that seem harmless — sugar, flour, powdered milk, sawdust — are extremely explosive when dispersed in air. A sugar dust explosion at the Imperial Sugar refinery in 2008 killed 14 workers and injured 36 more. Technicians must treat ANY fine particulate material as potentially combustible until testing proves otherwise.
 
-### 13.11.2 NFPA Standards
+### 13.12.2 NFPA Standards
 
 The primary standards governing combustible dust safety in pneumatic conveying are:
 
@@ -869,7 +1061,7 @@ The primary standards governing combustible dust safety in pneumatic conveying a
 - **NFPA 68** — Standard on Explosion Protection by Deflagration Venting. Specifies how to design explosion vents on equipment.
 - **NFPA 69** — Standard on Explosion Prevention Systems. Covers inerting, suppression, and isolation systems.
 
-### 13.11.3 Protection Strategies
+### 13.12.3 Protection Strategies
 
 Pneumatic conveying systems handling combustible dusts must include:
 
@@ -880,7 +1072,7 @@ Pneumatic conveying systems handling combustible dusts must include:
 - **Spark detection and extinguishing** — sensors in the pipeline detect sparks or hot particles and trigger water spray or diverter valves to extinguish them before they reach the filter or silo.
 - **Housekeeping** — NFPA 654 limits the accumulation of fugitive dust on surfaces. A dust layer as thin as 1/32 inch over just 5% of a room's floor area can create a secondary explosion hazard if disturbed by a primary event.
 
-### 13.11.4 Additional Safety Practices
+### 13.12.4 Additional Safety Practices
 
 Beyond explosion prevention, pneumatic conveying systems require:
 
@@ -963,7 +1155,7 @@ Responsive design: Single column, full width. Must respond to window resize even
 Implementation: HTML/CSS/JS with local storage for saving checklist state
 </details>
 
-## 13.12 Hands-On Lab Activity
+## 13.13 Hands-On Lab Activity
 
 ### Lab: Pneumatic Conveying System Inspection and Troubleshooting
 

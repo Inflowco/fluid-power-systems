@@ -71,6 +71,52 @@ A hydraulic press with a 1 in² input piston and a 10 in² output piston multipl
 
 This table illustrates a key principle: **pressure is equal throughout the system**, but force depends on the area it acts upon.
 
+#### Worked Example: Pascal's Law — Force Multiplication
+
+**Given:**
+
+- Input piston diameter: 1 inch
+- Force applied to input piston: 100 lb
+- Output piston diameter: 6 inches
+
+**Find:** Output force and mechanical advantage
+
+**Solution:**
+
+1. Calculate input piston area:
+
+\[
+A_{in} = \frac{\pi \times d_{in}^2}{4} = \frac{\pi \times 1^2}{4} = 0.785 \text{ in}^2
+\]
+
+2. Calculate input pressure using \( P = F / A \):
+
+\[
+P = \frac{F_{in}}{A_{in}} = \frac{100}{0.785} = 127.4 \text{ psi}
+\]
+
+3. Calculate output piston area:
+
+\[
+A_{out} = \frac{\pi \times d_{out}^2}{4} = \frac{\pi \times 6^2}{4} = 28.27 \text{ in}^2
+\]
+
+4. Calculate output force (pressure is equal throughout the system):
+
+\[
+F_{out} = P \times A_{out} = 127.4 \times 28.27 = 3{,}602 \text{ lb}
+\]
+
+5. Calculate mechanical advantage:
+
+\[
+MA = \frac{F_{out}}{F_{in}} = \frac{3{,}602}{100} = 36:1
+\]
+
+**Answer:** The output force is **3,602 lb** with a mechanical advantage of **36:1**.
+
+> **Practical note:** This 36:1 mechanical advantage is why hydraulic presses and jacks are so powerful. The trade-off is distance — the output piston moves 1/36th the distance of the input piston. Energy is conserved: what you gain in force, you lose in distance.
+
 #### Diagram: Hydraulic Pump Types Comparison
 
 <iframe src="../../sims/hydraulic-pump-types/main.html" width="100%" height="500px" scrolling="no"></iframe>
@@ -172,6 +218,52 @@ Piston pumps achieve the highest pressures (up to 6,000+ psi), highest efficienc
 | Vane (variable) | 3,000 psi | 85–92% | Variable | Low | High | Energy-saving systems |
 | Axial piston | 6,000+ psi | 90–95% | Variable | Medium | High | Mobile equipment, presses |
 
+### Hydraulic Power
+
+The power delivered by a hydraulic system is a function of pressure and flow rate. Hydraulic horsepower is calculated as:
+
+\[
+HP_{hydraulic} = \frac{P \times Q}{1{,}714}
+\]
+
+Where \( P \) is pressure in psi, \( Q \) is flow rate in GPM, and 1,714 is the conversion constant for psi × GPM to horsepower. To determine the input power required from the electric motor, divide by pump efficiency.
+
+#### Worked Example: Hydraulic Power and Motor Sizing
+
+**Given:**
+
+- System pressure: 2,500 psi
+- Flow rate: 15 GPM
+- Pump efficiency: 85%
+
+**Find:** Hydraulic HP, input HP required, and motor size in kW
+
+**Solution:**
+
+1. Calculate hydraulic horsepower:
+
+\[
+HP_{hydraulic} = \frac{P \times Q}{1{,}714} = \frac{2{,}500 \times 15}{1{,}714} = 21.9 \text{ HP}
+\]
+
+2. Calculate input HP required (accounting for pump inefficiency):
+
+\[
+HP_{input} = \frac{HP_{hydraulic}}{\eta_{pump}} = \frac{21.9}{0.85} = 25.7 \text{ HP}
+\]
+
+Select the next standard motor size: **30 HP motor**.
+
+3. Convert to kilowatts:
+
+\[
+P_{kW} = HP_{input} \times 0.746 = 25.7 \times 0.746 = 19.2 \text{ kW}
+\]
+
+**Answer:** The hydraulic HP is **21.9 HP**, the required input HP is **25.7 HP** (select a **30 HP** motor), and the motor power is **19.2 kW**.
+
+> **Practical note:** The 1,714 constant converts psi × GPM to horsepower. Always size the electric motor for input HP (accounting for pump inefficiency), not hydraulic HP. The 30 HP motor provides margin for pressure spikes and viscosity changes during cold starts.
+
 ## 8.4 Hydraulic Actuators
 
 Actuators convert hydraulic energy back into mechanical work. The two main types are **cylinders** (linear actuators) and **motors** (rotary actuators).
@@ -195,6 +287,52 @@ F_{retract} = P \times (A_{bore} - A_{rod})
 \]
 
 Where \( A_{bore} \) is the full bore area and \( A_{rod} \) is the cross-sectional area of the piston rod. Because the rod occupies part of the piston area on the retract side, retract force is always less than extend force at the same pressure.
+
+#### Worked Example: Cylinder Extend and Retract Forces
+
+**Given:**
+
+- Bore diameter: 4 inches
+- Rod diameter: 2 inches
+- System pressure: 2,000 psi
+
+**Find:** Extension force and retraction force
+
+**Solution:**
+
+1. Calculate bore area (full piston area):
+
+\[
+A_{bore} = \frac{\pi \times 4^2}{4} = 12.57 \text{ in}^2
+\]
+
+2. Calculate rod area:
+
+\[
+A_{rod} = \frac{\pi \times 2^2}{4} = 3.14 \text{ in}^2
+\]
+
+3. Calculate annular area (bore area minus rod area):
+
+\[
+A_{annular} = A_{bore} - A_{rod} = 12.57 - 3.14 = 9.43 \text{ in}^2
+\]
+
+4. Calculate extension force (pressure acts on full bore area):
+
+\[
+F_{extend} = P \times A_{bore} = 2{,}000 \times 12.57 = 25{,}133 \text{ lb}
+\]
+
+5. Calculate retraction force (pressure acts on annular area):
+
+\[
+F_{retract} = P \times A_{annular} = 2{,}000 \times 9.43 = 18{,}850 \text{ lb}
+\]
+
+**Answer:** The extension force is **25,133 lb** and the retraction force is **18,850 lb**.
+
+> **Practical note:** Retraction force is 25% less than extension because the rod takes up area on the retract side. This is why cylinder applications that need equal force in both directions use double-rod cylinders or a larger bore for the retract stroke.
 
 ### Hydraulic Motors
 
@@ -373,6 +511,34 @@ Achieving and maintaining target cleanliness requires a multi-point filtration a
 \]
 
 A filter rated β₁₀ = 200 means that for every 200 particles of 10 μm or larger entering the filter, only 1 passes through — giving 99.5% efficiency at that size. Modern high-efficiency filters achieve β ratios of 1,000 or more (99.9% efficiency).
+
+#### Worked Example: Beta Ratio Filter Efficiency
+
+**Given:**
+
+- Filter rated at \( \beta_{10} = 200 \)
+
+**Find:** Capture efficiency for 10-micron and larger particles
+
+**Solution:**
+
+1. Apply the efficiency formula:
+
+\[
+\text{Efficiency} = \left(1 - \frac{1}{\beta}\right) \times 100
+\]
+
+2. Substitute \( \beta_{10} = 200 \):
+
+\[
+\text{Efficiency} = \left(1 - \frac{1}{200}\right) \times 100 = (1 - 0.005) \times 100 = 99.5\%
+\]
+
+3. Interpret the result: Of every 1,000,000 particles \( \geq 10 \) microns entering the filter, only 5,000 pass through. The filter captures 995,000 particles.
+
+**Answer:** The filter capture efficiency is **99.5%** for particles 10 microns and larger.
+
+> **Practical note:** For servo valves, specify \( \beta_3 \geq 1000 \) (99.9% at 3 microns). For proportional valves, \( \beta_6 \geq 200 \). For gear pumps and directional valves, \( \beta_{10} \geq 75 \). Under-filtration is the #1 cause of hydraulic component failure — 80% of hydraulic failures are contamination-related.
 
 ## 8.8 Seal Types and Failure Modes
 
@@ -639,7 +805,46 @@ Even biodegradable fluids must be disposed of properly. Used hydraulic fluid —
 !!! warning "Fluid Disposal"
     Never mix different types of used hydraulic fluid in the same collection container. Mineral oil, biodegradable ester, and fire-resistant fluids must be collected separately because mixing makes recycling impossible. Label all collection containers clearly with the fluid type.
 
-## 8.14 Key Takeaways
+## 8.14 Utility Rebates, Incentives, and Building the Business Case
+
+Many of the energy efficiency upgrades discussed in this chapter qualify for **utility rebate programs** and **government incentives** that can dramatically reduce upfront costs and shorten payback periods. Hydraulic power units are significant energy consumers — a 50 HP hydraulic pump running two shifts can consume over $20,000 in electricity per year — making them high-value targets for efficiency programs.
+
+### Available Incentive Programs
+
+| Program Type | Examples | Typical Benefit |
+|-------------|----------|----------------|
+| Utility prescriptive rebates | VFD on hydraulic power unit motor, premium-efficiency motors, servo-driven hydraulic pumps | $50–$150 per HP for VFDs; $10–$25 per HP for premium motors |
+| Utility custom/calculated rebates | Variable displacement pump conversion, servo-hydraulic systems, accumulator-assisted circuits | $0.03–$0.12 per kWh saved annually |
+| Federal tax credits (IRA §179D) | Energy-efficient commercial building deduction for qualifying manufacturing process upgrades | Up to $5.00/sq ft for whole-building projects |
+| State/local programs | Manufacturing modernization grants, industrial energy efficiency programs | Varies by state — $1,000 to $100,000+ per project |
+| DOE programs | Better Plants, Industrial Assessment Centers (IACs), Combined Heat and Power Technical Assistance | Free energy assessments, technical guidance, recognition programs |
+
+### How to Find Available Rebates
+
+1. **Check your utility's website** — Search for "[utility name] industrial rebates" or "manufacturing energy incentives." Hydraulic system VFD rebates fall under the same motor/drive incentive programs that cover fans and pumps. Many utilities also offer custom incentives for more sophisticated upgrades like servo-hydraulic conversions or load-sensing pump systems, where energy savings must be calculated from engineering analysis rather than a prescriptive formula.
+2. **Use the DSIRE database** — The Database of State Incentives for Renewables and Efficiency ([dsireusa.org](https://www.dsireusa.org)) catalogs federal, state, and local incentive programs. Search for "industrial process efficiency," "motor systems," or "manufacturing equipment" to find applicable programs in your state.
+3. **Request an Industrial Assessment Center (IAC) audit** — The DOE funds university-based IACs that provide free energy assessments to small and mid-sized manufacturers (generally under 500 employees and $100M revenue). IAC engineers will analyze your hydraulic systems, measure actual power consumption under various operating conditions, and provide a detailed report with specific upgrade recommendations, calculated energy savings, and estimated payback periods. This documentation is invaluable for both rebate applications and internal capital approval.
+4. **Get pre-approval before starting work** — Most rebate programs require pre-approval and baseline energy measurement before equipment is purchased or installed. For hydraulic system upgrades, this typically means logging motor power consumption over a representative production period (at least two weeks) to establish the baseline against which savings will be verified.
+
+### Common Hydraulic System Upgrades and Rebate Potential
+
+| Upgrade | Typical Cost | Annual Savings | Typical Rebate | Net Payback |
+|---------|-------------|----------------|----------------|-------------|
+| VFD on hydraulic power unit (50 HP) | $10,000–$16,000 | $6,000–$12,000/yr | $4,000–$8,000 | 0.5–1.5 years |
+| Servo-hydraulic conversion | $25,000–$50,000 | $10,000–$20,000/yr | $6,000–$15,000 | 1.5–3.0 years |
+| Premium-efficiency motor upgrade (50 HP) | $3,500–$6,000 | $800–$1,500/yr | $500–$1,200 | 2.0–4.0 years |
+| Variable displacement pump upgrade | $8,000–$15,000 | $4,000–$8,000/yr | $2,500–$6,000 | 0.8–2.0 years |
+| Hydraulic accumulator addition | $5,000–$12,000 | $2,000–$5,000/yr | $1,500–$4,000 | 1.0–2.5 years |
+
+### Building the Business Case
+
+When presenting a hydraulic efficiency project to management, emphasize that most industrial hydraulic systems waste 50–70% of their input energy. A conventional fixed-displacement pump running against a relief valve during idle and low-demand periods converts all that excess flow into heat — energy that was purchased as electricity and then must be removed by a cooler (consuming even more energy). A VFD or variable displacement pump eliminates this waste by matching pump output to actual demand. For a 50 HP power unit operating 4,000 hours per year, the transition from a fixed-displacement pump with relief valve unloading to a VFD-controlled system can save $8,000–$12,000 annually, with a utility rebate reducing the net project cost by 30–50%.
+
+Present efficiency upgrades as **multi-benefit investments** that go beyond energy savings. A VFD-equipped hydraulic power unit runs quieter (reducing workplace noise levels by 5–10 dB), generates less heat (reducing cooling requirements and extending fluid life), and subjects components to lower stress during startup (extending pump and motor bearing life). Quantify these secondary savings where possible — for example, extending hydraulic fluid change intervals from 2,000 hours to 4,000 hours saves $1,500–$3,000 per year in fluid and disposal costs for a 100-gallon system. Reduced heat generation may allow downsizing or eliminating the oil cooler, saving both capital and the energy to run it.
+
+Finally, connect the project to broader organizational goals. Many manufacturers face pressure to reduce their carbon footprint, meet customer sustainability requirements, or comply with state energy benchmarking laws. A hydraulic system optimization project that reduces electricity consumption by 40–60% generates a proportional reduction in Scope 2 greenhouse gas emissions. Document the avoided CO₂ emissions using EPA eGRID factors — a 50 HP hydraulic system saving 50,000 kWh per year avoids approximately 20–25 metric tons of CO₂ annually, depending on regional grid mix. This quantified environmental benefit strengthens both rebate applications and internal business cases, particularly when sustainability budgets can co-fund efficiency projects.
+
+## 8.15 Key Takeaways
 
 This chapter covered the essential knowledge and skills for maintaining and optimizing hydraulic systems with modern AI and predictive maintenance tools:
 

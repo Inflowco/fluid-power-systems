@@ -621,6 +621,86 @@ This integrated approach means the system can:
 
 The remaining chapters in this course will explore each specific system type in detail, building on the component knowledge and smart control concepts you learned here.
 
+### Electrical Power Fundamentals
+
+Understanding basic electrical calculations is essential for any fluid power technician. Motors drive pumps, fans, and compressors, and knowing how to calculate motor power, convert between watts and horsepower, and estimate energy costs helps you size equipment, verify nameplate data, and justify efficiency upgrades.
+
+#### Worked Example: Single-Phase Motor Power
+
+**Given:**
+
+- A single-phase motor operates at 230 V
+- The motor draws 15 A
+- The power factor (PF) is 0.85
+
+**Find:** The power consumed in watts and the equivalent horsepower (HP)
+
+**Solution:**
+
+1. Calculate power using the single-phase power formula:
+
+\[ P = V \times I \times PF = 230 \times 15 \times 0.85 = 2{,}932.5 \text{ W} \]
+
+2. Convert watts to horsepower (1 HP = 746 W):
+
+\[ HP = \frac{P}{746} = \frac{2{,}932.5}{746} = 3.93 \text{ HP} \]
+
+**Answer:** The motor consumes **2,932.5 W** (approximately **3.93 HP**). Since standard motor sizes jump from 3 HP to 5 HP, this motor would be rated as a **5 HP motor** operating near full load.
+
+> **Practical note:** Always select the next standard motor size above the calculated load. Running a motor above its rated HP causes overheating and premature failure. Standard single-phase motor sizes are 1, 1.5, 2, 3, 5, 7.5, and 10 HP.
+
+#### Worked Example: Three-Phase Motor Power
+
+**Given:**
+
+- A three-phase motor operates at 460 V
+- The motor draws 28 A
+- The power factor (PF) is 0.87
+
+**Find:** The power consumed in kilowatts (kW) and horsepower (HP)
+
+**Solution:**
+
+1. Calculate power using the three-phase power formula:
+
+\[ P = V \times I \times \sqrt{3} \times PF = 460 \times 28 \times 1.732 \times 0.87 = 19{,}415 \text{ W} \approx 19.4 \text{ kW} \]
+
+2. Convert watts to horsepower:
+
+\[ HP = \frac{P}{746} = \frac{19{,}415}{746} = 26.0 \text{ HP} \]
+
+**Answer:** The motor consumes approximately **19.4 kW** (**26.0 HP**). This is a **25 HP motor** operating at full load (motors typically draw slightly more than their rated HP when fully loaded).
+
+> **Practical note:** Three-phase power is standard for motors above 5 HP in commercial and industrial facilities. The \( \sqrt{3} \) factor (approximately 1.732) accounts for the 120-degree phase offset between the three power lines. If you forget this factor, your calculation will be 42% too low.
+
+#### Worked Example: Motor Efficiency and Annual Energy Cost
+
+**Given:**
+
+- A 25 HP motor has a nameplate efficiency of 91% (\( \eta = 0.91 \))
+- The motor runs 6,000 hours per year
+- Electricity costs $0.10 per kWh
+
+**Find:** The electrical input power in kW and the annual energy cost
+
+**Solution:**
+
+1. Calculate the input power required from the electrical supply:
+
+\[ \text{Input kW} = \frac{HP \times 0.746}{\eta} = \frac{25 \times 0.746}{0.91} = \frac{18.65}{0.91} = 20.5 \text{ kW} \]
+
+2. Calculate the annual energy consumption:
+
+\[ \text{Annual kWh} = \text{Input kW} \times \text{Hours} = 20.5 \times 6{,}000 = 123{,}000 \text{ kWh} \]
+
+3. Calculate the annual electricity cost:
+
+\[ \text{Annual Cost} = \text{kWh} \times \text{Rate} = 123{,}000 \times \$0.10 = \$12{,}300 \]
+
+**Answer:** The motor draws **20.5 kW** from the electrical supply and costs **$12,300 per year** to operate.
+
+> **Practical note:** The 9% efficiency loss (100% - 91%) is converted to waste heat inside the motor. This is why motor rooms need ventilation. Upgrading from a standard-efficiency motor (89%) to a premium-efficiency motor (93%) on this example would save approximately $1,000 per year — a quick payback on many motor replacements.
+
 ## 2.10 Lab Preview: Disassemble a Pump, Connect a Sensor, and View Data
 
 In this week's hands-on lab, you will:
