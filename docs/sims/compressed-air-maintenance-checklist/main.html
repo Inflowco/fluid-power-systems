@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="schema" content="https://dmccreary.github.io/intelligent-textbooks/ns/microsim/v1">
+<title>Compressed Air Maintenance Checklist</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+  h1{text-align:center;font-size:1.4rem;color:#1a3c5e;margin-bottom:4px;padding-top:12px}
+
+  /* ---- progress bar ---- */
+  .progress-wrapper{max-width:960px;margin:0 auto 10px;padding:0 12px;display:flex;align-items:center;gap:10px}
+  .progress-bar-bg{flex:1;height:22px;background:#d4dbe4;border-radius:11px;overflow:hidden;position:relative}
+  .progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#27ae60,#2ecc71);border-radius:11px;transition:width .4s ease}
+  .progress-text{font-weight:600;font-size:.85rem;min-width:48px;text-align:right;color:#1a3c5e}
+
+  /* ---- button row ---- */
+  .btn-row{display:flex;gap:8px}
+  .reset-btn{background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.8rem;font-weight:600;transition:background .2s}
+  .reset-btn:hover{background:#c0392b}
+  .print-btn{background:#2980b9;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.8rem;font-weight:600;transition:background .2s}
+  .print-btn:hover{background:#1f6da0}
+
+  /* ---- grid ---- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:960px;margin:0 auto;padding:0 12px 12px}
+
+  /* central illustration -- overlaid at center on wide screens */
+  .center-illustration{display:none}
+
+  /* ---- section card ---- */
+  .quadrant{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:8px;position:relative}
+  .quadrant-header{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .quadrant-header h2{font-size:1rem;color:#1a3c5e;margin:0}
+  .icon-wrap{width:56px;height:56px;flex-shrink:0;cursor:pointer;position:relative}
+  .icon-wrap svg{width:100%;height:100%}
+  .tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a3c5e;color:#fff;padding:6px 10px;border-radius:6px;font-size:.72rem;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s;z-index:10}
+  .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a3c5e}
+  .icon-wrap:hover .tooltip{opacity:1}
+
+  /* fifth card spans full width on wide screens */
+  .quadrant.full-width{grid-column:1 / -1}
+
+  /* ---- checklist ---- */
+  .checklist{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .checklist li{display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:5px 8px;border-radius:6px;transition:background .2s;font-size:.82rem;line-height:1.35;user-select:none}
+  .checklist li:hover{background:#eaf6ee}
+  .checklist li.critical{border-left:3px solid #e74c3c;padding-left:5px}
+  .check-box{width:20px;height:20px;flex-shrink:0;margin-top:1px;border:2px solid #aab;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:border-color .25s,background .25s}
+  .checklist li.checked .check-box{border-color:#27ae60;background:#27ae60}
+  .check-box svg{opacity:0;transition:opacity .25s}
+  .checklist li.checked .check-box svg{opacity:1}
+  .checklist li.checked .item-text{color:#555;text-decoration:line-through}
+  .item-text{flex:1;color:#333;transition:color .25s}
+
+  /* ---- responsive ---- */
+  @media(max-width:768px){
+    .grid{grid-template-columns:1fr}
+    .quadrant.full-width{grid-column:auto}
+    h1{font-size:1.15rem}
+  }
+
+  /* large-screen center illustration */
+  @media(min-width:769px){
+    .grid{position:relative}
+    .center-illustration{display:flex;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;pointer-events:none;width:140px;height:140px;background:#fff;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,.12);align-items:center;justify-content:center}
+    .center-illustration svg{width:110px;height:110px}
+  }
+
+  /* ---- print styles ---- */
+  @media print{
+    body{background:#fff;margin:0;padding:0}
+    .btn-row{display:none}
+    .progress-wrapper{display:none}
+    .center-illustration{display:none}
+    .grid{display:block;padding:0}
+    .quadrant{box-shadow:none;border:1px solid #ccc;margin-bottom:12px;page-break-inside:avoid}
+    .checklist li{cursor:default}
+    .checklist li:hover{background:transparent}
+    .checklist li.checked .item-text{text-decoration:none;color:#333}
+    .checklist li.checked .check-box{background:#27ae60;border-color:#27ae60;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .checklist li.checked .check-box svg{opacity:1}
+    .tooltip{display:none}
+  }
+</style>
+</head>
+<body>
+
+<h1>Compressed Air Maintenance Checklist</h1>
+
+<!-- Progress Bar -->
+<div class="progress-wrapper">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <span class="progress-text" id="progressText">0%</span>
+  <div class="btn-row">
+    <button class="reset-btn" id="resetBtn">Reset Checklist</button>
+    <button class="print-btn" id="printBtn">Print Checklist</button>
+  </div>
+</div>
+
+<!-- Grid -->
+<div class="grid">
+
+  <!-- Central Compressed Air System Illustration (visible on wide screens) -->
+  <div class="center-illustration">
+    <!-- Simplified rotary screw compressor -->
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <!-- compressor housing -->
+      <rect x="20" y="20" width="50" height="40" rx="6" fill="#dce6f0" stroke="#1a3c5e" stroke-width="2"/>
+      <!-- twin screw rotors -->
+      <ellipse cx="36" cy="40" rx="8" ry="12" fill="#e8e8e8" stroke="#555" stroke-width="1.2"/>
+      <ellipse cx="54" cy="40" rx="8" ry="12" fill="#e8e8e8" stroke="#555" stroke-width="1.2"/>
+      <!-- rotor centers -->
+      <circle cx="36" cy="40" r="2.5" fill="#1a3c5e"/>
+      <circle cx="54" cy="40" r="2.5" fill="#1a3c5e"/>
+      <!-- rotor teeth -->
+      <line x1="36" y1="28" x2="36" y2="24" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+      <line x1="36" y1="52" x2="36" y2="56" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+      <line x1="54" y1="28" x2="54" y2="24" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+      <line x1="54" y1="52" x2="54" y2="56" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+      <!-- air inlet -->
+      <rect x="8" y="34" width="12" height="12" rx="2" fill="#a2c4d5" stroke="#2980b9" stroke-width="1.5"/>
+      <polygon points="12,37 12,47 8,42" fill="#2980b9" opacity=".6"/>
+      <!-- discharge pipe to receiver -->
+      <line x1="70" y1="40" x2="82" y2="40" stroke="#546e7a" stroke-width="3"/>
+      <!-- receiver tank -->
+      <rect x="82" y="22" width="22" height="50" rx="8" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+      <!-- tank pressure gauge -->
+      <circle cx="93" cy="32" r="5" fill="#fff3e0" stroke="#e65100" stroke-width="1"/>
+      <line x1="93" y1="32" x2="91" y2="29" stroke="#e74c3c" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="93" cy="32" r="1" fill="#333"/>
+      <!-- drain valve -->
+      <rect x="89" y="72" width="8" height="6" rx="1" fill="#b0bec5" stroke="#546e7a" stroke-width="1"/>
+      <line x1="93" y1="78" x2="93" y2="82" stroke="#2980b9" stroke-width="1.5"/>
+      <!-- output pipe -->
+      <line x1="93" y1="22" x2="93" y2="12" stroke="#546e7a" stroke-width="2.5"/>
+      <line x1="93" y1="12" x2="60" y2="12" stroke="#546e7a" stroke-width="2.5"/>
+      <!-- labels -->
+      <text x="45" y="112" font-size="6" fill="#1a3c5e" text-anchor="middle" font-weight="bold">Compressor</text>
+      <text x="93" y="112" font-size="6" fill="#388e3c" text-anchor="middle" font-weight="bold">Receiver</text>
+      <text x="14" y="52" font-size="5" fill="#2980b9" text-anchor="middle">Inlet</text>
+    </svg>
+  </div>
+
+  <!-- Section 1: Compressor (top-left) -->
+  <div class="quadrant" id="q-compressor">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Rotary screw compressor -- uses twin helical rotors to compress intake air for the distribution system.</span>
+        <!-- SVG: Rotary screw compressor cross-section -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- housing -->
+          <rect x="8" y="10" width="48" height="36" rx="6" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+          <!-- twin screws -->
+          <ellipse cx="24" cy="28" rx="8" ry="12" fill="#e8eaf6" stroke="#3949ab" stroke-width="1.5"/>
+          <ellipse cx="40" cy="28" rx="8" ry="12" fill="#e8eaf6" stroke="#3949ab" stroke-width="1.5"/>
+          <!-- rotor shafts -->
+          <circle cx="24" cy="28" r="3" fill="#1a3c5e"/>
+          <circle cx="40" cy="28" r="3" fill="#1a3c5e"/>
+          <!-- vane lines -->
+          <line x1="24" y1="16" x2="24" y2="12" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+          <line x1="24" y1="40" x2="24" y2="44" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+          <line x1="40" y1="16" x2="40" y2="12" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+          <line x1="40" y1="40" x2="40" y2="44" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+          <!-- inlet arrow -->
+          <polygon points="4,24 8,28 4,32" fill="#2980b9" opacity=".7"/>
+          <!-- outlet arrow -->
+          <polygon points="60,24 56,28 60,32" fill="#c0392b" opacity=".7"/>
+          <!-- motor mount -->
+          <rect x="16" y="48" width="32" height="10" rx="3" fill="#b0bec5" stroke="#546e7a" stroke-width="1.5"/>
+          <text x="32" y="56" font-size="5" fill="#546e7a" text-anchor="middle">Motor</text>
+        </svg>
+      </div>
+      <h2>Compressor</h2>
+    </div>
+    <ul class="checklist" data-group="compressor">
+      <li data-id="c1" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check oil level and color (milky = moisture, dark = degraded)</span></li>
+      <li data-id="c2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Record discharge pressure and compare to setpoint</span></li>
+      <li data-id="c3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Listen for unusual sounds (knocking, grinding, excessive hissing)</span></li>
+      <li data-id="c4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check inlet filter and replace if dirty or damaged</span></li>
+      <li data-id="c5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Record motor amperage and compare to nameplate</span></li>
+      <li data-id="c6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect belt condition and tension (if belt-driven)</span></li>
+      <li data-id="c7"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check for oil leaks around shaft seals and fittings</span></li>
+      <li data-id="c8"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify unloader valve operates correctly</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 2: Air Dryer (top-right) -->
+  <div class="quadrant" id="q-dryer">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Refrigerated air dryer -- cools compressed air to condense and remove moisture before distribution.</span>
+        <!-- SVG: Refrigerated dryer schematic -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- dryer housing -->
+          <rect x="10" y="6" width="44" height="46" rx="4" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+          <!-- heat exchanger coil -->
+          <path d="M18,16 L46,16 L46,22 L18,22 L18,28 L46,28 L46,34 L18,34 L18,40 L46,40" fill="none" stroke="#2196f3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- condensate droplets -->
+          <circle cx="26" cy="45" r="2" fill="#2196f3" opacity=".6"/>
+          <circle cx="34" cy="47" r="1.5" fill="#2196f3" opacity=".5"/>
+          <circle cx="40" cy="44" r="1.8" fill="#2196f3" opacity=".6"/>
+          <!-- inlet arrow (left) -->
+          <polygon points="4,19 10,16 10,22" fill="#e65100" opacity=".7"/>
+          <!-- outlet arrow (right) -->
+          <polygon points="60,19 54,16 54,22" fill="#388e3c" opacity=".7"/>
+          <!-- drain -->
+          <rect x="28" y="52" width="8" height="6" rx="1" fill="#b0bec5" stroke="#546e7a" stroke-width="1"/>
+          <line x1="32" y1="58" x2="32" y2="62" stroke="#2196f3" stroke-width="1.5"/>
+          <!-- temperature display -->
+          <rect x="20" y="8" width="24" height="6" rx="2" fill="#fff3e0" stroke="#e65100" stroke-width="1"/>
+          <text x="32" y="13" font-size="4.5" fill="#e65100" text-anchor="middle" font-weight="bold">38 F</text>
+        </svg>
+      </div>
+      <h2>Air Dryer</h2>
+    </div>
+    <ul class="checklist" data-group="dryer">
+      <li data-id="d1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify dryer is operating (check indicators and temperatures)</span></li>
+      <li data-id="d2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Record outlet dew point and compare to specification</span></li>
+      <li data-id="d3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check condensate drain operation</span></li>
+      <li data-id="d4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect refrigerant charge (refrigerated type) or desiccant condition (desiccant type)</span></li>
+      <li data-id="d5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Clean or replace pre-filter element</span></li>
+      <li data-id="d6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check differential pressure across dryer</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 3: Filters and Separators (middle-left) -->
+  <div class="quadrant" id="q-filters">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Coalescing filter -- removes oil aerosols and fine particulates from compressed air to protect downstream equipment.</span>
+        <!-- SVG: Coalescing filter element -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- filter housing -->
+          <rect x="16" y="4" width="32" height="50" rx="4" fill="#fff3e0" stroke="#e65100" stroke-width="2"/>
+          <!-- filter element (inner cylinder) -->
+          <rect x="22" y="10" width="20" height="38" rx="3" fill="#ffe0b2" stroke="#f57c00" stroke-width="1.5"/>
+          <!-- mesh pattern -->
+          <line x1="26" y1="14" x2="26" y2="44" stroke="#ffb74d" stroke-width=".8"/>
+          <line x1="32" y1="14" x2="32" y2="44" stroke="#ffb74d" stroke-width=".8"/>
+          <line x1="38" y1="14" x2="38" y2="44" stroke="#ffb74d" stroke-width=".8"/>
+          <line x1="24" y1="18" x2="40" y2="18" stroke="#ffb74d" stroke-width=".8"/>
+          <line x1="24" y1="24" x2="40" y2="24" stroke="#ffb74d" stroke-width=".8"/>
+          <line x1="24" y1="30" x2="40" y2="30" stroke="#ffb74d" stroke-width=".8"/>
+          <line x1="24" y1="36" x2="40" y2="36" stroke="#ffb74d" stroke-width=".8"/>
+          <line x1="24" y1="42" x2="40" y2="42" stroke="#ffb74d" stroke-width=".8"/>
+          <!-- inlet arrow (top) -->
+          <polygon points="28,1 36,1 32,4" fill="#e65100" opacity=".7"/>
+          <!-- outlet arrow (bottom) -->
+          <polygon points="28,57 36,57 32,54" fill="#388e3c" opacity=".7"/>
+          <!-- drain bowl -->
+          <path d="M20,54 Q20,62 32,62 Q44,62 44,54" fill="#e0e0e0" stroke="#757575" stroke-width="1.5"/>
+          <!-- condensate droplets in bowl -->
+          <circle cx="28" cy="58" r="1.5" fill="#2196f3" opacity=".5"/>
+          <circle cx="36" cy="59" r="1.2" fill="#2196f3" opacity=".5"/>
+          <!-- dP gauge -->
+          <circle cx="52" cy="28" r="6" fill="#fff8e1" stroke="#f57c00" stroke-width="1"/>
+          <line x1="52" y1="28" x2="50" y2="25" stroke="#e74c3c" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="52" cy="28" r="1" fill="#333"/>
+        </svg>
+      </div>
+      <h2>Filters and Separators</h2>
+    </div>
+    <ul class="checklist" data-group="filters">
+      <li data-id="f1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check differential pressure across all filters</span></li>
+      <li data-id="f2" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Replace elements when dP exceeds manufacturer limit</span></li>
+      <li data-id="f3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify automatic drain traps are discharging condensate</span></li>
+      <li data-id="f4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect filter housings for corrosion or cracks</span></li>
+      <li data-id="f5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check activated carbon filter replacement schedule</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 4: Distribution Piping (middle-right) -->
+  <div class="quadrant" id="q-piping">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Distribution piping with drop leg -- delivers compressed air from the header to points of use with moisture separation.</span>
+        <!-- SVG: Pipe section with drop leg -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- main header pipe (horizontal) -->
+          <rect x="4" y="12" width="56" height="10" rx="2" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
+          <!-- pipe inner -->
+          <rect x="8" y="15" width="48" height="4" rx="1" fill="#eceff1"/>
+          <!-- drop leg (vertical pipe going up from header) -->
+          <rect x="36" y="2" width="8" height="12" rx="1" fill="#b0bec5" stroke="#546e7a" stroke-width="1.5"/>
+          <!-- takeoff tee at top of drop leg -->
+          <rect x="32" y="0" width="16" height="5" rx="2" fill="#90a4ae" stroke="#546e7a" stroke-width="1"/>
+          <!-- outlet valve -->
+          <circle cx="48" cy="3" r="3" fill="#fff3e0" stroke="#e65100" stroke-width="1"/>
+          <!-- moisture leg (vertical pipe going down) -->
+          <rect x="36" y="22" width="8" height="26" rx="1" fill="#b0bec5" stroke="#546e7a" stroke-width="1.5"/>
+          <!-- drain valve at bottom -->
+          <rect x="34" y="48" width="12" height="6" rx="2" fill="#e74c3c" stroke="#c0392b" stroke-width="1"/>
+          <!-- condensate droplets -->
+          <circle cx="40" cy="38" r="1.5" fill="#2196f3" opacity=".5"/>
+          <circle cx="40" cy="43" r="1.2" fill="#2196f3" opacity=".5"/>
+          <!-- flow arrow in header -->
+          <polygon points="14,17 22,14 22,20" fill="#546e7a" opacity=".6"/>
+          <!-- pipe supports -->
+          <line x1="12" y1="22" x2="12" y2="28" stroke="#78909c" stroke-width="2"/>
+          <line x1="8" y1="28" x2="16" y2="28" stroke="#78909c" stroke-width="2"/>
+          <line x1="52" y1="22" x2="52" y2="28" stroke="#78909c" stroke-width="2"/>
+          <line x1="48" y1="28" x2="56" y2="28" stroke="#78909c" stroke-width="2"/>
+          <!-- label -->
+          <text x="18" y="62" font-size="5" fill="#546e7a" text-anchor="middle">Header</text>
+          <text x="50" y="62" font-size="5" fill="#e65100" text-anchor="middle">Drain</text>
+        </svg>
+      </div>
+      <h2>Distribution Piping</h2>
+    </div>
+    <ul class="checklist" data-group="piping">
+      <li data-id="p1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Walk the air line listening and looking for leaks</span></li>
+      <li data-id="p2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check pipe supports and hangers for damage or sagging</span></li>
+      <li data-id="p3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify drop legs connect to top of header</span></li>
+      <li data-id="p4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Drain moisture legs at all low points</span></li>
+      <li data-id="p5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect quick-connect fittings for wear and leaks</span></li>
+      <li data-id="p6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check pressure at farthest point of use and compare to compressor discharge</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 5: Receiver Tank (bottom, full width) -->
+  <div class="quadrant full-width" id="q-receiver">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Vertical air receiver -- stores compressed air to dampen pulsation and provide reserve capacity during peak demand.</span>
+        <!-- SVG: Vertical air receiver tank -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- tank body -->
+          <rect x="18" y="8" width="28" height="42" rx="10" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+          <!-- tank inner highlight -->
+          <rect x="24" y="14" width="6" height="30" rx="3" fill="#c8e6c9" opacity=".5"/>
+          <!-- pressure gauge (top) -->
+          <circle cx="32" cy="4" r="5" fill="#fff3e0" stroke="#e65100" stroke-width="1.2"/>
+          <line x1="32" y1="4" x2="30" y2="2" stroke="#e74c3c" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="32" cy="4" r="1" fill="#333"/>
+          <!-- safety relief valve -->
+          <rect x="46" y="12" width="10" height="8" rx="2" fill="#e74c3c" stroke="#c0392b" stroke-width="1.2"/>
+          <polygon points="56,16 60,14 60,18" fill="#c0392b" opacity=".7"/>
+          <text x="51" y="18" font-size="3.5" fill="#fff" text-anchor="middle">PRV</text>
+          <!-- inlet pipe -->
+          <rect x="4" y="18" width="14" height="6" rx="1" fill="#b0bec5" stroke="#546e7a" stroke-width="1"/>
+          <polygon points="6,21 10,18 10,24" fill="#546e7a" opacity=".6"/>
+          <!-- outlet pipe (top) -->
+          <rect x="32" y="6" width="6" height="4" rx="1" fill="#b0bec5" stroke="#546e7a" stroke-width="1"/>
+          <!-- drain valve (bottom) -->
+          <rect x="28" y="50" width="8" height="6" rx="1" fill="#b0bec5" stroke="#546e7a" stroke-width="1.2"/>
+          <line x1="32" y1="56" x2="32" y2="62" stroke="#2196f3" stroke-width="2"/>
+          <!-- condensate drops -->
+          <circle cx="30" cy="60" r="1.2" fill="#2196f3" opacity=".5"/>
+          <circle cx="34" cy="61" r="1" fill="#2196f3" opacity=".5"/>
+          <!-- legs/supports -->
+          <line x1="22" y1="50" x2="18" y2="58" stroke="#546e7a" stroke-width="2" stroke-linecap="round"/>
+          <line x1="42" y1="50" x2="46" y2="58" stroke="#546e7a" stroke-width="2" stroke-linecap="round"/>
+          <line x1="16" y1="58" x2="20" y2="58" stroke="#546e7a" stroke-width="2"/>
+          <line x1="44" y1="58" x2="48" y2="58" stroke="#546e7a" stroke-width="2"/>
+        </svg>
+      </div>
+      <h2>Receiver Tank</h2>
+    </div>
+    <ul class="checklist" data-group="receiver">
+      <li data-id="t1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Drain condensate from tank bottom</span></li>
+      <li data-id="t2" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check safety relief valve (pull ring to verify it opens and reseats)</span></li>
+      <li data-id="t3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify pressure gauge reads accurately</span></li>
+      <li data-id="t4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect tank exterior for corrosion or damage</span></li>
+      <li data-id="t5" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Confirm tank has current inspection certification</span></li>
+    </ul>
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+(function(){
+  // --- state ---
+  var items = document.querySelectorAll('.checklist li');
+  var total = items.length;
+  var fillBar = document.getElementById('progressFill');
+  var progressText = document.getElementById('progressText');
+  var resetBtn = document.getElementById('resetBtn');
+  var printBtn = document.getElementById('printBtn');
+
+  function updateProgress(){
+    var checked = document.querySelectorAll('.checklist li.checked').length;
+    var pct = Math.round((checked / total) * 100);
+    fillBar.style.width = pct + '%';
+    progressText.textContent = pct + '%';
+  }
+
+  items.forEach(function(li){
+    li.addEventListener('click', function(){
+      li.classList.toggle('checked');
+      updateProgress();
+    });
+  });
+
+  resetBtn.addEventListener('click', function(){
+    items.forEach(function(li){ li.classList.remove('checked'); });
+    updateProgress();
+  });
+
+  printBtn.addEventListener('click', function(){
+    window.print();
+  });
+
+  // initial
+  updateProgress();
+})();
+</script>
+</body>
+</html>

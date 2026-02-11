@@ -1,0 +1,9 @@
+{
+  "title": "Pneumatic Conveying Troubleshooting Diagnostic",
+  "chapter": 13,
+  "type": "microsim",
+  "bloom_level": "L4 Analyze",
+  "bloom_verbs": ["differentiate", "examine", "deconstruct"],
+  "technology": "p5.js",
+  "learning_objective": "Students will be able to examine symptoms of pneumatic conveying problems and differentiate between root causes."
+}

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vacuum Maintenance Checklist</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f4f8;color:#333;padding:12px;min-height:100vh}
+  h1{text-align:center;font-size:1.4rem;color:#1a3c5e;margin-bottom:4px}
+
+  /* ---- progress bar ---- */
+  .progress-wrapper{max-width:960px;margin:0 auto 10px;display:flex;align-items:center;gap:10px}
+  .progress-bar-bg{flex:1;height:22px;background:#d4dbe4;border-radius:11px;overflow:hidden;position:relative}
+  .progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#27ae60,#2ecc71);border-radius:11px;transition:width .4s ease}
+  .progress-text{font-weight:600;font-size:.85rem;min-width:48px;text-align:right;color:#1a3c5e}
+  .reset-btn{background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.8rem;font-weight:600;transition:background .2s}
+  .reset-btn:hover{background:#c0392b}
+
+  /* ---- grid ---- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:960px;margin:0 auto}
+
+  /* central illustration -- overlaid at center on wide screens */
+  .center-illustration{display:none}
+
+  /* ---- section card ---- */
+  .quadrant{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:8px;position:relative}
+  .quadrant-header{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .quadrant-header h2{font-size:1rem;color:#1a3c5e;margin:0}
+  .icon-wrap{width:56px;height:56px;flex-shrink:0;cursor:pointer;position:relative}
+  .icon-wrap svg{width:100%;height:100%}
+  .tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a3c5e;color:#fff;padding:6px 10px;border-radius:6px;font-size:.72rem;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s;z-index:10}
+  .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a3c5e}
+  .icon-wrap:hover .tooltip{opacity:1}
+
+  /* fifth card spans full width on wide screens */
+  .quadrant.full-width{grid-column:1 / -1}
+
+  /* ---- checklist ---- */
+  .checklist{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .checklist li{display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:5px 8px;border-radius:6px;transition:background .2s;font-size:.82rem;line-height:1.35;user-select:none}
+  .checklist li:hover{background:#eaf6ee}
+  .checklist li.critical{border-left:3px solid #e74c3c;padding-left:5px}
+  .check-box{width:20px;height:20px;flex-shrink:0;margin-top:1px;border:2px solid #aab;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:border-color .25s,background .25s}
+  .checklist li.checked .check-box{border-color:#27ae60;background:#27ae60}
+  .check-box svg{opacity:0;transition:opacity .25s}
+  .checklist li.checked .check-box svg{opacity:1}
+  .checklist li.checked .item-text{color:#555;text-decoration:line-through}
+  .item-text{flex:1;color:#333;transition:color .25s}
+
+  /* ---- responsive ---- */
+  @media(max-width:768px){
+    .grid{grid-template-columns:1fr}
+    .quadrant.full-width{grid-column:auto}
+    h1{font-size:1.15rem}
+  }
+
+  /* large-screen center illustration */
+  @media(min-width:769px){
+    .grid{position:relative}
+    .center-illustration{display:flex;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;pointer-events:none;width:140px;height:140px;background:#fff;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,.12);align-items:center;justify-content:center}
+    .center-illustration svg{width:110px;height:110px}
+  }
+</style>
+</head>
+<body>
+
+<h1>Vacuum Maintenance Checklist</h1>
+
+<!-- Progress Bar -->
+<div class="progress-wrapper">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <span class="progress-text" id="progressText">0%</span>
+  <button class="reset-btn" id="resetBtn">Reset Checklist</button>
+</div>
+
+<!-- Grid -->
+<div class="grid">
+
+  <!-- Central Vacuum Pump Illustration (visible on wide screens) -->
+  <div class="center-illustration">
+    <!-- Simplified rotary vane vacuum pump -->
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <!-- pump housing -->
+      <circle cx="60" cy="55" r="36" fill="#dce6f0" stroke="#1a3c5e" stroke-width="2"/>
+      <!-- offset rotor -->
+      <circle cx="54" cy="55" r="18" fill="#e8e8e8" stroke="#555" stroke-width="1.5"/>
+      <!-- vanes -->
+      <line x1="54" y1="37" x2="54" y2="30" stroke="#1a3c5e" stroke-width="3" stroke-linecap="round"/>
+      <line x1="72" y1="55" x2="80" y2="55" stroke="#1a3c5e" stroke-width="3" stroke-linecap="round"/>
+      <line x1="54" y1="73" x2="54" y2="80" stroke="#1a3c5e" stroke-width="3" stroke-linecap="round"/>
+      <line x1="36" y1="55" x2="28" y2="55" stroke="#1a3c5e" stroke-width="3" stroke-linecap="round"/>
+      <!-- center shaft -->
+      <circle cx="54" cy="55" r="4" fill="#1a3c5e"/>
+      <!-- inlet port (top) -->
+      <rect x="50" y="8" width="8" height="12" rx="2" fill="#a2c4d5" stroke="#2980b9" stroke-width="1.5"/>
+      <polygon points="50,10 58,10 54,5" fill="#2980b9" opacity=".6"/>
+      <!-- exhaust port (bottom) -->
+      <rect x="50" y="90" width="8" height="12" rx="2" fill="#d5a2a2" stroke="#c0392b" stroke-width="1.5"/>
+      <polygon points="50,100 58,100 54,105" fill="#c0392b" opacity=".6"/>
+      <!-- motor coupling (right) -->
+      <rect x="96" y="48" width="16" height="14" rx="3" fill="#b0bec5" stroke="#546e7a" stroke-width="1.5"/>
+      <line x1="96" y1="55" x2="88" y2="55" stroke="#546e7a" stroke-width="2"/>
+      <!-- labels -->
+      <text x="54" y="118" font-size="7" fill="#1a3c5e" text-anchor="middle" font-weight="bold">Vacuum Pump</text>
+      <text x="54" y="3" font-size="5" fill="#2980b9" text-anchor="middle">Inlet</text>
+      <text x="104" y="44" font-size="5" fill="#546e7a" text-anchor="middle">Motor</text>
+    </svg>
+  </div>
+
+  <!-- Section 1: Seals and Connections (top-left) -->
+  <div class="quadrant" id="q-seals">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">O-ring seal -- prevents atmospheric air from entering the vacuum system at connection points.</span>
+        <!-- SVG: O-ring cross-section (circle with groove) -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- groove (channel) -->
+          <rect x="8" y="24" width="48" height="16" rx="8" fill="#e0e0e0" stroke="#757575" stroke-width="1.5"/>
+          <!-- O-ring cross-section -->
+          <circle cx="32" cy="32" r="10" fill="#ff8a65" stroke="#d84315" stroke-width="2"/>
+          <!-- inner highlight -->
+          <circle cx="29" cy="29" r="3" fill="#ffab91" opacity=".6"/>
+          <!-- flange surfaces (top and bottom) -->
+          <rect x="4" y="6" width="56" height="14" rx="2" fill="#cfd8dc" stroke="#78909c" stroke-width="1.5"/>
+          <rect x="4" y="44" width="56" height="14" rx="2" fill="#cfd8dc" stroke="#78909c" stroke-width="1.5"/>
+          <!-- bolt holes -->
+          <circle cx="12" cy="13" r="3" fill="#90a4ae" stroke="#546e7a" stroke-width="1"/>
+          <circle cx="52" cy="13" r="3" fill="#90a4ae" stroke="#546e7a" stroke-width="1"/>
+          <circle cx="12" cy="51" r="3" fill="#90a4ae" stroke="#546e7a" stroke-width="1"/>
+          <circle cx="52" cy="51" r="3" fill="#90a4ae" stroke="#546e7a" stroke-width="1"/>
+        </svg>
+      </div>
+      <h2>Seals and Connections</h2>
+    </div>
+    <ul class="checklist" data-group="seals">
+      <li data-id="s1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect all O-rings for cracks, hardening, and deformation</span></li>
+      <li data-id="s2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check flange bolt torque in star pattern</span></li>
+      <li data-id="s3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify vacuum grease on all elastomer seals</span></li>
+      <li data-id="s4" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Look for evidence of leaks (dust patterns, oil traces near joints)</span></li>
+      <li data-id="s5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Replace any suspect seals -- do not wait for failure</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 2: Vacuum Pump (top-right) -->
+  <div class="quadrant" id="q-pump">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Rotary vane pump -- the most common vacuum pump type in industrial applications.</span>
+        <!-- SVG: Rotary vane pump (circle with offset inner circle and vanes) -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- pump housing -->
+          <circle cx="32" cy="32" r="26" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+          <!-- offset rotor -->
+          <circle cx="28" cy="32" r="14" fill="#e8eaf6" stroke="#3949ab" stroke-width="1.5"/>
+          <!-- vanes -->
+          <line x1="28" y1="18" x2="28" y2="10" stroke="#1a3c5e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="42" y1="32" x2="50" y2="32" stroke="#1a3c5e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="28" y1="46" x2="28" y2="54" stroke="#1a3c5e" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="14" y1="32" x2="8" y2="32" stroke="#1a3c5e" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- center shaft -->
+          <circle cx="28" cy="32" r="3" fill="#1a3c5e"/>
+          <!-- rotation arrow -->
+          <path d="M42,16 A18,18 0 0,1 46,28" fill="none" stroke="#1565c0" stroke-width="1.2" stroke-linecap="round"/>
+          <polygon points="46,28 44,23 49,25" fill="#1565c0"/>
+        </svg>
+      </div>
+      <h2>Vacuum Pump</h2>
+    </div>
+    <ul class="checklist" data-group="pump">
+      <li data-id="p1" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check oil level and color (milky = moisture contamination)</span></li>
+      <li data-id="p2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Listen for unusual sounds (knocking, grinding, rattling)</span></li>
+      <li data-id="p3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Measure motor current and compare to baseline</span></li>
+      <li data-id="p4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Record vibration reading and compare to baseline</span></li>
+      <li data-id="p5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check exhaust filter/mist eliminator for clogging</span></li>
+      <li data-id="p6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Record ultimate vacuum achieved and compare to specification</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 3: Filters and Traps (middle-left) -->
+  <div class="quadrant" id="q-filters">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Inline filter -- removes particulates and moisture from the gas stream before it reaches the pump.</span>
+        <!-- SVG: Inline filter element (cylinder with mesh) -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- cylinder body -->
+          <rect x="14" y="10" width="36" height="44" rx="4" fill="#e8f5e9" stroke="#388e3c" stroke-width="2"/>
+          <!-- mesh lines (horizontal) -->
+          <line x1="18" y1="18" x2="46" y2="18" stroke="#66bb6a" stroke-width="1"/>
+          <line x1="18" y1="24" x2="46" y2="24" stroke="#66bb6a" stroke-width="1"/>
+          <line x1="18" y1="30" x2="46" y2="30" stroke="#66bb6a" stroke-width="1"/>
+          <line x1="18" y1="36" x2="46" y2="36" stroke="#66bb6a" stroke-width="1"/>
+          <line x1="18" y1="42" x2="46" y2="42" stroke="#66bb6a" stroke-width="1"/>
+          <line x1="18" y1="48" x2="46" y2="48" stroke="#66bb6a" stroke-width="1"/>
+          <!-- mesh lines (vertical) -->
+          <line x1="22" y1="14" x2="22" y2="50" stroke="#66bb6a" stroke-width="1"/>
+          <line x1="30" y1="14" x2="30" y2="50" stroke="#66bb6a" stroke-width="1"/>
+          <line x1="38" y1="14" x2="38" y2="50" stroke="#66bb6a" stroke-width="1"/>
+          <line x1="46" y1="14" x2="46" y2="50" stroke="#66bb6a" stroke-width="1"/>
+          <!-- end caps -->
+          <rect x="10" y="6" width="44" height="6" rx="2" fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5"/>
+          <rect x="10" y="52" width="44" height="6" rx="2" fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5"/>
+          <!-- flow arrows -->
+          <polygon points="32,1 28,6 36,6" fill="#388e3c" opacity=".7"/>
+          <polygon points="32,63 28,58 36,58" fill="#388e3c" opacity=".7"/>
+        </svg>
+      </div>
+      <h2>Filters and Traps</h2>
+    </div>
+    <ul class="checklist" data-group="filters">
+      <li data-id="f1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect inlet filter for debris and contamination</span></li>
+      <li data-id="f2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check differential pressure across inline filters</span></li>
+      <li data-id="f3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Drain and clean moisture traps and separators</span></li>
+      <li data-id="f4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Replace coalescing filter elements per schedule</span></li>
+      <li data-id="f5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify condensate drain valves operate properly</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 4: Gauges and Instruments (middle-right) -->
+  <div class="quadrant" id="q-gauges">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Vacuum gauge -- measures system pressure below atmospheric to verify proper operation.</span>
+        <!-- SVG: Vacuum gauge face (circle with needle) -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- gauge body -->
+          <circle cx="32" cy="30" r="26" fill="#fff3e0" stroke="#e65100" stroke-width="2"/>
+          <!-- inner ring -->
+          <circle cx="32" cy="30" r="22" fill="#fff8e1" stroke="#f57c00" stroke-width="1"/>
+          <!-- scale markings -->
+          <line x1="32" y1="10" x2="32" y2="14" stroke="#333" stroke-width="1.5"/>
+          <line x1="14" y1="30" x2="18" y2="30" stroke="#333" stroke-width="1.5"/>
+          <line x1="50" y1="30" x2="46" y2="30" stroke="#333" stroke-width="1.5"/>
+          <line x1="18" y1="16" x2="21" y2="19" stroke="#333" stroke-width="1"/>
+          <line x1="46" y1="16" x2="43" y2="19" stroke="#333" stroke-width="1"/>
+          <line x1="18" y1="44" x2="21" y2="41" stroke="#333" stroke-width="1"/>
+          <line x1="46" y1="44" x2="43" y2="41" stroke="#333" stroke-width="1"/>
+          <!-- needle -->
+          <line x1="32" y1="30" x2="20" y2="18" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"/>
+          <!-- center pivot -->
+          <circle cx="32" cy="30" r="3" fill="#333"/>
+          <!-- label -->
+          <text x="32" y="42" font-size="5" fill="#333" text-anchor="middle" font-weight="bold">inHg</text>
+          <!-- connection stub -->
+          <rect x="28" y="56" width="8" height="8" rx="2" fill="#b0bec5" stroke="#546e7a" stroke-width="1"/>
+        </svg>
+      </div>
+      <h2>Gauges and Instruments</h2>
+    </div>
+    <ul class="checklist" data-group="gauges">
+      <li data-id="g1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify gauge readings against a known reference</span></li>
+      <li data-id="g2" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check gauge connections for leaks</span></li>
+      <li data-id="g3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Calibrate process-critical gauges per schedule</span></li>
+      <li data-id="g4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Replace batteries in wireless sensors</span></li>
+      <li data-id="g5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify data transmission to monitoring system</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 5: Piping and Receivers (bottom, full width) -->
+  <div class="quadrant full-width" id="q-piping">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Vacuum piping -- distributes vacuum from the pump to process points throughout the facility.</span>
+        <!-- SVG: Pipe section with flange (rectangle with circles at ends) -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- pipe body -->
+          <rect x="12" y="22" width="40" height="20" rx="2" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
+          <!-- pipe inner -->
+          <rect x="16" y="26" width="32" height="12" rx="1" fill="#eceff1"/>
+          <!-- left flange -->
+          <rect x="4" y="16" width="10" height="32" rx="2" fill="#b0bec5" stroke="#546e7a" stroke-width="1.5"/>
+          <circle cx="9" cy="22" r="2.5" fill="#78909c" stroke="#455a64" stroke-width="1"/>
+          <circle cx="9" cy="42" r="2.5" fill="#78909c" stroke="#455a64" stroke-width="1"/>
+          <!-- right flange -->
+          <rect x="50" y="16" width="10" height="32" rx="2" fill="#b0bec5" stroke="#546e7a" stroke-width="1.5"/>
+          <circle cx="55" cy="22" r="2.5" fill="#78909c" stroke="#455a64" stroke-width="1"/>
+          <circle cx="55" cy="42" r="2.5" fill="#78909c" stroke="#455a64" stroke-width="1"/>
+          <!-- flow arrow -->
+          <polygon points="26,32 34,28 34,36" fill="#546e7a" opacity=".6"/>
+        </svg>
+      </div>
+      <h2>Piping and Receivers</h2>
+    </div>
+    <ul class="checklist" data-group="piping">
+      <li data-id="r1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Walk the vacuum line looking for damage, corrosion, or vibration wear</span></li>
+      <li data-id="r2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check pipe supports and hangers</span></li>
+      <li data-id="r3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Drain condensate from receiver tank</span></li>
+      <li data-id="r4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect receiver for internal corrosion (annual)</span></li>
+      <li data-id="r5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify check valve operation (should hold vacuum when pump stops)</span></li>
+    </ul>
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+(function(){
+  // --- state ---
+  var items = document.querySelectorAll('.checklist li');
+  var total = items.length;
+  var fillBar = document.getElementById('progressFill');
+  var progressText = document.getElementById('progressText');
+  var resetBtn = document.getElementById('resetBtn');
+
+  function updateProgress(){
+    var checked = document.querySelectorAll('.checklist li.checked').length;
+    var pct = Math.round((checked / total) * 100);
+    fillBar.style.width = pct + '%';
+    progressText.textContent = pct + '%';
+  }
+
+  items.forEach(function(li){
+    li.addEventListener('click', function(){
+      li.classList.toggle('checked');
+      updateProgress();
+    });
+  });
+
+  resetBtn.addEventListener('click', function(){
+    items.forEach(function(li){ li.classList.remove('checked'); });
+    updateProgress();
+  });
+
+  // initial
+  updateProgress();
+})();
+</script>
+</body>
+</html>

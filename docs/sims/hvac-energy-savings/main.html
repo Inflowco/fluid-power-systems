@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HVAC Energy Savings Comparison</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f0f4f8;
+    color: #1a202c;
+    padding: 20px;
+    line-height: 1.5;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+
+  /* Controls Panel */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: center;
+    align-items: flex-end;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+  }
+
+  .control-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .control-group input[type="range"] {
+    width: 100%;
+    accent-color: #3b82f6;
+    cursor: pointer;
+  }
+
+  .control-group select {
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .control-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e40af;
+    margin-top: 2px;
+    text-align: center;
+  }
+
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: auto;
+  }
+
+  .toggle-group label {
+    margin-bottom: 0;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.25s;
+    border-radius: 24px;
+  }
+
+  .toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.25s;
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background-color: #3b82f6;
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+  }
+
+  /* Comparison Cards */
+  .cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-top: 4px solid;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+
+  .card.manual { border-top-color: #ef4444; }
+  .card.programmable { border-top-color: #f59e0b; }
+  .card.ai-optimized { border-top-color: #10b981; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .card.manual .card-icon { background: #fef2f2; color: #dc2626; }
+  .card.programmable .card-icon { background: #fffbeb; color: #d97706; }
+  .card.ai-optimized .card-icon { background: #ecfdf5; color: #059669; }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .card-subtitle {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+
+  .data-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .data-row:last-child {
+    border-bottom: none;
+  }
+
+  .data-label {
+    font-size: 0.82rem;
+    color: #64748b;
+  }
+
+  .data-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .savings-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .card.manual .savings-badge { background: #fef2f2; color: #991b1b; }
+  .card.programmable .savings-badge { background: #fffbeb; color: #92400e; }
+  .card.ai-optimized .savings-badge { background: #ecfdf5; color: #065f46; }
+
+  .co2-row {
+    display: none;
+  }
+
+  .co2-row.visible {
+    display: flex;
+  }
+
+  /* Chart Section */
+  .chart-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  .chart-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  .chart-subtitle {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    margin-bottom: 14px;
+  }
+
+  .chart-wrapper {
+    position: relative;
+    width: 100%;
+    max-height: 340px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .cards-container {
+      grid-template-columns: 1fr;
+    }
+
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .control-group {
+      min-width: unset;
+    }
+
+    h1 { font-size: 1.3rem; }
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 10px; }
+    .card { padding: 14px; }
+    .chart-section { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>HVAC Energy Savings Comparison</h1>
+<p class="subtitle">Compare energy consumption across manual, programmable, and AI-optimized control strategies</p>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="control-group">
+    <label for="buildingSize">Building Size</label>
+    <input type="range" id="buildingSize" min="5000" max="50000" step="1000" value="10000">
+    <div class="control-value" id="buildingSizeValue">10,000 sq ft</div>
+  </div>
+  <div class="control-group">
+    <label for="elecRate">Electricity Rate</label>
+    <input type="range" id="elecRate" min="0.08" max="0.25" step="0.01" value="0.12">
+    <div class="control-value" id="elecRateValue">$0.12 / kWh</div>
+  </div>
+  <div class="control-group">
+    <label for="climateZone">Climate Zone</label>
+    <select id="climateZone">
+      <option value="hot-humid">Hot-Humid</option>
+      <option value="hot-dry">Hot-Dry</option>
+      <option value="mixed" selected>Mixed</option>
+      <option value="cold">Cold</option>
+    </select>
+  </div>
+  <div class="control-group toggle-group">
+    <label for="showCO2">Show CO2 Impact</label>
+    <div class="toggle-switch">
+      <input type="checkbox" id="showCO2">
+      <span class="toggle-slider"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Comparison Cards -->
+<div class="cards-container">
+  <!-- Manual Control -->
+  <div class="card manual">
+    <div class="card-header">
+      <div class="card-icon">&#9881;</div>
+      <div>
+        <div class="card-title">Manual Control</div>
+        <div class="card-subtitle">Constant temperature, no scheduling</div>
+      </div>
+    </div>
+    <div class="data-rows">
+      <div class="data-row">
+        <span class="data-label">Annual Cooling</span>
+        <span class="data-value" id="manual-cooling">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Annual Heating</span>
+        <span class="data-value" id="manual-heating">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Total HVAC Energy</span>
+        <span class="data-value" id="manual-total">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Energy Cost</span>
+        <span class="data-value" id="manual-cost">—</span>
+      </div>
+      <div class="data-row co2-row" id="manual-co2-row">
+        <span class="data-label">CO2 Emissions</span>
+        <span class="data-value" id="manual-co2">—</span>
+      </div>
+    </div>
+    <div class="savings-badge" id="manual-savings">Baseline</div>
+  </div>
+
+  <!-- Programmable Thermostat -->
+  <div class="card programmable">
+    <div class="card-header">
+      <div class="card-icon">&#128339;</div>
+      <div>
+        <div class="card-title">Programmable Thermostat</div>
+        <div class="card-subtitle">Time-based schedule with setbacks</div>
+      </div>
+    </div>
+    <div class="data-rows">
+      <div class="data-row">
+        <span class="data-label">Annual Cooling</span>
+        <span class="data-value" id="prog-cooling">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Annual Heating</span>
+        <span class="data-value" id="prog-heating">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Total HVAC Energy</span>
+        <span class="data-value" id="prog-total">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Energy Cost</span>
+        <span class="data-value" id="prog-cost">—</span>
+      </div>
+      <div class="data-row co2-row" id="prog-co2-row">
+        <span class="data-label">CO2 Emissions</span>
+        <span class="data-value" id="prog-co2">—</span>
+      </div>
+    </div>
+    <div class="savings-badge" id="prog-savings">—</div>
+  </div>
+
+  <!-- AI-Optimized Control -->
+  <div class="card ai-optimized">
+    <div class="card-header">
+      <div class="card-icon">&#129302;</div>
+      <div>
+        <div class="card-title">AI-Optimized Control</div>
+        <div class="card-subtitle">Learning, prediction &amp; load balancing</div>
+      </div>
+    </div>
+    <div class="data-rows">
+      <div class="data-row">
+        <span class="data-label">Annual Cooling</span>
+        <span class="data-value" id="ai-cooling">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Annual Heating</span>
+        <span class="data-value" id="ai-heating">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Total HVAC Energy</span>
+        <span class="data-value" id="ai-total">—</span>
+      </div>
+      <div class="data-row">
+        <span class="data-label">Energy Cost</span>
+        <span class="data-value" id="ai-cost">—</span>
+      </div>
+      <div class="data-row co2-row" id="ai-co2-row">
+        <span class="data-label">CO2 Emissions</span>
+        <span class="data-value" id="ai-co2">—</span>
+      </div>
+    </div>
+    <div class="savings-badge" id="ai-savings">—</div>
+  </div>
+</div>
+
+<!-- Chart -->
+<div class="chart-section">
+  <div class="chart-title">Energy Breakdown &amp; Cumulative Savings</div>
+  <div class="chart-subtitle">Grouped bars show energy by category; line shows cumulative dollar savings over 12 months</div>
+  <div class="chart-wrapper">
+    <canvas id="mainChart"></canvas>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ── Base data for 10,000 sq ft, Mixed climate ──
+  // Climate zone multipliers: [coolingFraction, heatingFraction, fanFraction]
+  // Fractions of total energy that go to cooling, heating, and fan
+  const climateProfiles = {
+    'hot-humid':  { cooling: 0.58, heating: 0.18, fan: 0.24 },
+    'hot-dry':    { cooling: 0.55, heating: 0.20, fan: 0.25 },
+    'mixed':      { cooling: 0.42, heating: 0.35, fan: 0.23 },
+    'cold':       { cooling: 0.22, heating: 0.55, fan: 0.23 }
+  };
+
+  // Base totals at 10,000 sq ft (kWh)
+  const baseSqFt = 10000;
+  const baseManualTotal   = 120000;
+  const baseProgTotal     = 100000;
+  const baseAITotal       = 82000;
+
+  const co2PerKwh = 0.9; // lbs CO2 per kWh
+
+  // DOM references
+  const buildingSizeSlider = document.getElementById('buildingSize');
+  const elecRateSlider     = document.getElementById('elecRate');
+  const climateSelect      = document.getElementById('climateZone');
+  const co2Toggle          = document.getElementById('showCO2');
+  const buildingSizeVal    = document.getElementById('buildingSizeValue');
+  const elecRateVal        = document.getElementById('elecRateValue');
+
+  // Chart instance
+  let chart = null;
+
+  function formatNumber(n) {
+    return Math.round(n).toLocaleString('en-US');
+  }
+
+  function formatCurrency(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function formatLbs(n) {
+    return formatNumber(n) + ' lbs';
+  }
+
+  function compute() {
+    const sqft = parseFloat(buildingSizeSlider.value);
+    const rate = parseFloat(elecRateSlider.value);
+    const zone = climateSelect.value;
+    const showCO2 = co2Toggle.checked;
+    const profile = climateProfiles[zone];
+
+    const scale = sqft / baseSqFt;
+
+    // Totals
+    const manualTotal = baseManualTotal * scale;
+    const progTotal   = baseProgTotal * scale;
+    const aiTotal     = baseAITotal * scale;
+
+    // Split into categories
+    const manual = {
+      cooling: manualTotal * profile.cooling,
+      heating: manualTotal * profile.heating,
+      fan:     manualTotal * profile.fan,
+      total:   manualTotal
+    };
+    const prog = {
+      cooling: progTotal * profile.cooling,
+      heating: progTotal * profile.heating,
+      fan:     progTotal * profile.fan,
+      total:   progTotal
+    };
+    const ai = {
+      cooling: aiTotal * profile.cooling,
+      heating: aiTotal * profile.heating,
+      fan:     aiTotal * profile.fan,
+      total:   aiTotal
+    };
+
+    // Costs
+    manual.cost = manual.total * rate;
+    prog.cost   = prog.total * rate;
+    ai.cost     = ai.total * rate;
+
+    // CO2
+    manual.co2 = manual.total * co2PerKwh;
+    prog.co2   = prog.total * co2PerKwh;
+    ai.co2     = ai.total * co2PerKwh;
+
+    // Savings %
+    prog.savingsPct = ((manual.total - prog.total) / manual.total * 100).toFixed(0);
+    ai.savingsPct   = ((manual.total - ai.total) / manual.total * 100).toFixed(0);
+
+    // Update display values
+    buildingSizeVal.textContent = formatNumber(sqft) + ' sq ft';
+    elecRateVal.textContent = '$' + rate.toFixed(2) + ' / kWh';
+
+    // Update cards
+    document.getElementById('manual-cooling').textContent = formatNumber(manual.cooling) + ' kWh';
+    document.getElementById('manual-heating').textContent = formatNumber(manual.heating) + ' kWh';
+    document.getElementById('manual-total').textContent   = formatNumber(manual.total) + ' kWh';
+    document.getElementById('manual-cost').textContent    = formatCurrency(manual.cost);
+    document.getElementById('manual-co2').textContent     = formatLbs(manual.co2);
+    document.getElementById('manual-savings').textContent = 'Baseline';
+
+    document.getElementById('prog-cooling').textContent = formatNumber(prog.cooling) + ' kWh';
+    document.getElementById('prog-heating').textContent = formatNumber(prog.heating) + ' kWh';
+    document.getElementById('prog-total').textContent   = formatNumber(prog.total) + ' kWh';
+    document.getElementById('prog-cost').textContent    = formatCurrency(prog.cost);
+    document.getElementById('prog-co2').textContent     = formatLbs(prog.co2);
+    document.getElementById('prog-savings').textContent = prog.savingsPct + '% savings vs. manual';
+
+    document.getElementById('ai-cooling').textContent = formatNumber(ai.cooling) + ' kWh';
+    document.getElementById('ai-heating').textContent = formatNumber(ai.heating) + ' kWh';
+    document.getElementById('ai-total').textContent   = formatNumber(ai.total) + ' kWh';
+    document.getElementById('ai-cost').textContent    = formatCurrency(ai.cost);
+    document.getElementById('ai-co2').textContent     = formatLbs(ai.co2);
+    document.getElementById('ai-savings').textContent = ai.savingsPct + '% savings vs. manual';
+
+    // CO2 visibility
+    const co2Rows = document.querySelectorAll('.co2-row');
+    co2Rows.forEach(function(row) {
+      row.classList.toggle('visible', showCO2);
+    });
+
+    // Build chart
+    updateChart(manual, prog, ai, rate);
+  }
+
+  function updateChart(manual, prog, ai, rate) {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+
+    // Monthly cumulative savings (linear distribution across 12 months)
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const progMonthlySavings = (manual.cost - prog.cost) / 12;
+    const aiMonthlySavings   = (manual.cost - ai.cost) / 12;
+    const progCumulative = months.map(function(_, i) { return progMonthlySavings * (i + 1); });
+    const aiCumulative   = months.map(function(_, i) { return aiMonthlySavings * (i + 1); });
+
+    const barData = {
+      labels: months,
+      datasets: [
+        // Grouped bars: cooling for each strategy
+        {
+          label: 'Manual - Cooling',
+          data: months.map(function() { return Math.round(manual.cooling / 12); }),
+          backgroundColor: 'rgba(239, 68, 68, 0.75)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 1,
+          stack: 'manual',
+          order: 2
+        },
+        {
+          label: 'Manual - Heating',
+          data: months.map(function() { return Math.round(manual.heating / 12); }),
+          backgroundColor: 'rgba(239, 68, 68, 0.45)',
+          borderColor: 'rgba(239, 68, 68, 0.8)',
+          borderWidth: 1,
+          stack: 'manual',
+          order: 2
+        },
+        {
+          label: 'Manual - Fan',
+          data: months.map(function() { return Math.round(manual.fan / 12); }),
+          backgroundColor: 'rgba(239, 68, 68, 0.22)',
+          borderColor: 'rgba(239, 68, 68, 0.5)',
+          borderWidth: 1,
+          stack: 'manual',
+          order: 2
+        },
+        {
+          label: 'Programmable - Cooling',
+          data: months.map(function() { return Math.round(prog.cooling / 12); }),
+          backgroundColor: 'rgba(245, 158, 11, 0.75)',
+          borderColor: 'rgba(245, 158, 11, 1)',
+          borderWidth: 1,
+          stack: 'prog',
+          order: 2
+        },
+        {
+          label: 'Programmable - Heating',
+          data: months.map(function() { return Math.round(prog.heating / 12); }),
+          backgroundColor: 'rgba(245, 158, 11, 0.45)',
+          borderColor: 'rgba(245, 158, 11, 0.8)',
+          borderWidth: 1,
+          stack: 'prog',
+          order: 2
+        },
+        {
+          label: 'Programmable - Fan',
+          data: months.map(function() { return Math.round(prog.fan / 12); }),
+          backgroundColor: 'rgba(245, 158, 11, 0.22)',
+          borderColor: 'rgba(245, 158, 11, 0.5)',
+          borderWidth: 1,
+          stack: 'prog',
+          order: 2
+        },
+        {
+          label: 'AI-Optimized - Cooling',
+          data: months.map(function() { return Math.round(ai.cooling / 12); }),
+          backgroundColor: 'rgba(16, 185, 129, 0.75)',
+          borderColor: 'rgba(16, 185, 129, 1)',
+          borderWidth: 1,
+          stack: 'ai',
+          order: 2
+        },
+        {
+          label: 'AI-Optimized - Heating',
+          data: months.map(function() { return Math.round(ai.heating / 12); }),
+          backgroundColor: 'rgba(16, 185, 129, 0.45)',
+          borderColor: 'rgba(16, 185, 129, 0.8)',
+          borderWidth: 1,
+          stack: 'ai',
+          order: 2
+        },
+        {
+          label: 'AI-Optimized - Fan',
+          data: months.map(function() { return Math.round(ai.fan / 12); }),
+          backgroundColor: 'rgba(16, 185, 129, 0.22)',
+          borderColor: 'rgba(16, 185, 129, 0.5)',
+          borderWidth: 1,
+          stack: 'ai',
+          order: 2
+        },
+        // Line overlays: cumulative savings
+        {
+          label: 'Programmable Cumulative Savings ($)',
+          data: progCumulative,
+          type: 'line',
+          borderColor: '#d97706',
+          backgroundColor: 'rgba(217, 119, 6, 0.1)',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          pointBackgroundColor: '#d97706',
+          fill: false,
+          yAxisID: 'y1',
+          order: 1
+        },
+        {
+          label: 'AI-Optimized Cumulative Savings ($)',
+          data: aiCumulative,
+          type: 'line',
+          borderColor: '#059669',
+          backgroundColor: 'rgba(5, 150, 105, 0.1)',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          pointBackgroundColor: '#059669',
+          fill: false,
+          yAxisID: 'y1',
+          order: 1
+        }
+      ]
+    };
+
+    const maxEnergy = Math.ceil((manual.total / 12) / 1000) * 1000 + 1000;
+    const maxSavings = Math.ceil(aiCumulative[11] / 500) * 500 + 500;
+
+    if (chart) {
+      chart.data = barData;
+      chart.options.scales.y.max = maxEnergy;
+      chart.options.scales.y1.max = maxSavings;
+      chart.update();
+    } else {
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: barData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 12,
+                font: { size: 11 },
+                filter: function(item) {
+                  // Show simplified legend
+                  var show = [
+                    'Manual - Cooling', 'Manual - Heating', 'Manual - Fan',
+                    'Programmable Cumulative Savings ($)',
+                    'AI-Optimized Cumulative Savings ($)'
+                  ];
+                  return show.indexOf(item.text) !== -1 ||
+                         item.text.indexOf('Programmable - Cooling') !== -1 ||
+                         item.text.indexOf('AI-Optimized - Cooling') !== -1;
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  var label = context.dataset.label || '';
+                  if (context.dataset.yAxisID === 'y1') {
+                    return label + ': $' + Math.round(context.parsed.y).toLocaleString();
+                  }
+                  return label + ': ' + Math.round(context.parsed.y).toLocaleString() + ' kWh';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 11 } }
+            },
+            y: {
+              position: 'left',
+              beginAtZero: true,
+              max: maxEnergy,
+              stacked: true,
+              title: {
+                display: true,
+                text: 'Monthly Energy (kWh)',
+                font: { size: 12, weight: 'bold' }
+              },
+              ticks: {
+                callback: function(v) { return v.toLocaleString(); },
+                font: { size: 11 }
+              }
+            },
+            y1: {
+              position: 'right',
+              beginAtZero: true,
+              max: maxSavings,
+              grid: { drawOnChartArea: false },
+              title: {
+                display: true,
+                text: 'Cumulative Savings ($)',
+                font: { size: 12, weight: 'bold' }
+              },
+              ticks: {
+                callback: function(v) { return '$' + v.toLocaleString(); },
+                font: { size: 11 }
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Event listeners
+  buildingSizeSlider.addEventListener('input', compute);
+  elecRateSlider.addEventListener('input', compute);
+  climateSelect.addEventListener('change', compute);
+  co2Toggle.addEventListener('change', compute);
+
+  // Handle window resize
+  window.addEventListener('resize', function() {
+    if (chart) {
+      chart.resize();
+    }
+  });
+
+  // Initial render
+  compute();
+})();
+</script>
+
+</body>
+</html>

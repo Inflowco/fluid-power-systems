@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dust Collector Types Comparison</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #p5-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .control-button {
+            padding: 10px 16px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .control-button:hover {
+            background-color: #1976D2;
+        }
+        .control-button.active {
+            background-color: #4CAF50;
+        }
+        .info-text {
+            font-size: 14px;
+            color: #666;
+            margin-left: 10px;
+        }
+        .comparison-table {
+            margin-top: 30px;
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .comparison-table th {
+            background-color: #1976D2;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+        .comparison-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        .comparison-table .type-col {
+            font-weight: 600;
+            color: #1976D2;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button id="toggleAnimationBtn" class="control-button active">Stop Animation</button>
+        <span class="info-text">Click any panel to expand | Hover over components for details</span>
+    </div>
+    <div id="p5-container"></div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <table class="comparison-table">
+        <thead>
+            <tr>
+                <th>Collector Type</th>
+                <th>Efficiency</th>
+                <th>Particle Size</th>
+                <th>Footprint</th>
+                <th>Combustible Dust Safe</th>
+                <th>Best For</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="type-col">Cyclone Separator</td>
+                <td>90-95%</td>
+                <td>5-50 μm</td>
+                <td>Compact</td>
+                <td>⚠ Moderate Risk</td>
+                <td>Medium volume, general use</td>
+            </tr>
+            <tr>
+                <td class="type-col">Baghouse</td>
+                <td>99-99.9%</td>
+                <td>0.3 μm</td>
+                <td>Large</td>
+                <td>✓ Very Safe</td>
+                <td>High-efficiency, fine dust</td>
+            </tr>
+            <tr>
+                <td class="type-col">Cartridge Filter</td>
+                <td>99-99.8%</td>
+                <td>0.3-1 μm</td>
+                <td>Medium</td>
+                <td>✓ Very Safe</td>
+                <td>Compact installations, semi-dry</td>
+            </tr>
+            <tr>
+                <td class="type-col">Wet Scrubber</td>
+                <td>95-99%</td>
+                <td>0.1-10 μm</td>
+                <td>Medium</td>
+                <td>✓ Very Safe</td>
+                <td>Hazardous/combustible dust</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        let animationActive = true;
+        let expandedPanel = null;
+        const tooltip = document.getElementById('tooltip');
+        const toggleBtn = document.getElementById('toggleAnimationBtn');
+
+        toggleBtn.addEventListener('click', () => {
+            animationActive = !animationActive;
+            toggleBtn.textContent = animationActive ? 'Stop Animation' : 'Start Animation';
+            toggleBtn.classList.toggle('active', animationActive);
+        });
+
+        let sketch = (p) => {
+            let panelWidth, panelHeight;
+            let panelMargin = 20;
+            let particles = [];
+            let collectorTypes = [
+                { name: 'Cyclone', type: 'cyclone' },
+                { name: 'Baghouse', type: 'baghouse' },
+                { name: 'Cartridge', type: 'cartridge' },
+                { name: 'Wet Scrubber', type: 'scrubber' }
+            ];
+
+            class Particle {
+                constructor(x, y, vx, vy, type) {
+                    this.x = x;
+                    this.y = y;
+                    this.vx = vx;
+                    this.vy = vy;
+                    this.type = type; // 'dust' or 'air'
+                    this.life = 255;
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.type === 'dust') {
+                        this.life -= 2;
+                    }
+                }
+
+                display() {
+                    p.fill(this.type === 'dust' ? color(139, 69, 19) : color(173, 216, 230));
+                    p.noStroke();
+                    p.circle(this.x, this.y, this.type === 'dust' ? 4 : 3);
+                }
+            }
+
+            function color(r, g, b) {
+                return p.color(r, g, b);
+            }
+
+            p.setup = function() {
+                let containerWidth = document.getElementById('p5-container').clientWidth - 40;
+                let containerHeight = 600;
+
+                let canvas = p.createCanvas(containerWidth, containerHeight);
+                canvas.parent('p5-container');
+
+                panelWidth = (containerWidth - panelMargin * 3) / 2;
+                panelHeight = (containerHeight - panelMargin * 3) / 2;
+
+                // Initialize some particles
+                initializeParticles();
+            };
+
+            function initializeParticles() {
+                particles = [];
+            }
+
+            function drawCyclone(x, y, w, h, expanded) {
+                p.push();
+
+                // Draw background
+                p.fill(245, 245, 245);
+                p.stroke(100);
+                p.strokeWeight(2);
+                p.rect(x, y, w, h);
+
+                let scale = expanded ? 1.5 : 1;
+                let centerX = x + w / 2;
+                let centerY = y + h / 2;
+
+                // Main cylinder
+                p.fill(220, 220, 220);
+                p.stroke(100);
+                p.strokeWeight(2);
+                let cylWidth = w * 0.4 * scale;
+                let cylHeight = h * 0.5 * scale;
+                p.rect(centerX - cylWidth / 2, centerY - cylHeight / 2, cylWidth, cylHeight);
+
+                // Conical bottom
+                p.fill(200, 200, 200);
+                p.stroke(100);
+                p.strokeWeight(2);
+                p.triangle(
+                    centerX - cylWidth / 2, centerY + cylHeight / 2,
+                    centerX + cylWidth / 2, centerY + cylHeight / 2,
+                    centerX, centerY + cylHeight / 2 + h * 0.25 * scale
+                );
+
+                // Hopper
+                p.fill(180, 180, 180);
+                p.stroke(100);
+                p.strokeWeight(2);
+                let hopperW = cylWidth * 0.4;
+                p.rect(centerX - hopperW / 2, centerY + cylHeight / 2 + h * 0.25 * scale, hopperW, h * 0.1 * scale);
+
+                // Tangential inlet (arrow)
+                p.stroke(200, 50, 50);
+                p.strokeWeight(3);
+                p.noFill();
+                p.arc(centerX - cylWidth / 2.5, centerY - cylHeight / 4, cylWidth * 0.3, cylHeight * 0.3, p.PI, p.PI + p.PI * 0.5);
+
+                // Inlet arrow
+                let inletX = centerX - cylWidth / 2;
+                let inletY = centerY - cylHeight / 3;
+                p.fill(200, 50, 50);
+                p.triangle(inletX - 15, inletY, inletX - 5, inletY - 8, inletX - 5, inletY + 8);
+
+                // Top exhaust (clean air outlet)
+                p.fill(173, 216, 230);
+                p.stroke(50, 150, 200);
+                p.strokeWeight(3);
+                let exhaustW = cylWidth * 0.2;
+                p.rect(centerX - exhaustW / 2, centerY - cylHeight / 2 - h * 0.08 * scale, exhaustW, h * 0.08 * scale);
+
+                // Vortex visualization
+                p.stroke(100, 150, 200);
+                p.strokeWeight(1);
+                p.noFill();
+                for (let i = 0; i < 3; i++) {
+                    p.arc(centerX, centerY, cylWidth * (0.8 - i * 0.2), cylHeight * (0.8 - i * 0.2), 0, p.TWO_PI);
+                }
+
+                // Animated particles (swirling motion)
+                if (animationActive) {
+                    let particleCount = 8;
+                    for (let i = 0; i < particleCount; i++) {
+                        let angle = p.frameCount * 0.05 + (i / particleCount) * p.TWO_PI;
+                        let radius = cylWidth * 0.15;
+                        let px = centerX + p.cos(angle) * radius;
+                        let py = centerY - cylHeight * 0.1 + p.sin(angle) * radius * 0.5;
+
+                        p.fill(139, 69, 19);
+                        p.noStroke();
+                        p.circle(px, py, 3);
+                    }
+                }
+
+                // Labels
+                p.fill(0);
+                p.textSize(12);
+                p.textAlign(p.CENTER);
+                p.text('Dirty Air', centerX - cylWidth / 2 - 30, centerY - cylHeight / 3);
+                p.text('Clean Air', centerX, centerY - cylHeight / 2 - 15);
+                p.text('Hopper', centerX, centerY + cylHeight / 2 + h * 0.3);
+
+                p.pop();
+            }
+
+            function drawBaghouse(x, y, w, h, expanded) {
+                p.push();
+
+                // Draw background
+                p.fill(245, 245, 245);
+                p.stroke(100);
+                p.strokeWeight(2);
+                p.rect(x, y, w, h);
+
+                let centerX = x + w / 2;
+                let centerY = y + h / 2;
+
+                // Rectangular housing
+                p.fill(220, 220, 220);
+                p.stroke(100);
+                p.strokeWeight(2);
+                let houseW = w * 0.5;
+                let houseH = h * 0.6;
+                p.rect(centerX - houseW / 2, centerY - houseH / 2, houseW, houseH);
+
+                // Draw 4 filter bags
+                p.stroke(100);
+                p.strokeWeight(2);
+                let bagWidth = houseW * 0.15;
+                let startX = centerX - houseW / 2 + houseW * 0.1;
+
+                for (let i = 0; i < 4; i++) {
+                    let bagX = startX + i * bagWidth * 1.2;
+                    p.fill(220, 240, 220);
+                    p.rect(bagX, centerY - houseH / 2 + 10, bagWidth, houseH - 20);
+
+                    // Dust cake on exterior
+                    p.stroke(139, 69, 19);
+                    p.strokeWeight(1);
+                    p.noFill();
+                    p.rect(bagX - 2, centerY - houseH / 2 + 10, bagWidth + 4, houseH - 20);
+                }
+
+                // Dirty air inlet (bottom)
+                p.fill(180, 180, 200);
+                p.stroke(100, 100, 150);
+                p.strokeWeight(3);
+                p.rect(centerX - houseW / 3, centerY + houseH / 2 - 20, houseW * 0.66, 20);
+
+                // Clean air outlet (top)
+                p.fill(173, 216, 230);
+                p.stroke(50, 150, 200);
+                p.strokeWeight(3);
+                p.rect(centerX - houseW / 3, centerY - houseH / 2 - 20, houseW * 0.66, 20);
+
+                // Animated particles
+                if (animationActive) {
+                    for (let i = 0; i < 4; i++) {
+                        let bagX = startX + i * bagWidth * 1.2;
+                        // Dirty air moving up around bags
+                        let dustY = centerY + houseH / 2 - 30 - (p.frameCount * 2) % (houseH - 10);
+                        p.fill(139, 69, 19);
+                        p.noStroke();
+                        p.circle(bagX + bagWidth / 2, dustY, 3);
+                    }
+                }
+
+                // Labels
+                p.fill(0);
+                p.textSize(12);
+                p.textAlign(p.CENTER);
+                p.text('Dirty Air', centerX, centerY + houseH / 2 + 10);
+                p.text('Clean Air', centerX, centerY - houseH / 2 - 10);
+
+                p.pop();
+            }
+
+            function drawCartridge(x, y, w, h, expanded) {
+                p.push();
+
+                // Draw background
+                p.fill(245, 245, 245);
+                p.stroke(100);
+                p.strokeWeight(2);
+                p.rect(x, y, w, h);
+
+                let centerX = x + w / 2;
+                let centerY = y + h / 2;
+
+                // Rectangular housing
+                p.fill(220, 220, 220);
+                p.stroke(100);
+                p.strokeWeight(2);
+                let houseW = w * 0.45;
+                let houseH = h * 0.55;
+                p.rect(centerX - houseW / 2, centerY - houseH / 2, houseW, houseH);
+
+                // Draw 3 pleated cartridges
+                p.stroke(100);
+                p.strokeWeight(2);
+                let cartWidth = houseW * 0.12;
+                let startX = centerX - houseW / 2 + houseW * 0.1;
+
+                for (let i = 0; i < 3; i++) {
+                    let cartX = startX + i * cartWidth * 1.3;
+
+                    // Cartridge body (pleated)
+                    p.fill(240, 240, 200);
+                    p.rect(cartX, centerY - houseH / 2 + 15, cartWidth, houseH - 30);
+
+                    // Pleats (vertical lines)
+                    p.stroke(180, 180, 100);
+                    p.strokeWeight(1);
+                    for (let j = 0; j < 6; j++) {
+                        let px = cartX + (cartWidth * j) / 5;
+                        p.line(px, centerY - houseH / 2 + 15, px, centerY + houseH / 2 - 15);
+                    }
+                }
+
+                // Center clean air core
+                p.fill(173, 216, 230);
+                p.stroke(50, 150, 200);
+                p.strokeWeight(2);
+                p.rect(centerX - houseW / 3, centerY - houseH / 2 - 20, houseW * 0.66, 20);
+
+                // Dirty air inlet (side)
+                p.fill(180, 180, 200);
+                p.stroke(100, 100, 150);
+                p.strokeWeight(3);
+                p.rect(centerX - houseW / 2 - 15, centerY - houseH / 3, 15, houseH * 0.33);
+
+                // Animated particles
+                if (animationActive) {
+                    for (let i = 0; i < 3; i++) {
+                        let cartX = startX + i * cartWidth * 1.3;
+                        let dustX = centerX - houseW / 2 + (p.frameCount * 1.5) % (houseW * 0.3);
+                        let dustY = centerY - houseH / 4 + p.random(-20, 20);
+                        p.fill(139, 69, 19);
+                        p.noStroke();
+                        p.circle(dustX, dustY, 3);
+                    }
+                }
+
+                // Labels
+                p.fill(0);
+                p.textSize(12);
+                p.textAlign(p.CENTER);
+                p.text('Dirty Air In', centerX - houseW / 2 - 35, centerY);
+                p.text('Clean Air', centerX, centerY - houseH / 2 - 10);
+
+                p.pop();
+            }
+
+            function drawScrubber(x, y, w, h, expanded) {
+                p.push();
+
+                // Draw background
+                p.fill(245, 245, 245);
+                p.stroke(100);
+                p.strokeWeight(2);
+                p.rect(x, y, w, h);
+
+                let centerX = x + w / 2;
+                let centerY = y + h / 2;
+
+                // Chamber body
+                p.fill(220, 220, 220);
+                p.stroke(100);
+                p.strokeWeight(2);
+                let chamberW = w * 0.5;
+                let chamberH = h * 0.6;
+                p.rect(centerX - chamberW / 2, centerY - chamberH / 2, chamberW, chamberH);
+
+                // Spray nozzles (top)
+                p.fill(180, 180, 200);
+                p.stroke(100);
+                p.strokeWeight(2);
+                let nozzleSpacing = chamberW / 4;
+                for (let i = 0; i < 3; i++) {
+                    let nX = centerX - chamberW / 3 + i * nozzleSpacing;
+                    // Nozzle
+                    p.circle(nX, centerY - chamberH / 2 - 10, 4);
+                    // Water spray lines
+                    p.stroke(100, 150, 220);
+                    p.strokeWeight(1);
+                    for (let j = 0; j < 3; j++) {
+                        let angle = -p.PI / 4 + (j * p.PI / 8);
+                        let px = nX + p.cos(angle) * 20;
+                        let py = centerY - chamberH / 2 - 10 + p.sin(angle) * 20;
+                        p.line(nX, centerY - chamberH / 2 - 10, px, py);
+                    }
+                }
+
+                // Water droplets animation
+                if (animationActive) {
+                    for (let i = 0; i < 12; i++) {
+                        let dropX = centerX - chamberW / 2 + p.random(chamberW);
+                        let dropY = centerY - chamberH / 3 + (p.frameCount * 2 + i * 30) % (chamberH / 2);
+                        p.fill(100, 150, 220, 150);
+                        p.noStroke();
+                        p.circle(dropX, dropY, 4);
+                    }
+                }
+
+                // Dust particles in water
+                if (animationActive) {
+                    for (let i = 0; i < 8; i++) {
+                        let dustX = centerX - chamberW / 2 + p.random(chamberW);
+                        let dustY = centerY + (p.frameCount * 1) % (chamberH / 3);
+                        p.fill(139, 69, 19, 150);
+                        p.noStroke();
+                        p.circle(dustX, dustY, 3);
+                    }
+                }
+
+                // Sump at bottom
+                p.fill(180, 180, 200);
+                p.stroke(100);
+                p.strokeWeight(2);
+                p.rect(centerX - chamberW / 2, centerY + chamberH / 2 - 15, chamberW, 15);
+
+                // Clean air outlet (top)
+                p.fill(173, 216, 230);
+                p.stroke(50, 150, 200);
+                p.strokeWeight(3);
+                p.rect(centerX - chamberW / 3, centerY - chamberH / 2 - 25, chamberW * 0.66, 20);
+
+                // Mist eliminator lines
+                p.stroke(150, 150, 200);
+                p.strokeWeight(1);
+                for (let i = 0; i < 4; i++) {
+                    p.line(centerX - chamberW / 3, centerY - chamberH / 2 + i * 5, centerX + chamberW / 3, centerY - chamberH / 2 + i * 5);
+                }
+
+                // Labels
+                p.fill(0);
+                p.textSize(12);
+                p.textAlign(p.CENTER);
+                p.text('Water Spray', centerX, centerY - chamberH / 2 - 40);
+                p.text('Clean Air', centerX, centerY - chamberH / 2 - 15);
+                p.text('Sump', centerX, centerY + chamberH / 2 + 10);
+
+                p.pop();
+            }
+
+            p.draw = function() {
+                p.background(255);
+
+                // Draw 2x2 grid
+                let positions = [
+                    { x: panelMargin, y: panelMargin, type: 'cyclone', label: 'Cyclone Separator' },
+                    { x: panelMargin + panelWidth + panelMargin, y: panelMargin, type: 'baghouse', label: 'Baghouse' },
+                    { x: panelMargin, y: panelMargin + panelHeight + panelMargin, type: 'cartridge', label: 'Cartridge Filter' },
+                    { x: panelMargin + panelWidth + panelMargin, y: panelMargin + panelHeight + panelMargin, type: 'scrubber', label: 'Wet Scrubber' }
+                ];
+
+                let index = 0;
+                for (let pos of positions) {
+                    let isExpanded = expandedPanel === index;
+
+                    // Panel outline
+                    p.stroke(200);
+                    p.strokeWeight(2);
+                    p.fill(isExpanded ? 240 : 255);
+                    p.rect(pos.x, pos.y, panelWidth, panelHeight);
+
+                    // Draw collector type
+                    if (pos.type === 'cyclone') {
+                        drawCyclone(pos.x, pos.y, panelWidth, panelHeight, isExpanded);
+                    } else if (pos.type === 'baghouse') {
+                        drawBaghouse(pos.x, pos.y, panelWidth, panelHeight, isExpanded);
+                    } else if (pos.type === 'cartridge') {
+                        drawCartridge(pos.x, pos.y, panelWidth, panelHeight, isExpanded);
+                    } else if (pos.type === 'scrubber') {
+                        drawScrubber(pos.x, pos.y, panelWidth, panelHeight, isExpanded);
+                    }
+
+                    // Panel label
+                    p.fill(0);
+                    p.textSize(14);
+                    p.textAlign(p.CENTER);
+                    p.textStyle(p.BOLD);
+                    p.text(pos.label, pos.x + panelWidth / 2, pos.y + panelHeight - 15);
+
+                    index++;
+                }
+
+                // Title at top
+                p.fill(0);
+                p.textSize(18);
+                p.textAlign(p.CENTER);
+                p.textStyle(p.BOLD);
+                p.text('Dust Collector Types Comparison', p.width / 2, 25);
+            };
+
+            p.mousePressed = function() {
+                let positions = [
+                    { x: panelMargin, y: panelMargin, index: 0 },
+                    { x: panelMargin + panelWidth + panelMargin, y: panelMargin, index: 1 },
+                    { x: panelMargin, y: panelMargin + panelHeight + panelMargin, index: 2 },
+                    { x: panelMargin + panelWidth + panelMargin, y: panelMargin + panelHeight + panelMargin, index: 3 }
+                ];
+
+                for (let pos of positions) {
+                    if (p.mouseX > pos.x && p.mouseX < pos.x + panelWidth &&
+                        p.mouseY > pos.y && p.mouseY < pos.y + panelHeight) {
+                        expandedPanel = expandedPanel === pos.index ? null : pos.index;
+                        return false;
+                    }
+                }
+            };
+
+            p.windowResized = function() {
+                if (document.getElementById('p5-container')) {
+                    let containerWidth = document.getElementById('p5-container').clientWidth - 40;
+                    if (containerWidth > 0) {
+                        panelWidth = (containerWidth - panelMargin * 3) / 2;
+                        panelHeight = (panelWidth) * 0.8;
+                        p.resizeCanvas(containerWidth, panelHeight * 2 + panelMargin * 3);
+                    }
+                }
+            };
+        };
+
+        new p5(sketch);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="schema" content="https://dmccreary.github.io/intelligent-textbooks/ns/microsim/v1">
+    <title>Compressed Air System Optimizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+        main { display: flex; justify-content: center; }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a5276;
+            font-size: 24px;
+            margin: 8px 0 4px 0;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .layout {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .panel {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        .left-panel {
+            flex: 1 1 480px;
+            min-width: 340px;
+        }
+        .right-panel {
+            flex: 1 1 340px;
+            min-width: 300px;
+        }
+        .bottom-panel {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .panel-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 4px;
+        }
+
+        /* Schematic canvas */
+        #schematic-container canvas {
+            display: block;
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        /* Energy flow bars */
+        .energy-flow { margin-top: 8px; }
+        .flow-bar-container { margin: 4px 0; }
+        .flow-bar-label {
+            font-size: 11px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+        }
+        .flow-bar-track {
+            height: 16px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 2px;
+            position: relative;
+        }
+        .flow-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .flow-bar-fill.animated::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Dashboard metrics */
+        .savings-banner {
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+            color: white;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 10px;
+            transition: background 0.5s ease;
+        }
+        .savings-banner.active {
+            background: linear-gradient(135deg, #1e8449, #27ae60);
+        }
+        .savings-pct {
+            font-size: 36px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+        .savings-label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        .savings-dollar {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .metric-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-label {
+            font-size: 10px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 3px 0;
+            transition: color 0.3s;
+        }
+        .metric-unit {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        .metric-baseline {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+        .metric-comparison {
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            margin-top: 6px;
+            position: relative;
+        }
+        .metric-comparison-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .metric-comparison-baseline {
+            position: absolute;
+            top: -2px;
+            height: 10px;
+            width: 2px;
+            background: #333;
+            border-radius: 1px;
+        }
+
+        /* CO2 bar */
+        .co2-section { margin-top: 10px; }
+        .co2-label {
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .co2-bar-track {
+            height: 22px;
+            background: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        .co2-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #c0392b);
+            border-radius: 5px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .co2-baseline-marker {
+            position: absolute;
+            right: 0;
+            top: -2px;
+            height: 26px;
+            width: 2px;
+            background: #333;
+        }
+
+        /* Payback section */
+        .payback-section {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff8e1;
+            border-radius: 6px;
+            border: 1px solid #ffe082;
+        }
+        .payback-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #795548;
+            margin-bottom: 6px;
+        }
+        .payback-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .payback-row:last-child { border-bottom: none; }
+        .payback-row span:last-child { font-weight: bold; color: #2c3e50; }
+
+        /* Toggle switches */
+        .strategy-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .strategy-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .strategy-item:hover {
+            background: #f0f0f0;
+        }
+        .strategy-item.active {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #ccc;
+            border-radius: 26px;
+            transition: 0.3s;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .toggle-slider:before {
+            content: "";
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background: #28a745;
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+        .strategy-info { flex: 1; }
+        .strategy-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .strategy-detail {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        .strategy-meta {
+            text-align: right;
+            min-width: 110px;
+        }
+        .strategy-savings {
+            font-size: 12px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .strategy-cost {
+            font-size: 10px;
+            color: #888;
+        }
+        .strategy-payback {
+            font-size: 10px;
+            color: #795548;
+            font-weight: 600;
+        }
+
+        /* Controls row */
+        .controls-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .slider-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .slider-group label {
+            font-size: 12px;
+            color: #555;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .slider-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #3498db;
+        }
+        .slider-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .btn {
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-reset {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-reset:hover { background: #5a6268; transform: translateY(-1px); }
+        .btn-apply {
+            background: #28a745;
+            color: white;
+        }
+        .btn-apply:hover { background: #218838; transform: translateY(-1px); }
+
+        @media (max-width: 750px) {
+            .layout { flex-direction: column; }
+            .metric-grid { grid-template-columns: 1fr 1fr; }
+            h1 { font-size: 19px; }
+            .savings-pct { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+<main>
+<div class="container">
+    <h1>Compressed Air System Optimizer</h1>
+    <p class="subtitle">Toggle optimization strategies to see cumulative energy savings on a 100 HP rotary screw system</p>
+
+    <div class="layout">
+        <!-- LEFT PANEL: System Schematic -->
+        <div class="panel left-panel">
+            <div class="panel-title">System Schematic</div>
+            <div id="schematic-container"></div>
+            <div class="energy-flow">
+                <div class="panel-title" style="font-size:12px; margin-top:6px;">Energy Distribution</div>
+                <div class="flow-bar-container">
+                    <div class="flow-bar-label"><span>Useful Work</span><span id="flow-work-pct">25%</span></div>
+                    <div class="flow-bar-track"><div class="flow-bar-fill animated" id="flow-work" style="width:25%; background: linear-gradient(90deg, #27ae60, #2ecc71);"></div></div>
+                </div>
+                <div class="flow-bar-container">
+                    <div class="flow-bar-label"><span>Heat (Recoverable)</span><span id="flow-heat-pct">35%</span></div>
+                    <div class="flow-bar-track"><div class="flow-bar-fill animated" id="flow-heat" style="width:35%; background: linear-gradient(90deg, #e67e22, #f39c12);"></div></div>
+                </div>
+                <div class="flow-bar-container">
+                    <div class="flow-bar-label"><span>Leaks</span><span id="flow-leak-pct">30%</span></div>
+                    <div class="flow-bar-track"><div class="flow-bar-fill animated" id="flow-leak" style="width:30%; background: linear-gradient(90deg, #c0392b, #e74c3c);"></div></div>
+                </div>
+                <div class="flow-bar-container">
+                    <div class="flow-bar-label"><span>Waste (Blowoff / Inefficiency)</span><span id="flow-waste-pct">10%</span></div>
+                    <div class="flow-bar-track"><div class="flow-bar-fill animated" id="flow-waste" style="width:10%; background: linear-gradient(90deg, #8e44ad, #9b59b6);"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Energy Dashboard -->
+        <div class="panel right-panel">
+            <div class="panel-title">Energy Dashboard</div>
+
+            <div id="savings-banner" class="savings-banner">
+                <div class="savings-pct" id="savings-pct">0.0%</div>
+                <div class="savings-label">Cumulative Energy Savings</div>
+                <div class="savings-dollar" id="savings-dollar">$0 saved per year</div>
+            </div>
+
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Current Power</div>
+                    <div class="metric-value" id="metric-power" style="color:#e74c3c;">55.9</div>
+                    <div class="metric-unit">kW</div>
+                    <div class="metric-baseline">Baseline: 55.9 kW</div>
+                    <div class="metric-comparison">
+                        <div class="metric-comparison-fill" id="power-bar" style="width:100%; background:#e74c3c;"></div>
+                        <div class="metric-comparison-baseline" style="right:0;"></div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Annual Energy</div>
+                    <div class="metric-value" id="metric-energy" style="color:#2980b9;">279,720</div>
+                    <div class="metric-unit">kWh / yr</div>
+                    <div class="metric-baseline">Baseline: 279,720 kWh</div>
+                    <div class="metric-comparison">
+                        <div class="metric-comparison-fill" id="energy-bar" style="width:100%; background:#2980b9;"></div>
+                        <div class="metric-comparison-baseline" style="right:0;"></div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Annual Cost</div>
+                    <div class="metric-value" id="metric-cost" style="color:#8e44ad;">$33,566</div>
+                    <div class="metric-unit">per year</div>
+                    <div class="metric-baseline">Baseline: $33,566</div>
+                    <div class="metric-comparison">
+                        <div class="metric-comparison-fill" id="cost-bar" style="width:100%; background:#8e44ad;"></div>
+                        <div class="metric-comparison-baseline" style="right:0;"></div>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">CO2 Emissions</div>
+                    <div class="metric-value" id="metric-co2" style="color:#e67e22;">198.3</div>
+                    <div class="metric-unit">tonnes / yr</div>
+                    <div class="metric-baseline">Baseline: 198.3 tonnes</div>
+                    <div class="metric-comparison">
+                        <div class="metric-comparison-fill" id="co2-comp-bar" style="width:100%; background:#e67e22;"></div>
+                        <div class="metric-comparison-baseline" style="right:0;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="co2-section">
+                <div class="co2-label">
+                    <span>CO2 Emissions vs Baseline</span>
+                    <span id="co2-pct-label">100%</span>
+                </div>
+                <div class="co2-bar-track">
+                    <div class="co2-bar-fill" id="co2-bar" style="width:100%;">100%</div>
+                    <div class="co2-baseline-marker"></div>
+                </div>
+            </div>
+
+            <div class="payback-section" id="payback-section">
+                <div class="payback-title">Investment &amp; Payback</div>
+                <div class="payback-row"><span>Total Investment:</span><span id="payback-invest">$0</span></div>
+                <div class="payback-row"><span>Annual Savings:</span><span id="payback-savings">$0 / yr</span></div>
+                <div class="payback-row"><span>Simple Payback:</span><span id="payback-period">N/A</span></div>
+                <div class="payback-row"><span>Heat Recovered:</span><span id="payback-heat">0 BTU/yr</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM PANEL: Optimization Strategies & Controls -->
+    <div class="panel bottom-panel">
+        <div class="panel-title">Optimization Strategies</div>
+        <div class="strategy-list" id="strategy-list"></div>
+        <div class="controls-row">
+            <div class="slider-group">
+                <label>Operating Hours / Year: <span class="slider-value" id="hours-val">5,000</span></label>
+                <input type="range" id="hours-slider" min="2000" max="8760" value="5000" step="10">
+            </div>
+            <div class="slider-group">
+                <label>Electricity Rate: <span class="slider-value" id="rate-val">$0.12/kWh</span></label>
+                <input type="range" id="rate-slider" min="0.08" max="0.25" value="0.12" step="0.01">
+            </div>
+            <button class="btn btn-reset" id="btn-reset">Reset to Baseline</button>
+            <button class="btn btn-apply" id="btn-apply">Apply All</button>
+        </div>
+    </div>
+</div>
+</main>
+
+<script>
+// ===== COMPRESSED AIR SYSTEM OPTIMIZER =====
+// Baseline: 100 HP rotary screw compressor, 125 psi, 30% leaks,
+// load/unload control, 60% average load, no heat recovery
+
+// ----- Baseline Constants -----
+const BASELINE_HP = 100;
+const BASELINE_KW = 74.6; // 100 HP * 0.746 kW/HP
+const BASELINE_LOAD_FRACTION = 0.60;
+// With load/unload control at 60% load, power is ~75% of full load
+const BASELINE_POWER_FACTOR = 0.75;
+const BASELINE_POWER_KW = BASELINE_KW * BASELINE_POWER_FACTOR; // ~55.95 kW
+const BASELINE_LEAK_RATE = 0.30;
+const BASELINE_PSI = 125;
+const CO2_PER_KWH = 0.000709; // tonnes CO2 per kWh (US grid avg)
+
+// ----- Optimization Strategies -----
+const strategies = [
+    {
+        id: 'fix-leaks',
+        name: 'Fix Major Leaks',
+        detail: 'Reduce leak rate from 30% to 10% — ultrasonic detection & repair program',
+        savingsFraction: 0.20,
+        investmentCost: 3500,
+        active: false
+    },
+    {
+        id: 'reduce-pressure',
+        name: 'Reduce Pressure',
+        detail: 'Lower discharge from 125 psi to 100 psi — 1% savings per 2 psi drop',
+        savingsFraction: 0.125,
+        investmentCost: 500,
+        active: false
+    },
+    {
+        id: 'install-vfd',
+        name: 'Install VFD',
+        detail: 'Variable frequency drive replaces load/unload control at partial load',
+        savingsFraction: 0.15,
+        investmentCost: 12000,
+        active: false
+    },
+    {
+        id: 'recover-heat',
+        name: 'Recover Heat',
+        detail: 'Capture compressor waste heat for building/process heating (~90% recoverable)',
+        savingsFraction: 0.0, // no direct electrical kW savings
+        investmentCost: 5000,
+        heatRecoveryBTU: 280000, // BTU/hr recovered at baseline power
+        active: false
+    },
+    {
+        id: 'eliminate-blowoff',
+        name: 'Eliminate Blowoff Misuse',
+        detail: 'Remove 15 CFM of inappropriate compressed air use (open blows, cooling, etc.)',
+        savingsFraction: 0.10,
+        investmentCost: 1000,
+        active: false
+    }
+];
+
+// ----- State -----
+let operatingHours = 5000;
+let electricityRate = 0.12;
+
+// ----- Animated display values for smooth transitions -----
+let displayPower = BASELINE_POWER_KW;
+let displayEnergy = BASELINE_POWER_KW * 5000;
+let displayCost = BASELINE_POWER_KW * 5000 * 0.12;
+let displayCO2 = BASELINE_POWER_KW * 5000 * CO2_PER_KWH;
+let displaySavingsPct = 0;
+
+// ----- DOM References -----
+const hoursSlider = document.getElementById('hours-slider');
+const rateSlider = document.getElementById('rate-slider');
+const hoursVal = document.getElementById('hours-val');
+const rateVal = document.getElementById('rate-val');
+const btnReset = document.getElementById('btn-reset');
+const btnApply = document.getElementById('btn-apply');
+
+// ----- Build strategy toggles -----
+const strategyListEl = document.getElementById('strategy-list');
+strategies.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'strategy-item';
+    item.id = 'strategy-item-' + s.id;
+
+    const savingsText = s.savingsFraction > 0
+        ? '~' + Math.round(s.savingsFraction * 100) + '% savings'
+        : 'Heat recovery';
+
+    item.innerHTML = `
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggle-${s.id}" data-index="${i}">
+            <span class="toggle-slider"></span>
+        </label>
+        <div class="strategy-info">
+            <div class="strategy-name">${s.name}</div>
+            <div class="strategy-detail">${s.detail}</div>
+        </div>
+        <div class="strategy-meta">
+            <div class="strategy-savings" id="savings-${s.id}">${savingsText}</div>
+            <div class="strategy-cost">Invest: $${s.investmentCost.toLocaleString()}</div>
+            <div class="strategy-payback" id="payback-ind-${s.id}"></div>
+        </div>
+    `;
+    strategyListEl.appendChild(item);
+
+    const toggle = document.getElementById('toggle-' + s.id);
+    toggle.addEventListener('change', function() {
+        strategies[this.dataset.index].active = this.checked;
+        updateAll();
+    });
+
+    // Make the whole row clickable
+    item.addEventListener('click', function(e) {
+        if (e.target.closest('.toggle-switch')) return;
+        toggle.checked = !toggle.checked;
+        strategies[i].active = toggle.checked;
+        updateAll();
+    });
+});
+
+// ----- Slider Events -----
+hoursSlider.addEventListener('input', function() {
+    operatingHours = parseInt(this.value);
+    hoursVal.textContent = operatingHours.toLocaleString();
+    updateAll();
+});
+rateSlider.addEventListener('input', function() {
+    electricityRate = parseFloat(this.value);
+    rateVal.textContent = '$' + electricityRate.toFixed(2) + '/kWh';
+    updateAll();
+});
+
+// ----- Buttons -----
+btnReset.addEventListener('click', function() {
+    strategies.forEach((s) => {
+        s.active = false;
+        document.getElementById('toggle-' + s.id).checked = false;
+    });
+    hoursSlider.value = 5000;
+    rateSlider.value = 0.12;
+    operatingHours = 5000;
+    electricityRate = 0.12;
+    hoursVal.textContent = '5,000';
+    rateVal.textContent = '$0.12/kWh';
+    updateAll();
+});
+btnApply.addEventListener('click', function() {
+    strategies.forEach((s) => {
+        s.active = true;
+        document.getElementById('toggle-' + s.id).checked = true;
+    });
+    updateAll();
+});
+
+// ----- Calculation Engine -----
+function calculateMetrics() {
+    let powerKW = BASELINE_POWER_KW;
+    let totalInvestment = 0;
+    let heatRecovered = false;
+
+    // Apply multiplicative savings (compounding, order-independent)
+    let remainingFraction = 1.0;
+    strategies.forEach(s => {
+        if (s.active && s.savingsFraction > 0) {
+            remainingFraction *= (1 - s.savingsFraction);
+            totalInvestment += s.investmentCost;
+        }
+        if (s.active && s.id === 'recover-heat') {
+            heatRecovered = true;
+            totalInvestment += s.investmentCost;
+        }
+    });
+
+    powerKW = BASELINE_POWER_KW * remainingFraction;
+    let annualEnergy = powerKW * operatingHours;
+    let baselineAnnualEnergy = BASELINE_POWER_KW * operatingHours;
+    let annualCost = annualEnergy * electricityRate;
+    let baselineAnnualCost = baselineAnnualEnergy * electricityRate;
+    let co2 = annualEnergy * CO2_PER_KWH;
+    let baselineCO2 = baselineAnnualEnergy * CO2_PER_KWH;
+    let savingsPct = baselineAnnualEnergy > 0 ? ((1 - annualEnergy / baselineAnnualEnergy) * 100) : 0;
+    let annualSavings = baselineAnnualCost - annualCost;
+    let paybackYears = (totalInvestment > 0 && annualSavings > 0) ? totalInvestment / annualSavings : null;
+    // Heat recovery: BTU/year (heating season ~50% of hours)
+    let heatBTUYear = heatRecovered ? strategies[3].heatRecoveryBTU * operatingHours * 0.5 : 0;
+
+    // Energy distribution fractions (where the energy goes)
+    let leakFraction = strategies[0].active ? 0.10 : BASELINE_LEAK_RATE;
+    let wasteFraction = strategies[4].active ? 0.02 : 0.10;
+    let heatFraction = 0.35;
+    let workFraction = 1.0 - leakFraction - wasteFraction - heatFraction;
+    if (workFraction < 0.10) workFraction = 0.10;
+
+    return {
+        powerKW, annualEnergy, baselineAnnualEnergy,
+        annualCost, baselineAnnualCost,
+        co2, baselineCO2,
+        savingsPct, annualSavings, totalInvestment,
+        paybackYears, heatBTUYear, heatRecovered,
+        leakFraction, wasteFraction, heatFraction, workFraction,
+        remainingFraction
+    };
+}
+
+// ----- Update Dashboard -----
+function updateAll() {
+    const m = calculateMetrics();
+
+    // Update strategy item styling
+    strategies.forEach(s => {
+        const el = document.getElementById('strategy-item-' + s.id);
+        if (s.active) el.classList.add('active');
+        else el.classList.remove('active');
+    });
+
+    // Individual strategy payback periods
+    strategies.forEach(s => {
+        const pbEl = document.getElementById('payback-ind-' + s.id);
+        if (s.savingsFraction > 0) {
+            let individualSavings = BASELINE_POWER_KW * s.savingsFraction * operatingHours * electricityRate;
+            let pb = s.investmentCost / individualSavings;
+            pbEl.textContent = 'Payback: ' + pb.toFixed(1) + ' yr';
+        } else if (s.id === 'recover-heat') {
+            // Estimate heat value: natural gas equivalent at $1.00/therm
+            let thermsYear = (s.heatRecoveryBTU * operatingHours * 0.5) / 100000;
+            let heatValue = thermsYear * 1.0;
+            if (heatValue > 0) {
+                let pb = s.investmentCost / heatValue;
+                pbEl.textContent = 'Payback: ' + pb.toFixed(1) + ' yr';
+            } else {
+                pbEl.textContent = '';
+            }
+        }
+    });
+
+    // Savings banner
+    const banner = document.getElementById('savings-banner');
+    document.getElementById('savings-pct').textContent = m.savingsPct.toFixed(1) + '%';
+    document.getElementById('savings-dollar').textContent =
+        '$' + Math.round(m.annualSavings).toLocaleString() + ' saved per year';
+    if (m.savingsPct > 0) {
+        banner.classList.add('active');
+    } else {
+        banner.classList.remove('active');
+    }
+
+    // Metrics with animated numbers
+    animateValue('metric-power', displayPower, m.powerKW, 500, v => v.toFixed(1));
+    animateValue('metric-energy', displayEnergy, m.annualEnergy, 500, v => Math.round(v).toLocaleString());
+    animateValue('metric-cost', displayCost, m.annualCost, 500, v => '$' + Math.round(v).toLocaleString());
+    animateValue('metric-co2', displayCO2, m.co2, 500, v => v.toFixed(1));
+
+    displayPower = m.powerKW;
+    displayEnergy = m.annualEnergy;
+    displayCost = m.annualCost;
+    displayCO2 = m.co2;
+
+    // Color the metric values based on savings
+    const powerEl = document.getElementById('metric-power');
+    const energyEl = document.getElementById('metric-energy');
+    const costEl = document.getElementById('metric-cost');
+    const co2El = document.getElementById('metric-co2');
+    if (m.savingsPct > 0) {
+        powerEl.style.color = '#27ae60';
+        energyEl.style.color = '#27ae60';
+        costEl.style.color = '#27ae60';
+        co2El.style.color = '#27ae60';
+    } else {
+        powerEl.style.color = '#e74c3c';
+        energyEl.style.color = '#2980b9';
+        costEl.style.color = '#8e44ad';
+        co2El.style.color = '#e67e22';
+    }
+
+    // Before/after comparison bars
+    const pctOfBaseline = m.remainingFraction * 100;
+    document.getElementById('power-bar').style.width = pctOfBaseline + '%';
+    document.getElementById('energy-bar').style.width = pctOfBaseline + '%';
+    document.getElementById('cost-bar').style.width = pctOfBaseline + '%';
+    document.getElementById('co2-comp-bar').style.width = pctOfBaseline + '%';
+
+    // Comparison bar colors
+    const barColor = m.savingsPct > 0 ? '#27ae60' : '#e74c3c';
+    document.getElementById('power-bar').style.background = barColor;
+    document.getElementById('energy-bar').style.background = barColor;
+    document.getElementById('cost-bar').style.background = barColor;
+    document.getElementById('co2-comp-bar').style.background = barColor;
+
+    // CO2 bar
+    const co2Pct = m.baselineCO2 > 0 ? (m.co2 / m.baselineCO2 * 100) : 100;
+    document.getElementById('co2-bar').style.width = co2Pct + '%';
+    document.getElementById('co2-bar').textContent = co2Pct.toFixed(0) + '%';
+    document.getElementById('co2-pct-label').textContent = co2Pct.toFixed(0) + '% of baseline';
+
+    // Payback
+    document.getElementById('payback-invest').textContent = '$' + m.totalInvestment.toLocaleString();
+    document.getElementById('payback-savings').textContent = '$' + Math.round(m.annualSavings).toLocaleString() + ' / yr';
+    document.getElementById('payback-period').textContent = m.paybackYears !== null
+        ? m.paybackYears.toFixed(1) + ' years'
+        : 'N/A';
+    document.getElementById('payback-heat').textContent = m.heatBTUYear > 0
+        ? (m.heatBTUYear / 1e6).toFixed(1) + ' MMBTU/yr'
+        : '0 BTU/yr';
+
+    // Energy flow bars
+    setFlowBar('flow-work', 'flow-work-pct', m.workFraction);
+    setFlowBar('flow-heat', 'flow-heat-pct', m.heatFraction);
+    setFlowBar('flow-leak', 'flow-leak-pct', m.leakFraction);
+    setFlowBar('flow-waste', 'flow-waste-pct', m.wasteFraction);
+}
+
+function setFlowBar(barId, labelId, fraction) {
+    document.getElementById(barId).style.width = (fraction * 100) + '%';
+    document.getElementById(labelId).textContent = (fraction * 100).toFixed(0) + '%';
+}
+
+// Smooth number animation
+function animateValue(elementId, start, end, duration, formatter) {
+    const el = document.getElementById(elementId);
+    if (Math.abs(start - end) < 0.01) {
+        el.textContent = formatter(end);
+        return;
+    }
+    const startTime = performance.now();
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = start + (end - start) * eased;
+        el.textContent = formatter(current);
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    requestAnimationFrame(update);
+}
+
+// ----- P5.JS v2 ANIMATED SCHEMATIC -----
+let animPhase = 0;
+
+function schematicSketch(p) {
+    let cW, cH;
+    let isHovering = false;
+
+    p.setup = function() {
+        const container = document.getElementById('schematic-container');
+        cW = container.offsetWidth - 2;
+        cH = 280;
+        const canvas = p.createCanvas(cW, cH);
+        canvas.parent(container);
+        canvas.mouseOver(() => { isHovering = true; });
+        canvas.mouseOut(() => { isHovering = false; });
+        p.textFont('Arial');
+    };
+
+    p.draw = function() {
+        const container = document.getElementById('schematic-container');
+        let newW = container.offsetWidth - 2;
+        if (Math.abs(newW - cW) > 2) {
+            cW = newW;
+            p.resizeCanvas(cW, cH);
+        }
+
+        // Always animate but faster on hover
+        animPhase += isHovering ? 0.05 : 0.02;
+
+        const m = calculateMetrics();
+        p.background(240, 248, 255);
+
+        // Rounded border
+        p.stroke(200);
+        p.strokeWeight(1);
+        p.noFill();
+        p.rect(0, 0, cW - 1, cH - 1, 6);
+
+        // Layout positions proportional to width
+        const marginL = 15;
+        const compX = marginL + cW * 0.02;
+        const dryerX = marginL + cW * 0.24;
+        const receiverX = marginL + cW * 0.46;
+        const distX = marginL + cW * 0.68;
+        const compY = 85;
+        const boxW = cW * 0.17;
+        const boxH = 52;
+
+        // --- Draw main pipes ---
+        p.stroke(52, 152, 219);
+        p.strokeWeight(5);
+        const pipeY = compY + boxH / 2;
+        p.line(compX + boxW, pipeY, dryerX, pipeY);
+        p.line(dryerX + boxW, pipeY, receiverX, pipeY);
+        p.line(receiverX + boxW, pipeY, distX, pipeY);
+
+        // --- Animated air flow particles along the pipe ---
+        const numParticles = 10;
+        const pipeStartX = compX + boxW;
+        const pipeEndX = distX + boxW;
+        const pipeLen = pipeEndX - pipeStartX;
+        const speedMult = m.powerKW / BASELINE_POWER_KW;
+
+        p.noStroke();
+        for (let i = 0; i < numParticles; i++) {
+            let t = ((animPhase * speedMult * 0.4) + i / numParticles) % 1.0;
+            let px = pipeStartX + t * pipeLen;
+            let alpha = 150 + 100 * p.sin(animPhase * 3 + i * 0.8);
+            let sz = 6 + 2 * p.sin(animPhase * 2 + i);
+            p.fill(52, 152, 219, alpha);
+            p.ellipse(px, pipeY, sz, sz);
+        }
+
+        // --- Leak particles if leaks are high ---
+        if (!strategies[0].active) {
+            // Red leak particles near distribution
+            for (let i = 0; i < 6; i++) {
+                let lt = (animPhase * 0.6 + i * 0.17) % 1.0;
+                let lx = distX + boxW * 0.3 + p.sin(i * 2.1) * boxW * 0.3;
+                let ly = pipeY + lt * 40;
+                let la = 200 * (1 - lt);
+                p.fill(231, 76, 60, la);
+                p.ellipse(lx, ly, 5, 5);
+            }
+        }
+
+        // --- Heat recovery wavy lines ---
+        if (strategies[3].active) {
+            let heatX = compX + boxW / 2;
+            let heatBaseY = compY + boxH + 12;
+            p.stroke(243, 156, 18, 180);
+            p.strokeWeight(2);
+            for (let wi = 0; wi < 3; wi++) {
+                let ox = (wi - 1) * 12;
+                p.beginShape();
+                p.noFill();
+                for (let wy = 0; wy < 30; wy += 2) {
+                    let wx = heatX + ox + p.sin((wy + animPhase * 8) * 0.25) * 6;
+                    p.vertex(wx, heatBaseY + wy);
+                }
+                p.endShape();
+            }
+            p.noStroke();
+            p.fill(230, 126, 34);
+            p.textSize(10);
+            p.textAlign(p.CENTER, p.TOP);
+            p.text('Heat Recovery', heatX, heatBaseY + 34);
+            p.text('Active', heatX, heatBaseY + 46);
+        }
+
+        // --- Draw Components ---
+        drawComponent(p, compX, compY, boxW, boxH, 'Compressor');
+        drawComponent(p, dryerX, compY, boxW, boxH, 'Dryer');
+        drawComponent(p, receiverX, compY, boxW, boxH, 'Receiver');
+        drawComponent(p, distX, compY, boxW, boxH, 'Distribution');
+
+        // --- Operating parameters under each component ---
+        p.noStroke();
+        p.textSize(10);
+        p.textAlign(p.CENTER, p.TOP);
+
+        // Compressor params
+        let psi = strategies[1].active ? 100 : 125;
+        let controlType = strategies[2].active ? 'VFD Control' : 'Load/Unload';
+        p.fill(80);
+        p.text(BASELINE_HP + ' HP Rotary Screw', compX + boxW / 2, compY + boxH + 5);
+        p.fill(strategies[1].active ? p.color(39, 174, 96) : p.color(80));
+        p.text(psi + ' psi discharge', compX + boxW / 2, compY + boxH + 17);
+        p.fill(strategies[2].active ? p.color(39, 174, 96) : p.color(80));
+        p.text(controlType, compX + boxW / 2, compY + boxH + 29);
+
+        // Receiver params
+        p.fill(80);
+        p.text('60% avg load', receiverX + boxW / 2, compY + boxH + 5);
+
+        // Leak indicator
+        let leakPct = strategies[0].active ? 10 : 30;
+        p.fill(leakPct > 15 ? p.color(231, 76, 60) : p.color(39, 174, 96));
+        p.textStyle(p.BOLD);
+        p.text('Leaks: ' + leakPct + '%', distX + boxW / 2, compY + boxH + 5);
+        p.textStyle(p.NORMAL);
+
+        // Blowoff indicator
+        if (!strategies[4].active) {
+            p.fill(200, 60, 60);
+            p.text('Blowoff: 15 CFM', distX + boxW / 2, compY + boxH + 17);
+        } else {
+            p.fill(39, 174, 96);
+            p.text('Blowoff: Eliminated', distX + boxW / 2, compY + boxH + 17);
+        }
+
+        // --- Green check marks for active strategies ---
+        let arrowY = 24;
+        p.textSize(10);
+        if (strategies[0].active) {
+            drawGreenCheck(p, distX + boxW * 0.6, arrowY, 'Leaks Fixed');
+        }
+        if (strategies[1].active) {
+            drawGreenCheck(p, compX + boxW * 0.5, arrowY, 'Pressure Reduced');
+        }
+        if (strategies[2].active) {
+            drawGreenCheck(p, compX + boxW * 0.5, arrowY + 16, 'VFD Active');
+        }
+        if (strategies[4].active) {
+            drawGreenCheck(p, distX + boxW * 0.6, arrowY + 16, 'No Blowoff');
+        }
+
+        // --- Title ---
+        p.noStroke();
+        p.fill(44, 62, 80);
+        p.textSize(13);
+        p.textAlign(p.CENTER, p.TOP);
+        p.textStyle(p.BOLD);
+        p.text('100 HP Rotary Screw Compressed Air System', cW / 2, 5);
+        p.textStyle(p.NORMAL);
+
+        // --- Power readout bottom right ---
+        p.textAlign(p.RIGHT, p.BOTTOM);
+        p.fill(m.savingsPct > 0 ? p.color(39, 174, 96) : p.color(200, 60, 60));
+        p.textSize(16);
+        p.textStyle(p.BOLD);
+        p.text(m.powerKW.toFixed(1) + ' kW', cW - 12, cH - 8);
+        p.textStyle(p.NORMAL);
+        p.fill(120);
+        p.textSize(10);
+        p.text('Current Power Draw', cW - 12, cH - 26);
+
+        // --- Savings readout bottom left ---
+        if (m.savingsPct > 0) {
+            p.textAlign(p.LEFT, p.BOTTOM);
+            p.fill(39, 174, 96);
+            p.textSize(14);
+            p.textStyle(p.BOLD);
+            p.text(m.savingsPct.toFixed(1) + '% Savings', 12, cH - 8);
+            p.textStyle(p.NORMAL);
+            p.fill(120);
+            p.textSize(10);
+            p.text('vs. Baseline (' + BASELINE_POWER_KW.toFixed(1) + ' kW)', 12, cH - 24);
+        }
+    };
+
+    function drawComponent(p, x, y, w, h, label) {
+        // Shadow
+        p.noStroke();
+        p.fill(0, 0, 0, 15);
+        p.rect(x + 2, y + 2, w, h, 8);
+
+        // Box
+        p.fill(52, 152, 219, 30);
+        p.stroke(52, 152, 219);
+        p.strokeWeight(2);
+        p.rect(x, y, w, h, 8);
+
+        // Label
+        p.noStroke();
+        p.fill(44, 62, 80);
+        p.textSize(12);
+        p.textAlign(p.CENTER, p.CENTER);
+        p.textStyle(p.BOLD);
+        p.text(label, x + w / 2, y + h / 2);
+        p.textStyle(p.NORMAL);
+    }
+
+    function drawGreenCheck(p, x, y, label) {
+        p.fill(39, 174, 96);
+        p.noStroke();
+        p.textAlign(p.CENTER, p.CENTER);
+        p.textSize(10);
+        p.textStyle(p.BOLD);
+        p.text(label, x, y);
+        p.textStyle(p.NORMAL);
+
+        // Down arrow
+        p.stroke(39, 174, 96);
+        p.strokeWeight(1.5);
+        p.line(x, y + 7, x, y + 14);
+        p.line(x - 4, y + 11, x, y + 14);
+        p.line(x + 4, y + 11, x, y + 14);
+    }
+
+    p.windowResized = function() {
+        const container = document.getElementById('schematic-container');
+        if (container) {
+            cW = container.offsetWidth - 2;
+            p.resizeCanvas(cW, cH);
+        }
+    };
+}
+
+new p5(schematicSketch);
+
+// Initial calculation
+updateAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "title": "Dust Collection Airflow Monitor",
+  "chapter": 7,
+  "type": "microsim",
+  "bloom_level": "L4",
+  "bloom_verb": ["examine", "differentiate"],
+  "learning_objective": "Analyze sensor data to differentiate between normal operation and fault conditions in dust collection systems",
+  "technology": "p5.js"
+}

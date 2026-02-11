@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooling Energy Comparison</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f0f4f8;
+    color: #1a202c;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 4px;
+    padding-top: 8px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.92rem;
+    color: #64748b;
+    margin-bottom: 16px;
+  }
+
+  /* ── Controls Panel ── */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    align-items: flex-end;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 148px;
+  }
+
+  .control-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+  }
+
+  .control-group input[type="range"] {
+    width: 100%;
+    accent-color: #3b82f6;
+    cursor: pointer;
+  }
+
+  .control-group select {
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    background: #fff;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .control-value {
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #1e40af;
+    margin-top: 2px;
+    text-align: center;
+  }
+
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: auto;
+  }
+
+  .toggle-group label {
+    margin-bottom: 0;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.25s;
+    border-radius: 24px;
+  }
+
+  .toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.25s;
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background-color: #3b82f6;
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+  }
+
+  /* ── Section Headers ── */
+  .section-header {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  /* ── Two-Panel Layout ── */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .panel {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  /* ── Cooling Strategy Cards (left panel) ── */
+  .strategy-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .strat-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 12px;
+    border-left: 4px solid;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .strat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+
+  .strat-card.once-through { border-left-color: #ef4444; }
+  .strat-card.open-recirc  { border-left-color: #3b82f6; }
+  .strat-card.open-vfd     { border-left-color: #10b981; }
+  .strat-card.dry-hybrid   { border-left-color: #8b5cf6; }
+
+  .strat-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .strat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .strat-card.once-through .strat-icon { background: #ef4444; }
+  .strat-card.open-recirc  .strat-icon { background: #3b82f6; }
+  .strat-card.open-vfd     .strat-icon { background: #10b981; }
+  .strat-card.dry-hybrid   .strat-icon { background: #8b5cf6; }
+
+  .strat-card-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+  }
+
+  .strat-data-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .strat-data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .strat-data-row:last-child {
+    border-bottom: none;
+  }
+
+  .strat-data-label {
+    font-size: 0.71rem;
+    color: #64748b;
+  }
+
+  .strat-data-value {
+    font-size: 0.77rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .strat-data-value.energy-color  { color: #d97706; }
+  .strat-data-value.water-color   { color: #2563eb; }
+  .strat-data-value.savings-color { color: #059669; }
+  .strat-data-value.high-cost     { color: #dc2626; }
+
+  .co2-data { display: none; }
+  .co2-data.visible { display: flex; }
+
+  /* Climate suitability badges */
+  .climate-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+  }
+
+  .climate-badge {
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .climate-badge.hot-good     { background: #dcfce7; color: #166534; }
+  .climate-badge.hot-fair     { background: #fef9c3; color: #854d0e; }
+  .climate-badge.hot-poor     { background: #fee2e2; color: #991b1b; }
+  .climate-badge.temp-good    { background: #dcfce7; color: #166534; }
+  .climate-badge.temp-fair    { background: #fef9c3; color: #854d0e; }
+  .climate-badge.temp-poor    { background: #fee2e2; color: #991b1b; }
+  .climate-badge.cold-good    { background: #dcfce7; color: #166534; }
+  .climate-badge.cold-fair    { background: #fef9c3; color: #854d0e; }
+  .climate-badge.cold-poor    { background: #fee2e2; color: #991b1b; }
+
+  /* ── Optimization Cards (right panel) ── */
+  .opt-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .opt-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 12px;
+    border-top: 4px solid;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .opt-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+
+  .opt-card.baseline  { border-top-color: #94a3b8; }
+  .opt-card.vfd-pumps { border-top-color: #3b82f6; }
+  .opt-card.vfd-free  { border-top-color: #10b981; }
+  .opt-card.full-ai   { border-top-color: #8b5cf6; }
+
+  .opt-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    margin: 0 auto 8px;
+  }
+
+  .opt-card.baseline  .opt-card-icon { background: #f1f5f9; color: #64748b; }
+  .opt-card.vfd-pumps .opt-card-icon { background: #eff6ff; color: #2563eb; }
+  .opt-card.vfd-free  .opt-card-icon { background: #ecfdf5; color: #059669; }
+  .opt-card.full-ai   .opt-card-icon { background: #f5f3ff; color: #7c3aed; }
+
+  .opt-card-title {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .opt-data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .opt-data-row:last-child {
+    border-bottom: none;
+  }
+
+  .opt-data-label {
+    font-size: 0.71rem;
+    color: #64748b;
+    text-align: left;
+  }
+
+  .opt-data-value {
+    font-size: 0.77rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: right;
+  }
+
+  .savings-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    margin-top: 8px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .opt-card.baseline  .savings-badge { background: #f1f5f9; color: #475569; }
+  .opt-card.vfd-pumps .savings-badge { background: #eff6ff; color: #1e40af; }
+  .opt-card.vfd-free  .savings-badge { background: #ecfdf5; color: #065f46; }
+  .opt-card.full-ai   .savings-badge { background: #f5f3ff; color: #5b21b6; }
+
+  .payback-label {
+    font-size: 0.68rem;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  /* ── Chart Section ── */
+  .chart-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin-bottom: 18px;
+  }
+
+  .chart-title {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  .chart-subtitle {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+
+  .chart-wrapper {
+    position: relative;
+    width: 100%;
+    max-height: 420px;
+  }
+
+  .best-combo-section {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .best-combo-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  .best-combo-cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .best-combo-card {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .best-combo-card.hot  { border-left: 4px solid #ef4444; background: #fff5f5; }
+  .best-combo-card.temp { border-left: 4px solid #f59e0b; background: #fffbeb; }
+  .best-combo-card.cold { border-left: 4px solid #3b82f6; background: #eff6ff; }
+
+  .best-combo-zone {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 3px;
+  }
+
+  .best-combo-card.hot  .best-combo-zone { color: #dc2626; }
+  .best-combo-card.temp .best-combo-zone { color: #d97706; }
+  .best-combo-card.cold .best-combo-zone { color: #1e40af; }
+
+  .best-combo-rec {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 2px;
+  }
+
+  .best-combo-detail {
+    font-size: 0.72rem;
+    color: #64748b;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .panels {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .strategy-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .opt-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .control-group {
+      min-width: unset;
+    }
+
+    .best-combo-cards {
+      flex-direction: column;
+    }
+
+    h1 { font-size: 1.3rem; }
+    .container { padding: 8px; }
+    .panel { padding: 12px; }
+    .chart-section { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Cooling Energy Comparison</h1>
+<p class="subtitle">Interactive comparison of energy and water consumption across cooling strategies</p>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="control-group">
+    <label for="coolingLoad">Cooling Load</label>
+    <input type="range" id="coolingLoad" min="25" max="100" step="25" value="100">
+    <div class="control-value" id="coolingLoadValue">100%</div>
+  </div>
+  <div class="control-group">
+    <label for="elecRate">Electricity Rate</label>
+    <input type="range" id="elecRate" min="0.08" max="0.25" step="0.01" value="0.12">
+    <div class="control-value" id="elecRateValue">$0.12 / kWh</div>
+  </div>
+  <div class="control-group">
+    <label for="waterRate">Water Rate</label>
+    <input type="range" id="waterRate" min="2" max="15" step="0.5" value="5">
+    <div class="control-value" id="waterRateValue">$5.00 / 1,000 gal</div>
+  </div>
+  <div class="control-group">
+    <label for="wetBulb">Avg Wet-Bulb Temp</label>
+    <input type="range" id="wetBulb" min="50" max="80" step="1" value="65">
+    <div class="control-value" id="wetBulbValue">65&deg;F</div>
+  </div>
+  <div class="control-group">
+    <label for="systemSize">System Size</label>
+    <select id="systemSize">
+      <option value="100">100 tons</option>
+      <option value="500" selected>500 tons</option>
+      <option value="1000">1,000 tons</option>
+      <option value="5000">5,000 tons</option>
+    </select>
+  </div>
+  <div class="control-group toggle-group">
+    <label for="showCO2">Show CO2 Impact</label>
+    <div class="toggle-switch">
+      <input type="checkbox" id="showCO2">
+      <span class="toggle-slider"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Two-Panel Layout -->
+<div class="panels">
+  <!-- Left Panel: Cooling Strategy Comparison -->
+  <div class="panel">
+    <div class="section-header">Cooling Strategy Comparison</div>
+    <div class="strategy-cards">
+
+      <div class="strat-card once-through">
+        <div class="strat-card-header">
+          <div class="strat-icon">OT</div>
+          <div class="strat-card-title">Once-Through</div>
+        </div>
+        <div class="strat-data-rows">
+          <div class="strat-data-row">
+            <span class="strat-data-label">Energy</span>
+            <span class="strat-data-value energy-color" id="ot-energy">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Water</span>
+            <span class="strat-data-value water-color" id="ot-water">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Energy Cost</span>
+            <span class="strat-data-value energy-color" id="ot-ecost">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Water Cost</span>
+            <span class="strat-data-value water-color" id="ot-wcost">--</span>
+          </div>
+          <div class="strat-data-row co2-data" id="ot-co2-row">
+            <span class="strat-data-label">CO2 / Year</span>
+            <span class="strat-data-value" id="ot-co2">--</span>
+          </div>
+        </div>
+        <div class="climate-row">
+          <span class="climate-badge hot-fair">Hot: Fair</span>
+          <span class="climate-badge temp-fair">Temp: Fair</span>
+          <span class="climate-badge cold-good">Cold: Good</span>
+        </div>
+      </div>
+
+      <div class="strat-card open-recirc">
+        <div class="strat-card-header">
+          <div class="strat-icon">OR</div>
+          <div class="strat-card-title">Open Recirc (Std)</div>
+        </div>
+        <div class="strat-data-rows">
+          <div class="strat-data-row">
+            <span class="strat-data-label">Energy</span>
+            <span class="strat-data-value energy-color" id="or-energy">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Water</span>
+            <span class="strat-data-value water-color" id="or-water">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Energy Cost</span>
+            <span class="strat-data-value energy-color" id="or-ecost">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Water Cost</span>
+            <span class="strat-data-value water-color" id="or-wcost">--</span>
+          </div>
+          <div class="strat-data-row co2-data" id="or-co2-row">
+            <span class="strat-data-label">CO2 / Year</span>
+            <span class="strat-data-value" id="or-co2">--</span>
+          </div>
+        </div>
+        <div class="climate-row">
+          <span class="climate-badge hot-good">Hot: Good</span>
+          <span class="climate-badge temp-good">Temp: Good</span>
+          <span class="climate-badge cold-fair">Cold: Fair</span>
+        </div>
+      </div>
+
+      <div class="strat-card open-vfd">
+        <div class="strat-card-header">
+          <div class="strat-icon">VF</div>
+          <div class="strat-card-title">Open Recirc (VFD)</div>
+        </div>
+        <div class="strat-data-rows">
+          <div class="strat-data-row">
+            <span class="strat-data-label">Energy</span>
+            <span class="strat-data-value savings-color" id="vf-energy">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Water</span>
+            <span class="strat-data-value water-color" id="vf-water">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Energy Cost</span>
+            <span class="strat-data-value savings-color" id="vf-ecost">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Water Cost</span>
+            <span class="strat-data-value water-color" id="vf-wcost">--</span>
+          </div>
+          <div class="strat-data-row co2-data" id="vf-co2-row">
+            <span class="strat-data-label">CO2 / Year</span>
+            <span class="strat-data-value" id="vf-co2">--</span>
+          </div>
+        </div>
+        <div class="climate-row">
+          <span class="climate-badge hot-good">Hot: Good</span>
+          <span class="climate-badge temp-good">Temp: Good</span>
+          <span class="climate-badge cold-good">Cold: Good</span>
+        </div>
+      </div>
+
+      <div class="strat-card dry-hybrid">
+        <div class="strat-card-header">
+          <div class="strat-icon">DH</div>
+          <div class="strat-card-title">Dry / Hybrid</div>
+        </div>
+        <div class="strat-data-rows">
+          <div class="strat-data-row">
+            <span class="strat-data-label">Energy</span>
+            <span class="strat-data-value energy-color" id="dh-energy">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Water</span>
+            <span class="strat-data-value savings-color" id="dh-water">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Energy Cost</span>
+            <span class="strat-data-value energy-color" id="dh-ecost">--</span>
+          </div>
+          <div class="strat-data-row">
+            <span class="strat-data-label">Water Cost</span>
+            <span class="strat-data-value savings-color" id="dh-wcost">--</span>
+          </div>
+          <div class="strat-data-row co2-data" id="dh-co2-row">
+            <span class="strat-data-label">CO2 / Year</span>
+            <span class="strat-data-value" id="dh-co2">--</span>
+          </div>
+        </div>
+        <div class="climate-row">
+          <span class="climate-badge hot-poor">Hot: Poor</span>
+          <span class="climate-badge temp-fair">Temp: Fair</span>
+          <span class="climate-badge cold-good">Cold: Good</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Right Panel: Optimization Impact -->
+  <div class="panel">
+    <div class="section-header">Optimization Impact</div>
+    <p style="font-size:0.8rem; color:#64748b; margin-bottom:12px;">Based on Open Recirculating system</p>
+    <div class="opt-cards">
+
+      <div class="opt-card baseline">
+        <div class="opt-card-icon">&#9881;</div>
+        <div class="opt-card-title">Baseline</div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Energy</span>
+          <span class="opt-data-value" id="bl-energy">--</span>
+        </div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Water</span>
+          <span class="opt-data-value" id="bl-water">--</span>
+        </div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Total Cost</span>
+          <span class="opt-data-value" id="bl-total">--</span>
+        </div>
+        <div class="opt-data-row co2-data" id="bl-co2-row">
+          <span class="opt-data-label">CO2 / Year</span>
+          <span class="opt-data-value" id="bl-co2">--</span>
+        </div>
+        <div class="savings-badge" id="bl-savings">Baseline</div>
+        <div class="payback-label" id="bl-payback">--</div>
+      </div>
+
+      <div class="opt-card vfd-pumps">
+        <div class="opt-card-icon">&#9889;</div>
+        <div class="opt-card-title">VFD on Pumps</div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Energy</span>
+          <span class="opt-data-value" id="vp-energy">--</span>
+        </div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Water</span>
+          <span class="opt-data-value" id="vp-water">--</span>
+        </div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Total Cost</span>
+          <span class="opt-data-value" id="vp-total">--</span>
+        </div>
+        <div class="opt-data-row co2-data" id="vp-co2-row">
+          <span class="opt-data-label">CO2 / Year</span>
+          <span class="opt-data-value" id="vp-co2">--</span>
+        </div>
+        <div class="savings-badge" id="vp-savings">--</div>
+        <div class="payback-label" id="vp-payback">--</div>
+      </div>
+
+      <div class="opt-card vfd-free">
+        <div class="opt-card-icon">&#10052;</div>
+        <div class="opt-card-title">VFD Fans + Free Cooling</div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Energy</span>
+          <span class="opt-data-value" id="vfc-energy">--</span>
+        </div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Water</span>
+          <span class="opt-data-value" id="vfc-water">--</span>
+        </div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Total Cost</span>
+          <span class="opt-data-value" id="vfc-total">--</span>
+        </div>
+        <div class="opt-data-row co2-data" id="vfc-co2-row">
+          <span class="opt-data-label">CO2 / Year</span>
+          <span class="opt-data-value" id="vfc-co2">--</span>
+        </div>
+        <div class="savings-badge" id="vfc-savings">--</div>
+        <div class="payback-label" id="vfc-payback">--</div>
+      </div>
+
+      <div class="opt-card full-ai">
+        <div class="opt-card-icon">&#9733;</div>
+        <div class="opt-card-title">Full Optimization</div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Energy</span>
+          <span class="opt-data-value" id="ai-energy">--</span>
+        </div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Water</span>
+          <span class="opt-data-value" id="ai-water">--</span>
+        </div>
+        <div class="opt-data-row">
+          <span class="opt-data-label">Total Cost</span>
+          <span class="opt-data-value" id="ai-total">--</span>
+        </div>
+        <div class="opt-data-row co2-data" id="ai-co2-row">
+          <span class="opt-data-label">CO2 / Year</span>
+          <span class="opt-data-value" id="ai-co2">--</span>
+        </div>
+        <div class="savings-badge" id="ai-savings">--</div>
+        <div class="payback-label" id="ai-payback">--</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Panel: Combined Summary Chart -->
+<div class="chart-section">
+  <div class="chart-title">Cost Breakdown by Strategy and Optimization Level</div>
+  <div class="chart-subtitle">Stacked bars: pump energy, fan energy, chiller energy, water cost, chemical cost. Line: total annual operating cost.</div>
+  <div class="chart-wrapper">
+    <canvas id="mainChart"></canvas>
+  </div>
+  <div class="best-combo-section">
+    <div class="best-combo-title">Best Combination by Climate Zone</div>
+    <div class="best-combo-cards">
+      <div class="best-combo-card hot">
+        <div class="best-combo-zone">Hot Climate (75-80 F WB)</div>
+        <div class="best-combo-rec" id="best-hot-rec">--</div>
+        <div class="best-combo-detail" id="best-hot-detail">--</div>
+      </div>
+      <div class="best-combo-card temp">
+        <div class="best-combo-zone">Temperate Climate (60-68 F WB)</div>
+        <div class="best-combo-rec" id="best-temp-rec">--</div>
+        <div class="best-combo-detail" id="best-temp-detail">--</div>
+      </div>
+      <div class="best-combo-card cold">
+        <div class="best-combo-zone">Cold Climate (50-55 F WB)</div>
+        <div class="best-combo-rec" id="best-cold-rec">--</div>
+        <div class="best-combo-detail" id="best-cold-detail">--</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end container -->
+
+<script>
+(function() {
+  // ── Base engineering data for a 500-ton system at 100% load ──
+  // Reference conditions: $0.12/kWh, $5/1000 gal, 65 F wet-bulb
+  // Annual operating hours: 8,760
+
+  // Cooling strategy base data (annual, 500 tons, 100% load)
+  var strategies = {
+    ot: {
+      name: 'Once-Through',
+      baseEnergy: 350000,      // kWh - low energy (just pumps, no tower/chiller)
+      baseWater: 150000000,    // gallons - enormous water use
+      baseCO2: 175             // tons CO2
+    },
+    or: {
+      name: 'Open Recirc (Std)',
+      baseEnergy: 520000,      // kWh - pumps + tower fans + chiller
+      baseWater: 8000000,      // gallons - evaporation + blowdown
+      baseCO2: 260
+    },
+    vf: {
+      name: 'Open Recirc (VFD)',
+      baseEnergy: 380000,      // kWh - VFDs cut pump/fan energy significantly
+      baseWater: 7000000,      // gallons - slightly less from better control
+      baseCO2: 190
+    },
+    dh: {
+      name: 'Dry/Hybrid',
+      baseEnergy: 650000,      // kWh - higher fan energy for dry coolers
+      baseWater: 500000,       // gallons - minimal water (hybrid assist only)
+      baseCO2: 325
+    }
+  };
+
+  // Optimization levels (based on open recirculating system, 500 tons)
+  // Each level adds incremental optimization technologies
+  var optimizations = {
+    bl: {
+      name: 'Baseline',
+      pumpEnergy: 130000,
+      fanEnergy: 104000,
+      chillerEnergy: 286000,
+      baseWater: 8000000,
+      chemicalCost: 12000,
+      capitalCost: 0             // no additional capital
+    },
+    vp: {
+      name: 'VFD on Pumps',
+      pumpEnergy: 78000,         // ~40% pump savings with VFDs
+      fanEnergy: 104000,
+      chillerEnergy: 238000,     // slightly lower chiller load from better flow control
+      baseWater: 8000000,
+      chemicalCost: 12000,
+      capitalCost: 45000         // $ VFD installation cost (per 500 tons)
+    },
+    vfc: {
+      name: 'VFD Fans + Free Cooling',
+      pumpEnergy: 68000,
+      fanEnergy: 72000,          // VFD fans save ~30%
+      chillerEnergy: 200000,     // free cooling offsets chiller hours
+      baseWater: 6500000,
+      chemicalCost: 10000,
+      capitalCost: 120000        // VFDs + free cooling heat exchangers
+    },
+    ai: {
+      name: 'Full Optimization',
+      pumpEnergy: 55000,
+      fanEnergy: 58000,
+      chillerEnergy: 177000,     // AI optimizes setpoints, staging, schedules
+      baseWater: 5500000,        // better water treatment = higher cycles = less blowdown
+      chemicalCost: 8500,
+      capitalCost: 210000        // VFDs + AI controls + advanced water treatment
+    }
+  };
+
+  var stratKeys = ['ot', 'or', 'vf', 'dh'];
+  var optKeys = ['bl', 'vp', 'vfc', 'ai'];
+
+  // DOM references
+  var loadSlider = document.getElementById('coolingLoad');
+  var rateSlider = document.getElementById('elecRate');
+  var waterRateSlider = document.getElementById('waterRate');
+  var wetBulbSlider = document.getElementById('wetBulb');
+  var sizeSelect = document.getElementById('systemSize');
+  var co2Toggle = document.getElementById('showCO2');
+
+  var loadVal = document.getElementById('coolingLoadValue');
+  var rateVal = document.getElementById('elecRateValue');
+  var waterRateVal = document.getElementById('waterRateValue');
+  var wetBulbVal = document.getElementById('wetBulbValue');
+
+  var chart = null;
+
+  // ── Formatting helpers ──
+  function fmtNum(n) {
+    return Math.round(n).toLocaleString('en-US');
+  }
+
+  function fmtCurrency(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function fmtWater(gallons) {
+    if (gallons >= 1000000) {
+      return (gallons / 1000000).toFixed(1) + 'M gal';
+    } else if (gallons >= 1000) {
+      return (gallons / 1000).toFixed(0) + 'K gal';
+    }
+    return fmtNum(gallons) + ' gal';
+  }
+
+  function fmtTons(t) {
+    return t.toFixed(1) + ' tons';
+  }
+
+  // ── Main computation ──
+  function compute() {
+    var loadPct = parseInt(loadSlider.value);
+    var loadFraction = loadPct / 100;
+    var elecRate = parseFloat(rateSlider.value);
+    var wRate = parseFloat(waterRateSlider.value);
+    var wetBulb = parseInt(wetBulbSlider.value);
+    var systemSize = parseInt(sizeSelect.value);
+    var showCO2 = co2Toggle.checked;
+
+    // Update displayed control values
+    loadVal.textContent = loadPct + '%';
+    rateVal.textContent = '$' + elecRate.toFixed(2) + ' / kWh';
+    waterRateVal.textContent = '$' + wRate.toFixed(2) + ' / 1,000 gal';
+    wetBulbVal.innerHTML = wetBulb + '&deg;F';
+
+    // Scale factor for system size (base = 500 tons)
+    var sizeFactor = systemSize / 500;
+
+    // Load factors:
+    // Linear load factor for conventional equipment
+    var loadLinear = loadFraction;
+    // VFD load factor: affinity laws => power ~ (speed)^3, so at 50% load, power ~ 12.5%
+    // In practice, not all components follow cubic law perfectly, so use exponent ~2.5
+    var loadVFD = Math.pow(loadFraction, 2.5);
+    // Blended VFD factor (some components are VFD, some are not)
+    var loadVFDBlend = (loadLinear + loadVFD) / 2;
+
+    // Wet-bulb temperature impact
+    var wetBulbBase = 65;
+    var wetBulbDelta = wetBulb - wetBulbBase;
+    // Energy: ~1.5% per degree above 65F (chillers work harder)
+    var wbEnergyMult = 1 + (wetBulbDelta * 0.015);
+    // Water: ~2% per degree above 65F (more evaporation)
+    var wbWaterMult = 1 + (wetBulbDelta * 0.02);
+    // Free cooling: hours where outdoor conditions allow chiller bypass
+    // At 50F WB ~42% of year, at 65F ~15%, at 80F ~2%
+    var freeCoolingFrac = Math.max(0.02, Math.min(0.45, 0.15 + (wetBulbBase - wetBulb) * 0.02));
+
+    // ── LEFT PANEL: Strategy Cards ──
+    var stratResults = {};
+    for (var i = 0; i < stratKeys.length; i++) {
+      var key = stratKeys[i];
+      var s = strategies[key];
+      var lf, wbE, waterMult;
+
+      if (key === 'ot') {
+        // Once-through: just pump energy, scales linearly
+        lf = loadLinear;
+        wbE = 1 + (wetBulbDelta * 0.008); // less sensitive (no chiller)
+        waterMult = wbWaterMult;
+      } else if (key === 'or') {
+        // Standard open recirc: all components at fixed speed
+        lf = loadLinear;
+        wbE = wbEnergyMult;
+        waterMult = wbWaterMult;
+      } else if (key === 'vf') {
+        // VFD open recirc: dramatic savings at partial loads
+        lf = loadVFDBlend;
+        wbE = wbEnergyMult;
+        waterMult = 1 + (wetBulbDelta * 0.018); // slightly less water with better control
+      } else {
+        // Dry/hybrid: higher energy penalty in hot climates
+        lf = loadLinear;
+        wbE = 1 + (wetBulbDelta * 0.025); // more sensitive to wet-bulb
+        waterMult = 1 + (wetBulbDelta * 0.005); // minimal water impact
+      }
+
+      var energy = s.baseEnergy * sizeFactor * lf * wbE;
+      var water = s.baseWater * sizeFactor * loadLinear * waterMult;
+      var eCost = energy * elecRate;
+      var wCost = (water / 1000) * wRate;
+      var co2 = s.baseCO2 * sizeFactor * lf * wbE;
+
+      stratResults[key] = {
+        energy: energy,
+        water: water,
+        eCost: eCost,
+        wCost: wCost,
+        co2: co2
+      };
+
+      // Update card DOM
+      document.getElementById(key + '-energy').textContent = fmtNum(energy) + ' kWh';
+      document.getElementById(key + '-water').textContent = fmtWater(water);
+      document.getElementById(key + '-ecost').textContent = fmtCurrency(eCost);
+      document.getElementById(key + '-wcost').textContent = fmtCurrency(wCost);
+      document.getElementById(key + '-co2').textContent = fmtTons(co2);
+    }
+
+    // ── RIGHT PANEL: Optimization Cards ──
+    var optResults = {};
+    var baselineTotalCost = 0;
+
+    for (var j = 0; j < optKeys.length; j++) {
+      var okey = optKeys[j];
+      var o = optimizations[okey];
+
+      // Energy load factor depends on optimization level
+      var eLF;
+      if (okey === 'bl') {
+        eLF = loadLinear;
+      } else if (okey === 'vp') {
+        // VFD pumps: pumps follow cubic, fans/chiller still linear
+        eLF = loadLinear;
+      } else if (okey === 'vfc') {
+        // VFD on fans + free cooling
+        eLF = loadLinear;
+      } else {
+        // Full AI: optimizes everything
+        eLF = loadLinear;
+      }
+
+      // Compute each energy component separately
+      // Pumps: VFD levels use cubic law for pump energy
+      var pumpLF = (okey === 'bl') ? loadLinear : Math.pow(loadFraction, 2.5);
+      // Fans: VFD fans use cubic law (vfc and ai levels)
+      var fanLF = (okey === 'bl' || okey === 'vp') ? loadLinear : Math.pow(loadFraction, 2.5);
+      // Chiller: scales roughly linearly but free cooling offsets hours
+      var chillerLF = loadLinear;
+      var chillerReduction = 1.0;
+      if (okey === 'vfc') {
+        chillerReduction = 1.0 - (freeCoolingFrac * 0.6);
+      } else if (okey === 'ai') {
+        chillerReduction = 1.0 - (freeCoolingFrac * 0.85);
+        // AI also optimizes chiller staging for ~5% additional savings
+        chillerReduction *= 0.95;
+      }
+
+      var pumpE = o.pumpEnergy * sizeFactor * pumpLF * wbEnergyMult;
+      var fanE = o.fanEnergy * sizeFactor * fanLF * wbEnergyMult;
+      var chillerE = o.chillerEnergy * sizeFactor * chillerLF * wbEnergyMult * chillerReduction;
+      var totalEnergy = pumpE + fanE + chillerE;
+
+      var waterGal = o.baseWater * sizeFactor * loadLinear * wbWaterMult;
+      var wCostOpt = (waterGal / 1000) * wRate;
+      var chemCost = o.chemicalCost * sizeFactor * loadLinear;
+
+      var pumpCost = pumpE * elecRate;
+      var fanCost = fanE * elecRate;
+      var chillerCost = chillerE * elecRate;
+      var totalCost = pumpCost + fanCost + chillerCost + wCostOpt + chemCost;
+
+      // CO2: US grid average ~0.42 kg CO2/kWh, convert to metric tons
+      var co2Opt = (totalEnergy * 0.42) / 1000;
+
+      // Capital cost scales with system size
+      var capitalCostScaled = o.capitalCost * sizeFactor;
+
+      // Annual savings vs baseline
+      var annualSavings = 0;
+      if (okey !== 'bl' && baselineTotalCost > 0) {
+        annualSavings = baselineTotalCost - totalCost;
+      }
+
+      // Payback period
+      var paybackYears = 0;
+      if (annualSavings > 0) {
+        paybackYears = capitalCostScaled / annualSavings;
+      }
+
+      optResults[okey] = {
+        energy: totalEnergy,
+        water: waterGal,
+        totalCost: totalCost,
+        co2: co2Opt,
+        pumpE: pumpE,
+        fanE: fanE,
+        chillerE: chillerE,
+        pumpCost: pumpCost,
+        fanCost: fanCost,
+        chillerCost: chillerCost,
+        wCost: wCostOpt,
+        chemCost: chemCost,
+        capitalCost: capitalCostScaled,
+        annualSavings: annualSavings,
+        paybackYears: paybackYears
+      };
+
+      if (okey === 'bl') {
+        baselineTotalCost = totalCost;
+      }
+
+      // Update card DOM
+      document.getElementById(okey + '-energy').textContent = fmtNum(totalEnergy) + ' kWh';
+      document.getElementById(okey + '-water').textContent = fmtWater(waterGal);
+      document.getElementById(okey + '-total').textContent = fmtCurrency(totalCost);
+      document.getElementById(okey + '-co2').textContent = fmtTons(co2Opt);
+    }
+
+    // Recompute savings/payback now that baseline is known
+    // (baseline was set during the loop on first iteration)
+    for (var k = 0; k < optKeys.length; k++) {
+      var ok = optKeys[k];
+      var r = optResults[ok];
+
+      if (ok === 'bl') {
+        document.getElementById('bl-savings').textContent = 'Baseline';
+        document.getElementById('bl-payback').textContent = 'No additional investment';
+        continue;
+      }
+
+      // Recalculate savings against now-known baseline
+      r.annualSavings = baselineTotalCost - r.totalCost;
+      r.paybackYears = (r.annualSavings > 0) ? r.capitalCost / r.annualSavings : 0;
+
+      var savPct = (baselineTotalCost > 0)
+        ? ((baselineTotalCost - r.totalCost) / baselineTotalCost * 100)
+        : 0;
+
+      document.getElementById(ok + '-savings').textContent =
+        savPct.toFixed(0) + '% savings vs baseline';
+
+      if (r.paybackYears > 0 && r.paybackYears < 100) {
+        document.getElementById(ok + '-payback').textContent =
+          'Payback: ' + r.paybackYears.toFixed(1) + ' years';
+      } else {
+        document.getElementById(ok + '-payback').textContent = 'Payback: N/A';
+      }
+    }
+
+    // CO2 visibility
+    var co2Rows = document.querySelectorAll('.co2-data');
+    for (var m = 0; m < co2Rows.length; m++) {
+      if (showCO2) {
+        co2Rows[m].classList.add('visible');
+      } else {
+        co2Rows[m].classList.remove('visible');
+      }
+    }
+
+    // Update chart
+    updateChart(optResults, stratResults);
+
+    // Update best combination recommendations
+    updateBestCombos(sizeFactor, elecRate, wRate);
+  }
+
+  // ── Build chart data for all strategies x optimization combinations ──
+  function updateChart(optResults, stratResults) {
+    var ctx = document.getElementById('mainChart').getContext('2d');
+
+    // Chart shows: 4 optimization levels for the open-recirc strategy
+    // plus the 4 strategy types for comparison
+    // Labels: strategies on left, optimization levels on right
+    var labels = [
+      'Once-Through',
+      'Open Recirc (Std)',
+      'Open Recirc (VFD)',
+      'Dry/Hybrid',
+      '',  // spacer
+      'Baseline',
+      'VFD Pumps',
+      'VFD+Free Cool',
+      'Full Optimized'
+    ];
+
+    // For strategies, estimate component breakdown
+    // Once-Through: mostly pump energy, no chiller, no tower fans
+    var otTotal = stratResults.ot.eCost + stratResults.ot.wCost;
+    // Standard breakdown estimates for strategy cards
+    var stratPump = [
+      stratResults.ot.eCost * 1.0,                // OT: all energy is pumps
+      stratResults.or.eCost * 0.25,                // OR: ~25% pumps
+      stratResults.vf.eCost * 0.205,               // VF: lower pump share
+      stratResults.dh.eCost * 0.15                 // DH: pumps smaller fraction
+    ];
+    var stratFan = [
+      0,                                           // OT: no tower fans
+      stratResults.or.eCost * 0.20,                // OR: ~20% fans
+      stratResults.vf.eCost * 0.19,                // VF: VFD fans
+      stratResults.dh.eCost * 0.45                 // DH: huge fan energy
+    ];
+    var stratChiller = [
+      0,                                           // OT: no chiller
+      stratResults.or.eCost * 0.55,                // OR: ~55% chiller
+      stratResults.vf.eCost * 0.555,               // VF: chiller dominates
+      stratResults.dh.eCost * 0.40                 // DH: chiller portion
+    ];
+    var stratWater = [
+      stratResults.ot.wCost,
+      stratResults.or.wCost,
+      stratResults.vf.wCost,
+      stratResults.dh.wCost
+    ];
+    // Chemical costs estimates (per year)
+    var loadFraction = parseInt(loadSlider.value) / 100;
+    var sizeFactor = parseInt(sizeSelect.value) / 500;
+    var stratChem = [
+      1000 * sizeFactor * loadFraction,            // OT: minimal chemicals
+      12000 * sizeFactor * loadFraction,            // OR: standard treatment
+      11000 * sizeFactor * loadFraction,            // VF: similar
+      2000 * sizeFactor * loadFraction              // DH: minimal
+    ];
+
+    // Optimization columns
+    var optPump = [
+      optResults.bl.pumpCost,
+      optResults.vp.pumpCost,
+      optResults.vfc.pumpCost,
+      optResults.ai.pumpCost
+    ];
+    var optFan = [
+      optResults.bl.fanCost,
+      optResults.vp.fanCost,
+      optResults.vfc.fanCost,
+      optResults.ai.fanCost
+    ];
+    var optChiller = [
+      optResults.bl.chillerCost,
+      optResults.vp.chillerCost,
+      optResults.vfc.chillerCost,
+      optResults.ai.chillerCost
+    ];
+    var optWaterCost = [
+      optResults.bl.wCost,
+      optResults.vp.wCost,
+      optResults.vfc.wCost,
+      optResults.ai.wCost
+    ];
+    var optChem = [
+      optResults.bl.chemCost,
+      optResults.vp.chemCost,
+      optResults.vfc.chemCost,
+      optResults.ai.chemCost
+    ];
+
+    // Combine into full dataset (with spacer at index 4)
+    var pumpCosts =    stratPump.concat([0], optPump);
+    var fanCosts =     stratFan.concat([0], optFan);
+    var chillerCosts = stratChiller.concat([0], optChiller);
+    var waterCosts =   stratWater.concat([0], optWaterCost);
+    var chemCosts =    stratChem.concat([0], optChem);
+
+    // Total line
+    var totalCosts = [];
+    for (var t = 0; t < labels.length; t++) {
+      if (labels[t] === '') {
+        totalCosts.push(null);
+      } else {
+        totalCosts.push(
+          Math.round(pumpCosts[t] + fanCosts[t] + chillerCosts[t] + waterCosts[t] + chemCosts[t])
+        );
+      }
+    }
+
+    var chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Pump Energy ($)',
+          data: pumpCosts.map(function(v) { return Math.round(v); }),
+          backgroundColor: 'rgba(59, 130, 246, 0.8)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1,
+          stack: 'costs',
+          order: 2
+        },
+        {
+          label: 'Fan Energy ($)',
+          data: fanCosts.map(function(v) { return Math.round(v); }),
+          backgroundColor: 'rgba(16, 185, 129, 0.8)',
+          borderColor: 'rgba(16, 185, 129, 1)',
+          borderWidth: 1,
+          stack: 'costs',
+          order: 2
+        },
+        {
+          label: 'Chiller Energy ($)',
+          data: chillerCosts.map(function(v) { return Math.round(v); }),
+          backgroundColor: 'rgba(139, 92, 246, 0.8)',
+          borderColor: 'rgba(139, 92, 246, 1)',
+          borderWidth: 1,
+          stack: 'costs',
+          order: 2
+        },
+        {
+          label: 'Water Cost ($)',
+          data: waterCosts.map(function(v) { return Math.round(v); }),
+          backgroundColor: 'rgba(245, 158, 11, 0.8)',
+          borderColor: 'rgba(245, 158, 11, 1)',
+          borderWidth: 1,
+          stack: 'costs',
+          order: 2
+        },
+        {
+          label: 'Chemical Cost ($)',
+          data: chemCosts.map(function(v) { return Math.round(v); }),
+          backgroundColor: 'rgba(239, 68, 68, 0.7)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 1,
+          stack: 'costs',
+          order: 2
+        },
+        {
+          label: 'Total Annual Cost ($)',
+          data: totalCosts,
+          type: 'line',
+          borderColor: '#1e293b',
+          backgroundColor: 'rgba(30, 41, 59, 0.1)',
+          borderWidth: 3,
+          pointRadius: 5,
+          pointBackgroundColor: '#1e293b',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          fill: false,
+          spanGaps: false,
+          yAxisID: 'y1',
+          order: 1
+        }
+      ]
+    };
+
+    // Calculate axis max
+    var maxStacked = 0;
+    for (var s = 0; s < labels.length; s++) {
+      if (labels[s] === '') continue;
+      var stackSum = pumpCosts[s] + fanCosts[s] + chillerCosts[s] + waterCosts[s] + chemCosts[s];
+      if (stackSum > maxStacked) maxStacked = stackSum;
+    }
+    var maxLine = 0;
+    for (var l = 0; l < totalCosts.length; l++) {
+      if (totalCosts[l] !== null && totalCosts[l] > maxLine) maxLine = totalCosts[l];
+    }
+    var yMax = Math.ceil(Math.max(maxStacked, maxLine) * 1.15 / 10000) * 10000;
+    if (yMax < 10000) yMax = 10000;
+
+    if (chart) {
+      chart.data = chartData;
+      chart.options.scales.y.max = yMax;
+      chart.options.scales.y1.max = yMax;
+      chart.update();
+    } else {
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 12,
+                font: { size: 11 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  var label = context.dataset.label || '';
+                  var val = context.parsed.y;
+                  if (val === null || val === undefined) return '';
+                  return label + ': $' + Math.round(val).toLocaleString();
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                font: { size: 10, weight: 'bold' },
+                maxRotation: 45,
+                minRotation: 0
+              }
+            },
+            y: {
+              position: 'left',
+              beginAtZero: true,
+              max: yMax,
+              stacked: true,
+              title: {
+                display: true,
+                text: 'Component Costs ($)',
+                font: { size: 11, weight: 'bold' }
+              },
+              ticks: {
+                callback: function(v) { return '$' + v.toLocaleString(); },
+                font: { size: 10 }
+              }
+            },
+            y1: {
+              position: 'right',
+              beginAtZero: true,
+              max: yMax,
+              grid: { drawOnChartArea: false },
+              title: {
+                display: true,
+                text: 'Total Annual Cost ($)',
+                font: { size: 11, weight: 'bold' }
+              },
+              ticks: {
+                callback: function(v) { return '$' + v.toLocaleString(); },
+                font: { size: 10 }
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // ── Best combination for each climate zone ──
+  function updateBestCombos(sizeFactor, elecRate, wRate) {
+    var loadFraction = parseInt(loadSlider.value) / 100;
+    var climates = {
+      hot:  { wb: 77, label: 'Hot' },
+      temp: { wb: 64, label: 'Temperate' },
+      cold: { wb: 52, label: 'Cold' }
+    };
+
+    var combos = [
+      { stratName: 'Open Recirc (VFD) + Full AI Opt',  stratKey: 'vf', optKey: 'ai' },
+      { stratName: 'Open Recirc (VFD) + VFD+Free Cool', stratKey: 'vf', optKey: 'vfc' },
+      { stratName: 'Open Recirc (Std) + VFD Pumps',     stratKey: 'or', optKey: 'vp' },
+      { stratName: 'Dry/Hybrid + Full AI Opt',           stratKey: 'dh', optKey: 'ai' },
+      { stratName: 'Dry/Hybrid + VFD+Free Cool',         stratKey: 'dh', optKey: 'vfc' },
+      { stratName: 'Open Recirc (VFD) + Baseline',       stratKey: 'vf', optKey: 'bl' }
+    ];
+
+    var zones = ['hot', 'temp', 'cold'];
+    for (var z = 0; z < zones.length; z++) {
+      var zone = zones[z];
+      var wb = climates[zone].wb;
+      var wbDelta = wb - 65;
+      var wbEMult = 1 + (wbDelta * 0.015);
+      var wbWMult = 1 + (wbDelta * 0.02);
+      var freeCool = Math.max(0.02, Math.min(0.45, 0.15 + (65 - wb) * 0.02));
+
+      var bestName = '';
+      var bestCost = Infinity;
+      var bestDetail = '';
+
+      for (var c = 0; c < combos.length; c++) {
+        var combo = combos[c];
+        var o = optimizations[combo.optKey];
+        var s = strategies[combo.stratKey];
+
+        // Quick cost estimate for this combo at this climate
+        var pumpLF = (combo.optKey === 'bl') ? loadFraction : Math.pow(loadFraction, 2.5);
+        var fanLF = (combo.optKey === 'bl' || combo.optKey === 'vp') ? loadFraction : Math.pow(loadFraction, 2.5);
+
+        var chillerRed = 1.0;
+        if (combo.optKey === 'vfc') chillerRed = 1.0 - (freeCool * 0.6);
+        else if (combo.optKey === 'ai') chillerRed = (1.0 - (freeCool * 0.85)) * 0.95;
+
+        var wbEM = (combo.stratKey === 'dh') ? (1 + wbDelta * 0.025) : wbEMult;
+        var wbWM = (combo.stratKey === 'dh') ? (1 + wbDelta * 0.005) : wbWMult;
+
+        var pE = o.pumpEnergy * sizeFactor * pumpLF * wbEM;
+        var fE = o.fanEnergy * sizeFactor * fanLF * wbEM;
+        var cE = o.chillerEnergy * sizeFactor * loadFraction * wbEM * chillerRed;
+
+        // For dry/hybrid, adjust energy upward
+        if (combo.stratKey === 'dh') {
+          fE *= 1.4; // larger fans needed
+          cE *= 0.9; // slightly less chiller
+        }
+
+        var totalE = pE + fE + cE;
+        var waterGal = (combo.stratKey === 'dh')
+          ? 500000 * sizeFactor * loadFraction * wbWM
+          : o.baseWater * sizeFactor * loadFraction * wbWM;
+        var wCost = (waterGal / 1000) * wRate;
+        var chem = o.chemicalCost * sizeFactor * loadFraction;
+        if (combo.stratKey === 'dh') chem *= 0.2;
+
+        var total = (totalE * elecRate) + wCost + chem;
+
+        if (total < bestCost) {
+          bestCost = total;
+          bestName = combo.stratName;
+          bestDetail = 'Est. ' + fmtCurrency(total) + '/yr | Energy: ' + fmtNum(totalE) + ' kWh';
+        }
+      }
+
+      document.getElementById('best-' + zone + '-rec').textContent = bestName;
+      document.getElementById('best-' + zone + '-detail').textContent = bestDetail;
+    }
+  }
+
+  // ── Event listeners ──
+  loadSlider.addEventListener('input', compute);
+  rateSlider.addEventListener('input', compute);
+  waterRateSlider.addEventListener('input', compute);
+  wetBulbSlider.addEventListener('input', compute);
+  sizeSelect.addEventListener('change', compute);
+  co2Toggle.addEventListener('change', compute);
+
+  window.addEventListener('resize', function() {
+    if (chart) chart.resize();
+  });
+
+  // Initial render
+  compute();
+})();
+</script>
+
+</body>
+</html>

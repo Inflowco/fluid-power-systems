@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HVAC Load Balancing</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2/lib/p5.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; overflow: hidden; }
+        main { display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ── HVAC Load Balancing MicroSim ──
+    // Interactive simulation: AI-balanced vs unbalanced AHU operation
+
+    // Canvas dimensions
+    let drawHeight = 400;
+    let controlHeight = 80;
+    let aspectRatio = 1.91;
+    let canvasWidth, canvasHeight;
+
+    // State
+    let aiBalanced = false;
+    let timeOfDay = 12;          // 6..22 (6 AM to 10 PM)
+    let outdoorTemp = 85;        // 70..100 F
+    let conferenceMeeting = false;
+    let conferenceTimer = 0;     // frames remaining
+
+    // Smooth animation targets
+    let ahuLoadDisplay = [0, 0, 0];
+    let ahuLoadTarget = [0, 0, 0];
+
+    // Flow particle system
+    let flowOffset = 0;
+
+    // Layout regions (recomputed on resize)
+    let zoneRegion, ahuRegion, chartRegion, controlRegionY;
+
+    // Interactive element hit zones
+    let btnToggle = {};
+    let sliderTime = {};
+    let sliderTemp = {};
+    let btnConference = {};
+
+    let draggingTime = false;
+    let draggingTemp = false;
+
+    // Zone visual configuration
+    const zoneColors = [
+        [70, 130, 200],   // Zone A - blue (Office North)
+        [220, 160, 40],   // Zone B - amber (Office South)
+        [100, 180, 100],  // Zone C - green (Conference Room)
+        [180, 70, 70]     // Zone D - red (Server Room)
+    ];
+    const zoneNames = ['Zone A', 'Zone B', 'Zone C', 'Zone D'];
+    const zoneLabels = ['Office North', 'Office South', 'Conference Room', 'Server Room'];
+
+    // AHU visual configuration
+    const ahuColors = [
+        [60, 120, 190],
+        [50, 160, 100],
+        [160, 110, 50]
+    ];
+
+    // ── Canvas sizing (from spec) ──
+
+    function updateCanvasSize() {
+        const w = windowWidth;
+        canvasWidth = w;
+        canvasHeight = w / aspectRatio;
+        if (canvasHeight > windowHeight) {
+            canvasHeight = windowHeight;
+            canvasWidth = canvasHeight * aspectRatio;
+        }
+        drawHeight = canvasHeight - controlHeight;
+    }
+
+    function updateLayout() {
+        let margin = canvasWidth * 0.02;
+        zoneRegion  = { x: margin, y: 8, w: canvasWidth - margin * 2, h: drawHeight * 0.22 };
+        ahuRegion   = { x: margin, y: zoneRegion.y + zoneRegion.h + 10, w: canvasWidth - margin * 2, h: drawHeight * 0.42 };
+        chartRegion = { x: margin, y: ahuRegion.y + ahuRegion.h + 10, w: canvasWidth - margin * 2, h: drawHeight - (ahuRegion.y + ahuRegion.h + 10) - 5 };
+        controlRegionY = drawHeight + 2;
+    }
+
+    function setup() {
+        updateCanvasSize();
+        const canvas = createCanvas(canvasWidth, canvasHeight);
+        canvas.parent(document.querySelector('main'));
+        updateLayout();
+
+        // Initialize display values
+        let loads = computeZoneLoads();
+        let dist = distributeLoads(loads);
+        for (let i = 0; i < 3; i++) {
+            ahuLoadDisplay[i] = dist.loadPct[i];
+            ahuLoadTarget[i]  = dist.loadPct[i];
+        }
+    }
+
+    function windowResized() {
+        updateCanvasSize();
+        resizeCanvas(canvasWidth, canvasHeight);
+        updateLayout();
+    }
+
+    // ── Zone Load Calculation ──
+
+    function computeZoneLoads() {
+        // Returns BTU/hr for each zone [A, B, C, D]
+        let tempFactor = map(outdoorTemp, 70, 100, 0.6, 1.5);
+
+        // Zone A: Office North - moderate, peaks mid-morning
+        let hourFracA = map(timeOfDay, 6, 22, 0, 1);
+        let profileA = 0.5 + 0.5 * sin(hourFracA * PI);
+        let loadA = 18000 * profileA * tempFactor;
+
+        // Zone B: Office South - high solar gain peaking in afternoon
+        let hourFracB = map(timeOfDay, 6, 22, 0, 1);
+        let profileB = 0.3 + 0.7 * pow(sin(constrain(hourFracB * 1.3 - 0.15, 0, 1) * PI), 1.5);
+        let loadB = 25000 * profileB * tempFactor;
+
+        // Zone C: Conference Room - base load + spike if meeting active
+        let loadC = 8000 * tempFactor;
+        if (conferenceMeeting) {
+            loadC += 22000 * tempFactor * 0.7;
+        }
+
+        // Zone D: Server Room - constant high load
+        let loadD = 30000 * tempFactor * 0.9;
+
+        return [loadA, loadB, loadC, loadD];
+    }
+
+    // ── Load Distribution ──
+
+    function distributeLoads(zoneLoads) {
+        // AHU capacities (BTU/hr)
+        let capacities = [40000, 35000, 38000];
+        let totalLoad = zoneLoads[0] + zoneLoads[1] + zoneLoads[2] + zoneLoads[3];
+
+        let loadPct, assignments;
+
+        if (!aiBalanced) {
+            // Unbalanced: AHU-1 handles Zone B + D (heavy), AHU-2 handles Zone A only (light), AHU-3 handles Zone C
+            let ahu1Load = zoneLoads[1] + zoneLoads[3];
+            let ahu2Load = zoneLoads[0];
+            let ahu3Load = zoneLoads[2];
+
+            // Overflow from AHU-1 if over capacity
+            if (ahu1Load > capacities[0]) {
+                let overflow = ahu1Load - capacities[0];
+                ahu1Load = capacities[0];
+                ahu3Load += overflow;
+            }
+
+            loadPct = [
+                constrain(ahu1Load / capacities[0] * 100, 0, 100),
+                constrain(ahu2Load / capacities[1] * 100, 0, 100),
+                constrain(ahu3Load / capacities[2] * 100, 0, 100)
+            ];
+            assignments = [[1, 3], [0], [2]];
+        } else {
+            // AI-Balanced: distribute proportionally to capacity
+            let totalCap = capacities[0] + capacities[1] + capacities[2];
+            loadPct = [
+                constrain((totalLoad * capacities[0] / totalCap) / capacities[0] * 100, 0, 100),
+                constrain((totalLoad * capacities[1] / totalCap) / capacities[1] * 100, 0, 100),
+                constrain((totalLoad * capacities[2] / totalCap) / capacities[2] * 100, 0, 100)
+            ];
+            assignments = [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]];
+        }
+
+        return { loadPct, assignments, capacities, totalLoad, zoneLoads };
+    }
+
+    // ── Efficiency Model ──
+    // AHUs most efficient at 55-70% load; drops at very low or very high loads.
+
+    function ahuEfficiency(loadPct) {
+        if (loadPct <= 0) return 0.5;
+        let x = loadPct / 100;
+        let eff = -1.8 * pow(x - 0.6, 2) + 0.92;
+        return constrain(eff, 0.50, 0.92);
+    }
+
+    function computeKW(loadPct, capacityBtu) {
+        let loadFrac = loadPct / 100;
+        let eff = ahuEfficiency(loadPct);
+        let btuLoad = capacityBtu * loadFrac;
+        // 1 ton = 12000 BTU/hr, COP ~3.5 baseline
+        let kw = btuLoad / 12000 / (3.5 * eff);
+        return kw;
+    }
+
+    // ── Main Draw Loop ──
+
+    function draw() {
+        // Update conference timer
+        if (conferenceTimer > 0) {
+            conferenceTimer--;
+            if (conferenceTimer <= 0) {
+                conferenceMeeting = false;
+            }
+        }
+
+        // Compute loads
+        let zoneLoads = computeZoneLoads();
+        let dist = distributeLoads(zoneLoads);
+
+        // Smooth animation
+        for (let i = 0; i < 3; i++) {
+            ahuLoadTarget[i] = dist.loadPct[i];
+            ahuLoadDisplay[i] += (ahuLoadTarget[i] - ahuLoadDisplay[i]) * 0.08;
+        }
+
+        flowOffset += 0.6;
+
+        background(245, 247, 250);
+
+        drawBuildingZones(zoneLoads);
+        drawFlowLines(dist);
+        drawAHUs(dist);
+        drawEnergyComparison(zoneLoads, dist);
+        drawControls();
+    }
+
+    // ── Building Zones (Top Section) ──
+
+    function drawBuildingZones(zoneLoads) {
+        push();
+        let r = zoneRegion;
+
+        // Section title
+        fill(30);
+        noStroke();
+        textSize(constrain(canvasWidth * 0.018, 11, 16));
+        textAlign(LEFT, TOP);
+        textStyle(BOLD);
+        text('Building Zones', r.x, r.y);
+        textStyle(NORMAL);
+
+        let gap = 10;
+        let zoneW = (r.w - gap * 3) / 4;
+        let zoneH = r.h - 24;
+        let zoneY = r.y + 22;
+
+        for (let i = 0; i < 4; i++) {
+            let zx = r.x + i * (zoneW + gap);
+            let zc = zoneColors[i];
+
+            // Zone box with rounded corners
+            stroke(zc[0], zc[1], zc[2]);
+            strokeWeight(2);
+            fill(zc[0], zc[1], zc[2], 35);
+            rect(zx, zoneY, zoneW, zoneH, 8);
+
+            // Zone name + label
+            noStroke();
+            fill(zc[0] * 0.55, zc[1] * 0.55, zc[2] * 0.55);
+            textSize(constrain(canvasWidth * 0.014, 9, 13));
+            textAlign(CENTER, TOP);
+            textStyle(BOLD);
+            text(zoneNames[i] + ': ' + zoneLabels[i], zx + zoneW / 2, zoneY + 5);
+            textStyle(NORMAL);
+
+            // BTU/hr value
+            fill(30);
+            textSize(constrain(canvasWidth * 0.018, 11, 18));
+            textAlign(CENTER, CENTER);
+            let btuStr = nfc(round(zoneLoads[i])) + ' BTU/hr';
+            text(btuStr, zx + zoneW / 2, zoneY + zoneH * 0.48);
+
+            // Heat intensity bar
+            let maxLoad = 55000;
+            let barW = zoneW - 16;
+            let barH = 7;
+            let barX = zx + 8;
+            let barY = zoneY + zoneH - 16;
+            fill(220);
+            noStroke();
+            rect(barX, barY, barW, barH, 3);
+            let fillFrac = constrain(zoneLoads[i] / maxLoad, 0, 1);
+            let fillW = fillFrac * barW;
+            let heatColor = lerpColor(color(80, 180, 80), color(220, 60, 40), fillFrac);
+            fill(heatColor);
+            rect(barX, barY, fillW, barH, 3);
+
+            // Conference meeting indicator
+            if (i === 2 && conferenceMeeting) {
+                fill(255, 90, 40);
+                textSize(constrain(canvasWidth * 0.012, 7, 10));
+                textAlign(CENTER, BOTTOM);
+                textStyle(BOLD);
+                text('MEETING IN PROGRESS', zx + zoneW / 2, barY - 2);
+                textStyle(NORMAL);
+            }
+        }
+        pop();
+    }
+
+    // ── Animated Flow Lines ──
+
+    function drawFlowLines(dist) {
+        push();
+        let gap = 10;
+        let zoneW = (zoneRegion.w - gap * 3) / 4;
+        let zoneBottomY = zoneRegion.y + zoneRegion.h;
+
+        let ahuGap = 20;
+        let ahuW = (ahuRegion.w - ahuGap * 2) / 3;
+        let ahuTopY = ahuRegion.y + 22;
+
+        for (let a = 0; a < 3; a++) {
+            let ahuCx = ahuRegion.x + a * (ahuW + ahuGap) + ahuW / 2;
+            let zones = dist.assignments[a];
+
+            for (let zi = 0; zi < zones.length; zi++) {
+                let zIdx = zones[zi];
+                let zoneCx = zoneRegion.x + zIdx * (zoneW + gap) + zoneW / 2;
+
+                let zc = zoneColors[zIdx];
+                let alpha = aiBalanced ? 90 : 140;
+                stroke(zc[0], zc[1], zc[2], alpha);
+                strokeWeight(aiBalanced ? 1.5 : 2.5);
+
+                // Animated dashed lines (particles flowing down)
+                let segments = 12;
+                let dashLen = 0.04;
+                for (let s = 0; s < segments; s++) {
+                    let t1 = ((s / segments) + (flowOffset % 25) / 25) % 1;
+                    let t2 = t1 + dashLen;
+                    t1 = constrain(t1, 0, 1);
+                    t2 = constrain(t2, 0, 1);
+                    let x1 = lerp(zoneCx, ahuCx, t1);
+                    let y1 = lerp(zoneBottomY, ahuTopY, t1);
+                    let x2 = lerp(zoneCx, ahuCx, t2);
+                    let y2 = lerp(zoneBottomY, ahuTopY, t2);
+                    line(x1, y1, x2, y2);
+                }
+            }
+        }
+        pop();
+    }
+
+    // ── AHU Equipment Blocks (Middle Section) ──
+
+    function drawAHUs(dist) {
+        push();
+        let r = ahuRegion;
+
+        // Section title
+        fill(30);
+        noStroke();
+        textSize(constrain(canvasWidth * 0.018, 11, 16));
+        textAlign(LEFT, TOP);
+        textStyle(BOLD);
+        text('Air Handling Units', r.x, r.y);
+        textStyle(NORMAL);
+
+        let ahuGap = 20;
+        let ahuW = (r.w - ahuGap * 2) / 3;
+        let ahuH = r.h - 24;
+        let ahuY = r.y + 22;
+
+        for (let i = 0; i < 3; i++) {
+            let ax = r.x + i * (ahuW + ahuGap);
+            let loadPct = ahuLoadDisplay[i];
+            let eff = ahuEfficiency(loadPct);
+            let kw = computeKW(loadPct, dist.capacities[i]);
+            let ac = ahuColors[i];
+
+            // AHU box - rounded rectangle with colored border
+            stroke(ac[0], ac[1], ac[2]);
+            strokeWeight(2);
+            fill(255, 253, 250);
+            rect(ax, ahuY, ahuW, ahuH, 8);
+
+            // AHU name
+            noStroke();
+            fill(ac[0], ac[1], ac[2]);
+            textSize(constrain(canvasWidth * 0.02, 12, 17));
+            textAlign(CENTER, TOP);
+            textStyle(BOLD);
+            text('AHU-' + (i + 1), ax + ahuW / 2, ahuY + 5);
+            textStyle(NORMAL);
+
+            // Capacity label
+            fill(110);
+            textSize(constrain(canvasWidth * 0.012, 8, 11));
+            text(nfc(dist.capacities[i]) + ' BTU/hr capacity', ax + ahuW / 2, ahuY + 22);
+
+            // ── Load Percentage Bar (horizontal) ──
+            let barMargin = ahuW * 0.08;
+            let barX = ax + barMargin;
+            let barY = ahuY + 40;
+            let barW = ahuW - barMargin * 2;
+            let barH = 20;
+
+            fill(60);
+            textSize(constrain(canvasWidth * 0.013, 8, 11));
+            textAlign(LEFT, BOTTOM);
+            text('Load:', barX, barY - 2);
+
+            // Bar background
+            fill(225);
+            noStroke();
+            rect(barX, barY, barW, barH, 5);
+
+            // Bar fill
+            let barFillW = constrain(loadPct / 100, 0, 1) * barW;
+            let barColor;
+            if (loadPct < 50) barColor = color(80, 180, 80);
+            else if (loadPct < 70) barColor = color(60, 155, 210);
+            else if (loadPct < 85) barColor = color(230, 190, 40);
+            else barColor = color(220, 65, 40);
+            fill(barColor);
+            rect(barX, barY, barFillW, barH, 5);
+
+            // Load percentage text on bar
+            fill(loadPct > 45 ? 255 : 40);
+            textSize(constrain(canvasWidth * 0.015, 9, 13));
+            textAlign(CENTER, CENTER);
+            textStyle(BOLD);
+            text(nf(loadPct, 1, 1) + '%', barX + barW / 2, barY + barH / 2);
+            textStyle(NORMAL);
+
+            // ── Efficiency Gauge (arc gauge) ──
+            let gaugeR = min(ahuW * 0.18, ahuH * 0.17);
+            let gaugeCx = ax + ahuW * 0.3;
+            let gaugeCy = barY + barH + 18 + gaugeR;
+
+            // Gauge arc background zones
+            noFill();
+            let arcWeight = gaugeR * 0.35;
+            strokeWeight(arcWeight);
+
+            // Red zone (poor efficiency: 50-65%)
+            stroke(220, 70, 70, 100);
+            arc(gaugeCx, gaugeCy, gaugeR * 1.6, gaugeR * 1.6, PI, PI + PI * 0.33);
+            // Yellow zone (moderate: 65-80%)
+            stroke(230, 200, 40, 100);
+            arc(gaugeCx, gaugeCy, gaugeR * 1.6, gaugeR * 1.6, PI + PI * 0.33, PI + PI * 0.66);
+            // Green zone (efficient: 80-92%)
+            stroke(60, 190, 60, 100);
+            arc(gaugeCx, gaugeCy, gaugeR * 1.6, gaugeR * 1.6, PI + PI * 0.66, TWO_PI);
+
+            // Needle
+            let effNorm = constrain(map(eff, 0.50, 0.92, 0, 1), 0, 1);
+            let needleAngle = PI + PI * effNorm;
+            stroke(40);
+            strokeWeight(2);
+            let nx = gaugeCx + cos(needleAngle) * gaugeR * 0.65;
+            let ny = gaugeCy + sin(needleAngle) * gaugeR * 0.65;
+            line(gaugeCx, gaugeCy, nx, ny);
+            fill(40);
+            noStroke();
+            ellipse(gaugeCx, gaugeCy, 6, 6);
+
+            // Efficiency value
+            fill(60);
+            textSize(constrain(canvasWidth * 0.013, 8, 11));
+            textAlign(CENTER, TOP);
+            text('Eff: ' + nf(eff * 100, 1, 1) + '%', gaugeCx, gaugeCy + 8);
+
+            // ── kW Display ──
+            let kwX = ax + ahuW * 0.72;
+            let kwY = gaugeCy - gaugeR * 0.4;
+
+            fill(30);
+            textSize(constrain(canvasWidth * 0.014, 9, 12));
+            textAlign(CENTER, TOP);
+            text('Power', kwX, kwY - 14);
+
+            textSize(constrain(canvasWidth * 0.026, 14, 24));
+            textStyle(BOLD);
+            fill(aiBalanced ? color(40, 150, 80) : color(180, 60, 40));
+            text(nf(kw, 1, 1), kwX, kwY + 2);
+            textStyle(NORMAL);
+
+            textSize(constrain(canvasWidth * 0.013, 8, 11));
+            fill(80);
+            text('kW', kwX, kwY + 26);
+        }
+        pop();
+    }
+
+    // ── Energy Comparison (Bottom Section) ──
+
+    function drawEnergyComparison(zoneLoads, currentDist) {
+        push();
+        let r = chartRegion;
+
+        // Section title
+        fill(30);
+        noStroke();
+        textSize(constrain(canvasWidth * 0.018, 11, 16));
+        textAlign(LEFT, TOP);
+        textStyle(BOLD);
+        text('Energy Comparison', r.x, r.y);
+        textStyle(NORMAL);
+
+        // Compute both scenarios for side-by-side comparison
+        let savedState = aiBalanced;
+
+        // Unbalanced kW
+        aiBalanced = false;
+        let unbalDist = distributeLoads(zoneLoads);
+        let unbalKW = 0;
+        for (let i = 0; i < 3; i++) {
+            unbalKW += computeKW(unbalDist.loadPct[i], unbalDist.capacities[i]);
+        }
+
+        // Balanced kW
+        aiBalanced = true;
+        let balDist = distributeLoads(zoneLoads);
+        let balKW = 0;
+        for (let i = 0; i < 3; i++) {
+            balKW += computeKW(balDist.loadPct[i], balDist.capacities[i]);
+        }
+
+        // Restore state
+        aiBalanced = savedState;
+
+        let savings = unbalKW > 0 ? ((unbalKW - balKW) / unbalKW * 100) : 0;
+
+        // Bar chart area
+        let barAreaX = r.x + 10;
+        let barAreaY = r.y + 20;
+        let barAreaW = r.w * 0.52;
+        let barAreaH = r.h - 24;
+
+        let barH = barAreaH * 0.32;
+        let gap = barAreaH * 0.12;
+        let maxKW = max(unbalKW, balKW, 1) * 1.2;
+
+        // Unbalanced bar
+        let ubY = barAreaY + gap;
+        let ubW = (unbalKW / maxKW) * barAreaW;
+        fill(210, 80, 70);
+        noStroke();
+        rect(barAreaX, ubY, ubW, barH, 5);
+
+        fill(255);
+        textSize(constrain(canvasWidth * 0.016, 10, 14));
+        textAlign(LEFT, CENTER);
+        textStyle(BOLD);
+        if (ubW > canvasWidth * 0.15) {
+            text('Unbalanced: ' + nf(unbalKW, 1, 1) + ' kW', barAreaX + 10, ubY + barH / 2);
+        } else {
+            fill(210, 80, 70);
+            text('Unbalanced: ' + nf(unbalKW, 1, 1) + ' kW', barAreaX + ubW + 8, ubY + barH / 2);
+        }
+
+        // Balanced bar
+        let bY = ubY + barH + gap;
+        let bW = (balKW / maxKW) * barAreaW;
+        fill(60, 170, 90);
+        noStroke();
+        rect(barAreaX, bY, bW, barH, 5);
+
+        fill(255);
+        textSize(constrain(canvasWidth * 0.016, 10, 14));
+        textAlign(LEFT, CENTER);
+        if (bW > canvasWidth * 0.15) {
+            text('AI-Balanced: ' + nf(balKW, 1, 1) + ' kW', barAreaX + 10, bY + barH / 2);
+        } else {
+            fill(60, 170, 90);
+            text('AI-Balanced: ' + nf(balKW, 1, 1) + ' kW', barAreaX + bW + 8, bY + barH / 2);
+        }
+        textStyle(NORMAL);
+
+        // Savings indicator box
+        let savingsX = r.x + r.w * 0.58;
+        let savingsY = barAreaY + barAreaH * 0.05;
+        let savingsW = r.w * 0.38;
+        let savingsH = barAreaH * 0.82;
+
+        stroke(40, 160, 80);
+        strokeWeight(2);
+        fill(40, 160, 80, 25);
+        rect(savingsX, savingsY, savingsW, savingsH, 10);
+
+        noStroke();
+        fill(30);
+        textSize(constrain(canvasWidth * 0.016, 10, 14));
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text('Energy Savings', savingsX + savingsW / 2, savingsY + 6);
+        textStyle(NORMAL);
+
+        // Big percentage
+        fill(40, 150, 70);
+        textSize(constrain(canvasWidth * 0.04, 20, 36));
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text(nf(savings, 1, 1) + '%', savingsX + savingsW / 2, savingsY + savingsH * 0.45);
+        textStyle(NORMAL);
+
+        // kW saved
+        fill(80);
+        textSize(constrain(canvasWidth * 0.014, 9, 12));
+        textAlign(CENTER, BOTTOM);
+        text(nf(unbalKW - balKW, 1, 1) + ' kW saved', savingsX + savingsW / 2, savingsY + savingsH - 6);
+
+        // Current mode indicator
+        let modeColor = aiBalanced ? color(40, 150, 70) : color(180, 60, 40);
+        fill(modeColor);
+        textSize(constrain(canvasWidth * 0.013, 8, 11));
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text('Current: ' + (aiBalanced ? 'AI-Balanced' : 'Unbalanced'), savingsX + savingsW / 2, savingsY + savingsH + 4);
+        textStyle(NORMAL);
+
+        pop();
+    }
+
+    // ── Controls (Bottom Bar) ──
+
+    function drawControls() {
+        push();
+        // Background bar
+        noStroke();
+        fill(228, 232, 238);
+        rect(0, controlRegionY, canvasWidth, controlHeight);
+        stroke(195);
+        strokeWeight(1);
+        line(0, controlRegionY, canvasWidth, controlRegionY);
+
+        let cx = canvasWidth * 0.02;
+        let cy = controlRegionY + 8;
+        let sectionW = canvasWidth / 4.3;
+
+        // ── Toggle: Unbalanced / AI-Balanced ──
+        noStroke();
+        fill(60);
+        textSize(constrain(canvasWidth * 0.013, 8, 11));
+        textAlign(LEFT, TOP);
+        text('Mode:', cx, cy);
+
+        let toggleW = min(sectionW * 0.85, 160);
+        let toggleH = 28;
+        let toggleY = cy + 15;
+
+        // Toggle background pill
+        fill(aiBalanced ? color(40, 155, 75) : color(180, 80, 60));
+        noStroke();
+        rect(cx, toggleY, toggleW, toggleH, 14);
+
+        // Toggle knob
+        let knobR = toggleH - 8;
+        let knobX = aiBalanced ? cx + toggleW - knobR / 2 - 4 : cx + knobR / 2 + 4;
+        fill(255);
+        noStroke();
+        ellipse(knobX, toggleY + toggleH / 2, knobR, knobR);
+
+        // Toggle label text
+        fill(255);
+        textSize(constrain(canvasWidth * 0.013, 8, 11));
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        if (aiBalanced) {
+            text('AI-Balanced', cx + toggleW / 2 - 10, toggleY + toggleH / 2);
+        } else {
+            text('Unbalanced', cx + toggleW / 2 + 8, toggleY + toggleH / 2);
+        }
+        textStyle(NORMAL);
+
+        btnToggle = { x: cx, y: toggleY, w: toggleW, h: toggleH };
+
+        // ── Slider: Time of Day ──
+        cx += sectionW;
+        fill(60);
+        textSize(constrain(canvasWidth * 0.013, 8, 11));
+        textAlign(LEFT, TOP);
+        noStroke();
+        text('Time of Day: ' + formatTime(timeOfDay), cx, cy);
+
+        let sliderW = sectionW - 30;
+        let sliderY = cy + 18;
+        let sliderH = 8;
+
+        // Track background
+        fill(200);
+        noStroke();
+        rect(cx, sliderY + 10, sliderW, sliderH, 4);
+
+        // Time-of-day gradient on track
+        for (let px = 0; px < sliderW; px++) {
+            let t = px / sliderW;
+            let hour = lerp(6, 22, t);
+            let brightness;
+            if (hour < 8) brightness = map(hour, 6, 8, 60, 225);
+            else if (hour < 17) brightness = 225;
+            else brightness = map(hour, 17, 22, 225, 60);
+            fill(brightness, brightness, min(255, brightness + 30));
+            noStroke();
+            rect(cx + px, sliderY + 10, 1, sliderH);
+        }
+
+        // Slider knob
+        let timeFrac = map(timeOfDay, 6, 22, 0, 1);
+        let timeKnobX = cx + timeFrac * sliderW;
+        fill(70, 130, 210);
+        stroke(50, 100, 180);
+        strokeWeight(1.5);
+        ellipse(timeKnobX, sliderY + 10 + sliderH / 2, 16, 16);
+
+        // Tick labels
+        noStroke();
+        fill(120);
+        textSize(constrain(canvasWidth * 0.01, 7, 9));
+        textAlign(CENTER, TOP);
+        text('6AM', cx, sliderY + 22);
+        text('2PM', cx + sliderW / 2, sliderY + 22);
+        text('10PM', cx + sliderW, sliderY + 22);
+
+        sliderTime = { x: cx, y: sliderY + 2, w: sliderW, h: 28 };
+
+        // ── Slider: Outdoor Temperature ──
+        cx += sectionW;
+        fill(60);
+        textSize(constrain(canvasWidth * 0.013, 8, 11));
+        textAlign(LEFT, TOP);
+        noStroke();
+        text('Outdoor Temp: ' + nf(outdoorTemp, 1, 0) + String.fromCharCode(176) + 'F', cx, cy);
+
+        // Track background
+        fill(200);
+        noStroke();
+        rect(cx, sliderY + 10, sliderW, sliderH, 4);
+
+        // Temperature gradient on track
+        for (let px = 0; px < sliderW; px++) {
+            let t = px / sliderW;
+            let rr = lerp(80, 230, t);
+            let gg = lerp(160, 55, t);
+            let bb = lerp(220, 40, t);
+            fill(rr, gg, bb);
+            noStroke();
+            rect(cx + px, sliderY + 10, 1, sliderH);
+        }
+
+        // Slider knob
+        let tempFrac = map(outdoorTemp, 70, 100, 0, 1);
+        let tempKnobX = cx + tempFrac * sliderW;
+        fill(220, 100, 40);
+        stroke(180, 70, 30);
+        strokeWeight(1.5);
+        ellipse(tempKnobX, sliderY + 10 + sliderH / 2, 16, 16);
+
+        // Tick labels
+        noStroke();
+        fill(120);
+        textSize(constrain(canvasWidth * 0.01, 7, 9));
+        textAlign(CENTER, TOP);
+        text('70' + String.fromCharCode(176) + 'F', cx, sliderY + 22);
+        text('85' + String.fromCharCode(176) + 'F', cx + sliderW / 2, sliderY + 22);
+        text('100' + String.fromCharCode(176) + 'F', cx + sliderW, sliderY + 22);
+
+        sliderTemp = { x: cx, y: sliderY + 2, w: sliderW, h: 28 };
+
+        // ── Conference Meeting Button ──
+        cx += sectionW;
+        let btnW = min(sectionW - 20, 170);
+        let btnH = 34;
+        let btnY = cy + 12;
+
+        if (conferenceMeeting) {
+            fill(225, 120, 40);
+            stroke(185, 90, 30);
+        } else {
+            fill(70, 140, 210);
+            stroke(50, 110, 180);
+        }
+        strokeWeight(1.5);
+        rect(cx, btnY, btnW, btnH, 8);
+
+        fill(255);
+        noStroke();
+        textSize(constrain(canvasWidth * 0.014, 9, 12));
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        if (conferenceMeeting) {
+            text('Meeting Active (' + ceil(conferenceTimer / 60) + 's)', cx + btnW / 2, btnY + btnH / 2);
+        } else {
+            text('Simulate Conference', cx + btnW / 2, btnY + btnH / 2 - 5);
+            textStyle(NORMAL);
+            fill(210);
+            textSize(constrain(canvasWidth * 0.011, 7, 9));
+            text('Meeting', cx + btnW / 2, btnY + btnH / 2 + 10);
+        }
+        textStyle(NORMAL);
+
+        btnConference = { x: cx, y: btnY, w: btnW, h: btnH };
+
+        pop();
+    }
+
+    // ── Utility ──
+
+    function formatTime(hour) {
+        let h = floor(hour);
+        let m = floor((hour - h) * 60);
+        let period = h >= 12 ? 'PM' : 'AM';
+        let displayH = h > 12 ? h - 12 : h;
+        if (displayH === 0) displayH = 12;
+        return displayH + ':' + nf(m, 2) + ' ' + period;
+    }
+
+    function isInside(mx, my, btn) {
+        return mx >= btn.x && mx <= btn.x + btn.w &&
+               my >= btn.y && my <= btn.y + btn.h;
+    }
+
+    // ── Mouse Interaction ──
+
+    function mousePressed() {
+        // Toggle mode button
+        if (btnToggle.w && isInside(mouseX, mouseY, btnToggle)) {
+            aiBalanced = !aiBalanced;
+            return;
+        }
+
+        // Conference meeting button
+        if (btnConference.w && isInside(mouseX, mouseY, btnConference)) {
+            conferenceMeeting = true;
+            conferenceTimer = 600; // 10 seconds at 60 fps
+            return;
+        }
+
+        // Time slider
+        if (sliderTime.w && isInside(mouseX, mouseY, sliderTime)) {
+            draggingTime = true;
+            updateTimeSlider();
+        }
+
+        // Temperature slider
+        if (sliderTemp.w && isInside(mouseX, mouseY, sliderTemp)) {
+            draggingTemp = true;
+            updateTempSlider();
+        }
+    }
+
+    function mouseDragged() {
+        if (draggingTime) updateTimeSlider();
+        if (draggingTemp) updateTempSlider();
+    }
+
+    function mouseReleased() {
+        draggingTime = false;
+        draggingTemp = false;
+    }
+
+    function updateTimeSlider() {
+        let frac = constrain((mouseX - sliderTime.x) / sliderTime.w, 0, 1);
+        timeOfDay = lerp(6, 22, frac);
+    }
+
+    function updateTempSlider() {
+        let frac = constrain((mouseX - sliderTemp.x) / sliderTemp.w, 0, 1);
+        outdoorTemp = lerp(70, 100, frac);
+    }
+
+    // ── Touch support ──
+
+    function touchStarted() {
+        mousePressed();
+        return false;
+    }
+
+    function touchMoved() {
+        mouseDragged();
+        return false;
+    }
+
+    function touchEnded() {
+        mouseReleased();
+        return false;
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "title": "Hydraulic System Diagnostics",
+  "chapter": 8,
+  "type": "microsim",
+  "bloom_level": "L4",
+  "bloom_verb": ["differentiate", "examine"],
+  "learning_objective": "Analyze sensor data to differentiate between fault conditions in hydraulic systems",
+  "technology": "p5.js"
+}

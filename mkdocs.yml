@@ -24,6 +24,7 @@ nav:
     - 10. Fans: chapters/10-fan/index.md
     - 11. Systems and Software: chapters/11-systems/index.md
     - 12. Safety: chapters/12-safety/index.md
+    - 13. Pneumatic Conveying: chapters/13-pneumatic-conveying/index.md
 
   - Prompts:
     - Introduction: prompts/index.md
@@ -47,6 +48,46 @@ nav:
     - PLC Control Loop: sims/plc-control-loop/index.md
     - Data Decision Pipeline: sims/data-decision-pipeline/index.md
     - Maintenance Workflow Comparison: sims/maintenance-workflow-comparison/index.md
+    - HVAC Airflow Path: sims/hvac-airflow-path/index.md
+    - HVAC Refrigerant Cycle: sims/hvac-refrigerant-cycle/index.md
+    - HVAC Maintenance Checklist: sims/hvac-maintenance-checklist/index.md
+    - HVAC Monitoring Dashboard: sims/hvac-monitoring-dashboard/index.md
+    - HVAC Load Balancing: sims/hvac-load-balancing/index.md
+    - HVAC Energy Savings: sims/hvac-energy-savings/index.md
+    - Vacuum Pump Types: sims/vacuum-pump-types/index.md
+    - Vacuum System Diagram: sims/vacuum-system-diagram/index.md
+    - Vacuum Leak Detection: sims/vacuum-leak-detection/index.md
+    - Vacuum Pressure Monitor: sims/vacuum-pressure-monitor/index.md
+    - Vacuum Maintenance Checklist: sims/vacuum-maintenance-checklist/index.md
+    - Vacuum Energy Comparison: sims/vacuum-energy-comparison/index.md
+    - Compressed Air Compressor Types: sims/compressed-air-compressor-types/index.md
+    - Compressed Air Treatment Path: sims/compressed-air-treatment-path/index.md
+    - Compressed Air Maintenance Checklist: sims/compressed-air-maintenance-checklist/index.md
+    - Compressed Air Leak Detector: sims/compressed-air-leak-detector/index.md
+    - Compressed Air System Optimizer: sims/compressed-air-system-optimizer/index.md
+    - Compressed Air Energy Comparison: sims/compressed-air-energy-comparison/index.md
+    - Cooling Tower Types: sims/cooling-tower-types/index.md
+    - Cooling Water Treatment Cycle: sims/cooling-water-treatment-cycle/index.md
+    - Cooling Water Quality Monitor: sims/cooling-water-quality-monitor/index.md
+    - Cooling Corrosion and Scale Sim: sims/cooling-corrosion-scale-sim/index.md
+    - Cooling Maintenance Checklist: sims/cooling-maintenance-checklist/index.md
+    - Cooling Energy Comparison: sims/cooling-energy-comparison/index.md
+    - Pneumatic Conveying Modes: sims/pneumatic-conveying-modes/index.md
+    - Pneumatic System Configurations: sims/pneumatic-system-configs/index.md
+    - Pneumatic Pipeline Calculator: sims/pneumatic-pipeline-calculator/index.md
+    - Pneumatic Material Selector: sims/pneumatic-material-selector/index.md
+    - Pneumatic Troubleshooter: sims/pneumatic-troubleshooter/index.md
+    - Pneumatic Energy Comparison: sims/pneumatic-energy-comparison/index.md
+    - Pneumatic Maintenance Checklist: sims/pneumatic-maintenance-checklist/index.md
+    - Dust Collector Types: sims/dust-collector-types/index.md
+    - Dust System Layout: sims/dust-system-layout/index.md
+    - Dust Maintenance Checklist: sims/dust-maintenance-checklist/index.md
+    - Dust Airflow Monitor: sims/dust-airflow-monitor/index.md
+    - Dust Energy Comparison: sims/dust-energy-comparison/index.md
+    - Hydraulic Pump Types: sims/hydraulic-pump-types/index.md
+    - Hydraulic Schematic Symbols: sims/hydraulic-schematic-symbols/index.md
+    - Hydraulic Diagnostics: sims/hydraulic-diagnostics/index.md
+    - Hydraulic Predictive Maintenance: sims/hydraulic-predictive-maintenance/index.md
   - FAQ: faq.md
   - Glossary: glossary.md
   - How We Built This Site: how-we-built-this-site.md

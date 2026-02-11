@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydraulic Schematic Symbols Guide</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .controls h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .quiz-toggle {
+            background: white;
+            color: #1976d2;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-toggle:hover {
+            background: #e3f2fd;
+            transform: scale(1.05);
+        }
+
+        .quiz-toggle.active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .tab-container {
+            background: white;
+            border-bottom: 2px solid #ddd;
+            padding: 0;
+            display: flex;
+            gap: 0;
+            flex-wrap: wrap;
+            padding: 10px 20px;
+        }
+
+        .tab {
+            background: #f0f0f0;
+            border: none;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: #1976d2;
+            color: white;
+        }
+
+        .content {
+            flex: 1;
+            overflow: hidden;
+            background: white;
+            position: relative;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        .quiz-mode {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+        }
+
+        .quiz-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .quiz-score {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .quiz-symbol {
+            border: 3px solid #1976d2;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 30px 0;
+            background: #f9f9f9;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 30px 0;
+        }
+
+        .option-btn {
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            padding: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .option-btn:hover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+        }
+
+        .option-btn.correct {
+            background: #4caf50;
+            color: white;
+            border-color: #388e3c;
+        }
+
+        .option-btn.incorrect {
+            background: #f44336;
+            color: white;
+            border-color: #d32f2f;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .feedback {
+            font-size: 16px;
+            margin-top: 20px;
+            font-weight: 600;
+            min-height: 24px;
+        }
+
+        .feedback.correct {
+            color: #4caf50;
+        }
+
+        .feedback.incorrect {
+            color: #f44336;
+        }
+
+        .next-btn {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            background: #0d47a1;
+            transform: scale(1.05);
+        }
+
+        .legend {
+            background: #f9f9f9;
+            padding: 12px 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="controls">
+            <h1>Hydraulic Schematic Symbols Guide</h1>
+            <button class="quiz-toggle" id="quizToggle">Enter Quiz Mode</button>
+        </div>
+    </div>
+
+    <div class="tab-container" id="tabContainer"></div>
+
+    <div class="content">
+        <div id="canvas-container"></div>
+    </div>
+
+    <div class="legend">
+        Hover over symbols to see names | Click for details | ISO 1219 Standard
+    </div>
+
+    <div class="tooltip" id="tooltip" style="display: none;"></div>
+
+    <script>
+        // Symbol definitions with complete ISO 1219 specifications
+        const symbols = {
+            pumps: [
+                {
+                    id: 'fixed-pump',
+                    name: 'Fixed Displacement Pump',
+                    function: 'Produces constant flow at constant speed',
+                    applications: 'Simple systems, constant pressure applications',
+                    draw: (x, y, size, color) => drawFixedPump(x, y, size, color)
+                },
+                {
+                    id: 'variable-pump',
+                    name: 'Variable Displacement Pump',
+                    function: 'Adjustable flow output controlled by load',
+                    applications: 'Energy-efficient systems, proportional control',
+                    draw: (x, y, size, color) => drawVariablePump(x, y, size, color)
+                },
+                {
+                    id: 'bidirectional-pump',
+                    name: 'Bidirectional Pump',
+                    function: 'Produces flow in both directions',
+                    applications: 'Reversible drive systems, forward/reverse motion',
+                    draw: (x, y, size, color) => drawBidirectionalPump(x, y, size, color)
+                },
+                {
+                    id: 'pump-case-drain',
+                    name: 'Pump with Case Drain',
+                    function: 'Removes case leakage back to tank',
+                    applications: 'Variable pumps, closed-loop systems',
+                    draw: (x, y, size, color) => drawPumpCaseDrain(x, y, size, color)
+                }
+            ],
+            actuators: [
+                {
+                    id: 'single-acting-cylinder',
+                    name: 'Single-Acting Cylinder',
+                    function: 'Extends with pressure, retracts with spring',
+                    applications: 'Clamping, pressing, simple linear motion',
+                    draw: (x, y, size, color) => drawSingleActingCylinder(x, y, size, color)
+                },
+                {
+                    id: 'double-acting-cylinder',
+                    name: 'Double-Acting Cylinder',
+                    function: 'Extends and retracts with fluid pressure',
+                    applications: 'Most common actuator, precise positioning',
+                    draw: (x, y, size, color) => drawDoubleActingCylinder(x, y, size, color)
+                },
+                {
+                    id: 'hydraulic-motor',
+                    name: 'Hydraulic Motor',
+                    function: 'Converts fluid pressure to rotational motion',
+                    applications: 'Drive pumps, fans, conveyors, winches',
+                    draw: (x, y, size, color) => drawHydraulicMotor(x, y, size, color)
+                },
+                {
+                    id: 'bidirectional-motor',
+                    name: 'Bidirectional Motor',
+                    function: 'Rotates in both directions',
+                    applications: 'Reversible rotation, forward/reverse drives',
+                    draw: (x, y, size, color) => drawBidirectionalMotor(x, y, size, color)
+                }
+            ],
+            valves_directional: [
+                {
+                    id: '2-2-valve',
+                    name: '2/2 Directional Control Valve',
+                    function: 'Two ports, two positions - on/off control',
+                    applications: 'Simple on/off circuits, pilot control',
+                    draw: (x, y, size, color) => draw2x2Valve(x, y, size, color)
+                },
+                {
+                    id: '4-2-valve',
+                    name: '4/2 Directional Control Valve',
+                    function: 'Four ports, two positions - reverses flow direction',
+                    applications: 'Cylinder extension/retraction, motor reversal',
+                    draw: (x, y, size, color) => draw4x2Valve(x, y, size, color)
+                },
+                {
+                    id: '4-3-valve',
+                    name: '4/3 Directional Control Valve',
+                    function: 'Four ports, three positions - forward/neutral/reverse',
+                    applications: 'Proportional control, smooth motion transitions',
+                    draw: (x, y, size, color) => draw4x3Valve(x, y, size, color)
+                }
+            ],
+            valves_pressure: [
+                {
+                    id: 'relief-valve',
+                    name: 'Relief Valve (Pressure)',
+                    function: 'Limits maximum system pressure',
+                    applications: 'Overpressure protection, system safety',
+                    draw: (x, y, size, color) => drawReliefValve(x, y, size, color)
+                },
+                {
+                    id: 'reducing-valve',
+                    name: 'Pressure Reducing Valve',
+                    function: 'Reduces pressure in secondary line',
+                    applications: 'Multi-pressure circuits, auxiliary controls',
+                    draw: (x, y, size, color) => drawReducingValve(x, y, size, color)
+                },
+                {
+                    id: 'check-valve',
+                    name: 'Check Valve',
+                    function: 'Allows flow one direction only',
+                    applications: 'Backflow prevention, load holding',
+                    draw: (x, y, size, color) => drawCheckValve(x, y, size, color)
+                }
+            ],
+            accessories: [
+                {
+                    id: 'filter',
+                    name: 'Filter',
+                    function: 'Removes contaminant particles from fluid',
+                    applications: 'Fluid maintenance, component protection',
+                    draw: (x, y, size, color) => drawFilter(x, y, size, color)
+                },
+                {
+                    id: 'accumulator',
+                    name: 'Accumulator (Gas-Charged)',
+                    function: 'Stores energy and stabilizes pressure',
+                    applications: 'Shock absorption, peak load smoothing',
+                    draw: (x, y, size, color) => drawAccumulator(x, y, size, color)
+                },
+                {
+                    id: 'reservoir',
+                    name: 'Reservoir (Tank)',
+                    function: 'Stores hydraulic fluid for system',
+                    applications: 'All hydraulic systems, fluid cooling',
+                    draw: (x, y, size, color) => drawReservoir(x, y, size, color)
+                },
+                {
+                    id: 'flow-control',
+                    name: 'Flow Control Valve',
+                    function: 'Adjusts fluid flow rate',
+                    applications: 'Speed control, metering applications',
+                    draw: (x, y, size, color) => drawFlowControl(x, y, size, color)
+                }
+            ]
+        };
+
+        // Drawing functions for each symbol
+        function drawFixedPump(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s);
+            fill(color);
+            triangle(-s/6, -s/4, s/6, -s/4, 0, s/4);
+            pop();
+        }
+
+        function drawVariablePump(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s);
+            fill(color);
+            triangle(-s/6, -s/4, s/6, -s/4, 0, s/4);
+            stroke(color);
+            strokeWeight(2);
+            noFill();
+            line(-s/4, -s/6, s/4, s/6);
+            pop();
+        }
+
+        function drawBidirectionalPump(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s);
+            fill(color);
+            triangle(-s/6, -s/3, s/6, -s/3, 0, 0);
+            triangle(-s/6, s/3, s/6, s/3, 0, 0);
+            pop();
+        }
+
+        function drawPumpCaseDrain(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s);
+            fill(color);
+            triangle(-s/6, -s/4, s/6, -s/4, 0, s/4);
+            stroke(color);
+            strokeWeight(1.5);
+            noFill();
+            line(s/3, s/4, s/2, s/2);
+            pop();
+        }
+
+        function drawSingleActingCylinder(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            rect(-s/2, -s/4, s, s/2);
+            circle(s/2, 0, s/6);
+            line(s/2 + s/6, 0, s/2 + s/3, 0);
+            line(-s/2, -s/4, -s/2 - s/6, -s/4);
+            pop();
+        }
+
+        function drawDoubleActingCylinder(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            rect(-s/2, -s/4, s, s/2);
+            circle(s/2, 0, s/6);
+            line(s/2 + s/6, 0, s/2 + s/3, 0);
+            line(-s/2, -s/4, -s/2 - s/6, -s/4);
+            line(-s/2, s/4, -s/2 - s/6, s/4);
+            pop();
+        }
+
+        function drawHydraulicMotor(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s);
+            noFill();
+            stroke(color);
+            triangle(-s/6, -s/4, s/6, -s/4, 0, s/4);
+            pop();
+        }
+
+        function drawBidirectionalMotor(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s);
+            noFill();
+            stroke(color);
+            triangle(-s/6, -s/3, s/6, -s/3, 0, 0);
+            triangle(-s/6, s/3, s/6, s/3, 0, 0);
+            pop();
+        }
+
+        function draw2x2Valve(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            rect(-s/2, -s/4, s/2, s/2);
+            rect(0, -s/4, s/2, s/2);
+            line(-s/3, -s/4, -s/3, s/4);
+            pop();
+        }
+
+        function draw4x2Valve(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            rect(-s/2, -s/3, s/2, s/3);
+            rect(0, -s/3, s/2, s/3);
+            line(-s/3, -s/3, s/3, s/3);
+            line(-s/3, s/3, s/3, -s/3);
+            pop();
+        }
+
+        function draw4x3Valve(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            rect(-s/2, -s/3, s/3, s/3);
+            rect(-s/6, -s/3, s/3, s/3);
+            rect(s/6, -s/3, s/3, s/3);
+            line(-s/3, -s/3, -s/3, s/3);
+            line(0, -s/3, 0, s/3);
+            pop();
+        }
+
+        function drawReliefValve(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s/2);
+            stroke(color);
+            line(0, -s/4, s/3, -s/3);
+            line(s/3, -s/3, s/3, 0);
+            pop();
+        }
+
+        function drawReducingValve(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s/2);
+            stroke(color);
+            line(0, -s/4, s/3, -s/3);
+            line(s/3, -s/3, s/3, s/3);
+            line(-s/3, 0, s/3, 0);
+            pop();
+        }
+
+        function drawCheckValve(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s/2);
+            fill(color);
+            circle(0, 0, s/6);
+            pop();
+        }
+
+        function drawFilter(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            quad(-s/2, -s/2, s/2, -s/3, s/2, s/3, -s/2, s/2);
+            line(-s/3, -s/4, s/3, s/4);
+            line(-s/3, 0, s/3, 0);
+            pop();
+        }
+
+        function drawAccumulator(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            ellipse(0, 0, s, s * 0.6);
+            line(0, -s/3, 0, s/3);
+            pop();
+        }
+
+        function drawReservoir(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            rect(-s/2, -s/3, s, s * 0.6);
+            line(-s/3, -s/3, s/3, -s/3);
+            pop();
+        }
+
+        function drawFlowControl(x, y, s, color) {
+            push();
+            translate(x, y);
+            stroke(color);
+            strokeWeight(2);
+            fill(255);
+            circle(0, 0, s/2);
+            noFill();
+            arc(0, 0, s/3, s/3, 0, PI);
+            line(0, 0, s/4, -s/4);
+            pop();
+        }
+
+        // State management
+        let state = {
+            currentCategory: 'pumps',
+            quizMode: false,
+            quizQuestion: null,
+            quizOptions: [],
+            quizScore: 0,
+            quizTotal: 0,
+            answered: false,
+            hoveredSymbol: null
+        };
+
+        let p5Instance;
+
+        // Initialize tabs
+        function initTabs() {
+            const tabContainer = document.getElementById('tabContainer');
+            tabContainer.innerHTML = '';
+            const categories = ['pumps', 'actuators', 'valves_directional', 'valves_pressure', 'accessories'];
+            const labels = ['Pumps', 'Actuators', 'Directional Valves', 'Pressure Valves', 'Accessories'];
+
+            categories.forEach((cat, i) => {
+                const tab = document.createElement('button');
+                tab.className = 'tab' + (cat === state.currentCategory ? ' active' : '');
+                tab.textContent = labels[i];
+                tab.onclick = () => selectTab(cat);
+                tabContainer.appendChild(tab);
+            });
+        }
+
+        function selectTab(category) {
+            state.currentCategory = category;
+            state.quizMode = false;
+            state.answered = false;
+            initTabs();
+            if (p5Instance) p5Instance.redraw();
+        }
+
+        function toggleQuizMode() {
+            state.quizMode = !state.quizMode;
+            state.quizTotal = 0;
+            state.quizScore = 0;
+            state.answered = false;
+            document.getElementById('quizToggle').classList.toggle('active');
+            document.getElementById('quizToggle').textContent = state.quizMode ? 'Exit Quiz Mode' : 'Enter Quiz Mode';
+            if (state.quizMode) generateQuizQuestion();
+            if (p5Instance) p5Instance.redraw();
+        }
+
+        function generateQuizQuestion() {
+            const allSymbols = Object.values(symbols).flat();
+            state.quizQuestion = allSymbols[Math.floor(Math.random() * allSymbols.length)];
+
+            const wrongChoices = allSymbols.filter(s => s.id !== state.quizQuestion.id);
+            state.quizOptions = [state.quizQuestion];
+
+            for (let i = 0; i < 3; i++) {
+                const randomIdx = Math.floor(Math.random() * wrongChoices.length);
+                state.quizOptions.push(wrongChoices[randomIdx]);
+                wrongChoices.splice(randomIdx, 1);
+            }
+
+            state.quizOptions.sort(() => Math.random() - 0.5);
+            state.answered = false;
+        }
+
+        function checkAnswer(selected) {
+            if (state.answered) return;
+            state.answered = true;
+            state.quizTotal++;
+            if (selected.id === state.quizQuestion.id) {
+                state.quizScore++;
+            }
+        }
+
+        function nextQuestion() {
+            generateQuizQuestion();
+            if (p5Instance) p5Instance.redraw();
+        }
+
+        // p5.js sketch
+        const sketch = (p) => {
+            p5Instance = p;
+
+            p.setup = function() {
+                const container = document.getElementById('canvas-container');
+                if (!container) return;
+                const w = container.offsetWidth;
+                const h = container.offsetHeight;
+                const canvas = p.createCanvas(w, h);
+                canvas.parent('canvas-container');
+            };
+
+            p.draw = function() {
+                p.background(255);
+
+                if (state.quizMode) {
+                    drawQuizMode();
+                } else {
+                    drawReferenceMode();
+                }
+            };
+
+            function drawReferenceMode() {
+                const categorySymbols = symbols[state.currentCategory];
+                const padding = 40;
+                const cols = 2;
+                const rows = Math.ceil(categorySymbols.length / cols);
+                const cellWidth = (p.width - padding * 2) / cols;
+                const cellHeight = (p.height - padding * 2) / rows;
+                const symbolSize = Math.min(cellWidth, cellHeight) * 0.5;
+
+                let index = 0;
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        if (index >= categorySymbols.length) break;
+
+                        const symbol = categorySymbols[index];
+                        const x = padding + col * cellWidth + cellWidth / 2;
+                        const y = padding + row * cellHeight + cellHeight / 2 - 30;
+
+                        const isHovered = state.hoveredSymbol === symbol.id;
+                        const color = isHovered ? '#2196F3' : '#000000';
+
+                        // Draw symbol
+                        symbol.draw(x, y, symbolSize, color);
+
+                        // Draw name
+                        p.fill(0);
+                        p.textSize(12);
+                        p.textAlign(p.CENTER, p.TOP);
+                        p.text(symbol.name, x, y + symbolSize / 2 + 10);
+
+                        // Hover detection
+                        const dist = p.dist(p.mouseX, p.mouseY, x, y);
+                        if (dist < symbolSize / 2 + 20) {
+                            state.hoveredSymbol = symbol.id;
+                            showTooltip(symbol.name, p.mouseX, p.mouseY);
+                        }
+
+                        index++;
+                    }
+                }
+            }
+
+            function drawQuizMode() {
+                p.fill(255);
+                p.rect(p.width / 2 - 250, p.height / 2 - 200, 500, 400);
+
+                p.fill(0);
+                p.textSize(16);
+                p.textAlign(p.CENTER);
+                p.text(`Score: ${state.quizScore} / ${state.quizTotal}`, p.width / 2, p.height / 2 - 170);
+
+                p.textSize(18);
+                p.text('Identify the symbol:', p.width / 2, p.height / 2 - 120);
+
+                // Draw symbol in quiz
+                const symbolSize = 80;
+                state.quizQuestion.draw(p.width / 2, p.height / 2 - 40, symbolSize, '#000000');
+
+                p.textSize(14);
+                p.textAlign(p.CENTER);
+                p.text('Click on the correct option below:', p.width / 2, p.height / 2 + 80);
+            }
+        };
+
+        // Utility functions
+        function showTooltip(text, x, y) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.textContent = text;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (x + 10) + 'px';
+            tooltip.style.top = (y + 10) + 'px';
+        }
+
+        // Event listeners
+        document.getElementById('quizToggle').addEventListener('click', toggleQuizMode);
+
+        // Initialize p5 sketch
+        new p5(sketch);
+
+        // Initialize tabs on load
+        window.addEventListener('load', () => {
+            initTabs();
+        });
+
+        // Clear tooltip on mouse leave
+        document.getElementById('canvas-container').addEventListener('mouseleave', () => {
+            state.hoveredSymbol = null;
+            document.getElementById('tooltip').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

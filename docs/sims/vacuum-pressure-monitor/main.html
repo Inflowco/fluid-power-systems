@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacuum Pressure Monitoring Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ========================================================================
+    // Vacuum Pressure Monitoring Dashboard MicroSim
+    // Professional industrial monitoring dashboard with fault scenario diagnosis
+    // ========================================================================
+
+    // -- Layout constants --
+    let cW, cH;
+    let topBarH = 48;
+    let bottomPanelH = 200;
+    let minWidth = 900;
+    let minHeight = 620;
+
+    // -- Color palette --
+    const COL_NAVY = [26, 42, 74];
+    const COL_NAVY_LIGHT = [36, 58, 102];
+    const COL_WHITE = [255, 255, 255];
+    const COL_PANEL_BG = [245, 247, 250];
+    const COL_BORDER = [210, 215, 225];
+    const COL_TEXT = [40, 45, 55];
+    const COL_TEXT_LIGHT = [120, 130, 145];
+    const COL_GREEN = [34, 170, 80];
+    const COL_YELLOW = [230, 180, 30];
+    const COL_RED = [210, 50, 50];
+    const COL_BLUE = [40, 120, 210];
+    const COL_DEEP_BLUE = [20, 60, 140];
+    const COL_LIGHT_BLUE = [100, 175, 230];
+
+    // -- Simulated clock --
+    let simTime;
+    let simDay = 0; // 0-based day index for trend
+
+    // -- Scenario state --
+    let currentScenario = 'normal';
+    let scenarioTransition = 0; // 0 to 1 for smooth transitions
+    let targetValues = {};
+    let currentValues = {};
+
+    // -- System data model --
+    let sysData = {
+        pumpPressure: -25.0,    // inHg (vacuum)
+        receiverPressure: -24.5,
+        lineAPressure: -23.8,
+        lineBPressure: -23.5,
+        motorCurrent: 12.5,     // amps
+        motorCurrentNormal: 12.5,
+        exhaustTemp: 165,       // deg F
+        exhaustTempNormal: 165,
+        vibration: 0.08,        // in/s
+        vibrationNormal: 0.08,
+        oilCondition: 'Good',   // Good, Marginal, Replace
+        oilConditionVal: 0,     // 0=Good, 1=Marginal, 2=Replace
+        evacuationTime: 45,     // seconds
+        evacuationBaseline: 45,
+        hoursSinceService: 320
+    };
+
+    // -- Normal baselines --
+    const NORMAL = {
+        pumpPressure: -25.0,
+        receiverPressure: -24.5,
+        lineAPressure: -23.8,
+        lineBPressure: -23.5,
+        motorCurrent: 12.5,
+        exhaustTemp: 165,
+        vibration: 0.08,
+        oilConditionVal: 0,
+        evacuationTime: 45,
+        hoursSinceService: 320
+    };
+
+    // -- Trend data (7 days of history, 1 point per ~2 hours = 84 points) --
+    let TREND_POINTS = 84;
+    let trendData = {};
+    let trendKeys = ['pumpPressure', 'receiverPressure', 'lineAPressure', 'lineBPressure',
+                     'motorCurrent', 'exhaustTemp', 'vibration', 'evacuationTime'];
+    let trendLabels = {
+        pumpPressure: 'Pump Pressure (inHg)',
+        receiverPressure: 'Receiver Pressure (inHg)',
+        lineAPressure: 'Line A Pressure (inHg)',
+        lineBPressure: 'Line B Pressure (inHg)',
+        motorCurrent: 'Motor Current (A)',
+        exhaustTemp: 'Exhaust Temp (\u00B0F)',
+        vibration: 'Vibration (in/s)',
+        evacuationTime: 'Evacuation Time (s)'
+    };
+    let selectedTrendParam = 'pumpPressure';
+
+    // -- AI Prediction --
+    let showPrediction = false;
+    let predictionData = [];
+
+    // -- Popup state --
+    let popupActive = false;
+    let popupComponent = '';
+    let popupX = 0;
+    let popupY = 0;
+
+    // -- Button regions --
+    let scenarioBtns = [];
+    let trendDropdown = { x: 0, y: 0, w: 0, h: 0, open: false };
+    let trendDropdownOptions = [];
+    let aiPredBtn = { x: 0, y: 0, w: 0, h: 0 };
+
+    // -- Schematic component hit zones --
+    let componentZones = {};
+
+    // -- Scenario definitions --
+    const SCENARIOS = {
+        normal: {
+            label: 'Normal Operation',
+            pumpPressure: -25.0,
+            receiverPressure: -24.5,
+            lineAPressure: -23.8,
+            lineBPressure: -23.5,
+            motorCurrent: 12.5,
+            exhaustTemp: 165,
+            vibration: 0.08,
+            oilConditionVal: 0,
+            evacuationTime: 45,
+            trendSlope: 0 // no degradation over days
+        },
+        leak: {
+            label: 'Developing Leak',
+            pumpPressure: -22.0,
+            receiverPressure: -20.5,
+            lineAPressure: -18.0,
+            lineBPressure: -17.5,
+            motorCurrent: 14.8,
+            exhaustTemp: 172,
+            vibration: 0.10,
+            oilConditionVal: 0,
+            evacuationTime: 68,
+            trendSlope: 1 // pressure rising over days
+        },
+        pumpWear: {
+            label: 'Pump Wear',
+            pumpPressure: -21.5,
+            receiverPressure: -20.8,
+            lineAPressure: -20.0,
+            lineBPressure: -19.5,
+            motorCurrent: 15.5,
+            exhaustTemp: 195,
+            vibration: 0.28,
+            oilConditionVal: 0,
+            evacuationTime: 62,
+            trendSlope: 1
+        },
+        oilDeg: {
+            label: 'Oil Degradation',
+            pumpPressure: -23.5,
+            receiverPressure: -23.0,
+            lineAPressure: -22.2,
+            lineBPressure: -22.0,
+            motorCurrent: 13.2,
+            exhaustTemp: 185,
+            vibration: 0.12,
+            oilConditionVal: 1,
+            evacuationTime: 52,
+            trendSlope: 0.5
+        }
+    };
+
+    // ========================================================================
+    // Initialization
+    // ========================================================================
+
+    function setup() {
+        cW = max(minWidth, windowWidth);
+        cH = max(minHeight, windowHeight);
+        let canvas = createCanvas(cW, cH);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+
+        simTime = new Date();
+        simTime.setHours(10, 15, 0, 0);
+
+        initTrendData('normal');
+        initCurrentValues();
+    }
+
+    function initCurrentValues() {
+        let sc = SCENARIOS[currentScenario];
+        for (let key of trendKeys) {
+            currentValues[key] = sc[key];
+        }
+        currentValues.oilConditionVal = sc.oilConditionVal;
+    }
+
+    function initTrendData(scenarioKey) {
+        let sc = SCENARIOS[scenarioKey];
+        for (let key of trendKeys) {
+            trendData[key] = [];
+            let baseVal = NORMAL[key]; // start from normal
+            let endVal = sc[key];
+            for (let i = 0; i < TREND_POINTS; i++) {
+                let t = i / (TREND_POINTS - 1); // 0 to 1 over 7 days
+                let dayProgress = t * sc.trendSlope;
+                let val = baseVal + (endVal - baseVal) * dayProgress;
+                val += (Math.random() - 0.5) * getNoiseLevel(key);
+                trendData[key].push(val);
+            }
+        }
+        generatePrediction(scenarioKey);
+    }
+
+    function getNoiseLevel(key) {
+        switch (key) {
+            case 'pumpPressure': return 0.3;
+            case 'receiverPressure': return 0.3;
+            case 'lineAPressure': return 0.4;
+            case 'lineBPressure': return 0.4;
+            case 'motorCurrent': return 0.3;
+            case 'exhaustTemp': return 2.0;
+            case 'vibration': return 0.01;
+            case 'evacuationTime': return 1.5;
+            default: return 0.5;
+        }
+    }
+
+    function generatePrediction(scenarioKey) {
+        let sc = SCENARIOS[scenarioKey];
+        predictionData = [];
+        let predPoints = 48; // 14 more days
+        for (let key of trendKeys) {
+            predictionData[key] = [];
+            let lastVal = trendData[key][trendData[key].length - 1];
+            let degradationRate = (sc[key] - NORMAL[key]) / 7; // per day rate
+            for (let i = 0; i < predPoints; i++) {
+                let dayOffset = (i + 1) * (14.0 / predPoints);
+                let val = lastVal + degradationRate * dayOffset * 0.8;
+                predictionData[key].push({
+                    val: val,
+                    upper: val + getNoiseLevel(key) * 2 * (1 + dayOffset * 0.1),
+                    lower: val - getNoiseLevel(key) * 2 * (1 + dayOffset * 0.1)
+                });
+            }
+        }
+    }
+
+    // ========================================================================
+    // Simulation update
+    // ========================================================================
+
+    function updateSimulation() {
+        // Advance simulated clock by 10 minutes per real second (at 60fps)
+        simTime = new Date(simTime.getTime() + 10000);
+
+        let sc = SCENARIOS[currentScenario];
+        let n = getNoiseLevel;
+
+        // Smoothly interpolate toward target scenario values
+        for (let key of trendKeys) {
+            let target = sc[key] + (Math.random() - 0.5) * n(key);
+            currentValues[key] = currentValues[key] * 0.95 + target * 0.05;
+        }
+        currentValues.oilConditionVal = sc.oilConditionVal;
+
+        // Update sysData from currentValues
+        sysData.pumpPressure = currentValues.pumpPressure;
+        sysData.receiverPressure = currentValues.receiverPressure;
+        sysData.lineAPressure = currentValues.lineAPressure;
+        sysData.lineBPressure = currentValues.lineBPressure;
+        sysData.motorCurrent = currentValues.motorCurrent;
+        sysData.exhaustTemp = currentValues.exhaustTemp;
+        sysData.vibration = currentValues.vibration;
+        sysData.evacuationTime = currentValues.evacuationTime;
+        sysData.oilConditionVal = currentValues.oilConditionVal;
+        sysData.oilCondition = ['Good', 'Marginal', 'Replace'][Math.round(constrain(sysData.oilConditionVal, 0, 2))];
+
+        // Push trend data every ~100 frames (represents ~2h simulated)
+        if (frameCount % 100 === 0) {
+            for (let key of trendKeys) {
+                trendData[key].push(currentValues[key]);
+                if (trendData[key].length > TREND_POINTS + 20) {
+                    trendData[key].shift();
+                }
+            }
+        }
+    }
+
+    // ========================================================================
+    // Overall status
+    // ========================================================================
+
+    function getOverallStatus() {
+        if (currentScenario === 'normal') return 'green';
+        if (sysData.pumpPressure > -20 || sysData.vibration > 0.25 || sysData.exhaustTemp > 190) return 'red';
+        if (sysData.pumpPressure > -23 || sysData.vibration > 0.15 || sysData.exhaustTemp > 175 ||
+            sysData.motorCurrent > 14 || sysData.evacuationTime > 55) return 'yellow';
+        return 'green';
+    }
+
+    // ========================================================================
+    // Pressure color coding for vacuum
+    // ========================================================================
+
+    function pressureColor(p) {
+        // p is negative inHg. More negative = better vacuum
+        if (p <= -23) return COL_DEEP_BLUE;     // good vacuum
+        if (p <= -20) return COL_LIGHT_BLUE;     // marginal
+        if (p <= -15) return COL_YELLOW;          // poor
+        return COL_RED;                            // loss of vacuum
+    }
+
+    function pressureColorP5(p) {
+        let c = pressureColor(p);
+        return color(c[0], c[1], c[2]);
+    }
+
+    // ========================================================================
+    // Drawing
+    // ========================================================================
+
+    function draw() {
+        updateSimulation();
+
+        background(COL_PANEL_BG);
+        drawTopBar();
+        drawLeftPanel();
+        drawRightPanel();
+        drawBottomPanel();
+        drawPopup();
+
+        // Draw dropdown overlay last (on top of everything)
+        if (trendDropdown.open) {
+            drawTrendDropdownMenu();
+        }
+    }
+
+    // -- Top Bar --
+    function drawTopBar() {
+        push();
+        noStroke();
+        fill(COL_NAVY);
+        rect(0, 0, cW, topBarH);
+
+        // System name
+        fill(255);
+        textSize(16);
+        textStyle(BOLD);
+        textAlign(LEFT, CENTER);
+        text('Vacuum System VS-100', 16, topBarH / 2);
+        textStyle(NORMAL);
+
+        // Date/time
+        let dtStr = formatDateTime(simTime);
+        fill(180, 195, 220);
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        text(dtStr, cW / 2, topBarH / 2);
+
+        // Overall status indicator
+        let status = getOverallStatus();
+        let statusCol = status === 'green' ? COL_GREEN : (status === 'yellow' ? COL_YELLOW : COL_RED);
+        let statusLabel = status === 'green' ? 'NORMAL' : (status === 'yellow' ? 'WARNING' : 'ALARM');
+
+        fill(statusCol);
+        noStroke();
+        ellipse(cW - 100, topBarH / 2, 16, 16);
+
+        fill(255);
+        textSize(11);
+        textAlign(LEFT, CENTER);
+        text(statusLabel, cW - 88, topBarH / 2);
+
+        // Scenario selector buttons
+        let btnStartX = cW * 0.23;
+        let btnY = topBarH / 2;
+        let btnH = 26;
+        let btnGap = 8;
+        let scenarios = ['normal', 'leak', 'pumpWear', 'oilDeg'];
+        let scenarioLabels = ['Normal Operation', 'Developing Leak', 'Pump Wear', 'Oil Degradation'];
+        scenarioBtns = [];
+
+        textSize(10);
+        for (let i = 0; i < scenarios.length; i++) {
+            let lbl = scenarioLabels[i];
+            let tw = textWidth(lbl) + 16;
+            let bx = btnStartX;
+            if (i > 0) bx = scenarioBtns[i - 1].x + scenarioBtns[i - 1].w + btnGap;
+
+            let isActive = currentScenario === scenarios[i];
+            if (isActive) {
+                fill(70, 130, 210);
+            } else {
+                fill(50, 65, 95);
+            }
+            stroke(80, 110, 160);
+            strokeWeight(1);
+            rect(bx, btnY - btnH / 2, tw, btnH, 4);
+
+            fill(255);
+            noStroke();
+            textAlign(CENTER, CENTER);
+            text(lbl, bx + tw / 2, btnY);
+
+            scenarioBtns.push({ x: bx, y: btnY - btnH / 2, w: tw, h: btnH, scenario: scenarios[i] });
+            btnStartX = bx + tw + btnGap;
+        }
+
+        pop();
+    }
+
+    // -- Left Panel: System Schematic --
+    function drawLeftPanel() {
+        push();
+        let panelX = 10;
+        let panelY = topBarH + 10;
+        let panelW = cW * 0.55;
+        let panelH = cH - topBarH - bottomPanelH - 25;
+
+        // Panel background
+        fill(255);
+        stroke(COL_BORDER);
+        strokeWeight(1);
+        rect(panelX, panelY, panelW, panelH, 6);
+
+        // Panel title
+        fill(COL_TEXT);
+        noStroke();
+        textSize(13);
+        textStyle(BOLD);
+        textAlign(LEFT, TOP);
+        text('SYSTEM SCHEMATIC', panelX + 14, panelY + 10);
+        textStyle(NORMAL);
+
+        // Draw vacuum system schematic
+        let sx = panelX + 30;
+        let sy = panelY + 40;
+        let sw = panelW - 60;
+        let sh = panelH - 60;
+
+        drawSchematic(sx, sy, sw, sh);
+
+        pop();
+    }
+
+    function drawSchematic(sx, sy, sw, sh) {
+        push();
+        componentZones = {};
+
+        // Layout positions
+        let pumpCX = sx + sw * 0.15;
+        let pumpCY = sy + sh * 0.5;
+        let pumpW = sw * 0.18;
+        let pumpH = sh * 0.32;
+
+        let tankCX = sx + sw * 0.45;
+        let tankCY = sy + sh * 0.45;
+        let tankW = sw * 0.16;
+        let tankH = sh * 0.45;
+
+        let lineAEndX = sx + sw * 0.82;
+        let lineAEndY = sy + sh * 0.25;
+
+        let lineBEndX = sx + sw * 0.82;
+        let lineBEndY = sy + sh * 0.65;
+
+        // -- Piping connections --
+        stroke(120, 140, 160);
+        strokeWeight(4);
+        noFill();
+
+        // Pump to receiver tank
+        line(pumpCX + pumpW / 2, pumpCY, tankCX - tankW / 2, tankCY);
+
+        // Tank to Line A
+        let branchX = tankCX + tankW / 2;
+        line(branchX, tankCY, branchX + sw * 0.08, tankCY);
+        line(branchX + sw * 0.08, tankCY, branchX + sw * 0.08, lineAEndY);
+        line(branchX + sw * 0.08, lineAEndY, lineAEndX, lineAEndY);
+
+        // Tank to Line B
+        line(branchX + sw * 0.08, tankCY, branchX + sw * 0.08, lineBEndY);
+        line(branchX + sw * 0.08, lineBEndY, lineBEndX, lineBEndY);
+
+        // -- Vacuum Pump --
+        let pCol = pressureColor(sysData.pumpPressure);
+        fill(pCol[0], pCol[1], pCol[2], 40);
+        stroke(pCol);
+        strokeWeight(2);
+        rect(pumpCX - pumpW / 2, pumpCY - pumpH / 2, pumpW, pumpH, 8);
+
+        // Motor symbol (circle)
+        fill(200, 210, 225);
+        stroke(100);
+        strokeWeight(1.5);
+        ellipse(pumpCX, pumpCY - pumpH / 2 - 15, 28, 28);
+        fill(COL_TEXT);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, CENTER);
+        text('M', pumpCX, pumpCY - pumpH / 2 - 15);
+
+        // Pump label
+        fill(COL_TEXT);
+        textSize(11);
+        textStyle(BOLD);
+        textAlign(CENTER, TOP);
+        text('VACUUM PUMP', pumpCX, pumpCY + pumpH / 2 + 6);
+        textStyle(NORMAL);
+
+        // Pump pressure value
+        fill(pressureColorP5(sysData.pumpPressure));
+        textSize(13);
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text(nf(sysData.pumpPressure, 1, 1) + '"Hg', pumpCX, pumpCY);
+        textStyle(NORMAL);
+
+        componentZones.pump = { x: pumpCX - pumpW / 2, y: pumpCY - pumpH / 2 - 30, w: pumpW, h: pumpH + 30 };
+
+        // -- Receiver Tank --
+        let tCol = pressureColor(sysData.receiverPressure);
+        fill(tCol[0], tCol[1], tCol[2], 40);
+        stroke(tCol);
+        strokeWeight(2);
+        // Tank shape: rounded rect
+        rect(tankCX - tankW / 2, tankCY - tankH / 2, tankW, tankH, 12);
+
+        // Tank legs
+        stroke(100);
+        strokeWeight(2);
+        line(tankCX - tankW * 0.3, tankCY + tankH / 2, tankCX - tankW * 0.3, tankCY + tankH / 2 + 12);
+        line(tankCX + tankW * 0.3, tankCY + tankH / 2, tankCX + tankW * 0.3, tankCY + tankH / 2 + 12);
+
+        fill(COL_TEXT);
+        noStroke();
+        textSize(11);
+        textStyle(BOLD);
+        textAlign(CENTER, TOP);
+        text('RECEIVER', tankCX, tankCY + tankH / 2 + 16);
+        text('TANK', tankCX, tankCY + tankH / 2 + 28);
+        textStyle(NORMAL);
+
+        fill(pressureColorP5(sysData.receiverPressure));
+        textSize(13);
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text(nf(sysData.receiverPressure, 1, 1) + '"Hg', tankCX, tankCY);
+        textStyle(NORMAL);
+
+        componentZones.tank = { x: tankCX - tankW / 2, y: tankCY - tankH / 2, w: tankW, h: tankH };
+
+        // -- Process Line A --
+        let lineABoxW = sw * 0.18;
+        let lineABoxH = sh * 0.18;
+        let laCol = pressureColor(sysData.lineAPressure);
+        fill(laCol[0], laCol[1], laCol[2], 40);
+        stroke(laCol);
+        strokeWeight(2);
+        rect(lineAEndX - lineABoxW / 2, lineAEndY - lineABoxH / 2, lineABoxW, lineABoxH, 6);
+
+        fill(COL_TEXT);
+        noStroke();
+        textSize(10);
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text('PROCESS LINE A', lineAEndX, lineAEndY - lineABoxH / 2 + 12);
+        textStyle(NORMAL);
+
+        fill(pressureColorP5(sysData.lineAPressure));
+        textSize(12);
+        textStyle(BOLD);
+        text(nf(sysData.lineAPressure, 1, 1) + '"Hg', lineAEndX, lineAEndY + 6);
+        textStyle(NORMAL);
+
+        componentZones.lineA = { x: lineAEndX - lineABoxW / 2, y: lineAEndY - lineABoxH / 2, w: lineABoxW, h: lineABoxH };
+
+        // -- Process Line B --
+        let lineBBoxW = sw * 0.18;
+        let lineBBoxH = sh * 0.18;
+        let lbCol = pressureColor(sysData.lineBPressure);
+        fill(lbCol[0], lbCol[1], lbCol[2], 40);
+        stroke(lbCol);
+        strokeWeight(2);
+        rect(lineBEndX - lineBBoxW / 2, lineBEndY - lineBBoxH / 2, lineBBoxW, lineBBoxH, 6);
+
+        fill(COL_TEXT);
+        noStroke();
+        textSize(10);
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text('PROCESS LINE B', lineBEndX, lineBEndY - lineBBoxH / 2 + 12);
+        textStyle(NORMAL);
+
+        fill(pressureColorP5(sysData.lineBPressure));
+        textSize(12);
+        textStyle(BOLD);
+        text(nf(sysData.lineBPressure, 1, 1) + '"Hg', lineBEndX, lineBEndY + 6);
+        textStyle(NORMAL);
+
+        componentZones.lineB = { x: lineBEndX - lineBBoxW / 2, y: lineBEndY - lineBBoxH / 2, w: lineBBoxW, h: lineBBoxH };
+
+        // -- Pressure gauge symbols on pipes --
+        let gaugeSymbols = [
+            { x: (pumpCX + pumpW / 2 + tankCX - tankW / 2) / 2, y: pumpCY - 16, label: 'PG-1' },
+            { x: branchX + sw * 0.04, y: tankCY - 16, label: 'PG-2' }
+        ];
+        for (let g of gaugeSymbols) {
+            fill(255);
+            stroke(80);
+            strokeWeight(1);
+            ellipse(g.x, g.y, 18, 18);
+            fill(COL_TEXT);
+            noStroke();
+            textSize(7);
+            textAlign(CENTER, CENTER);
+            text('P', g.x, g.y);
+            textSize(7);
+            fill(COL_TEXT_LIGHT);
+            text(g.label, g.x, g.y + 14);
+        }
+
+        // -- Flow direction arrows --
+        drawFlowArrow(pumpCX + pumpW / 2 + 8, pumpCY, pumpCX + pumpW / 2 + 22, pumpCY);
+        drawFlowArrow(branchX + 5, tankCY, branchX + 18, tankCY);
+
+        // -- Legend --
+        let legX = sx + 4;
+        let legY = sy + sh - 50;
+        textSize(9);
+        fill(COL_TEXT_LIGHT);
+        noStroke();
+        textAlign(LEFT, CENTER);
+        let legendItems = [
+            { col: COL_DEEP_BLUE, label: 'Good Vacuum (\u2264 -23"Hg)' },
+            { col: COL_LIGHT_BLUE, label: 'Marginal (-23 to -20"Hg)' },
+            { col: COL_YELLOW, label: 'Poor (-20 to -15"Hg)' },
+            { col: COL_RED, label: 'Loss of Vacuum (> -15"Hg)' }
+        ];
+        for (let i = 0; i < legendItems.length; i++) {
+            let li = legendItems[i];
+            fill(li.col);
+            noStroke();
+            rect(legX, legY + i * 14, 10, 10, 2);
+            fill(COL_TEXT_LIGHT);
+            textAlign(LEFT, CENTER);
+            text(li.label, legX + 14, legY + i * 14 + 5);
+        }
+
+        pop();
+    }
+
+    function drawFlowArrow(x1, y1, x2, y2) {
+        push();
+        stroke(80, 150, 220);
+        strokeWeight(2);
+        fill(80, 150, 220);
+        line(x1, y1, x2, y2);
+        let ang = atan2(y2 - y1, x2 - x1);
+        let sz = 5;
+        triangle(x2, y2,
+                 x2 - sz * cos(ang - PI / 5), y2 - sz * sin(ang - PI / 5),
+                 x2 - sz * cos(ang + PI / 5), y2 - sz * sin(ang + PI / 5));
+        pop();
+    }
+
+    // -- Right Panel: Equipment Status --
+    function drawRightPanel() {
+        push();
+        let panelX = cW * 0.55 + 20;
+        let panelY = topBarH + 10;
+        let panelW = cW - panelX - 10;
+        let panelH = cH - topBarH - bottomPanelH - 25;
+
+        // Panel background
+        fill(255);
+        stroke(COL_BORDER);
+        strokeWeight(1);
+        rect(panelX, panelY, panelW, panelH, 6);
+
+        // Panel title
+        fill(COL_TEXT);
+        noStroke();
+        textSize(13);
+        textStyle(BOLD);
+        textAlign(LEFT, TOP);
+        text('EQUIPMENT STATUS', panelX + 14, panelY + 10);
+        textStyle(NORMAL);
+
+        let mx = panelX + 14;
+        let my = panelY + 36;
+        let rowH = 34;
+        let labelW = panelW * 0.42;
+        let valueW = panelW * 0.28;
+        let statusW = panelW * 0.22;
+
+        // Header
+        fill(COL_TEXT_LIGHT);
+        textSize(9);
+        textAlign(LEFT, TOP);
+        text('PARAMETER', mx, my);
+        text('VALUE', mx + labelW, my);
+        text('STATUS', mx + labelW + valueW, my);
+        my += 18;
+
+        stroke(COL_BORDER);
+        strokeWeight(0.5);
+        line(mx, my - 2, mx + panelW - 28, my - 2);
+        noStroke();
+
+        // Motor current
+        drawStatusRow(mx, my, labelW, valueW, 'Motor Current',
+            nf(sysData.motorCurrent, 1, 1) + ' A',
+            sysData.motorCurrent > 15 ? 'HIGH' : (sysData.motorCurrent > 13.5 ? 'ELEVATED' : 'Normal'),
+            sysData.motorCurrent > 15 ? 'red' : (sysData.motorCurrent > 13.5 ? 'yellow' : 'green'));
+        my += rowH;
+
+        // Exhaust temperature
+        drawStatusRow(mx, my, labelW, valueW, 'Exhaust Temperature',
+            nf(sysData.exhaustTemp, 1, 0) + ' \u00B0F',
+            sysData.exhaustTemp > 190 ? 'HIGH' : (sysData.exhaustTemp > 175 ? 'ELEVATED' : 'Normal'),
+            sysData.exhaustTemp > 190 ? 'red' : (sysData.exhaustTemp > 175 ? 'yellow' : 'green'));
+        my += rowH;
+
+        // Vibration
+        let vibStatus = 'Normal';
+        let vibColor = 'green';
+        if (sysData.vibration > 0.25) { vibStatus = 'ALARM'; vibColor = 'red'; }
+        else if (sysData.vibration > 0.15) { vibStatus = 'WARNING'; vibColor = 'yellow'; }
+        drawStatusRow(mx, my, labelW, valueW, 'Vibration',
+            nf(sysData.vibration, 1, 2) + ' in/s', vibStatus, vibColor);
+        my += rowH;
+
+        // Oil condition
+        let oilColor = sysData.oilCondition === 'Good' ? 'green' : (sysData.oilCondition === 'Marginal' ? 'yellow' : 'red');
+        drawStatusRow(mx, my, labelW, valueW, 'Oil Condition',
+            sysData.oilCondition, sysData.oilCondition, oilColor);
+        my += rowH;
+
+        // Evacuation time
+        let evacPctChange = ((sysData.evacuationTime - sysData.evacuationBaseline) / sysData.evacuationBaseline * 100);
+        let evacStatus = evacPctChange > 30 ? 'SLOW' : (evacPctChange > 10 ? 'ELEVATED' : 'Normal');
+        let evacColor = evacPctChange > 30 ? 'red' : (evacPctChange > 10 ? 'yellow' : 'green');
+        drawStatusRow(mx, my, labelW, valueW, 'Evacuation Time',
+            nf(sysData.evacuationTime, 1, 0) + 's (base: ' + sysData.evacuationBaseline + 's)',
+            evacStatus + ' (' + (evacPctChange >= 0 ? '+' : '') + nf(evacPctChange, 1, 0) + '%)',
+            evacColor);
+        my += rowH;
+
+        // Hours since service
+        let svcColor = sysData.hoursSinceService > 800 ? 'red' : (sysData.hoursSinceService > 500 ? 'yellow' : 'green');
+        drawStatusRow(mx, my, labelW, valueW, 'Hours Since Service',
+            nf(sysData.hoursSinceService, 1, 0) + ' hrs',
+            sysData.hoursSinceService > 800 ? 'OVERDUE' : (sysData.hoursSinceService > 500 ? 'DUE SOON' : 'OK'),
+            svcColor);
+        my += rowH;
+
+        // Separator
+        my += 6;
+        stroke(COL_BORDER);
+        strokeWeight(0.5);
+        line(mx, my, mx + panelW - 28, my);
+        noStroke();
+        my += 10;
+
+        // Scenario diagnosis hint
+        fill(COL_TEXT_LIGHT);
+        textSize(10);
+        textStyle(ITALIC);
+        textAlign(LEFT, TOP);
+        let hint = getScenarioHint();
+        text(hint, mx, my, panelW - 28, panelH - (my - panelY));
+        textStyle(NORMAL);
+
+        pop();
+    }
+
+    function drawStatusRow(x, y, labelW, valueW, label, value, status, statusColor) {
+        push();
+        fill(COL_TEXT);
+        noStroke();
+        textSize(11);
+        textAlign(LEFT, CENTER);
+        text(label, x, y + 10);
+
+        textStyle(BOLD);
+        text(value, x + labelW, y + 10);
+        textStyle(NORMAL);
+
+        let sc = statusColor === 'green' ? COL_GREEN : (statusColor === 'yellow' ? COL_YELLOW : COL_RED);
+        fill(sc[0], sc[1], sc[2], 30);
+        noStroke();
+        let statusX = x + labelW + valueW;
+        let badgeW = textWidth(status) + 14;
+        rect(statusX, y + 2, badgeW, 18, 9);
+
+        fill(sc);
+        textSize(10);
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text(status, statusX + badgeW / 2, y + 11);
+        textStyle(NORMAL);
+        pop();
+    }
+
+    function getScenarioHint() {
+        switch (currentScenario) {
+            case 'normal':
+                return 'All parameters within normal operating range. System running efficiently.';
+            case 'leak':
+                return 'Note: System pressure is gradually rising across all points. Evacuation time increasing. Check for developing leak in vacuum lines or fittings.';
+            case 'pumpWear':
+                return 'Note: Vibration trending upward. Motor current increasing. Ultimate vacuum degrading. Exhaust temperature rising. Schedule pump inspection.';
+            case 'oilDeg':
+                return 'Note: Oil condition indicator yellow. Exhaust temperature elevated. Evacuation time slightly increasing. Consider oil analysis and change.';
+            default: return '';
+        }
+    }
+
+    // -- Bottom Panel: Trend Chart --
+    function drawBottomPanel() {
+        push();
+        let panelX = 10;
+        let panelY = cH - bottomPanelH - 5;
+        let panelW = cW - 20;
+        let panelH = bottomPanelH;
+
+        // Panel background
+        fill(255);
+        stroke(COL_BORDER);
+        strokeWeight(1);
+        rect(panelX, panelY, panelW, panelH, 6);
+
+        // Title and controls row
+        let ctrlY = panelY + 8;
+        fill(COL_TEXT);
+        noStroke();
+        textSize(13);
+        textStyle(BOLD);
+        textAlign(LEFT, CENTER);
+        text('TREND CHART', panelX + 14, ctrlY + 10);
+        textStyle(NORMAL);
+
+        // Dropdown for parameter selection
+        let ddX = panelX + 140;
+        let ddY = ctrlY + 2;
+        let ddW = 200;
+        let ddH = 22;
+        drawTrendDropdown(ddX, ddY, ddW, ddH);
+
+        // AI Prediction button
+        let aiBtnX = ddX + ddW + 20;
+        let aiBtnY = ctrlY + 2;
+        let aiBtnW = 140;
+        let aiBtnH = 22;
+
+        if (showPrediction) {
+            fill(70, 130, 210);
+        } else {
+            fill(50, 65, 95);
+        }
+        stroke(80, 110, 160);
+        strokeWeight(1);
+        rect(aiBtnX, aiBtnY, aiBtnW, aiBtnH, 4);
+
+        fill(255);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, CENTER);
+        text(showPrediction ? 'Hide AI Prediction' : 'Show AI Prediction', aiBtnX + aiBtnW / 2, aiBtnY + aiBtnH / 2);
+
+        aiPredBtn = { x: aiBtnX, y: aiBtnY, w: aiBtnW, h: aiBtnH };
+
+        // Chart area
+        let chartX = panelX + 60;
+        let chartY = panelY + 34;
+        let chartW = panelW - 80;
+        let chartH = panelH - 50;
+
+        drawTrendChartArea(chartX, chartY, chartW, chartH);
+
+        pop();
+    }
+
+    function drawTrendDropdown(x, y, w, h) {
+        push();
+        // Dropdown button
+        fill(255);
+        stroke(COL_BORDER);
+        strokeWeight(1);
+        rect(x, y, w, h, 3);
+
+        fill(COL_TEXT);
+        noStroke();
+        textSize(10);
+        textAlign(LEFT, CENTER);
+        text(trendLabels[selectedTrendParam], x + 8, y + h / 2);
+
+        // Arrow
+        fill(COL_TEXT_LIGHT);
+        textAlign(RIGHT, CENTER);
+        text('\u25BC', x + w - 8, y + h / 2);
+
+        trendDropdown.x = x;
+        trendDropdown.y = y;
+        trendDropdown.w = w;
+        trendDropdown.h = h;
+
+        pop();
+    }
+
+    function drawTrendDropdownMenu() {
+        push();
+        let x = trendDropdown.x;
+        let y = trendDropdown.y + trendDropdown.h;
+        let w = trendDropdown.w;
+        let itemH = 22;
+        let keys = trendKeys;
+
+        // Background
+        fill(255);
+        stroke(COL_BORDER);
+        strokeWeight(1);
+        rect(x, y, w, itemH * keys.length, 3);
+
+        trendDropdownOptions = [];
+        for (let i = 0; i < keys.length; i++) {
+            let iy = y + i * itemH;
+            let isHover = mouseX >= x && mouseX <= x + w && mouseY >= iy && mouseY <= iy + itemH;
+            let isSelected = keys[i] === selectedTrendParam;
+
+            if (isHover) {
+                fill(230, 238, 250);
+                noStroke();
+                rect(x + 1, iy, w - 2, itemH);
+            }
+            if (isSelected) {
+                fill(COL_BLUE);
+            } else {
+                fill(COL_TEXT);
+            }
+            noStroke();
+            textSize(10);
+            textAlign(LEFT, CENTER);
+            text(trendLabels[keys[i]], x + 8, iy + itemH / 2);
+
+            trendDropdownOptions.push({ x: x, y: iy, w: w, h: itemH, key: keys[i] });
+        }
+        pop();
+    }
+
+    function drawTrendChartArea(cx, cy, cw, ch) {
+        push();
+
+        // Chart background
+        fill(250, 251, 253);
+        stroke(COL_BORDER);
+        strokeWeight(1);
+        rect(cx, cy, cw, ch);
+
+        let data = trendData[selectedTrendParam] || [];
+        if (data.length < 2) { pop(); return; }
+
+        // Compute Y range
+        let allVals = data.filter(v => v !== null && !isNaN(v));
+        if (allVals.length === 0) { pop(); return; }
+        let minV = Math.min(...allVals);
+        let maxV = Math.max(...allVals);
+
+        // Include prediction range if showing
+        if (showPrediction && predictionData[selectedTrendParam]) {
+            let preds = predictionData[selectedTrendParam];
+            for (let p of preds) {
+                minV = Math.min(minV, p.lower);
+                maxV = Math.max(maxV, p.upper);
+            }
+        }
+
+        // Get thresholds
+        let thresholds = getTrendThresholds(selectedTrendParam);
+
+        // Include thresholds in range
+        if (thresholds.baseline !== null) {
+            minV = Math.min(minV, thresholds.baseline);
+            maxV = Math.max(maxV, thresholds.baseline);
+        }
+        if (thresholds.warning !== null) {
+            minV = Math.min(minV, thresholds.warning);
+            maxV = Math.max(maxV, thresholds.warning);
+        }
+        if (thresholds.alarm !== null) {
+            minV = Math.min(minV, thresholds.alarm);
+            maxV = Math.max(maxV, thresholds.alarm);
+        }
+
+        let range = maxV - minV;
+        if (range < 1) range = 1;
+        minV -= range * 0.12;
+        maxV += range * 0.12;
+        range = maxV - minV;
+
+        let totalDays = 7 + (showPrediction ? 14 : 0);
+
+        function xPos(dayIndex) {
+            return cx + (dayIndex / totalDays) * cw;
+        }
+        function yPos(v) {
+            return cy + ch - ((v - minV) / range) * ch;
+        }
+
+        // Grid lines
+        stroke(235);
+        strokeWeight(0.5);
+        let yTicks = 5;
+        for (let t = 0; t <= yTicks; t++) {
+            let v = minV + (t / yTicks) * range;
+            let yy = yPos(v);
+            line(cx, yy, cx + cw, yy);
+            // Y-axis label
+            fill(COL_TEXT_LIGHT);
+            noStroke();
+            textSize(9);
+            textAlign(RIGHT, CENTER);
+            text(nf(v, 1, 1), cx - 4, yy);
+            stroke(235);
+            strokeWeight(0.5);
+        }
+
+        // X-axis day labels
+        fill(COL_TEXT_LIGHT);
+        noStroke();
+        textSize(9);
+        textAlign(CENTER, TOP);
+        for (let d = 0; d <= totalDays; d += (totalDays <= 7 ? 1 : 3)) {
+            let xx = xPos(d);
+            text('Day ' + d, xx, cy + ch + 3);
+            stroke(235);
+            strokeWeight(0.5);
+            line(xx, cy, xx, cy + ch);
+            noStroke();
+        }
+
+        // Baseline threshold (dashed green)
+        if (thresholds.baseline !== null) {
+            let yB = yPos(thresholds.baseline);
+            stroke(COL_GREEN);
+            strokeWeight(1);
+            drawingContext.setLineDash([6, 4]);
+            line(cx, yB, cx + cw, yB);
+            drawingContext.setLineDash([]);
+            fill(COL_GREEN);
+            noStroke();
+            textSize(8);
+            textAlign(LEFT, BOTTOM);
+            text('Baseline', cx + 4, yB - 2);
+        }
+
+        // Warning threshold (dashed yellow)
+        if (thresholds.warning !== null) {
+            let yW = yPos(thresholds.warning);
+            stroke(COL_YELLOW);
+            strokeWeight(1);
+            drawingContext.setLineDash([5, 4]);
+            line(cx, yW, cx + cw, yW);
+            drawingContext.setLineDash([]);
+            fill(COL_YELLOW);
+            noStroke();
+            textSize(8);
+            textAlign(LEFT, BOTTOM);
+            text('Warning', cx + 4, yW - 2);
+        }
+
+        // Alarm threshold (dashed red)
+        if (thresholds.alarm !== null) {
+            let yA = yPos(thresholds.alarm);
+            stroke(COL_RED);
+            strokeWeight(1);
+            drawingContext.setLineDash([5, 3]);
+            line(cx, yA, cx + cw, yA);
+            drawingContext.setLineDash([]);
+            fill(COL_RED);
+            noStroke();
+            textSize(8);
+            textAlign(LEFT, BOTTOM);
+            text('Alarm', cx + 4, yA - 2);
+        }
+
+        // AI Prediction confidence band
+        if (showPrediction && predictionData[selectedTrendParam]) {
+            let preds = predictionData[selectedTrendParam];
+            // Confidence band
+            fill(70, 130, 210, 30);
+            noStroke();
+            beginShape();
+            for (let i = 0; i < preds.length; i++) {
+                let dayIdx = 7 + (i + 1) * (14.0 / preds.length);
+                vertex(xPos(dayIdx), yPos(preds[i].upper));
+            }
+            for (let i = preds.length - 1; i >= 0; i--) {
+                let dayIdx = 7 + (i + 1) * (14.0 / preds.length);
+                vertex(xPos(dayIdx), yPos(preds[i].lower));
+            }
+            endShape(CLOSE);
+
+            // Prediction line (dotted)
+            stroke(70, 130, 210);
+            strokeWeight(1.5);
+            drawingContext.setLineDash([3, 3]);
+            noFill();
+            beginShape();
+            // Start from last actual data point
+            let lastActual = data[data.length - 1];
+            vertex(xPos(7), yPos(lastActual));
+            for (let i = 0; i < preds.length; i++) {
+                let dayIdx = 7 + (i + 1) * (14.0 / preds.length);
+                vertex(xPos(dayIdx), yPos(preds[i].val));
+            }
+            endShape();
+            drawingContext.setLineDash([]);
+
+            // Label
+            fill(70, 130, 210);
+            noStroke();
+            textSize(9);
+            textStyle(ITALIC);
+            textAlign(RIGHT, TOP);
+            text('AI Predicted', cx + cw - 4, cy + 4);
+            textStyle(NORMAL);
+        }
+
+        // Main data line
+        stroke(40, 120, 210);
+        strokeWeight(2);
+        noFill();
+        beginShape();
+        for (let i = 0; i < data.length; i++) {
+            if (data[i] === null || isNaN(data[i])) continue;
+            let dayIdx = (i / (data.length - 1)) * 7;
+            vertex(xPos(dayIdx), yPos(data[i]));
+        }
+        endShape();
+
+        // Current value marker
+        if (data.length > 0) {
+            let lastVal = data[data.length - 1];
+            if (lastVal !== null && !isNaN(lastVal)) {
+                let lx = xPos(7);
+                let ly = yPos(lastVal);
+                // Vertical "now" line
+                stroke(COL_TEXT_LIGHT);
+                strokeWeight(0.5);
+                drawingContext.setLineDash([2, 2]);
+                line(lx, cy, lx, cy + ch);
+                drawingContext.setLineDash([]);
+
+                fill(40, 120, 210);
+                noStroke();
+                ellipse(lx, ly, 7, 7);
+
+                fill(COL_TEXT);
+                textSize(10);
+                textStyle(BOLD);
+                textAlign(LEFT, CENTER);
+                text(nf(lastVal, 1, 2), lx + 6, ly);
+                textStyle(NORMAL);
+
+                // "NOW" label
+                fill(COL_TEXT_LIGHT);
+                textSize(8);
+                textAlign(CENTER, BOTTOM);
+                text('NOW', lx, cy - 1);
+            }
+        }
+
+        pop();
+    }
+
+    function getTrendThresholds(key) {
+        // Returns baseline, warning, alarm thresholds
+        // For vacuum: more negative is better, so warnings/alarms are when values rise (less negative)
+        switch (key) {
+            case 'pumpPressure':
+                return { baseline: -25.0, warning: -22.0, alarm: -20.0 };
+            case 'receiverPressure':
+                return { baseline: -24.5, warning: -21.5, alarm: -19.5 };
+            case 'lineAPressure':
+                return { baseline: -23.8, warning: -20.5, alarm: -18.0 };
+            case 'lineBPressure':
+                return { baseline: -23.5, warning: -20.0, alarm: -17.5 };
+            case 'motorCurrent':
+                return { baseline: 12.5, warning: 14.0, alarm: 16.0 };
+            case 'exhaustTemp':
+                return { baseline: 165, warning: 180, alarm: 200 };
+            case 'vibration':
+                return { baseline: 0.08, warning: 0.15, alarm: 0.25 };
+            case 'evacuationTime':
+                return { baseline: 45, warning: 55, alarm: 70 };
+            default:
+                return { baseline: null, warning: null, alarm: null };
+        }
+    }
+
+    // -- Component Popup --
+    function drawPopup() {
+        if (!popupActive) return;
+
+        push();
+        let pw = 220;
+        let ph = 140;
+        let px = constrain(popupX, 10, cW - pw - 10);
+        let py = constrain(popupY, topBarH + 10, cH - bottomPanelH - ph - 10);
+
+        // Shadow
+        fill(0, 0, 0, 30);
+        noStroke();
+        rect(px + 3, py + 3, pw, ph, 6);
+
+        // Background
+        fill(255);
+        stroke(COL_BORDER);
+        strokeWeight(1);
+        rect(px, py, pw, ph, 6);
+
+        // Header
+        fill(COL_NAVY);
+        noStroke();
+        rect(px, py, pw, 26, 6, 6, 0, 0);
+
+        fill(255);
+        textSize(11);
+        textStyle(BOLD);
+        textAlign(LEFT, CENTER);
+        let popTitle = '';
+        let popData = [];
+
+        switch (popupComponent) {
+            case 'pump':
+                popTitle = 'Vacuum Pump Detail';
+                popData = [
+                    ['Inlet Pressure', nf(sysData.pumpPressure, 1, 1) + '"Hg'],
+                    ['Motor Current', nf(sysData.motorCurrent, 1, 1) + ' A'],
+                    ['Exhaust Temp', nf(sysData.exhaustTemp, 1, 0) + ' \u00B0F'],
+                    ['Vibration', nf(sysData.vibration, 1, 3) + ' in/s'],
+                    ['Oil Condition', sysData.oilCondition]
+                ];
+                break;
+            case 'tank':
+                popTitle = 'Receiver Tank Detail';
+                popData = [
+                    ['Tank Pressure', nf(sysData.receiverPressure, 1, 1) + '"Hg'],
+                    ['Capacity', '200 gallons'],
+                    ['Drain Valve', 'Closed'],
+                    ['Relief Valve', 'Set @ -28"Hg']
+                ];
+                break;
+            case 'lineA':
+                popTitle = 'Process Line A Detail';
+                popData = [
+                    ['Line Pressure', nf(sysData.lineAPressure, 1, 1) + '"Hg'],
+                    ['Flow Rate', '35 CFM'],
+                    ['Valve Position', 'Open 85%'],
+                    ['End Use', 'Pick & Place']
+                ];
+                break;
+            case 'lineB':
+                popTitle = 'Process Line B Detail';
+                popData = [
+                    ['Line Pressure', nf(sysData.lineBPressure, 1, 1) + '"Hg'],
+                    ['Flow Rate', '28 CFM'],
+                    ['Valve Position', 'Open 72%'],
+                    ['End Use', 'Vacuum Forming']
+                ];
+                break;
+        }
+
+        text(popTitle, px + 10, py + 13);
+        textStyle(NORMAL);
+
+        // Close X
+        fill(200, 210, 230);
+        textAlign(RIGHT, CENTER);
+        textSize(12);
+        text('\u2715', px + pw - 8, py + 13);
+
+        // Data rows
+        let ry = py + 36;
+        for (let d of popData) {
+            fill(COL_TEXT_LIGHT);
+            textSize(10);
+            textAlign(LEFT, TOP);
+            text(d[0], px + 12, ry);
+            fill(COL_TEXT);
+            textStyle(BOLD);
+            textAlign(RIGHT, TOP);
+            text(d[1], px + pw - 12, ry);
+            textStyle(NORMAL);
+            ry += 18;
+        }
+
+        pop();
+    }
+
+    // ========================================================================
+    // Utility
+    // ========================================================================
+
+    function formatDateTime(dt) {
+        let days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        let h = dt.getHours();
+        let m = dt.getMinutes();
+        let ampm = h >= 12 ? 'PM' : 'AM';
+        let h12 = h % 12;
+        if (h12 === 0) h12 = 12;
+        return days[dt.getDay()] + ', ' + months[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear() +
+               '  ' + nf(h12, 1) + ':' + nf(m, 2) + ' ' + ampm;
+    }
+
+    function isInsideRect(mx, my, r) {
+        return mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h;
+    }
+
+    // ========================================================================
+    // Mouse Interaction
+    // ========================================================================
+
+    function mousePressed() {
+        // If dropdown is open, check dropdown options first
+        if (trendDropdown.open) {
+            for (let opt of trendDropdownOptions) {
+                if (isInsideRect(mouseX, mouseY, opt)) {
+                    selectedTrendParam = opt.key;
+                    trendDropdown.open = false;
+                    return;
+                }
+            }
+            // Click outside dropdown closes it
+            trendDropdown.open = false;
+            return;
+        }
+
+        // Scenario buttons
+        for (let btn of scenarioBtns) {
+            if (isInsideRect(mouseX, mouseY, btn)) {
+                if (currentScenario !== btn.scenario) {
+                    currentScenario = btn.scenario;
+                    initTrendData(btn.scenario);
+                    initCurrentValues();
+                    showPrediction = false;
+                }
+                return;
+            }
+        }
+
+        // AI Prediction button
+        if (isInsideRect(mouseX, mouseY, aiPredBtn)) {
+            showPrediction = !showPrediction;
+            return;
+        }
+
+        // Trend dropdown
+        if (isInsideRect(mouseX, mouseY, trendDropdown)) {
+            trendDropdown.open = !trendDropdown.open;
+            return;
+        }
+
+        // Component clicks on schematic
+        for (let compName in componentZones) {
+            let zone = componentZones[compName];
+            if (isInsideRect(mouseX, mouseY, zone)) {
+                if (popupActive && popupComponent === compName) {
+                    popupActive = false;
+                } else {
+                    popupActive = true;
+                    popupComponent = compName;
+                    popupX = mouseX + 10;
+                    popupY = mouseY - 20;
+                }
+                return;
+            }
+        }
+
+        // Click elsewhere closes popup
+        popupActive = false;
+    }
+
+    // ========================================================================
+    // Window Resize
+    // ========================================================================
+
+    function windowResized() {
+        cW = max(minWidth, windowWidth);
+        cH = max(minHeight, windowHeight);
+        resizeCanvas(cW, cH);
+    }
+    </script>
+</body>
+</html>

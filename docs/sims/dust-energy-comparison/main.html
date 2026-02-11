@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="schema" content="https://dmccreary.github.io/intelligent-textbooks/ns/microsim/v1">
+<title>Dust Collection Energy Comparison</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f0f4f8;
+    color: #1a202c;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 4px;
+    padding-top: 8px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 18px;
+  }
+
+  /* Controls Panel */
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 18px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .control-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .control-group input[type="range"] {
+    width: 100%;
+    accent-color: #3b82f6;
+    cursor: pointer;
+  }
+
+  .control-group select {
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .control-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e40af;
+    margin-top: 2px;
+    text-align: center;
+  }
+
+  .baseline-box {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+  }
+
+  .baseline-label {
+    font-size: 0.73rem;
+    color: #065f46;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .baseline-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #047857;
+  }
+
+  .baseline-formula {
+    font-size: 0.72rem;
+    color: #047857;
+    margin-top: 3px;
+    font-style: italic;
+  }
+
+  /* Chart Section */
+  .chart-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  .chart-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  .chart-subtitle {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    margin-bottom: 14px;
+  }
+
+  .chart-wrapper {
+    position: relative;
+    width: 100%;
+    height: 350px;
+    margin-bottom: 16px;
+  }
+
+  /* Results Table */
+  .table-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  .table-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 14px;
+  }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .results-table thead {
+    background: #f1f5f9;
+    border-bottom: 2px solid #cbd5e1;
+  }
+
+  .results-table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .results-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.85rem;
+  }
+
+  .results-table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .results-table tbody tr.highest-savings {
+    background: #ecfdf5;
+  }
+
+  .results-table tbody tr.highest-savings td {
+    color: #047857;
+    font-weight: 600;
+  }
+
+  .scenario-name {
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .energy-pct {
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .annual-kwh {
+    text-align: right;
+  }
+
+  .annual-cost {
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .annual-savings {
+    text-align: right;
+    font-weight: 600;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .controls {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .controls {
+      grid-template-columns: 1fr;
+    }
+
+    h1 { font-size: 1.3rem; }
+    .container { padding: 8px; }
+    .chart-section { padding: 14px; }
+    .table-section { padding: 14px; }
+    .chart-wrapper { height: 280px; }
+
+    .results-table th, .results-table td {
+      padding: 8px 6px;
+      font-size: 0.75rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Dust Collection Energy Comparison</h1>
+<p class="subtitle">Interactive comparison of energy consumption across optimization strategies</p>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="control-group">
+    <label for="elecCost">Electricity Cost</label>
+    <input type="range" id="elecCost" min="0.05" max="0.25" step="0.01" value="0.12">
+    <div class="control-value" id="elecCostValue">$0.12 / kWh</div>
+  </div>
+
+  <div class="control-group">
+    <label for="motorHP">Motor Horsepower</label>
+    <select id="motorHP">
+      <option value="10">10 HP</option>
+      <option value="15">15 HP</option>
+      <option value="20">20 HP</option>
+      <option value="25" selected>25 HP</option>
+      <option value="30">30 HP</option>
+      <option value="40">40 HP</option>
+      <option value="50">50 HP</option>
+    </select>
+  </div>
+
+  <div class="control-group">
+    <label for="opHours">Operating Hours / Year</label>
+    <input type="range" id="opHours" min="1000" max="8760" step="100" value="4000">
+    <div class="control-value" id="opHoursValue">4,000 hrs</div>
+  </div>
+
+  <div class="control-group">
+    <div class="baseline-box">
+      <div class="baseline-label">Baseline Annual Energy</div>
+      <div class="baseline-value" id="baselineEnergy">--</div>
+      <div class="baseline-formula">HP × 0.746 × hrs</div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart Section -->
+<div class="chart-section">
+  <div class="chart-title">Dust Collection Energy Consumption by Strategy</div>
+  <div class="chart-subtitle">Percentage of baseline energy and absolute annual energy costs</div>
+  <div class="chart-wrapper">
+    <canvas id="mainChart"></canvas>
+  </div>
+</div>
+
+<!-- Results Table -->
+<div class="table-section">
+  <div class="table-title">Energy Optimization Scenarios</div>
+  <table class="results-table">
+    <thead>
+      <tr>
+        <th>Scenario</th>
+        <th>Energy %</th>
+        <th>Annual kWh</th>
+        <th>Annual Cost</th>
+        <th>Annual Savings</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody">
+    </tbody>
+  </table>
+</div>
+
+</div><!-- end container -->
+
+<script>
+(function() {
+  // ========================================================================
+  // CONFIGURATION
+  // ========================================================================
+
+  // HP to kW conversion: 1 HP = 0.7457 kW
+  var hpToKW = 0.7457;
+
+  // Scenario definitions: name and energy percentage vs baseline
+  var scenarios = [
+    { name: 'Baseline (Fixed Speed, Timer Cleaning)', percent: 100 },
+    { name: 'On-Demand Cleaning Only', percent: 92 },
+    { name: 'VFD Fan Control Only', percent: 62 },
+    { name: 'VFD + On-Demand Cleaning', percent: 55 },
+    { name: 'VFD + AI Predictive Cleaning', percent: 48 },
+    { name: 'Full AI Optimization', percent: 42 }
+  ];
+
+  // Color mapping from red (100%) through orange/yellow to green (42%)
+  var colors = [
+    '#ef4444', // Red for 100%
+    '#f97316', // Orange-red for 92%
+    '#eab308', // Yellow for 62%
+    '#84cc16', // Yellow-green for 55%
+    '#22c55e', // Light green for 48%
+    '#16a34a'  // Dark green for 42%
+  ];
+
+  // ========================================================================
+  // DOM REFERENCES
+  // ========================================================================
+  var elecCostSlider = document.getElementById('elecCost');
+  var motorHPSelect = document.getElementById('motorHP');
+  var opHoursSlider = document.getElementById('opHours');
+
+  var elecCostValue = document.getElementById('elecCostValue');
+  var opHoursValue = document.getElementById('opHoursValue');
+  var baselineEnergyDisplay = document.getElementById('baselineEnergy');
+  var resultsBody = document.getElementById('resultsBody');
+
+  var mainChart = null;
+
+  // ========================================================================
+  // FORMATTING HELPERS
+  // ========================================================================
+  function formatNumber(n) {
+    return Math.round(n).toLocaleString('en-US');
+  }
+
+  function formatCurrency(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  // ========================================================================
+  // MAIN COMPUTATION
+  // ========================================================================
+  function compute() {
+    var elecCost = parseFloat(elecCostSlider.value);
+    var motorHP = parseInt(motorHPSelect.value);
+    var opHours = parseInt(opHoursSlider.value);
+
+    // System rated power in kW
+    var systemKW = motorHP * hpToKW;
+
+    // Baseline annual energy in kWh (using simple formula: HP × 0.746 × hours)
+    var baselineKWh = systemKW * opHours;
+
+    // Update display values
+    elecCostValue.textContent = '$' + elecCost.toFixed(2) + ' / kWh';
+    opHoursValue.textContent = formatNumber(opHours) + ' hrs';
+    baselineEnergyDisplay.textContent = formatNumber(baselineKWh) + ' kWh';
+
+    // Calculate energy for each scenario
+    var scenarioData = [];
+    var maxSavings = 0;
+    var maxSavingsIndex = 0;
+
+    for (var i = 0; i < scenarios.length; i++) {
+      var scenario = scenarios[i];
+      var annualKWh = baselineKWh * (scenario.percent / 100);
+      var annualCost = annualKWh * elecCost;
+      var annualSavings = (baselineKWh - annualKWh) * elecCost;
+
+      scenarioData.push({
+        name: scenario.name,
+        percent: scenario.percent,
+        kWh: annualKWh,
+        cost: annualCost,
+        savings: annualSavings
+      });
+
+      // Track scenario with highest savings (not baseline)
+      if (i > 0 && annualSavings > maxSavings) {
+        maxSavings = annualSavings;
+        maxSavingsIndex = i;
+      }
+    }
+
+    // Update chart
+    updateChart(scenarioData);
+
+    // Update results table
+    updateTable(scenarioData, maxSavingsIndex);
+  }
+
+  // ========================================================================
+  // CHART UPDATE
+  // ========================================================================
+  function updateChart(scenarioData) {
+    var labels = scenarioData.map(function(s) {
+      return s.name.replace(' ', '\n').substring(0, 30) + '...';
+    });
+    var percentData = scenarioData.map(function(s) { return s.percent; });
+    var costData = scenarioData.map(function(s) { return s.cost; });
+
+    // Find max cost for right axis scaling
+    var maxCost = Math.max.apply(null, costData);
+    var maxCostScaled = Math.ceil(maxCost / 5000) * 5000;
+    if (maxCostScaled < 5000) maxCostScaled = 5000;
+
+    var chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Energy %',
+          data: percentData,
+          backgroundColor: colors,
+          borderColor: colors.map(function(c) { return c; }),
+          borderWidth: 1,
+          borderRadius: 6,
+          yAxisID: 'y',
+          order: 2
+        },
+        {
+          label: 'Annual Cost ($)',
+          data: costData,
+          type: 'line',
+          borderColor: '#1e40af',
+          backgroundColor: 'rgba(30, 64, 175, 0.05)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#1e40af',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          fill: false,
+          yAxisID: 'y1',
+          order: 1,
+          tension: 0.3
+        }
+      ]
+    };
+
+    if (mainChart) {
+      mainChart.data = chartData;
+      mainChart.options.scales.y1.max = maxCostScaled;
+      mainChart.update();
+    } else {
+      var ctx = document.getElementById('mainChart').getContext('2d');
+      mainChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 12,
+                font: { size: 11 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                title: function(context) {
+                  return context[0].label.replace(/\n.*/, '');
+                },
+                label: function(context) {
+                  var label = context.dataset.label || '';
+                  if (context.dataset.yAxisID === 'y1') {
+                    return label + ': ' + formatCurrency(context.parsed.y);
+                  }
+                  return label + ': ' + context.parsed.y + '%';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 } }
+            },
+            y: {
+              position: 'left',
+              beginAtZero: true,
+              max: 110,
+              title: {
+                display: true,
+                text: 'Energy Consumption (%)',
+                font: { size: 11, weight: 'bold' }
+              },
+              ticks: {
+                callback: function(v) { return v + '%'; },
+                font: { size: 10 }
+              }
+            },
+            y1: {
+              position: 'right',
+              beginAtZero: true,
+              max: maxCostScaled,
+              grid: { drawOnChartArea: false },
+              title: {
+                display: true,
+                text: 'Annual Cost ($)',
+                font: { size: 11, weight: 'bold' }
+              },
+              ticks: {
+                callback: function(v) { return '$' + Math.round(v / 1000) + 'k'; },
+                font: { size: 10 }
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // ========================================================================
+  // TABLE UPDATE
+  // ========================================================================
+  function updateTable(scenarioData, maxSavingsIndex) {
+    var html = '';
+
+    for (var i = 0; i < scenarioData.length; i++) {
+      var s = scenarioData[i];
+      var isMaxSavings = (i === maxSavingsIndex && i > 0);
+      var rowClass = isMaxSavings ? 'highest-savings' : '';
+
+      var savingsText = i === 0 ? '—' : formatCurrency(s.savings);
+
+      html += '<tr class="' + rowClass + '">' +
+        '<td class="scenario-name">' + s.name + '</td>' +
+        '<td class="energy-pct">' + s.percent + '%</td>' +
+        '<td class="annual-kwh">' + formatNumber(s.kWh) + ' kWh</td>' +
+        '<td class="annual-cost">' + formatCurrency(s.cost) + '</td>' +
+        '<td class="annual-savings">' + savingsText + '</td>' +
+        '</tr>';
+    }
+
+    resultsBody.innerHTML = html;
+  }
+
+  // ========================================================================
+  // EVENT LISTENERS
+  // ========================================================================
+  elecCostSlider.addEventListener('input', compute);
+  motorHPSelect.addEventListener('change', compute);
+  opHoursSlider.addEventListener('input', compute);
+
+  // Resize handling
+  window.addEventListener('resize', function() {
+    if (mainChart) mainChart.resize();
+  });
+
+  // ========================================================================
+  // INITIALIZE
+  // ========================================================================
+  compute();
+})();
+</script>
+
+</body>
+</html>

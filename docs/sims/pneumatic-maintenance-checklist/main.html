@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pneumatic Conveying Safety & Maintenance Checklist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .progress-section {
+            margin-bottom: 15px;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .header-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-reset {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .btn-reset:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+
+        .btn-report {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-report:hover {
+            background-color: #059669;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            background-color: #f3f4f6;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            transition: background-color 0.2s ease;
+        }
+
+        .section-header:hover {
+            background-color: #e5e7eb;
+        }
+
+        .section-header.expanded {
+            background-color: #e0e7ff;
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-stats {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .section-toggle {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .section-header.expanded .section-toggle {
+            transform: rotate(180deg);
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .section-content.expanded {
+            max-height: 2000px;
+        }
+
+        .section-body {
+            padding: 20px;
+        }
+
+        /* Checklist Items */
+        .checklist-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 18px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .checklist-item:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .item-checkbox {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            transition: all 0.2s ease;
+            font-size: 18px;
+        }
+
+        .checklist-item.checked .item-checkbox {
+            background-color: #10b981;
+            border-color: #10b981;
+            color: white;
+        }
+
+        .checklist-item.failed .item-checkbox {
+            background-color: #ef4444;
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .item-content {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .item-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .item-details.expanded {
+            max-height: 300px;
+        }
+
+        .item-text {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9fafb;
+            border-radius: 4px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .item-status {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .status-pass {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .status-fail {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .item-buttons {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-pass {
+            color: #10b981;
+            border-color: #10b981;
+        }
+
+        .btn-pass:hover {
+            background-color: #f0fdf4;
+        }
+
+        .btn-pass.active {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .btn-fail {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .btn-fail:hover {
+            background-color: #fef2f2;
+        }
+
+        .btn-fail.active {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .item-notes {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 50px;
+            margin-top: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .footer-stats {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .footer-stats strong {
+            color: #1f2937;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            max-width: 600px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 15px;
+        }
+
+        .modal-body {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .report-section {
+            margin-bottom: 20px;
+        }
+
+        .report-section-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .report-item {
+            font-size: 13px;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .report-item.pass {
+            background-color: #f0fdf4;
+            color: #065f46;
+        }
+
+        .report-item.fail {
+            background-color: #fef2f2;
+            color: #7f1d1d;
+        }
+
+        .report-item.unchecked {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .report-icon {
+            font-weight: bold;
+            min-width: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-close {
+            background-color: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .btn-close:hover {
+            background-color: #d1d5db;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .header-actions {
+                flex-direction: column;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .modal-content {
+                margin: 20% auto;
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 14px;
+            }
+
+            .checklist-item {
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Pneumatic Conveying Safety & Maintenance Checklist</h1>
+            <div class="progress-section">
+                <div class="progress-label">
+                    <span>Overall Progress</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%">
+                        <span id="progressText"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-reset" onclick="resetAll()">Reset All</button>
+                <button class="btn btn-report" onclick="generateReport()">Generate Report</button>
+            </div>
+        </div>
+
+        <!-- Sections Container -->
+        <div id="sectionsContainer"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-stats">
+                <strong id="footerStats">0</strong> / <strong id="footerTotal">0</strong> items completed
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Maintenance Report</div>
+            <div class="modal-body" id="reportBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-close" onclick="closeReport()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure for all sections and items
+        const checklistData = [
+            {
+                name: "Blower/Compressor",
+                items: [
+                    { title: "Check oil level and condition", procedure: "Inspect the sight glass or dipstick. Oil should be amber or light brown. Change if dark or burnt smell present. Level should be between min/max marks." },
+                    { title: "Check belt tension and alignment", procedure: "Apply 10 lbs of force midway between pulleys. Deflection should be 1/2 to 3/4 inch. Replace if frayed, cracked, or misaligned." },
+                    { title: "Listen for abnormal bearing noise", procedure: "Run compressor at idle and full load. Listen for grinding, squealing, or rumbling. If detected, bearing may need lubrication or replacement." },
+                    { title: "Check inlet filter condition", procedure: "Inspect filter element for dirt accumulation and damage. Replace if clogged (indicated by pressure drop gauge). Wash reusable filters if applicable." },
+                    { title: "Record discharge pressure", procedure: "Read pressure gauge at normal operating speed. Document value for trend analysis. Compare against manufacturer specifications and system design parameters." },
+                    { title: "Check for unusual vibration", procedure: "Feel housing surface at idle and operating speed. Excessive vibration may indicate loosened foundation bolts, imbalance, or internal wear. Tighten or replace as needed." },
+                    { title: "Verify VFD operation", procedure: "If equipped, check VFD display for error codes. Monitor voltage and current outputs. Verify speed ramps smoothly and stabilizes at setpoint." }
+                ]
+            },
+            {
+                name: "Feed Device - Rotary Valve",
+                items: [
+                    { title: "Check rotor tip clearance (spec: 0.003–0.008\")", procedure: "Measure with feeler gauge at four locations around rotor. If clearance exceeds spec, material may leak back into feeder. Adjust or replace rotor if worn beyond tolerance." },
+                    { title: "Listen for scraping sounds", procedure: "Run system empty and listen for grinding or scraping at feed valve. This indicates rotor contacting housing. Stop immediately and inspect for foreign material or bearing wear." },
+                    { title: "Check for material buildup", procedure: "Look inside rotary valve housing for material accumulation or bridging. Clean out any blockages. Material buildup reduces flow and increases temperature." },
+                    { title: "Verify drive motor current", procedure: "Using clamp meter, measure motor current on each phase. Compare to nameplate rated current. High current indicates rotor drag or foreign material. Low current may indicate slip or belt wear." },
+                    { title: "Check air leakage rate", procedure: "Block air inlet and measure flow at discharge. Leakage should be minimal (manufacturer spec). Excessive leakage indicates worn rotor or housing seals requiring replacement." },
+                    { title: "Inspect flexible connections", procedure: "Check all flexible couplings and rubber mounts for cracks, deterioration, or separation. Replace if damaged to prevent shaft misalignment and vibration." }
+                ]
+            },
+            {
+                name: "Pipeline",
+                items: [
+                    { title: "Visual inspection for damage or leaks", procedure: "Walk entire pipeline route looking for dents, holes, separation, or visible air leaks. Listen for hissing sounds. Mark any damage for repair or replacement." },
+                    { title: "Check all flange connections", procedure: "Inspect bolts for tightness. Check gaskets for deterioration or gasket material separation. Tighten loose bolts or replace gaskets if leaking." },
+                    { title: "Measure wall thickness at bends", procedure: "Use ultrasonic thickness gauge at inside radius of elbows. If thickness is less than 50% of original spec, section requires replacement. Bends experience accelerated erosion." },
+                    { title: "Verify pipeline supports", procedure: "Inspect hangers, clamps, and supports for cracks, corrosion, or looseness. Supports should hold pipe at 3 to 4 foot intervals. Add supports if excessive deflection observed." },
+                    { title: "Check flexible hose connections", procedure: "Inspect rubber hose for cracks, swelling, separation from fittings, or bulging. Verify clamps are tight and not rusted. Replace hose if any damage detected (flexibles typical life: 3-5 years)." },
+                    { title: "Look for condensation or moisture", procedure: "Check inside of access ports or clean-outs for moisture. Water promotes corrosion and degrades material properties. Install or verify desiccant filters are functioning." }
+                ]
+            },
+            {
+                name: "Separator/Filter",
+                items: [
+                    { title: "Check filter differential pressure", procedure: "Read pressure gauge across filter. Normal: 2-4 in. WC. Clean at 6-8 in. WC. Record reading and compare to trend. Climbing pressure indicates filter clogging." },
+                    { title: "Inspect filter bags/cartridges", procedure: "Remove and examine cartridges for tears, holes, or dust mat separation. Hold against light to check for pinholes. Replace if any damage found. Check for dust accumulation patterns indicating bypass." },
+                    { title: "Verify pulse cleaning system", procedure: "Check timer setting and solenoid valve operation. Listen for pulse (typically 5-15 pulses per minute). Verify compressed air supply at solenoid. If system not pulsing, check timer and valve operation." },
+                    { title: "Check discharge device", procedure: "Inspect valve or damper at outlet for proper operation. Verify it moves freely and returns to closed position. Check for stick-slip or hesitation which indicates stiction." },
+                    { title: "Inspect housing for corrosion", procedure: "Look for rust, pitting, or corrosion inside housing. Light surface rust can be cleaned and painted. Deep corrosion or holes require housing replacement." },
+                    { title: "Verify exhaust air quality", procedure: "Hold white cloth at exhaust port during operation. Cloth should remain clean (no dust visible). If dust clouds observed, filter bypass is occurring and cartridges need replacement." }
+                ]
+            },
+            {
+                name: "Safety Systems",
+                items: [
+                    { title: "Inspect explosion vent panels", procedure: "Check vent lids for cracks, dents, or corrosion. Verify pins or fasteners secure panel but allow opening if pressure spike occurs. Do not paint or obstruct vents." },
+                    { title: "Verify grounding connections (<1 ohm)", procedure: "Using ohmmeter, measure resistance between equipment and main ground. Should be <1 ohm. Clean any paint or rust at connection points. Retighten loose connections." },
+                    { title: "Test spark detection system", procedure: "If equipped, activate test mode per manufacturer manual. System should trigger warning and stop feed. Verify sensitivity adjusted to catch 1-2mm metal fragments." },
+                    { title: "Check fire suppression dates", procedure: "Inspect fire suppression cartridge expiration dates. Verify cartridges are secured in brackets. Note any activation history. Replace cartridges before expiration." },
+                    { title: "Verify LOTO procedures posted", procedure: "Check that lockout/tagout procedure placard is posted at disconnect switch and feeder. Ensure personnel are trained. Conduct mock LOTO exercise annually." },
+                    { title: "Check dust accumulation (<1/32\")", procedure: "Use ruler or feeler gauge to measure dust on horizontal surfaces and equipment tops. Level should be <1/32 inch. Accumulation risk triggers explosion risk. Clean if necessary." },
+                    { title: "Verify confined space signage", procedure: "Check that confined space warning labels are posted on filter housing, hopper, and any equipment that requires internal entry. Verify confined space entry permits are on file." }
+                ]
+            }
+        ];
+
+        // Initialize the checklist
+        function initializeChecklist() {
+            const container = document.getElementById('sectionsContainer');
+            container.innerHTML = '';
+
+            checklistData.forEach((section, sectionIndex) => {
+                const sectionEl = createSection(section, sectionIndex);
+                container.appendChild(sectionEl);
+            });
+
+            updateProgress();
+        }
+
+        function createSection(section, sectionIndex) {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'section';
+            sectionDiv.id = `section-${sectionIndex}`;
+
+            const checkedCount = getCheckedCount(sectionIndex);
+            const totalCount = section.items.length;
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'section-header';
+            headerDiv.onclick = () => toggleSection(sectionIndex);
+            headerDiv.innerHTML = `
+                <div class="section-title">
+                    <span class="section-toggle">▼</span>
+                    <span>${section.name}</span>
+                </div>
+                <div class="section-stats">${checkedCount} / ${totalCount}</div>
+            `;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'section-content';
+            contentDiv.id = `content-${sectionIndex}`;
+
+            const bodyDiv = document.createElement('div');
+            bodyDiv.className = 'section-body';
+
+            section.items.forEach((item, itemIndex) => {
+                const itemEl = createChecklistItem(sectionIndex, itemIndex, item);
+                bodyDiv.appendChild(itemEl);
+            });
+
+            contentDiv.appendChild(bodyDiv);
+            sectionDiv.appendChild(headerDiv);
+            sectionDiv.appendChild(contentDiv);
+
+            return sectionDiv;
+        }
+
+        function createChecklistItem(sectionIndex, itemIndex, item) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'checklist-item';
+            itemDiv.id = `item-${sectionIndex}-${itemIndex}`;
+
+            const status = getItemStatus(sectionIndex, itemIndex);
+
+            if (status === 'checked') itemDiv.classList.add('checked');
+            if (status === 'failed') itemDiv.classList.add('failed');
+
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'item-checkbox';
+            checkboxDiv.innerHTML = status === 'checked' ? '✓' : (status === 'failed' ? '✕' : '');
+            checkboxDiv.onclick = (e) => {
+                e.stopPropagation();
+                toggleItem(sectionIndex, itemIndex);
+            };
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'item-content';
+            contentDiv.onclick = () => toggleItemDetails(sectionIndex, itemIndex);
+
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'item-title';
+            titleDiv.textContent = item.title;
+
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'item-details';
+            detailsDiv.id = `details-${sectionIndex}-${itemIndex}`;
+
+            const procedureText = document.createElement('div');
+            procedureText.className = 'item-text';
+            procedureText.textContent = item.procedure;
+
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'item-status';
+            statusDiv.id = `status-${sectionIndex}-${itemIndex}`;
+            updateItemStatusDisplay(statusDiv, status);
+
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'item-buttons';
+
+            const passBtn = document.createElement('button');
+            passBtn.className = 'btn-small btn-pass';
+            if (status === 'checked') passBtn.classList.add('active');
+            passBtn.textContent = 'Pass';
+            passBtn.onclick = (e) => {
+                e.stopPropagation();
+                setItemStatus(sectionIndex, itemIndex, 'checked');
+            };
+
+            const failBtn = document.createElement('button');
+            failBtn.className = 'btn-small btn-fail';
+            if (status === 'failed') failBtn.classList.add('active');
+            failBtn.textContent = 'Fail';
+            failBtn.onclick = (e) => {
+                e.stopPropagation();
+                setItemStatus(sectionIndex, itemIndex, 'failed');
+            };
+
+            buttonsDiv.appendChild(passBtn);
+            buttonsDiv.appendChild(failBtn);
+
+            const notesTextarea = document.createElement('textarea');
+            notesTextarea.className = 'item-notes';
+            notesTextarea.placeholder = 'Add notes...';
+            notesTextarea.value = getItemNotes(sectionIndex, itemIndex);
+            notesTextarea.onclick = (e) => e.stopPropagation();
+            notesTextarea.onchange = () => {
+                setItemNotes(sectionIndex, itemIndex, notesTextarea.value);
+            };
+
+            detailsDiv.appendChild(procedureText);
+            detailsDiv.appendChild(statusDiv);
+            detailsDiv.appendChild(buttonsDiv);
+            detailsDiv.appendChild(notesTextarea);
+
+            contentDiv.appendChild(titleDiv);
+            contentDiv.appendChild(detailsDiv);
+
+            itemDiv.appendChild(checkboxDiv);
+            itemDiv.appendChild(contentDiv);
+
+            return itemDiv;
+        }
+
+        function updateItemStatusDisplay(element, status) {
+            if (status === 'checked') {
+                element.textContent = '✓ Pass';
+                element.className = 'item-status status-pass';
+            } else if (status === 'failed') {
+                element.textContent = '✕ Fail';
+                element.className = 'item-status status-fail';
+            } else {
+                element.textContent = '⊙ Unchecked';
+                element.className = 'item-status';
+            }
+        }
+
+        function toggleSection(sectionIndex) {
+            const header = document.querySelector(`#section-${sectionIndex} .section-header`);
+            const content = document.getElementById(`content-${sectionIndex}`);
+
+            header.classList.toggle('expanded');
+            content.classList.toggle('expanded');
+        }
+
+        function toggleItem(sectionIndex, itemIndex) {
+            const item = document.getElementById(`item-${sectionIndex}-${itemIndex}`);
+            const status = getItemStatus(sectionIndex, itemIndex);
+
+            if (status === 'checked') {
+                setItemStatus(sectionIndex, itemIndex, 'unchecked');
+            } else if (status === 'failed') {
+                setItemStatus(sectionIndex, itemIndex, 'unchecked');
+            } else {
+                setItemStatus(sectionIndex, itemIndex, 'checked');
+            }
+        }
+
+        function toggleItemDetails(sectionIndex, itemIndex) {
+            const details = document.getElementById(`details-${sectionIndex}-${itemIndex}`);
+            details.classList.toggle('expanded');
+        }
+
+        function setItemStatus(sectionIndex, itemIndex, status) {
+            const key = `item-${sectionIndex}-${itemIndex}`;
+            localStorage.setItem(key, status);
+
+            const item = document.getElementById(`item-${sectionIndex}-${itemIndex}`);
+            item.classList.remove('checked', 'failed');
+            if (status === 'checked') item.classList.add('checked');
+            if (status === 'failed') item.classList.add('failed');
+
+            const checkbox = item.querySelector('.item-checkbox');
+            checkbox.innerHTML = status === 'checked' ? '✓' : (status === 'failed' ? '✕' : '');
+
+            const statusDiv = document.getElementById(`status-${sectionIndex}-${itemIndex}`);
+            updateItemStatusDisplay(statusDiv, status);
+
+            const detailsDiv = item.querySelector('.item-details');
+            const passBtn = detailsDiv.querySelector('.btn-pass');
+            const failBtn = detailsDiv.querySelector('.btn-fail');
+            passBtn.classList.toggle('active', status === 'checked');
+            failBtn.classList.toggle('active', status === 'failed');
+
+            updateProgress();
+        }
+
+        function getItemStatus(sectionIndex, itemIndex) {
+            const key = `item-${sectionIndex}-${itemIndex}`;
+            return localStorage.getItem(key) || 'unchecked';
+        }
+
+        function setItemNotes(sectionIndex, itemIndex, notes) {
+            const key = `notes-${sectionIndex}-${itemIndex}`;
+            localStorage.setItem(key, notes);
+        }
+
+        function getItemNotes(sectionIndex, itemIndex) {
+            const key = `notes-${sectionIndex}-${itemIndex}`;
+            return localStorage.getItem(key) || '';
+        }
+
+        function getCheckedCount(sectionIndex) {
+            let count = 0;
+            const section = checklistData[sectionIndex];
+            section.items.forEach((item, itemIndex) => {
+                const status = getItemStatus(sectionIndex, itemIndex);
+                if (status !== 'unchecked') count++;
+            });
+            return count;
+        }
+
+        function updateProgress() {
+            let totalItems = 0;
+            let checkedItems = 0;
+
+            checklistData.forEach((section, sectionIndex) => {
+                section.items.forEach((item, itemIndex) => {
+                    totalItems++;
+                    const status = getItemStatus(sectionIndex, itemIndex);
+                    if (status !== 'unchecked') checkedItems++;
+                });
+            });
+
+            const percentage = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
+
+            document.getElementById('progressPercent').textContent = percentage + '%';
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('footerStats').textContent = checkedItems;
+            document.getElementById('footerTotal').textContent = totalItems;
+
+            // Update section stats
+            checklistData.forEach((section, sectionIndex) => {
+                const checkedCount = getCheckedCount(sectionIndex);
+                const stats = document.querySelector(`#section-${sectionIndex} .section-stats`);
+                if (stats) {
+                    stats.textContent = `${checkedCount} / ${section.items.length}`;
+                }
+            });
+        }
+
+        function resetAll() {
+            if (confirm('Are you sure you want to reset all items?')) {
+                for (let i = 0; i < checklistData.length; i++) {
+                    for (let j = 0; j < checklistData[i].items.length; j++) {
+                        localStorage.removeItem(`item-${i}-${j}`);
+                        localStorage.removeItem(`notes-${i}-${j}`);
+                    }
+                }
+                initializeChecklist();
+            }
+        }
+
+        function generateReport() {
+            let reportHTML = '';
+            let totalPass = 0;
+            let totalFail = 0;
+            let totalUnchecked = 0;
+
+            checklistData.forEach((section, sectionIndex) => {
+                reportHTML += `<div class="report-section">
+                    <div class="report-section-title">${section.name}</div>`;
+
+                section.items.forEach((item, itemIndex) => {
+                    const status = getItemStatus(sectionIndex, itemIndex);
+                    let statusClass = 'unchecked';
+                    let statusSymbol = '⊙';
+                    let statusText = 'Unchecked';
+
+                    if (status === 'checked') {
+                        statusClass = 'pass';
+                        statusSymbol = '✓';
+                        statusText = 'Pass';
+                        totalPass++;
+                    } else if (status === 'failed') {
+                        statusClass = 'fail';
+                        statusSymbol = '✕';
+                        statusText = 'Fail';
+                        totalFail++;
+                    } else {
+                        totalUnchecked++;
+                    }
+
+                    reportHTML += `
+                        <div class="report-item ${statusClass}">
+                            <span class="report-icon">${statusSymbol}</span>
+                            <span>${item.title} - ${statusText}</span>
+                        </div>`;
+                });
+
+                reportHTML += '</div>';
+            });
+
+            const summary = `
+                <div class="report-section">
+                    <div class="report-section-title">Summary</div>
+                    <div class="report-item pass">
+                        <span class="report-icon">✓</span>
+                        <span>Passed: <strong>${totalPass}</strong> items</span>
+                    </div>
+                    <div class="report-item fail">
+                        <span class="report-icon">✕</span>
+                        <span>Failed: <strong>${totalFail}</strong> items</span>
+                    </div>
+                    <div class="report-item unchecked">
+                        <span class="report-icon">⊙</span>
+                        <span>Unchecked: <strong>${totalUnchecked}</strong> items</span>
+                    </div>
+                </div>`;
+
+            document.getElementById('reportBody').innerHTML = summary + reportHTML;
+            document.getElementById('reportModal').style.display = 'block';
+        }
+
+        function closeReport() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('reportModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initializeChecklist);
+    </script>
+</body>
+</html>

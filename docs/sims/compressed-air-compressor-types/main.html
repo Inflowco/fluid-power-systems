@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="schema" content="https://dmccreary.github.io/intelligent-textbooks/ns/microsim/v1">
+    <title>Compressor Types Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+        main { display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // =====================================================================
+    //  Compressor Types Comparison MicroSim
+    //  Bloom Level: Understand (L2) -- compare, classify
+    //  Four animated cross-section diagrams: Reciprocating, Rotary Screw,
+    //  Rotary Vane, and Centrifugal compressors in a 2x2 grid
+    // =====================================================================
+
+    // GLOBAL STATE
+    let canvasW, canvasH;
+    let cols = 2;
+    let showAirFlow = false;
+
+    // Animation phases
+    let recipAngle = 0;
+    let screwAngle = 0;
+    let vaneAngle = 0;
+    let centrifugalAngle = 0;
+
+    // Pause states for each compressor (click to toggle)
+    let paused = [false, false, false, false];
+
+    // Tooltip state
+    let tooltipText = '';
+    let tooltipX = 0;
+    let tooltipY = 0;
+    let showTooltipFlag = false;
+
+    // Label hitboxes for hover detection
+    let labelHitboxes = [];
+
+    // Compressor cell bounding boxes for click detection
+    let compCells = [];
+
+    // Toggle button bounds
+    let toggleBtn = { x: 0, y: 0, w: 0, h: 0 };
+
+    // Title bar height
+    let titleBarH = 36;
+
+    // Specification card data for each compressor
+    let specs = [
+        { name: 'Reciprocating',   pressure: '100 - 350 bar', flow: 'Low-Med',   oilFree: 'Optional', duty: 'Intermittent', app: 'Auto shops, small mfg' },
+        { name: 'Rotary Screw',    pressure: '5 - 15 bar',    flow: 'Med-High',  oilFree: 'Optional', duty: 'Continuous',   app: 'Factories, plant air' },
+        { name: 'Rotary Vane',     pressure: '3 - 13 bar',    flow: 'Low-Med',   oilFree: 'No',       duty: 'Continuous',   app: 'Dental, dry cleaning' },
+        { name: 'Centrifugal',     pressure: '3 - 10 bar',    flow: 'Very High',  oilFree: 'Yes',     duty: 'Continuous',   app: 'Large plants, petrochemical' }
+    ];
+
+    // Label tooltip explanations
+    let labelExplanations = {
+        'Piston':          'A cylindrical component that moves up and down inside the cylinder, compressing air on the upstroke.',
+        'Cylinder':        'The chamber in which the piston travels, forming the compression space.',
+        'Inlet Valve':     'A one-way valve that opens on the downstroke to admit atmospheric air into the cylinder.',
+        'Discharge Valve': 'A one-way valve that opens on the upstroke when pressure exceeds the discharge line pressure.',
+        'Crankshaft':      'Converts rotary motion from the motor into the reciprocating motion of the piston.',
+        'Male Rotor':      'The driving helical rotor with convex lobes that meshes with the female rotor.',
+        'Female Rotor':    'The driven helical rotor with concave flutes that receives the male rotor lobes.',
+        'Housing':         'The outer casing that encloses the rotors or rotor and forms the compression chamber.',
+        'Inlet':           'The port where atmospheric air enters the compressor at low pressure.',
+        'Discharge':       'The port where compressed high-pressure air exits the compressor.',
+        'Oil Injection':   'Oil sprayed into the compression chamber for sealing, cooling, and lubrication.',
+        'Rotor':           'The eccentric rotating element inside the housing that drives the sliding vanes.',
+        'Vane':            'A sliding blade held in rotor slots that extends outward to seal against the housing wall.',
+        'Impeller':        'A high-speed rotating disk with blades that accelerates air outward by centrifugal force.',
+        'Diffuser':        'A stationary section after the impeller where air velocity is converted to pressure.',
+        'Inlet (eye)':     'The center opening of the impeller where air enters axially at low velocity.',
+        'Volute':          'The spiral-shaped casing that collects air from the diffuser and directs it to the discharge.'
+    };
+
+    function setup() {
+        computeLayout();
+        let canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+    }
+
+    function computeLayout() {
+        let maxW = min(windowWidth, 1000);
+        cols = (maxW < 600) ? 1 : 2;
+        canvasW = maxW;
+        let rows = (cols === 1) ? 4 : 2;
+        let cellH = (cols === 1) ? 360 : 380;
+        let controlBarH = 44;
+        canvasH = titleBarH + rows * cellH + controlBarH;
+    }
+
+    function windowResized() {
+        computeLayout();
+        resizeCanvas(canvasW, canvasH);
+    }
+
+    // =================================================================
+    //  MAIN DRAW
+    // =================================================================
+
+    function draw() {
+        background(245);
+        showTooltipFlag = false;
+        labelHitboxes = [];
+        compCells = [];
+
+        let rows = (cols === 1) ? 4 : 2;
+        let cellW = canvasW / cols;
+        let cellH = (cols === 1) ? 360 : 380;
+        let controlBarH = 44;
+        let sf = cellW / 500; // scale factor relative to reference width
+
+        // -- Title bar --
+        noStroke();
+        fill(35, 65, 115);
+        rect(0, 0, canvasW, titleBarH, 0);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(max(15, 18 * (canvasW / 1000)));
+        textStyle(BOLD);
+        text('Compressor Types Comparison', canvasW / 2, titleBarH / 2);
+        textStyle(NORMAL);
+
+        let drawFuncs = [drawReciprocating, drawRotaryScrew, drawRotaryVane, drawCentrifugal];
+        let compNames = ['Reciprocating Compressor', 'Rotary Screw Compressor', 'Rotary Vane Compressor', 'Centrifugal Compressor'];
+
+        for (let i = 0; i < 4; i++) {
+            let col = (cols === 1) ? 0 : (i % 2);
+            let row = (cols === 1) ? i : floor(i / 2);
+            let cx = col * cellW;
+            let cy = titleBarH + row * cellH;
+
+            compCells.push({ x: cx, y: cy, w: cellW, h: cellH });
+
+            // Cell background
+            noStroke();
+            fill(i % 2 === 0 ? 250 : 247);
+            rect(cx + 1, cy + 1, cellW - 2, cellH - 2);
+
+            // Cell border
+            stroke(200);
+            strokeWeight(1);
+            noFill();
+            rect(cx + 2, cy + 2, cellW - 4, cellH - 4, 6);
+
+            // Title
+            noStroke();
+            fill(40, 70, 120);
+            textAlign(CENTER, TOP);
+            textSize(max(13, 15 * sf));
+            textStyle(BOLD);
+            text(compNames[i], cx + cellW / 2, cy + 10);
+            textStyle(NORMAL);
+
+            // Paused indicator
+            if (paused[i]) {
+                fill(180, 50, 50);
+                textSize(max(9, 10 * sf));
+                text('PAUSED (click to play)', cx + cellW / 2, cy + 28 * sf);
+            }
+
+            // Compressor animation area
+            let animY = cy + 40 * sf;
+            let animH = cellH * 0.50;
+            push();
+            translate(cx + cellW / 2, animY + animH / 2);
+            drawFuncs[i](cellW * 0.88, animH, sf, i);
+            pop();
+
+            // Spec card
+            let cardY = animY + animH + 8 * sf;
+            let cardH = cellH - (cardY - cy) - 8;
+            drawSpecCard(cx + 10, cardY, cellW - 20, cardH, specs[i], sf);
+        }
+
+        // Update animation
+        let speed = 0.03;
+        if (!paused[0]) recipAngle += speed;
+        if (!paused[1]) screwAngle += speed * 0.8;
+        if (!paused[2]) vaneAngle += speed * 0.7;
+        if (!paused[3]) centrifugalAngle += speed * 2.5;
+
+        // -- Control bar --
+        let controlY = titleBarH + rows * cellH;
+        fill(225, 228, 232);
+        noStroke();
+        rect(0, controlY, canvasW, controlBarH);
+
+        // Toggle button
+        let btnW = max(145, 165 * sf);
+        let btnH = 30;
+        let btnX = canvasW / 2 - btnW / 2;
+        let btnY = controlY + (controlBarH - btnH) / 2;
+        toggleBtn = { x: btnX, y: btnY, w: btnW, h: btnH };
+
+        let hoveredBtn = mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH;
+        if (showAirFlow) {
+            fill(hoveredBtn ? color(40, 155, 85) : color(50, 140, 75));
+            stroke(30, 100, 55);
+        } else {
+            fill(hoveredBtn ? color(55, 110, 205) : color(70, 125, 185));
+            stroke(45, 85, 145);
+        }
+        strokeWeight(1.5);
+        rect(btnX, btnY, btnW, btnH, 6);
+        noStroke();
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(max(11, 13 * sf));
+        textStyle(BOLD);
+        text(showAirFlow ? 'Hide Air Flow' : 'Show Air Flow', btnX + btnW / 2, btnY + btnH / 2);
+        textStyle(NORMAL);
+
+        if (hoveredBtn) cursor(HAND);
+
+        // Hint text
+        fill(90);
+        textSize(max(9, 10 * sf));
+        textAlign(LEFT, CENTER);
+        text('Click a compressor to pause/play', 12, controlY + controlBarH / 2);
+        textAlign(RIGHT, CENTER);
+        text('Hover labels for details', canvasW - 12, controlY + controlBarH / 2);
+
+        if (!hoveredBtn) cursor(ARROW);
+
+        // -- Tooltip --
+        if (showTooltipFlag && tooltipText.length > 0) {
+            drawTooltip(tooltipX, tooltipY, tooltipText, sf);
+        }
+    }
+
+    // =================================================================
+    //  1. RECIPROCATING COMPRESSOR (Top-Left)
+    //  Piston moves up and down inside a cylinder with inlet/discharge valves
+    // =================================================================
+
+    function drawReciprocating(w, h, sf, idx) {
+        let cylW = w * 0.26;
+        let cylH = h * 0.62;
+        let cylX = -cylW / 2;
+        let cylY = -cylH / 2 - h * 0.08;
+
+        // Crank mechanism below cylinder
+        let crankCenterY = cylY + cylH + 20 * sf;
+        let crankR = 16 * sf;
+
+        // Piston position from crank angle
+        let strokeLen = cylH * 0.45;
+        let pistonY = cylY + cylH * 0.15 + (1 - sin(recipAngle)) * strokeLen / 2;
+        let pistonH = cylH * 0.12;
+
+        // Phase: downstroke (intake) when piston moves down, upstroke (compression) when moving up
+        let movingDown = cos(recipAngle) < 0;
+        let pistonNormalized = (pistonY - (cylY + cylH * 0.15)) / (strokeLen / 2);
+
+        // Crankshaft pin position
+        let crankPinX = cos(recipAngle) * crankR;
+        let crankPinY = crankCenterY + sin(recipAngle) * crankR;
+
+        // Cylinder body (gray metal)
+        fill(175, 180, 188);
+        stroke(115);
+        strokeWeight(2 * sf);
+        rectMode(CORNER);
+        rect(cylX - 8 * sf, cylY, cylW + 16 * sf, cylH, 4 * sf);
+
+        // Cylinder bore (lighter interior)
+        noStroke();
+        fill(218, 222, 228);
+        rect(cylX, cylY + 4 * sf, cylW, cylH - 8 * sf);
+
+        // Air coloring in cylinder (above piston)
+        if (showAirFlow) {
+            let airTop = cylY + 6 * sf;
+            let airBottom = pistonY;
+            if (airBottom > airTop) {
+                if (movingDown) {
+                    fill(80, 150, 230, 80); // blue = intake
+                } else {
+                    let compressionRatio = map(pistonY, cylY + cylH * 0.15 + strokeLen / 2, cylY + cylH * 0.15, 0, 1);
+                    compressionRatio = constrain(compressionRatio, 0, 1);
+                    let r = lerp(80, 230, compressionRatio);
+                    let g = lerp(150, 100, compressionRatio);
+                    let b = lerp(230, 50, compressionRatio);
+                    fill(r, g, b, 80);
+                }
+                noStroke();
+                rect(cylX + 2, airTop, cylW - 4, airBottom - airTop);
+            }
+        }
+
+        // Piston
+        fill(155, 150, 148);
+        stroke(105);
+        strokeWeight(1.5 * sf);
+        rectMode(CORNER);
+        rect(cylX + 2 * sf, pistonY, cylW - 4 * sf, pistonH, 2 * sf);
+
+        // Piston rings (two thin lines)
+        stroke(90);
+        strokeWeight(1 * sf);
+        line(cylX + 3 * sf, pistonY + pistonH * 0.3, cylX + cylW - 3 * sf, pistonY + pistonH * 0.3);
+        line(cylX + 3 * sf, pistonY + pistonH * 0.65, cylX + cylW - 3 * sf, pistonY + pistonH * 0.65);
+
+        // Connecting rod from piston to crank pin
+        stroke(135);
+        strokeWeight(3 * sf);
+        line(0, pistonY + pistonH, crankPinX, crankPinY);
+
+        // Crankshaft disk
+        fill(160, 162, 168);
+        stroke(105);
+        strokeWeight(1.5 * sf);
+        ellipse(0, crankCenterY, crankR * 2.4, crankR * 2.4);
+
+        // Crank pin
+        fill(125);
+        ellipse(crankPinX, crankPinY, 8 * sf, 8 * sf);
+
+        // Center hub
+        fill(95);
+        noStroke();
+        ellipse(0, crankCenterY, 7 * sf, 7 * sf);
+
+        // Inlet valve (left side, top of cylinder)
+        let valveSize = 14 * sf;
+        let inletVX = cylX - 16 * sf;
+        let inletVY = cylY + 12 * sf;
+        let inletOpen = movingDown && pistonNormalized > 0.3;
+
+        // Valve housing
+        fill(148, 150, 155);
+        stroke(105);
+        strokeWeight(1.5 * sf);
+        rectMode(CENTER);
+        rect(inletVX, inletVY, valveSize * 1.7, valveSize, 2 * sf);
+        // Valve state indicator
+        fill(inletOpen ? color(70, 185, 70) : color(185, 70, 70));
+        noStroke();
+        ellipse(inletVX, inletVY, valveSize * 0.55, valveSize * 0.55);
+
+        // Discharge valve (right side, top of cylinder)
+        let dischVX = cylX + cylW + 16 * sf;
+        let dischVY = cylY + 12 * sf;
+        let dischOpen = !movingDown && pistonNormalized < 0.5;
+
+        fill(148, 150, 155);
+        stroke(105);
+        strokeWeight(1.5 * sf);
+        rectMode(CENTER);
+        rect(dischVX, dischVY, valveSize * 1.7, valveSize, 2 * sf);
+        fill(dischOpen ? color(70, 185, 70) : color(185, 70, 70));
+        noStroke();
+        ellipse(dischVX, dischVY, valveSize * 0.55, valveSize * 0.55);
+
+        // Air flow arrows
+        if (showAirFlow) {
+            if (inletOpen) {
+                stroke(80, 150, 230);
+                fill(80, 150, 230);
+                strokeWeight(2.5 * sf);
+                drawArrowLine(inletVX - 24 * sf, inletVY, inletVX - 2 * sf, inletVY, 7 * sf);
+            }
+            if (dischOpen) {
+                stroke(230, 125, 50);
+                fill(230, 125, 50);
+                strokeWeight(2.5 * sf);
+                drawArrowLine(dischVX + 2 * sf, dischVY, dischVX + 24 * sf, dischVY, 7 * sf);
+            }
+        }
+
+        // Labels
+        rectMode(CORNER);
+        addLabel('Piston', cylW / 2 + 22 * sf, pistonY + pistonH / 2, sf);
+        addLabel('Cylinder', -cylW / 2 - 26 * sf, cylY + cylH / 2, sf);
+        addLabel('Inlet Valve', inletVX, inletVY - 18 * sf, sf);
+        addLabel('Discharge Valve', dischVX, dischVY - 18 * sf, sf);
+        addLabel('Crankshaft', 0, crankCenterY + crankR + 16 * sf, sf);
+    }
+
+    // =================================================================
+    //  2. ROTARY SCREW COMPRESSOR (Top-Right)
+    //  Two meshing helical rotors (shown as cross-section lobed profiles)
+    // =================================================================
+
+    function drawRotaryScrew(w, h, sf, idx) {
+        let housingW = w * 0.70;
+        let housingH = h * 0.52;
+
+        // Housing (rounded rectangle)
+        fill(175, 180, 188);
+        stroke(115);
+        strokeWeight(2 * sf);
+        rectMode(CENTER);
+        rect(0, 0, housingW, housingH, 10 * sf);
+
+        // Inner chamber
+        noStroke();
+        fill(218, 222, 228);
+        rect(0, 0, housingW - 8 * sf, housingH - 8 * sf, 8 * sf);
+
+        let maleX = -housingW * 0.18;
+        let femaleX = housingW * 0.18;
+        let rotorR = housingH * 0.36;
+
+        // Air coloring between rotors
+        if (showAirFlow) {
+            noStroke();
+            rectMode(CORNER);
+            // Left (inlet) side -- blue
+            fill(80, 150, 230, 55);
+            rect(-housingW / 2 + 6 * sf, -housingH / 2 + 6 * sf,
+                 housingW * 0.28, housingH - 12 * sf, 4 * sf);
+            // Right (discharge) side -- orange
+            fill(230, 125, 50, 55);
+            rect(housingW / 2 - housingW * 0.28 - 6 * sf, -housingH / 2 + 6 * sf,
+                 housingW * 0.28, housingH - 12 * sf, 4 * sf);
+            // Middle transition
+            fill(180, 170, 70, 40);
+            rect(-housingW * 0.08, -housingH / 2 + 6 * sf,
+                 housingW * 0.16, housingH - 12 * sf, 4 * sf);
+            rectMode(CENTER);
+        }
+
+        // Male rotor (4 lobes, convex) -- rotates clockwise
+        drawLobedRotor(maleX, 0, rotorR, 4, screwAngle, sf, color(90, 120, 170), true);
+
+        // Female rotor (6 flutes, concave) -- rotates counter-clockwise
+        drawLobedRotor(femaleX, 0, rotorR, 6, -screwAngle * 4 / 6, sf, color(170, 120, 90), false);
+
+        // Inlet port (left side)
+        fill(138, 140, 148);
+        stroke(98);
+        strokeWeight(1.5 * sf);
+        rectMode(CENTER);
+        rect(-housingW / 2 - 12 * sf, 0, 20 * sf, 24 * sf, 3 * sf);
+
+        // Discharge port (right side)
+        rect(housingW / 2 + 12 * sf, 0, 20 * sf, 24 * sf, 3 * sf);
+
+        // Oil injection indicator (amber dot at top)
+        fill(210, 175, 50);
+        stroke(170, 135, 30);
+        strokeWeight(1 * sf);
+        ellipse(0, -housingH / 2 - 8 * sf, 11 * sf, 11 * sf);
+
+        // Air flow arrows
+        if (showAirFlow) {
+            stroke(80, 150, 230);
+            fill(80, 150, 230);
+            strokeWeight(2.5 * sf);
+            drawArrowLine(-housingW / 2 - 30 * sf, 0, -housingW / 2 - 2 * sf, 0, 7 * sf);
+
+            stroke(230, 125, 50);
+            fill(230, 125, 50);
+            drawArrowLine(housingW / 2 + 2 * sf, 0, housingW / 2 + 30 * sf, 0, 7 * sf);
+        }
+
+        // Labels
+        rectMode(CORNER);
+        addLabel('Male Rotor', maleX, -rotorR - 15 * sf, sf);
+        addLabel('Female Rotor', femaleX, -rotorR - 15 * sf, sf);
+        addLabel('Housing', 0, housingH / 2 + 13 * sf, sf);
+        addLabel('Inlet', -housingW / 2 - 12 * sf, 22 * sf, sf);
+        addLabel('Discharge', housingW / 2 + 12 * sf, 22 * sf, sf);
+        addLabel('Oil Injection', 0, -housingH / 2 - 20 * sf, sf);
+    }
+
+    // Draw a lobed rotor profile (cross-section view)
+    function drawLobedRotor(cx, cy, r, lobes, angle, sf, col, isMale) {
+        push();
+        translate(cx, cy);
+        rotate(angle);
+
+        // Rotor body with lobes
+        fill(col);
+        stroke(red(col) * 0.6, green(col) * 0.6, blue(col) * 0.6);
+        strokeWeight(1.5 * sf);
+
+        beginShape();
+        let steps = 120;
+        for (let i = 0; i < steps; i++) {
+            let a = (TWO_PI / steps) * i;
+            let lobeOffset = isMale ?
+                r * 0.16 * cos(lobes * a) :
+                r * 0.13 * cos(lobes * a);
+            let rr = isMale ?
+                r * 0.55 + max(0, lobeOffset) :
+                r * 0.60 + min(0, -lobeOffset);
+            vertex(cos(a) * rr, sin(a) * rr);
+        }
+        endShape(CLOSE);
+
+        // Center hub
+        fill(red(col) * 0.8, green(col) * 0.8, blue(col) * 0.8);
+        stroke(red(col) * 0.5, green(col) * 0.5, blue(col) * 0.5);
+        strokeWeight(1 * sf);
+        ellipse(0, 0, r * 0.23, r * 0.23);
+
+        // Shaft keyway indicator
+        fill(red(col) * 0.55, green(col) * 0.55, blue(col) * 0.55);
+        noStroke();
+        ellipse(0, 0, r * 0.1, r * 0.1);
+
+        pop();
+    }
+
+    // =================================================================
+    //  3. ROTARY VANE COMPRESSOR (Bottom-Left)
+    //  Eccentric rotor with sliding vanes inside cylindrical housing
+    // =================================================================
+
+    function drawRotaryVane(w, h, sf, idx) {
+        let housingR = min(w, h) * 0.36;
+
+        // Housing (circular)
+        fill(175, 180, 188);
+        stroke(115);
+        strokeWeight(2 * sf);
+        ellipse(0, 0, housingR * 2, housingR * 2);
+
+        // Inner region
+        noStroke();
+        fill(218, 222, 228);
+        ellipse(0, 0, housingR * 1.9, housingR * 1.9);
+
+        // Inlet port (top-left)
+        let inletAngle = PI + PI / 4;
+        let inX = cos(inletAngle) * housingR;
+        let inY = sin(inletAngle) * housingR;
+        fill(138, 140, 148);
+        stroke(98);
+        strokeWeight(1.5 * sf);
+        push();
+        translate(inX, inY);
+        rotate(inletAngle);
+        rectMode(CENTER);
+        rect(-14 * sf, 0, 28 * sf, 16 * sf, 3 * sf);
+        pop();
+
+        // Discharge port (top-right)
+        let exAngle = -PI / 4;
+        let exX = cos(exAngle) * housingR;
+        let exY = sin(exAngle) * housingR;
+        fill(138, 140, 148);
+        stroke(98);
+        push();
+        translate(exX, exY);
+        rotate(exAngle);
+        rectMode(CENTER);
+        rect(14 * sf, 0, 28 * sf, 16 * sf, 3 * sf);
+        pop();
+
+        // Air pocket coloring (drawn before rotor so it appears behind)
+        if (showAirFlow) {
+            let numVanesPreview = 5;
+            for (let i = 0; i < numVanesPreview; i++) {
+                let va1 = vaneAngle + (TWO_PI / numVanesPreview) * i;
+                let va2 = va1 + (TWO_PI / numVanesPreview);
+                let midA = (va1 + va2) / 2;
+                let normalizedA = ((midA % TWO_PI) + TWO_PI) % TWO_PI;
+                let inletRegion = (normalizedA > PI * 0.6 && normalizedA < PI * 1.5);
+                let exhaustRegion = (normalizedA > PI * 1.5 || normalizedA < PI * 0.4);
+
+                noStroke();
+                if (inletRegion) {
+                    fill(80, 150, 230, 55);
+                } else if (exhaustRegion) {
+                    fill(230, 125, 50, 55);
+                } else {
+                    fill(180, 170, 70, 35);
+                }
+                arc(0, 0, housingR * 1.7, housingR * 1.7, va1, va2, PIE);
+            }
+        }
+
+        // Eccentric rotor
+        let offset = housingR * 0.18;
+        let rotorR = housingR * 0.50;
+        let rotorCX = offset;
+        let rotorCY = 0;
+
+        // Rotor body
+        fill(165, 170, 180);
+        stroke(105);
+        strokeWeight(1.5 * sf);
+        ellipse(rotorCX, rotorCY, rotorR * 2, rotorR * 2);
+
+        // Sliding vanes (5 vanes)
+        let numVanes = 5;
+        for (let i = 0; i < numVanes; i++) {
+            let va = vaneAngle + (TWO_PI / numVanes) * i;
+            let vCosA = cos(va);
+            let vSinA = sin(va);
+
+            // Calculate vane extension to housing wall
+            let dx = vCosA;
+            let dy = vSinA;
+            let a_coeff = 1;
+            let b_coeff = 2 * (rotorCX * dx + rotorCY * dy);
+            let c_coeff = rotorCX * rotorCX + rotorCY * rotorCY - (housingR - 3 * sf) * (housingR - 3 * sf);
+            let disc = b_coeff * b_coeff - 4 * a_coeff * c_coeff;
+            let t_ext = (-b_coeff + sqrt(max(0, disc))) / (2 * a_coeff);
+
+            let vaneInner = rotorR * 0.25;
+            let vaneOuter = t_ext;
+            let vaneThickness = max(3, 4.5 * sf);
+
+            push();
+            translate(rotorCX, rotorCY);
+            rotate(va);
+            fill(205, 195, 155);
+            stroke(155, 145, 110);
+            strokeWeight(1 * sf);
+            rectMode(CORNER);
+            rect(vaneInner, -vaneThickness / 2, vaneOuter - vaneInner, vaneThickness, 1 * sf);
+            pop();
+        }
+
+        // Rotor center hub
+        fill(145);
+        stroke(95);
+        strokeWeight(1.5 * sf);
+        ellipse(rotorCX, rotorCY, rotorR * 0.36, rotorR * 0.36);
+        fill(115);
+        noStroke();
+        ellipse(rotorCX, rotorCY, rotorR * 0.16, rotorR * 0.16);
+
+        // Flow arrows
+        if (showAirFlow) {
+            stroke(80, 150, 230);
+            fill(80, 150, 230);
+            strokeWeight(2.5 * sf);
+            drawCurvedArrow(inX - 20 * sf, inY - 5 * sf, inX + 10 * sf, inY + 10 * sf, 7 * sf);
+            stroke(230, 125, 50);
+            fill(230, 125, 50);
+            drawCurvedArrow(exX - 10 * sf, exY + 10 * sf, exX + 24 * sf, exY - 5 * sf, 7 * sf);
+        }
+
+        // Labels
+        addLabel('Rotor', rotorCX, rotorCY - rotorR - 14 * sf, sf);
+        addLabel('Vane', rotorCX + rotorR + 18 * sf, rotorCY, sf);
+        addLabel('Housing', 0, housingR + 14 * sf, sf);
+        addLabel('Inlet', inX - 16 * sf, inY + 18 * sf, sf);
+        addLabel('Discharge', exX + 16 * sf, exY + 18 * sf, sf);
+    }
+
+    // =================================================================
+    //  4. CENTRIFUGAL COMPRESSOR (Bottom-Right)
+    //  High-speed impeller with diffuser and volute casing
+    // =================================================================
+
+    function drawCentrifugal(w, h, sf, idx) {
+        let outerR = min(w, h) * 0.36;
+
+        // Volute casing (spiral shape)
+        fill(175, 180, 188);
+        stroke(115);
+        strokeWeight(2.5 * sf);
+
+        // Draw volute as a spiral-increasing circle
+        beginShape();
+        for (let a = 0; a <= TWO_PI + 0.1; a += 0.05) {
+            let voluteR = outerR * (0.85 + 0.16 * (a / TWO_PI));
+            vertex(cos(a - PI / 2) * voluteR, sin(a - PI / 2) * voluteR);
+        }
+        // Close with discharge tangent
+        let dischX = outerR * 1.06;
+        let dischY = -outerR * 0.15;
+        vertex(dischX, dischY);
+        vertex(dischX, dischY + 18 * sf);
+        // Return along smaller radius
+        for (let a = TWO_PI; a >= 0; a -= 0.05) {
+            let innerR = outerR * (0.56 + 0.09 * (a / TWO_PI));
+            vertex(cos(a - PI / 2) * innerR, sin(a - PI / 2) * innerR);
+        }
+        endShape(CLOSE);
+
+        // Diffuser region (annular ring between impeller and volute)
+        noStroke();
+        fill(210, 214, 220, 180);
+        ellipse(0, 0, outerR * 1.5, outerR * 1.5);
+
+        // Radial flow arrows in diffuser region
+        if (showAirFlow) {
+            for (let a = 0; a < TWO_PI; a += PI / 4) {
+                let innerPt = outerR * 0.42;
+                let outerPt = outerR * 0.72;
+                stroke(200, 140, 55, 130);
+                strokeWeight(2 * sf);
+                fill(230, 150, 55, 110);
+                drawArrowLine(cos(a) * innerPt, sin(a) * innerPt,
+                             cos(a) * outerPt, sin(a) * outerPt, 5 * sf);
+            }
+        }
+
+        // Impeller
+        let impR = outerR * 0.52;
+        let numBlades = 10;
+
+        // Impeller disk
+        fill(188, 192, 202);
+        stroke(125);
+        strokeWeight(1.5 * sf);
+        ellipse(0, 0, impR * 2, impR * 2);
+
+        // Impeller blades (backward-curved)
+        for (let i = 0; i < numBlades; i++) {
+            let a = centrifugalAngle + (TWO_PI / numBlades) * i;
+            let innerDist = impR * 0.22;
+            let outerDist = impR * 0.95;
+
+            stroke(125, 130, 148);
+            strokeWeight(max(2, 2.5 * sf));
+            noFill();
+            let x1 = cos(a) * innerDist;
+            let y1 = sin(a) * innerDist;
+            let x2 = cos(a - 0.2) * outerDist;
+            let y2 = sin(a - 0.2) * outerDist;
+            let cx1 = cos(a - 0.1) * impR * 0.6;
+            let cy1 = sin(a - 0.1) * impR * 0.6;
+            beginShape();
+            vertex(x1, y1);
+            quadraticVertex(cx1, cy1, x2, y2);
+            endShape();
+        }
+
+        // Center hub (inlet eye)
+        fill(198, 208, 220);
+        stroke(125);
+        strokeWeight(1.5 * sf);
+        ellipse(0, 0, impR * 0.42, impR * 0.42);
+
+        // Inlet eye core
+        fill(158, 178, 200);
+        noStroke();
+        ellipse(0, 0, impR * 0.26, impR * 0.26);
+
+        // Air flow: axial inlet arrow (shown as concentric circles at center)
+        if (showAirFlow) {
+            // Inlet: blue at center
+            stroke(80, 150, 230);
+            strokeWeight(2 * sf);
+            noFill();
+            ellipse(0, 0, impR * 0.16, impR * 0.16);
+            fill(80, 150, 230);
+            noStroke();
+            ellipse(0, 0, 5 * sf, 5 * sf);
+
+            // Discharge arrow at volute exit
+            stroke(230, 125, 50);
+            fill(230, 125, 50);
+            strokeWeight(2.5 * sf);
+            drawArrowLine(dischX + 2 * sf, dischY + 9 * sf,
+                         dischX + 24 * sf, dischY + 9 * sf, 7 * sf);
+        }
+
+        // Discharge pipe stub
+        fill(155, 158, 165);
+        stroke(105);
+        strokeWeight(1.5 * sf);
+        rectMode(CORNER);
+        rect(dischX, dischY - 2 * sf, 20 * sf, 22 * sf, 2 * sf);
+
+        // Labels
+        addLabel('Impeller', 0, -impR - 16 * sf, sf);
+        addLabel('Diffuser', -outerR * 0.72, outerR * 0.55, sf);
+        addLabel('Inlet (eye)', 0, impR * 0.38, sf);
+        addLabel('Discharge', dischX + 12 * sf, dischY - 16 * sf, sf);
+        addLabel('Volute', -outerR * 0.82, -outerR * 0.52, sf);
+    }
+
+    // =================================================================
+    //  SPEC CARD
+    // =================================================================
+
+    function drawSpecCard(x, y, w, h, spec, sf) {
+        // Card background
+        fill(252, 253, 255);
+        stroke(195);
+        strokeWeight(1);
+        rectMode(CORNER);
+        rect(x, y, w, h, 5 * sf);
+
+        // Header bar
+        fill(40, 75, 135);
+        noStroke();
+        rect(x, y, w, 20 * sf, 5 * sf, 5 * sf, 0, 0);
+        rect(x, y + 12 * sf, w, 8 * sf);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(max(10, 11 * sf));
+        textStyle(BOLD);
+        text(spec.name, x + w / 2, y + 10 * sf);
+        textStyle(NORMAL);
+
+        // Spec rows
+        let rowH = max(13, 14.5 * sf);
+        let startY = y + 24 * sf;
+        let labelX = x + 8 * sf;
+        let valueX = x + w * 0.46;
+
+        textAlign(LEFT, TOP);
+        textSize(max(9, 10 * sf));
+
+        let rows = [
+            ['Pressure:', spec.pressure],
+            ['Flow Rate:', spec.flow],
+            ['Oil-Free:', spec.oilFree],
+            ['Duty Cycle:', spec.duty],
+            ['Best For:', spec.app]
+        ];
+
+        for (let i = 0; i < rows.length; i++) {
+            let ry = startY + i * rowH;
+            // Alternating row background
+            if (i % 2 === 0) {
+                noStroke();
+                fill(238, 242, 250);
+                rectMode(CORNER);
+                rect(x + 4, ry - 1, w - 8, rowH, 2);
+            }
+            fill(75);
+            noStroke();
+            textStyle(BOLD);
+            text(rows[i][0], labelX, ry);
+            textStyle(NORMAL);
+            fill(45);
+            text(rows[i][1], valueX, ry);
+        }
+    }
+
+    // =================================================================
+    //  LABEL HELPER (with hitbox for tooltip)
+    // =================================================================
+
+    function addLabel(name, lx, ly, sf) {
+        noStroke();
+        fill(35, 80, 155);
+        textAlign(CENTER, CENTER);
+        textSize(max(8, 9.5 * sf));
+        textStyle(BOLD);
+        text(name, lx, ly);
+        textStyle(NORMAL);
+
+        let sw = textWidth(name) + 8 * sf;
+        let sh = max(12, 14 * sf);
+
+        // Screen-space hitbox using p5 transform
+        let sx = screenX(lx, ly);
+        let sy = screenY(lx, ly);
+
+        labelHitboxes.push({
+            x: sx - sw / 2,
+            y: sy - sh / 2,
+            w: sw,
+            h: sh,
+            name: name
+        });
+
+        // Hover visual feedback
+        if (mouseX > sx - sw / 2 && mouseX < sx + sw / 2 &&
+            mouseY > sy - sh / 2 && mouseY < sy + sh / 2) {
+            // Underline effect
+            stroke(35, 80, 155);
+            strokeWeight(1.2 * sf);
+            line(lx - sw / 2 + 4 * sf, ly + sh / 2 - 2 * sf,
+                 lx + sw / 2 - 4 * sf, ly + sh / 2 - 2 * sf);
+
+            if (labelExplanations[name]) {
+                showTooltipFlag = true;
+                tooltipText = name + ': ' + labelExplanations[name];
+                tooltipX = mouseX;
+                tooltipY = mouseY;
+            }
+        }
+    }
+
+    // =================================================================
+    //  TOOLTIP
+    // =================================================================
+
+    function drawTooltip(tx, ty, msg, sf) {
+        push();
+        resetMatrix();
+        textSize(max(10, 11 * sf));
+        let maxTipW = canvasW * 0.38;
+        let lines = [];
+        let words = msg.split(' ');
+        let currentLine = '';
+        for (let w of words) {
+            let test = currentLine + (currentLine.length > 0 ? ' ' : '') + w;
+            if (textWidth(test) > maxTipW && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = w;
+            } else {
+                currentLine = test;
+            }
+        }
+        if (currentLine.length > 0) lines.push(currentLine);
+
+        let lineH = max(14, 16 * sf);
+        let tipH = lines.length * lineH + 14 * sf;
+        let tipW = maxTipW + 22 * sf;
+
+        let tipX = tx + 14 * sf;
+        let tipY = ty - tipH - 10 * sf;
+        if (tipX + tipW > canvasW) tipX = canvasW - tipW - 6;
+        if (tipY < 0) tipY = ty + 22 * sf;
+
+        // Shadow
+        noStroke();
+        fill(0, 0, 0, 35);
+        rectMode(CORNER);
+        rect(tipX + 3, tipY + 3, tipW, tipH, 6 * sf);
+
+        // Background
+        fill(30, 35, 48, 240);
+        rect(tipX, tipY, tipW, tipH, 6 * sf);
+
+        // Text
+        fill(255);
+        noStroke();
+        textAlign(LEFT, TOP);
+        for (let i = 0; i < lines.length; i++) {
+            if (i === 0) {
+                // Bold the label name portion
+                textStyle(BOLD);
+                let colonIdx = lines[i].indexOf(':');
+                if (colonIdx > 0) {
+                    let boldPart = lines[i].substring(0, colonIdx + 1);
+                    let rest = lines[i].substring(colonIdx + 1);
+                    let boldW = textWidth(boldPart);
+                    text(boldPart, tipX + 10 * sf, tipY + 7 * sf);
+                    textStyle(NORMAL);
+                    text(rest, tipX + 10 * sf + boldW, tipY + 7 * sf);
+                } else {
+                    text(lines[i], tipX + 10 * sf, tipY + 7 * sf);
+                    textStyle(NORMAL);
+                }
+            } else {
+                textStyle(NORMAL);
+                text(lines[i], tipX + 10 * sf, tipY + 7 * sf + i * lineH);
+            }
+        }
+        textStyle(NORMAL);
+
+        pop();
+    }
+
+    // =================================================================
+    //  UTILITY: ARROWS
+    // =================================================================
+
+    function drawArrowLine(x1, y1, x2, y2, headSize) {
+        line(x1, y1, x2, y2);
+        let angle = atan2(y2 - y1, x2 - x1);
+        push();
+        translate(x2, y2);
+        rotate(angle);
+        noStroke();
+        triangle(0, 0, -headSize, -headSize * 0.45, -headSize, headSize * 0.45);
+        pop();
+    }
+
+    function drawCurvedArrow(x1, y1, x2, y2, headSize) {
+        noFill();
+        beginShape();
+        vertex(x1, y1);
+        let mx = (x1 + x2) / 2;
+        let my = (y1 + y2) / 2 - 10;
+        quadraticVertex(mx, my, x2, y2);
+        endShape();
+        let angle = atan2(y2 - my, x2 - mx);
+        push();
+        translate(x2, y2);
+        rotate(angle);
+        noStroke();
+        triangle(0, 0, -headSize, -headSize * 0.45, -headSize, headSize * 0.45);
+        pop();
+    }
+
+    // =================================================================
+    //  MOUSE INTERACTION
+    // =================================================================
+
+    function mousePressed() {
+        // Check toggle button
+        if (mouseX > toggleBtn.x && mouseX < toggleBtn.x + toggleBtn.w &&
+            mouseY > toggleBtn.y && mouseY < toggleBtn.y + toggleBtn.h) {
+            showAirFlow = !showAirFlow;
+            return;
+        }
+
+        // Check compressor cells for pause/play
+        for (let i = 0; i < compCells.length; i++) {
+            let c = compCells[i];
+            if (mouseX > c.x && mouseX < c.x + c.w &&
+                mouseY > c.y && mouseY < c.y + c.h) {
+                paused[i] = !paused[i];
+                return;
+            }
+        }
+    }
+    </script>
+</body>
+</html>

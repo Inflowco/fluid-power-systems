@@ -1,0 +1,12 @@
+{
+  "title": "Dust Collection Energy Comparison",
+  "chapter": 7,
+  "type": "chart",
+  "bloom_level": "L5",
+  "bloom_verb": ["assess", "justify"],
+  "learning_objective": "Evaluate energy-saving strategies and justify which optimization combination provides best ROI",
+  "technology": "Chart.js",
+  "description": "Interactive comparison of energy consumption across dust collection optimization strategies with adjustable facility parameters",
+  "keywords": ["dust collection", "energy efficiency", "VFD", "optimization", "cost analysis"],
+  "created": "2026-02-10"
+}

@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HVAC Real-Time Monitoring Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; background: #1a1d23; color: #e0e0e0; }
+
+  #dashboard { display: flex; flex-direction: column; height: 100vh; }
+
+  /* Top Bar */
+  #top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, #1e3a5f, #2a5298);
+    padding: 6px 16px; min-height: 44px; flex-shrink: 0;
+    border-bottom: 2px solid #3a7bd5;
+  }
+  #top-bar .building-name { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
+  #top-bar .top-info { display: flex; gap: 18px; align-items: center; font-size: 12px; color: #c8ddf0; }
+  #top-bar .top-info span { display: flex; align-items: center; gap: 4px; }
+  .scenario-select {
+    background: #1a2a44; color: #c8ddf0; border: 1px solid #3a7bd5; border-radius: 4px;
+    padding: 3px 8px; font-size: 12px; cursor: pointer; outline: none;
+  }
+  .scenario-select:hover { border-color: #5a9bf5; }
+
+  /* Middle panels */
+  #middle { display: flex; flex: 1; min-height: 0; }
+
+  /* Left Panel - Floor Plan */
+  #floor-plan-panel {
+    flex: 1; padding: 8px; display: flex; flex-direction: column; min-width: 0;
+  }
+  .panel-title { font-size: 12px; font-weight: 600; color: #8ab4f8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  #floor-plan {
+    flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+    gap: 5px; min-height: 0;
+  }
+  .zone {
+    border-radius: 6px; padding: 8px; cursor: pointer; position: relative;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    border: 2px solid transparent; transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 0;
+  }
+  .zone:hover { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,0.2); }
+  .zone.selected { border-color: #5a9bf5; box-shadow: 0 0 16px rgba(90,155,245,0.4); }
+  .zone .zone-name { font-size: 11px; font-weight: 700; color: #1a1d23; margin-bottom: 2px; text-align: center; }
+  .zone .zone-temp { font-size: 22px; font-weight: 700; color: #1a1d23; line-height: 1.1; }
+  .zone .zone-setpoint { font-size: 10px; color: #333; margin-top: 1px; }
+  .zone .zone-status { font-size: 9px; font-weight: 600; margin-top: 2px; padding: 1px 6px; border-radius: 3px; }
+  .zone-green { background: linear-gradient(135deg, #66bb6a, #81c784); }
+  .zone-yellow { background: linear-gradient(135deg, #fdd835, #ffee58); }
+  .zone-red { background: linear-gradient(135deg, #ef5350, #e57373); }
+  .zone-gray { background: linear-gradient(135deg, #9e9e9e, #bdbdbd); }
+
+  /* Right Panel - Equipment */
+  #equipment-panel {
+    width: 280px; flex-shrink: 0; padding: 8px; display: flex; flex-direction: column;
+    gap: 5px; overflow-y: auto; border-left: 1px solid #2a2d35;
+  }
+  .ahu-card {
+    background: #22252d; border-radius: 6px; padding: 8px 10px; cursor: pointer;
+    border: 1px solid #333; transition: border-color 0.2s;
+  }
+  .ahu-card:hover { border-color: #5a9bf5; }
+  .ahu-card.selected { border-color: #5a9bf5; background: #272b35; }
+  .ahu-card .ahu-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+  }
+  .ahu-card .ahu-name { font-size: 13px; font-weight: 700; color: #8ab4f8; }
+  .ahu-card .ahu-status {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+  }
+  .status-running { background: #1b5e20; color: #66bb6a; }
+  .status-stopped { background: #4e342e; color: #bcaaa4; }
+  .status-fault { background: #b71c1c; color: #ef9a9a; animation: pulse-fault 1s infinite; }
+  @keyframes pulse-fault { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
+
+  .ahu-card .ahu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px; }
+  .ahu-card .ahu-param { display: flex; flex-direction: column; }
+  .ahu-card .param-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.3px; }
+  .ahu-card .param-value { font-size: 13px; font-weight: 600; color: #e0e0e0; }
+  .ahu-card .param-value.warn { color: #fdd835; }
+  .ahu-card .param-value.alarm { color: #ef5350; }
+
+  .filter-bar-container { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+  .filter-bar { flex: 1; height: 6px; background: #444; border-radius: 3px; overflow: hidden; }
+  .filter-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  /* Expanded detail overlay */
+  .detail-overlay {
+    display: none; margin-top: 6px; padding: 6px 8px; background: #1a1d23;
+    border-radius: 4px; font-size: 11px; line-height: 1.5;
+  }
+  .detail-overlay.show { display: block; }
+  .detail-overlay .detail-row { display: flex; justify-content: space-between; padding: 1px 0; }
+  .detail-overlay .detail-label { color: #888; }
+  .detail-overlay .detail-val { color: #e0e0e0; font-weight: 600; }
+
+  /* Zone detail panel */
+  #zone-detail {
+    display: none; padding: 6px 8px; background: #22252d; border-radius: 6px;
+    margin-top: 5px; font-size: 11px; border: 1px solid #333;
+  }
+  #zone-detail.show { display: block; }
+  #zone-detail .zd-title { font-size: 12px; font-weight: 700; color: #8ab4f8; margin-bottom: 4px; }
+  #zone-detail .zd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; }
+  #zone-detail .zd-row { display: flex; justify-content: space-between; }
+  #zone-detail .zd-label { color: #888; }
+  #zone-detail .zd-val { color: #e0e0e0; font-weight: 600; }
+
+  /* Bottom Panel - Trend Chart */
+  #bottom-panel {
+    height: 180px; flex-shrink: 0; padding: 6px 12px 8px 12px;
+    border-top: 1px solid #2a2d35; display: flex; flex-direction: column;
+  }
+  #bottom-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  #bottom-controls label { font-size: 11px; color: #888; }
+  #trend-select {
+    background: #22252d; color: #c8ddf0; border: 1px solid #444; border-radius: 4px;
+    padding: 2px 6px; font-size: 11px; cursor: pointer; outline: none;
+  }
+  #trend-canvas-wrap { flex: 1; position: relative; min-height: 0; }
+  #trend-canvas { width: 100%; height: 100%; }
+
+  /* Alarm banner */
+  #alarm-banner {
+    display: none; background: #b71c1c; color: #fff; text-align: center;
+    padding: 3px 10px; font-size: 11px; font-weight: 600;
+    animation: pulse-fault 1.2s infinite;
+  }
+  #alarm-banner.show { display: block; }
+
+  /* Responsive adjustments */
+  @media (max-width: 700px) {
+    #equipment-panel { width: 220px; }
+    .zone .zone-temp { font-size: 18px; }
+    #bottom-panel { height: 150px; }
+  }
+  @media (max-width: 500px) {
+    #middle { flex-direction: column; }
+    #equipment-panel { width: 100%; flex-direction: row; flex-wrap: wrap; border-left: none; border-top: 1px solid #2a2d35; }
+    .ahu-card { flex: 1; min-width: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="dashboard">
+
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <div class="building-name">Central Office Building</div>
+    <div class="top-info">
+      <span id="sim-datetime"></span>
+      <span>|</span>
+      <span>Outside: <strong id="outdoor-temp"></strong>, <strong id="outdoor-hum"></strong> RH</span>
+      <span>|</span>
+      <label for="scenario-sel" style="margin:0;">Scenario:</label>
+      <select id="scenario-sel" class="scenario-select">
+        <option value="normal">Normal Operation</option>
+        <option value="dirty-filter">Dirty Filter</option>
+        <option value="refrigerant-leak">Refrigerant Leak</option>
+        <option value="sensor-failure">Zone Sensor Failure</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Alarm Banner -->
+  <div id="alarm-banner"></div>
+
+  <!-- Middle: Floor Plan + Equipment -->
+  <div id="middle">
+    <div id="floor-plan-panel">
+      <div class="panel-title">Building Floor Plan</div>
+      <div id="floor-plan">
+        <div class="zone" id="zone-0" data-zone="0">
+          <div class="zone-name">Office North</div>
+          <div class="zone-temp" id="zt-0"></div>
+          <div class="zone-setpoint" id="zs-0"></div>
+          <div class="zone-status" id="zst-0"></div>
+        </div>
+        <div class="zone" id="zone-1" data-zone="1">
+          <div class="zone-name">Office South</div>
+          <div class="zone-temp" id="zt-1"></div>
+          <div class="zone-setpoint" id="zs-1"></div>
+          <div class="zone-status" id="zst-1"></div>
+        </div>
+        <div class="zone" id="zone-2" data-zone="2">
+          <div class="zone-name">Conference Room</div>
+          <div class="zone-temp" id="zt-2"></div>
+          <div class="zone-setpoint" id="zs-2"></div>
+          <div class="zone-status" id="zst-2"></div>
+        </div>
+        <div class="zone" id="zone-3" data-zone="3">
+          <div class="zone-name">Server Room</div>
+          <div class="zone-temp" id="zt-3"></div>
+          <div class="zone-setpoint" id="zs-3"></div>
+          <div class="zone-status" id="zst-3"></div>
+        </div>
+      </div>
+      <div id="zone-detail">
+        <div class="zd-title" id="zd-title"></div>
+        <div class="zd-grid" id="zd-grid"></div>
+      </div>
+    </div>
+
+    <div id="equipment-panel">
+      <div class="panel-title">Equipment Status</div>
+      <div class="ahu-card" id="ahu-card-0" data-ahu="0"></div>
+      <div class="ahu-card" id="ahu-card-1" data-ahu="1"></div>
+    </div>
+  </div>
+
+  <!-- Bottom: Trend Chart -->
+  <div id="bottom-panel">
+    <div id="bottom-controls">
+      <label>Trend Parameter:</label>
+      <select id="trend-select">
+        <option value="zone0-temp">Office North Temp</option>
+        <option value="zone1-temp">Office South Temp</option>
+        <option value="zone2-temp">Conference Room Temp</option>
+        <option value="zone3-temp">Server Room Temp</option>
+        <option value="ahu0-supply">AHU-1 Supply Air Temp</option>
+        <option value="ahu0-return">AHU-1 Return Air Temp</option>
+        <option value="ahu0-fan">AHU-1 Fan Speed</option>
+        <option value="ahu0-filter">AHU-1 Filter dP</option>
+        <option value="ahu0-cooling">AHU-1 Cooling Valve</option>
+        <option value="ahu0-energy">AHU-1 Energy (kW)</option>
+        <option value="ahu1-supply">AHU-2 Supply Air Temp</option>
+        <option value="ahu1-return">AHU-2 Return Air Temp</option>
+        <option value="ahu1-fan">AHU-2 Fan Speed</option>
+        <option value="ahu1-filter">AHU-2 Filter dP</option>
+        <option value="ahu1-cooling">AHU-2 Cooling Valve</option>
+        <option value="ahu1-energy">AHU-2 Energy (kW)</option>
+      </select>
+    </div>
+    <div id="trend-canvas-wrap">
+      <canvas id="trend-canvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/p5@2/lib/p5.min.js"></script>
+<script>
+// ==========================================================================
+// HVAC Monitoring Dashboard - Simulation Engine
+// ==========================================================================
+
+// ---- Simulated clock ----
+let simTime = new Date();
+simTime.setHours(14, 30, 0, 0); // Start at 2:30 PM
+
+// ---- Scenario state ----
+let currentScenario = 'normal';
+
+// ---- Outdoor conditions ----
+let outdoorTemp = 92;
+let outdoorHum = 65;
+
+// ---- Zone data model ----
+const zones = [
+  { name: 'Office North', temp: 72.0, setpoint: 72, humidity: 45, airflow: 850, co2: 620, occupied: true, damperPos: 75, commOk: true, ahuIndex: 0 },
+  { name: 'Office South', temp: 73.0, setpoint: 72, humidity: 47, airflow: 820, co2: 680, occupied: true, damperPos: 70, commOk: true, ahuIndex: 0 },
+  { name: 'Conference Room', temp: 71.5, setpoint: 72, humidity: 44, airflow: 600, co2: 520, occupied: false, damperPos: 40, commOk: true, ahuIndex: 1 },
+  { name: 'Server Room', temp: 68.0, setpoint: 68, humidity: 40, airflow: 1200, co2: 410, occupied: false, damperPos: 95, commOk: true, ahuIndex: 1 }
+];
+
+// ---- AHU data model ----
+const ahus = [
+  {
+    name: 'AHU-1', status: 'Running', supplyTemp: 55.0, returnTemp: 74.0,
+    fanSpeed: 78, fanRPM: 1170, filterDP: 0.8, filterMax: 2.0,
+    coolingValve: 65, energyKW: 12.4, compressorOn: true,
+    suctionPressure: 68, dischargePressure: 225, refrigCharge: 100,
+    supplyStaticP: 1.2, ductLeakage: 2, vfdHz: 47
+  },
+  {
+    name: 'AHU-2', status: 'Running', supplyTemp: 56.0, returnTemp: 73.0,
+    fanSpeed: 72, fanRPM: 1080, filterDP: 0.6, filterMax: 2.0,
+    coolingValve: 58, energyKW: 10.8, compressorOn: true,
+    suctionPressure: 70, dischargePressure: 220, refrigCharge: 100,
+    supplyStaticP: 1.1, ductLeakage: 1.5, vfdHz: 43
+  }
+];
+
+// ---- Trend data (24h of history, one point per minute = 1440 points) ----
+const TREND_POINTS = 1440;
+let trendData = {};
+const trendKeys = [
+  'zone0-temp','zone1-temp','zone2-temp','zone3-temp',
+  'ahu0-supply','ahu0-return','ahu0-fan','ahu0-filter','ahu0-cooling','ahu0-energy',
+  'ahu1-supply','ahu1-return','ahu1-fan','ahu1-filter','ahu1-cooling','ahu1-energy'
+];
+
+// Selected UI state
+let selectedZone = -1;
+let selectedAHU = -1;
+
+// ---- Initialize trend history ----
+function initTrends() {
+  for (let key of trendKeys) {
+    trendData[key] = [];
+    let base = getTrendBaseValue(key);
+    for (let i = 0; i < TREND_POINTS; i++) {
+      // Generate a plausible 24h pattern
+      let hourFrac = i / 60; // 0-24
+      let diurnal = Math.sin((hourFrac - 6) * Math.PI / 12) * getDiurnalAmplitude(key);
+      trendData[key].push(base + diurnal + (Math.random() - 0.5) * getNoiseLevel(key));
+    }
+  }
+}
+
+function getTrendBaseValue(key) {
+  if (key.includes('zone') && key.includes('temp')) {
+    let zi = parseInt(key.charAt(4));
+    return zones[zi].setpoint;
+  }
+  if (key.includes('supply') && key.includes('ahu0')) return 55;
+  if (key.includes('supply') && key.includes('ahu1')) return 56;
+  if (key.includes('return')) return 73.5;
+  if (key.includes('fan')) return 75;
+  if (key.includes('filter') && key.includes('ahu0')) return 0.8;
+  if (key.includes('filter') && key.includes('ahu1')) return 0.6;
+  if (key.includes('cooling')) return 60;
+  if (key.includes('energy') && key.includes('ahu0')) return 12;
+  if (key.includes('energy') && key.includes('ahu1')) return 10.5;
+  return 50;
+}
+
+function getDiurnalAmplitude(key) {
+  if (key.includes('temp')) return 1.5;
+  if (key.includes('fan')) return 8;
+  if (key.includes('cooling')) return 10;
+  if (key.includes('energy')) return 2;
+  return 0.5;
+}
+
+function getNoiseLevel(key) {
+  if (key.includes('temp')) return 0.4;
+  if (key.includes('fan')) return 2;
+  if (key.includes('filter')) return 0.05;
+  if (key.includes('cooling')) return 3;
+  if (key.includes('energy')) return 0.5;
+  return 1;
+}
+
+// ---- Get current live value for a trend key ----
+function getCurrentTrendValue(key) {
+  if (key === 'zone0-temp') return zones[0].temp;
+  if (key === 'zone1-temp') return zones[1].temp;
+  if (key === 'zone2-temp') return zones[2].temp;
+  if (key === 'zone3-temp') return zones[3].temp;
+  if (key === 'ahu0-supply') return ahus[0].supplyTemp;
+  if (key === 'ahu0-return') return ahus[0].returnTemp;
+  if (key === 'ahu0-fan') return ahus[0].fanSpeed;
+  if (key === 'ahu0-filter') return ahus[0].filterDP;
+  if (key === 'ahu0-cooling') return ahus[0].coolingValve;
+  if (key === 'ahu0-energy') return ahus[0].energyKW;
+  if (key === 'ahu1-supply') return ahus[1].supplyTemp;
+  if (key === 'ahu1-return') return ahus[1].returnTemp;
+  if (key === 'ahu1-fan') return ahus[1].fanSpeed;
+  if (key === 'ahu1-filter') return ahus[1].filterDP;
+  if (key === 'ahu1-cooling') return ahus[1].coolingValve;
+  if (key === 'ahu1-energy') return ahus[1].energyKW;
+  return 0;
+}
+
+function getTrendSetpoint(key) {
+  if (key === 'zone0-temp') return zones[0].setpoint;
+  if (key === 'zone1-temp') return zones[1].setpoint;
+  if (key === 'zone2-temp') return zones[2].setpoint;
+  if (key === 'zone3-temp') return zones[3].setpoint;
+  if (key.includes('supply')) return 55;
+  if (key.includes('return')) return 74;
+  if (key.includes('fan')) return 75;
+  if (key.includes('filter')) return 1.0;
+  if (key.includes('cooling')) return 60;
+  if (key.includes('energy')) return null; // no setpoint
+  return null;
+}
+
+function getTrendAlarmHigh(key) {
+  if (key.includes('zone') && key.includes('temp')) return getTrendSetpoint(key) + 4;
+  if (key.includes('supply')) return 62;
+  if (key.includes('filter') && key.includes('ahu0')) return 1.8;
+  if (key.includes('filter') && key.includes('ahu1')) return 1.8;
+  if (key.includes('energy') && key.includes('ahu0')) return 18;
+  if (key.includes('energy') && key.includes('ahu1')) return 16;
+  return null;
+}
+
+function getTrendWarnHigh(key) {
+  if (key.includes('zone') && key.includes('temp')) return getTrendSetpoint(key) + 2;
+  if (key.includes('supply')) return 58;
+  if (key.includes('filter')) return 1.4;
+  if (key.includes('energy') && key.includes('ahu0')) return 15;
+  if (key.includes('energy') && key.includes('ahu1')) return 13;
+  return null;
+}
+
+function getTrendUnit(key) {
+  if (key.includes('temp') || key.includes('supply') || key.includes('return')) return 'deg F';
+  if (key.includes('fan')) return '%';
+  if (key.includes('filter')) return 'in.wc';
+  if (key.includes('cooling')) return '%';
+  if (key.includes('energy')) return 'kW';
+  return '';
+}
+
+// ---- Scenario-based simulation update (called every ~1s) ----
+function updateSimulation() {
+  // Advance simulated time by 1 minute per real second
+  simTime = new Date(simTime.getTime() + 60000);
+
+  let sc = currentScenario;
+
+  // Reset comm status
+  zones.forEach(z => { z.commOk = true; });
+
+  // Noise helper
+  const noise = (amp) => (Math.random() - 0.5) * amp;
+
+  if (sc === 'normal') {
+    // Normal operation - zones near setpoint
+    zones[0].temp = zones[0].setpoint + noise(0.6);
+    zones[1].temp = zones[1].setpoint + 0.8 + noise(0.5); // slightly warm (south exposure)
+    zones[2].temp = zones[2].setpoint - 0.3 + noise(0.5);
+    zones[3].temp = zones[3].setpoint + noise(0.3);
+
+    ahus[0].status = 'Running'; ahus[1].status = 'Running';
+    ahus[0].supplyTemp = 55 + noise(0.5);
+    ahus[0].returnTemp = 74 + noise(0.4);
+    ahus[0].fanSpeed = 78 + noise(2);
+    ahus[0].filterDP = 0.8 + noise(0.05);
+    ahus[0].coolingValve = 65 + noise(3);
+    ahus[0].energyKW = 12.4 + noise(0.4);
+    ahus[0].suctionPressure = 68 + noise(1);
+    ahus[0].dischargePressure = 225 + noise(2);
+
+    ahus[1].supplyTemp = 56 + noise(0.5);
+    ahus[1].returnTemp = 73 + noise(0.4);
+    ahus[1].fanSpeed = 72 + noise(2);
+    ahus[1].filterDP = 0.6 + noise(0.04);
+    ahus[1].coolingValve = 58 + noise(3);
+    ahus[1].energyKW = 10.8 + noise(0.4);
+    ahus[1].suctionPressure = 70 + noise(1);
+    ahus[1].dischargePressure = 220 + noise(2);
+
+    outdoorTemp = 92 + noise(1);
+    outdoorHum = 65 + noise(2);
+
+  } else if (sc === 'dirty-filter') {
+    // Dirty filter on AHU-1: high filter dP, supply temp rising, fan working harder
+    zones[0].temp = zones[0].setpoint + 2.5 + noise(0.5);
+    zones[1].temp = zones[1].setpoint + 3.2 + noise(0.5);
+    zones[2].temp = zones[2].setpoint + noise(0.5);
+    zones[3].temp = zones[3].setpoint + 0.3 + noise(0.3);
+
+    ahus[0].status = 'Running';
+    ahus[0].supplyTemp = 59 + noise(0.6);
+    ahus[0].returnTemp = 76 + noise(0.4);
+    ahus[0].fanSpeed = 92 + noise(2);
+    ahus[0].filterDP = 1.7 + noise(0.08);
+    ahus[0].coolingValve = 85 + noise(3);
+    ahus[0].energyKW = 16.2 + noise(0.5);
+    ahus[0].suctionPressure = 65 + noise(1);
+    ahus[0].dischargePressure = 230 + noise(2);
+
+    ahus[1].status = 'Running';
+    ahus[1].supplyTemp = 56 + noise(0.5);
+    ahus[1].returnTemp = 73 + noise(0.4);
+    ahus[1].fanSpeed = 72 + noise(2);
+    ahus[1].filterDP = 0.6 + noise(0.04);
+    ahus[1].coolingValve = 58 + noise(3);
+    ahus[1].energyKW = 10.8 + noise(0.4);
+    ahus[1].suctionPressure = 70 + noise(1);
+    ahus[1].dischargePressure = 220 + noise(2);
+
+    outdoorTemp = 94 + noise(1);
+    outdoorHum = 68 + noise(2);
+
+  } else if (sc === 'refrigerant-leak') {
+    // Refrigerant leak on AHU-1: supply temp rising, suction pressure dropping, compressor running 100%
+    zones[0].temp = zones[0].setpoint + 4.5 + noise(0.6);
+    zones[1].temp = zones[1].setpoint + 5.2 + noise(0.6);
+    zones[2].temp = zones[2].setpoint + 1.0 + noise(0.5);
+    zones[3].temp = zones[3].setpoint + 0.5 + noise(0.3);
+
+    ahus[0].status = 'Running';
+    ahus[0].supplyTemp = 64 + noise(0.7);
+    ahus[0].returnTemp = 78 + noise(0.5);
+    ahus[0].fanSpeed = 95 + noise(1);
+    ahus[0].filterDP = 0.85 + noise(0.05);
+    ahus[0].coolingValve = 100;
+    ahus[0].energyKW = 18.5 + noise(0.5);
+    ahus[0].suctionPressure = 42 + noise(1.5);
+    ahus[0].dischargePressure = 195 + noise(3);
+
+    ahus[1].status = 'Running';
+    ahus[1].supplyTemp = 56 + noise(0.5);
+    ahus[1].returnTemp = 73.5 + noise(0.4);
+    ahus[1].fanSpeed = 74 + noise(2);
+    ahus[1].filterDP = 0.6 + noise(0.04);
+    ahus[1].coolingValve = 62 + noise(3);
+    ahus[1].energyKW = 11.2 + noise(0.4);
+    ahus[1].suctionPressure = 70 + noise(1);
+    ahus[1].dischargePressure = 220 + noise(2);
+
+    outdoorTemp = 95 + noise(1);
+    outdoorHum = 70 + noise(2);
+
+  } else if (sc === 'sensor-failure') {
+    // Zone 2 (Conference Room) sensor comm failure
+    zones[0].temp = zones[0].setpoint + noise(0.5);
+    zones[1].temp = zones[1].setpoint + 0.5 + noise(0.5);
+    zones[2].temp = NaN; // sensor failure
+    zones[2].commOk = false;
+    zones[3].temp = zones[3].setpoint + noise(0.3);
+
+    ahus[0].status = 'Running';
+    ahus[0].supplyTemp = 55 + noise(0.5);
+    ahus[0].returnTemp = 74 + noise(0.4);
+    ahus[0].fanSpeed = 78 + noise(2);
+    ahus[0].filterDP = 0.8 + noise(0.05);
+    ahus[0].coolingValve = 65 + noise(3);
+    ahus[0].energyKW = 12.4 + noise(0.4);
+    ahus[0].suctionPressure = 68 + noise(1);
+    ahus[0].dischargePressure = 225 + noise(2);
+
+    ahus[1].status = 'Running';
+    ahus[1].supplyTemp = 56 + noise(0.5);
+    ahus[1].returnTemp = 73 + noise(0.4);
+    ahus[1].fanSpeed = 72 + noise(2);
+    ahus[1].filterDP = 0.6 + noise(0.04);
+    ahus[1].coolingValve = 58 + noise(3);
+    ahus[1].energyKW = 10.8 + noise(0.4);
+    ahus[1].suctionPressure = 70 + noise(1);
+    ahus[1].dischargePressure = 220 + noise(2);
+
+    outdoorTemp = 91 + noise(1);
+    outdoorHum = 63 + noise(2);
+  }
+
+  // Clamp values
+  ahus.forEach(a => {
+    a.fanSpeed = Math.max(0, Math.min(100, a.fanSpeed));
+    a.coolingValve = Math.max(0, Math.min(100, a.coolingValve));
+    a.filterDP = Math.max(0.2, a.filterDP);
+    a.energyKW = Math.max(0, a.energyKW);
+    a.fanRPM = Math.round(a.fanSpeed * 15);
+    a.vfdHz = Math.round(a.fanSpeed * 0.6);
+  });
+
+  // Derived zone properties
+  zones.forEach((z, i) => {
+    if (z.commOk && !isNaN(z.temp)) {
+      z.humidity = 42 + Math.random() * 8;
+      z.co2 = 400 + Math.random() * 300 + (z.occupied ? 200 : 0);
+      z.airflow = 500 + ahus[z.ahuIndex].fanSpeed * 8 + (Math.random() - 0.5) * 50;
+      z.damperPos = Math.min(100, Math.max(10, ahus[z.ahuIndex].coolingValve + (Math.random() - 0.5) * 15));
+    }
+  });
+
+  // Push current values into trend arrays
+  for (let key of trendKeys) {
+    let val = getCurrentTrendValue(key);
+    if (isNaN(val)) val = null;
+    trendData[key].push(val);
+    if (trendData[key].length > TREND_POINTS) {
+      trendData[key].shift();
+    }
+  }
+}
+
+// ---- Alarm banner logic ----
+function updateAlarmBanner() {
+  let alarms = [];
+  let sc = currentScenario;
+
+  if (sc === 'dirty-filter') {
+    alarms.push('AHU-1 Filter dP HIGH (>' + ahus[0].filterDP.toFixed(1) + ' in.wc)');
+  }
+  if (sc === 'refrigerant-leak') {
+    alarms.push('AHU-1 Low Suction Pressure ALARM - Check Refrigerant');
+    alarms.push('Zones 1-2 Temperature HIGH');
+  }
+  if (sc === 'sensor-failure') {
+    alarms.push('Zone 3 (Conference Room) COMM FAILURE - Check sensor wiring');
+  }
+
+  // Check any zone that is more than 4 degrees from setpoint
+  zones.forEach((z, i) => {
+    if (z.commOk && !isNaN(z.temp) && Math.abs(z.temp - z.setpoint) > 4) {
+      if (!alarms.some(a => a.includes(z.name))) {
+        alarms.push(z.name + ' temperature alarm: ' + z.temp.toFixed(1) + '\u00B0F (SP: ' + z.setpoint + '\u00B0F)');
+      }
+    }
+  });
+
+  let banner = document.getElementById('alarm-banner');
+  if (alarms.length > 0) {
+    banner.textContent = '\u26A0 ACTIVE ALARMS: ' + alarms.join('  |  ');
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+// ---- Render top bar ----
+function renderTopBar() {
+  let opts = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  document.getElementById('sim-datetime').textContent = simTime.toLocaleDateString('en-US', opts);
+  document.getElementById('outdoor-temp').textContent = outdoorTemp.toFixed(1) + '\u00B0F';
+  document.getElementById('outdoor-hum').textContent = outdoorHum.toFixed(0) + '%';
+}
+
+// ---- Render floor plan zones ----
+function renderZones() {
+  for (let i = 0; i < zones.length; i++) {
+    let z = zones[i];
+    let el = document.getElementById('zone-' + i);
+    let tempEl = document.getElementById('zt-' + i);
+    let spEl = document.getElementById('zs-' + i);
+    let stEl = document.getElementById('zst-' + i);
+
+    if (!z.commOk || isNaN(z.temp)) {
+      // Comm failure
+      el.className = 'zone zone-gray' + (selectedZone === i ? ' selected' : '');
+      tempEl.textContent = '---';
+      spEl.textContent = 'SP: ' + z.setpoint + '\u00B0F';
+      stEl.textContent = 'COMM FAIL';
+      stEl.style.background = '#b71c1c';
+      stEl.style.color = '#fff';
+    } else {
+      let diff = Math.abs(z.temp - z.setpoint);
+      let cls = 'zone-green';
+      if (diff > 4) cls = 'zone-red';
+      else if (diff > 2) cls = 'zone-yellow';
+      el.className = 'zone ' + cls + (selectedZone === i ? ' selected' : '');
+      tempEl.textContent = z.temp.toFixed(1) + '\u00B0F';
+      spEl.textContent = 'SP: ' + z.setpoint + '\u00B0F';
+
+      if (diff <= 2) {
+        stEl.textContent = 'NORMAL';
+        stEl.style.background = 'rgba(0,0,0,0.15)';
+        stEl.style.color = '#1a3a1a';
+      } else if (diff <= 4) {
+        stEl.textContent = 'WARNING';
+        stEl.style.background = 'rgba(0,0,0,0.15)';
+        stEl.style.color = '#5a4000';
+      } else {
+        stEl.textContent = 'ALARM';
+        stEl.style.background = 'rgba(0,0,0,0.2)';
+        stEl.style.color = '#5a0000';
+      }
+    }
+  }
+}
+
+// ---- Render zone detail ----
+function renderZoneDetail() {
+  let panel = document.getElementById('zone-detail');
+  if (selectedZone < 0) {
+    panel.classList.remove('show');
+    return;
+  }
+  panel.classList.add('show');
+  let z = zones[selectedZone];
+  document.getElementById('zd-title').textContent = z.name + ' - Detailed View';
+  let grid = document.getElementById('zd-grid');
+
+  if (!z.commOk || isNaN(z.temp)) {
+    grid.innerHTML = '<div class="zd-row"><span class="zd-label">Status</span><span class="zd-val" style="color:#ef5350;">COMMUNICATION FAILURE</span></div>' +
+      '<div class="zd-row"><span class="zd-label">Setpoint</span><span class="zd-val">' + z.setpoint + '\u00B0F</span></div>' +
+      '<div class="zd-row"><span class="zd-label">Served by</span><span class="zd-val">' + ahus[z.ahuIndex].name + '</span></div>';
+    return;
+  }
+
+  let rows = [
+    ['Temperature', z.temp.toFixed(1) + '\u00B0F'],
+    ['Setpoint', z.setpoint + '\u00B0F'],
+    ['Humidity', z.humidity.toFixed(0) + '% RH'],
+    ['Airflow', Math.round(z.airflow) + ' CFM'],
+    ['CO2 Level', Math.round(z.co2) + ' ppm'],
+    ['Damper Pos.', z.damperPos.toFixed(0) + '%'],
+    ['Occupied', z.occupied ? 'Yes' : 'No'],
+    ['Served by', ahus[z.ahuIndex].name]
+  ];
+  grid.innerHTML = rows.map(r => '<div class="zd-row"><span class="zd-label">' + r[0] + '</span><span class="zd-val">' + r[1] + '</span></div>').join('');
+}
+
+// ---- Render AHU equipment cards ----
+function renderAHUCards() {
+  for (let i = 0; i < ahus.length; i++) {
+    let a = ahus[i];
+    let card = document.getElementById('ahu-card-' + i);
+    card.className = 'ahu-card' + (selectedAHU === i ? ' selected' : '');
+
+    // Status class
+    let statusCls = 'status-running';
+    if (a.status === 'Stopped') statusCls = 'status-stopped';
+    else if (a.status === 'Fault') statusCls = 'status-fault';
+
+    // Filter bar color
+    let filterPct = (a.filterDP / a.filterMax) * 100;
+    let filterColor = '#66bb6a';
+    let filterValCls = '';
+    if (a.filterDP > 1.5) { filterColor = '#ef5350'; filterValCls = 'alarm'; }
+    else if (a.filterDP > 1.0) { filterColor = '#fdd835'; filterValCls = 'warn'; }
+
+    let expanded = (selectedAHU === i);
+
+    let html = '<div class="ahu-header">' +
+      '<span class="ahu-name">' + a.name + '</span>' +
+      '<span class="ahu-status ' + statusCls + '">' + a.status + '</span>' +
+      '</div>' +
+      '<div class="ahu-grid">' +
+      paramHTML('Supply Air', a.supplyTemp.toFixed(1) + '\u00B0F', a.supplyTemp > 60 ? (a.supplyTemp > 62 ? 'alarm' : 'warn') : '') +
+      paramHTML('Return Air', a.returnTemp.toFixed(1) + '\u00B0F', '') +
+      paramHTML('Fan Speed', a.fanSpeed.toFixed(0) + '% (' + a.fanRPM + ' RPM)', a.fanSpeed > 92 ? 'warn' : '') +
+      paramHTML('Cooling Valve', a.coolingValve.toFixed(0) + '% open', a.coolingValve >= 100 ? 'alarm' : '') +
+      paramHTML('Energy', a.energyKW.toFixed(1) + ' kW', a.energyKW > 16 ? 'alarm' : (a.energyKW > 14 ? 'warn' : '')) +
+      '</div>' +
+      '<div style="margin-top:4px;">' +
+      '<span class="param-label">Filter dP</span>' +
+      '<div class="filter-bar-container">' +
+      '<span class="param-value ' + filterValCls + '" style="font-size:12px;min-width:55px;">' + a.filterDP.toFixed(2) + ' in.wc</span>' +
+      '<div class="filter-bar"><div class="filter-bar-fill" style="width:' + Math.min(100, filterPct).toFixed(0) + '%;background:' + filterColor + ';"></div></div>' +
+      '</div></div>';
+
+    // Expanded details
+    html += '<div class="detail-overlay' + (expanded ? ' show' : '') + '">';
+    if (expanded) {
+      html += detailRow('Suction Pressure', a.suctionPressure.toFixed(1) + ' psig', a.suctionPressure < 50 ? 'alarm' : '') +
+        detailRow('Discharge Pressure', a.dischargePressure.toFixed(1) + ' psig', '') +
+        detailRow('Compressor', a.coolingValve >= 100 ? 'ON - Max Load' : 'ON - Normal', a.coolingValve >= 100 ? 'alarm' : '') +
+        detailRow('Supply Static', a.supplyStaticP.toFixed(2) + ' in.wc', '') +
+        detailRow('VFD Frequency', a.vfdHz + ' Hz', '') +
+        detailRow('Duct Leakage Est.', a.ductLeakage.toFixed(1) + '%', '');
+    }
+    html += '</div>';
+
+    card.innerHTML = html;
+  }
+}
+
+function paramHTML(label, value, cls) {
+  return '<div class="ahu-param"><span class="param-label">' + label + '</span><span class="param-value ' + cls + '">' + value + '</span></div>';
+}
+
+function detailRow(label, value, cls) {
+  return '<div class="detail-row"><span class="detail-label">' + label + '</span><span class="detail-val' + (cls ? ' style="color:' + (cls==='alarm' ? '#ef5350' : '#fdd835') + ';"' : '') + '">' + value + '</span></div>';
+}
+
+// ---- Trend chart rendering using p5.js ----
+let trendSketch;
+
+function drawTrendChart() {
+  let canvas = document.getElementById('trend-canvas');
+  let wrap = document.getElementById('trend-canvas-wrap');
+  let cw = wrap.clientWidth;
+  let ch = wrap.clientHeight;
+  if (cw < 10 || ch < 10) return;
+  canvas.width = cw * (window.devicePixelRatio || 1);
+  canvas.height = ch * (window.devicePixelRatio || 1);
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+
+  let ctx = canvas.getContext('2d');
+  let dpr = window.devicePixelRatio || 1;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cw, ch);
+
+  let key = document.getElementById('trend-select').value;
+  let data = trendData[key] || [];
+  if (data.length === 0) return;
+
+  let padL = 52, padR = 12, padT = 10, padB = 28;
+  let gw = cw - padL - padR;
+  let gh = ch - padT - padB;
+
+  // Compute Y range from data
+  let validData = data.filter(v => v !== null && !isNaN(v));
+  if (validData.length === 0) return;
+  let minVal = Math.min(...validData);
+  let maxVal = Math.max(...validData);
+
+  // Include setpoint and alarm thresholds in range
+  let sp = getTrendSetpoint(key);
+  let ah = getTrendAlarmHigh(key);
+  let wh = getTrendWarnHigh(key);
+  if (sp !== null) { minVal = Math.min(minVal, sp); maxVal = Math.max(maxVal, sp); }
+  if (ah !== null) { maxVal = Math.max(maxVal, ah + 1); }
+  if (wh !== null) { maxVal = Math.max(maxVal, wh); }
+
+  let range = maxVal - minVal;
+  if (range < 2) range = 2;
+  minVal -= range * 0.1;
+  maxVal += range * 0.1;
+  range = maxVal - minVal;
+
+  function xPos(i) { return padL + (i / (TREND_POINTS - 1)) * gw; }
+  function yPos(v) { return padT + gh - ((v - minVal) / range) * gh; }
+
+  // Background
+  ctx.fillStyle = '#1a1d23';
+  ctx.fillRect(0, 0, cw, ch);
+
+  // Grid lines
+  ctx.strokeStyle = '#2a2d35';
+  ctx.lineWidth = 1;
+  let yTicks = 5;
+  for (let t = 0; t <= yTicks; t++) {
+    let v = minVal + (t / yTicks) * range;
+    let y = yPos(v);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cw - padR, y); ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.font = '10px Segoe UI, Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(1), padL - 4, y + 3);
+  }
+
+  // Time labels on X axis
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#888';
+  for (let h = 0; h < 24; h += 4) {
+    let xi = (h / 24) * TREND_POINTS;
+    let x = xPos(xi);
+    let hour = (simTime.getHours() - 24 + h + 48) % 24;
+    let label = (hour === 0 ? '12' : (hour > 12 ? (hour - 12) : hour)) + (hour >= 12 ? 'PM' : 'AM');
+    ctx.fillText(label, x, ch - 6);
+    ctx.beginPath();
+    ctx.strokeStyle = '#2a2d35';
+    ctx.moveTo(x, padT); ctx.lineTo(x, padT + gh);
+    ctx.stroke();
+  }
+
+  // Alarm band (high)
+  if (ah !== null) {
+    let yA = yPos(ah);
+    ctx.fillStyle = 'rgba(239, 83, 80, 0.08)';
+    ctx.fillRect(padL, padT, gw, yA - padT);
+    ctx.strokeStyle = '#ef5350';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(padL, yA); ctx.lineTo(cw - padR, yA); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ef5350';
+    ctx.font = '9px Segoe UI, Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('ALARM', cw - padR - 34, yA - 2);
+  }
+
+  // Warning band (high)
+  if (wh !== null) {
+    let yW = yPos(wh);
+    let yTop = ah !== null ? yPos(ah) : padT;
+    ctx.fillStyle = 'rgba(253, 216, 53, 0.06)';
+    ctx.fillRect(padL, yTop, gw, yW - yTop);
+    ctx.strokeStyle = '#fdd835';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(padL, yW); ctx.lineTo(cw - padR, yW); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#fdd835';
+    ctx.font = '9px Segoe UI, Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('WARN', cw - padR - 30, yW - 2);
+  }
+
+  // Setpoint line (dashed)
+  if (sp !== null) {
+    let yS = yPos(sp);
+    ctx.strokeStyle = '#8ab4f8';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([8, 5]);
+    ctx.beginPath(); ctx.moveTo(padL, yS); ctx.lineTo(cw - padR, yS); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#8ab4f8';
+    ctx.font = '9px Segoe UI, Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('SP ' + sp, padL + 2, yS - 3);
+  }
+
+  // Data line
+  ctx.strokeStyle = '#4fc3f7';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] === null || isNaN(data[i])) {
+      started = false;
+      continue;
+    }
+    let x = xPos(i);
+    let y = yPos(data[i]);
+    if (!started) { ctx.moveTo(x, y); started = true; }
+    else { ctx.lineTo(x, y); }
+  }
+  ctx.stroke();
+
+  // Current time marker
+  let nowX = xPos(data.length - 1);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(nowX, padT); ctx.lineTo(nowX, padT + gh); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#fff';
+  ctx.font = '9px Segoe UI, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('NOW', nowX, padT + gh + 12);
+
+  // Current value dot
+  let lastVal = data[data.length - 1];
+  if (lastVal !== null && !isNaN(lastVal)) {
+    let lx = xPos(data.length - 1);
+    let ly = yPos(lastVal);
+    ctx.fillStyle = '#4fc3f7';
+    ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px Segoe UI, Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(lastVal.toFixed(1) + ' ' + getTrendUnit(key), lx - 8, ly - 6);
+  }
+
+  // Unit label
+  ctx.fillStyle = '#666';
+  ctx.font = '10px Segoe UI, Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText(getTrendUnit(key), padL + 2, padT + 10);
+}
+
+// ---- Event handlers ----
+function setupEvents() {
+  // Scenario selector
+  document.getElementById('scenario-sel').addEventListener('change', function() {
+    currentScenario = this.value;
+    // Reset trends when switching scenarios for clean visuals
+    initTrends();
+  });
+
+  // Zone clicks
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('zone-' + i).addEventListener('click', function() {
+      let zi = parseInt(this.dataset.zone);
+      selectedZone = (selectedZone === zi) ? -1 : zi;
+      renderZoneDetail();
+      renderZones();
+    });
+  }
+
+  // AHU card clicks
+  for (let i = 0; i < 2; i++) {
+    document.getElementById('ahu-card-' + i).addEventListener('click', function() {
+      let ai = parseInt(this.dataset.ahu);
+      selectedAHU = (selectedAHU === ai) ? -1 : ai;
+      renderAHUCards();
+    });
+  }
+
+  // Trend dropdown
+  document.getElementById('trend-select').addEventListener('change', function() {
+    drawTrendChart();
+  });
+
+  // Window resize
+  window.addEventListener('resize', function() {
+    drawTrendChart();
+  });
+}
+
+// ---- Main update loop ----
+function renderAll() {
+  renderTopBar();
+  renderZones();
+  renderZoneDetail();
+  renderAHUCards();
+  updateAlarmBanner();
+  drawTrendChart();
+}
+
+// Initialize
+initTrends();
+setupEvents();
+renderAll();
+
+// Simulation tick every 1 second
+setInterval(function() {
+  updateSimulation();
+  renderAll();
+}, 1000);
+
+</script>
+</body>
+</html>

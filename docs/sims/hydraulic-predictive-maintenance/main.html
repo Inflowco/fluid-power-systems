@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydraulic Predictive Maintenance Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+            min-height: 600px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .column h2 {
+            font-size: 18px;
+            color: #1976d2;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #2196f3;
+            padding-bottom: 8px;
+        }
+
+        .health-card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .health-card:hover {
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+            border-color: #2196f3;
+            transform: translateY(-2px);
+        }
+
+        .health-card.expanded {
+            grid-column: 1 / -1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .component-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .trend-arrow {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .trend-up { color: #4caf50; }
+        .trend-stable { color: #ffc107; }
+        .trend-down { color: #f44336; }
+
+        .health-bar-container {
+            margin-bottom: 12px;
+        }
+
+        .health-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .health-fill {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+
+        .health-good { background: linear-gradient(90deg, #4caf50, #66bb6a); }
+        .health-medium { background: linear-gradient(90deg, #ffc107, #ffca28); }
+        .health-poor { background: linear-gradient(90deg, #f44336, #ef5350); }
+
+        .card-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #2196f3;
+        }
+
+        .detail-label {
+            color: #999;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 4px;
+            padding: 12px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .chart-container.show {
+            display: block;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 150px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .priority-queue {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .priority-item {
+            background: #fafafa;
+            border-left: 4px solid;
+            padding: 14px;
+            border-radius: 4px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .priority-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateX(4px);
+        }
+
+        .priority-urgent { border-left-color: #f44336; background: #ffebee; }
+        .priority-high { border-left-color: #ff9800; background: #fff3e0; }
+        .priority-medium { border-left-color: #ffc107; background: #fffde7; }
+        .priority-low { border-left-color: #4caf50; background: #f1f8e9; }
+
+        .priority-badge {
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+
+        .priority-text {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .priority-subtext {
+            color: #999;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .controls {
+            background: #f5f5f5;
+            padding: 20px 30px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .control-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            width: 200px;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-toggle {
+            background: #e0e0e0;
+            color: #333;
+            min-width: 160px;
+        }
+
+        .btn-toggle.active {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-submit {
+            background: #4caf50;
+            color: white;
+            min-width: 180px;
+        }
+
+        .btn-submit:hover {
+            background: #45a049;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .assessment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .assessment-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h3 {
+            color: #1976d2;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 100px;
+            margin-bottom: 16px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-submit-modal {
+            background: #4caf50;
+            color: white;
+            flex: 1;
+        }
+
+        .feedback {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 16px;
+            border-radius: 4px;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #2e7d32;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback h4 {
+            margin-bottom: 8px;
+            color: #1b5e20;
+        }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .control-group {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            input[type="range"] {
+                flex: 1;
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Hydraulic Predictive Maintenance Dashboard</h1>
+            <p>Real-time Component Health Analysis and AI-Driven Maintenance Recommendations</p>
+        </div>
+
+        <div class="content">
+            <!-- LEFT COLUMN: Health Cards -->
+            <div class="column">
+                <h2>Component Health Status</h2>
+                <div id="healthCardsContainer"></div>
+            </div>
+
+            <!-- RIGHT COLUMN: Priority Queue -->
+            <div class="column">
+                <h2>AI Maintenance Priority Queue</h2>
+                <div class="priority-queue" id="priorityQueue"></div>
+            </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+            <div class="control-group">
+                <label class="control-label">Operating Hours/Day:</label>
+                <input type="range" id="hoursPerDay" min="1" max="24" value="8" step="1">
+                <span id="hoursValue">8 hrs/day</span>
+            </div>
+
+            <button class="btn-toggle active" id="timeToggle" data-mode="hours">Show Hours</button>
+
+            <button class="btn-submit" id="assessmentBtn">Submit Assessment</button>
+        </div>
+    </div>
+
+    <!-- ASSESSMENT MODAL -->
+    <div class="assessment-modal" id="assessmentModal">
+        <div class="modal-content">
+            <h3>Maintenance Priority Assessment</h3>
+            <p>Based on the dashboard data, which maintenance action would you prioritize first and why?</p>
+            <textarea id="assessmentInput" placeholder="Enter your assessment here..."></textarea>
+            <div class="feedback" id="feedback">
+                <h4>Feedback</h4>
+                <p id="feedbackText"></p>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeAssessmentModal()">Cancel</button>
+                <button class="btn-submit-modal" onclick="submitAssessment()">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script>
+        // Component health data
+        const components = [
+            {
+                name: 'Main Pump',
+                health: 72,
+                metric: 'Efficiency: 88%',
+                metricLabel: 'Efficiency',
+                metricValue: '88%',
+                baseline: '95%',
+                trend: 'down',
+                rul: 1200,
+                icon: '🔧'
+            },
+            {
+                name: 'Relief Valve',
+                health: 95,
+                metric: 'Cracking: 2,980 psi',
+                metricLabel: 'Cracking Pressure',
+                metricValue: '2,980 psi',
+                baseline: '3,000 psi',
+                trend: 'stable',
+                rul: 5000,
+                icon: '⚙️'
+            },
+            {
+                name: 'Main Cylinder',
+                health: 58,
+                metric: 'Drift: 0.5 in/min',
+                metricLabel: 'Drift Rate',
+                metricValue: '0.5 in/min',
+                baseline: '0.1 in/min',
+                trend: 'down',
+                rul: 400,
+                icon: '📦'
+            },
+            {
+                name: 'Hydraulic Fluid',
+                health: 65,
+                metric: 'ISO: 19/17/14',
+                metricLabel: 'Particle Count',
+                metricValue: 'ISO 19/17/14',
+                baseline: '18/16/13',
+                trend: 'down',
+                rul: 300,
+                icon: '💧'
+            },
+            {
+                name: 'Return Filter',
+                health: 40,
+                metric: 'ΔP: 28 psi',
+                metricLabel: 'Pressure Drop',
+                metricValue: '28 psi',
+                baseline: '< 10 psi',
+                trend: 'down',
+                rul: 100,
+                icon: '🔲'
+            },
+            {
+                name: 'Servo Valve',
+                health: 82,
+                metric: 'Response: 12ms',
+                metricLabel: 'Response Time',
+                metricValue: '12 ms',
+                baseline: '10 ms',
+                trend: 'stable',
+                rul: 2000,
+                icon: '⚡'
+            }
+        ];
+
+        // Priority items
+        const priorityItems = [
+            { severity: 'urgent', badge: '🔴 URGENT', title: 'Replace return filter', desc: 'RUL: 100 hrs' },
+            { severity: 'high', badge: '🟠 HIGH', title: 'Schedule fluid change', desc: 'RUL: 300 hrs' },
+            { severity: 'high', badge: '🟠 HIGH', title: 'Plan cylinder reseal', desc: 'RUL: 400 hrs' },
+            { severity: 'medium', badge: '🟡 MEDIUM', title: 'Monitor pump efficiency', desc: 'RUL: 1,200 hrs' },
+            { severity: 'low', badge: '🟢 LOW', title: 'Servo valve within spec', desc: 'Continue monitoring' }
+        ];
+
+        let currentMode = 'hours';
+        let hoursPerDay = 8;
+        let expandedCard = null;
+        let trendData = {};
+
+        // Initialize trend data for each component
+        components.forEach((comp, idx) => {
+            trendData[idx] = generateTrendData(comp.health);
+        });
+
+        function generateTrendData(baseHealth) {
+            const data = [];
+            let health = baseHealth;
+            for (let i = 0; i < 30; i++) {
+                data.push(health + (Math.random() - 0.5) * 5);
+                health += (Math.random() - 0.5) * 2;
+                health = Math.max(0, Math.min(100, health));
+            }
+            return data;
+        }
+
+        function getHealthColor(health) {
+            if (health > 80) return 'health-good';
+            if (health >= 60) return 'health-medium';
+            return 'health-poor';
+        }
+
+        function getTrendArrow(trend) {
+            if (trend === 'up') return '↑';
+            if (trend === 'down') return '↓';
+            return '→';
+        }
+
+        function calculateRUL(hours, hoursPerDay) {
+            if (currentMode === 'hours') {
+                return hours;
+            } else {
+                return Math.ceil(hours / hoursPerDay);
+            }
+        }
+
+        function getRULLabel() {
+            return currentMode === 'hours' ? 'hrs' : 'days';
+        }
+
+        function renderHealthCards() {
+            const container = document.getElementById('healthCardsContainer');
+            container.innerHTML = '';
+
+            components.forEach((comp, idx) => {
+                const rul = calculateRUL(comp.rul, hoursPerDay);
+                const healthClass = getHealthColor(comp.health);
+                const trendClass = `trend-${comp.trend}`;
+
+                const card = document.createElement('div');
+                card.className = `health-card ${expandedCard === idx ? 'expanded' : ''}`;
+                card.onclick = () => toggleCardExpand(idx);
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div>
+                            <span style="font-size: 16px; margin-right: 8px;">${comp.icon}</span>
+                            <span class="component-name">${comp.name}</span>
+                        </div>
+                        <span class="trend-arrow ${trendClass}">${getTrendArrow(comp.trend)}</span>
+                    </div>
+
+                    <div class="health-bar-container">
+                        <div class="health-label">
+                            <span>Health Score</span>
+                            <span>${comp.health}%</span>
+                        </div>
+                        <div class="health-bar">
+                            <div class="health-fill ${healthClass}" style="width: ${comp.health}%">
+                                ${comp.health > 20 ? comp.health + '%' : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-details">
+                        <div class="detail-item">
+                            <div class="detail-label">${comp.metricLabel}</div>
+                            <div class="detail-value">${comp.metricValue}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">RUL</div>
+                            <div class="detail-value">${rul} ${getRULLabel()}</div>
+                        </div>
+                    </div>
+
+                    ${expandedCard === idx ? `
+                        <div class="chart-container show">
+                            <canvas id="chart-${idx}" class="chart-canvas"></canvas>
+                        </div>
+                    ` : ''}
+                `;
+
+                container.appendChild(card);
+            });
+
+            // Draw trend charts if any card is expanded
+            if (expandedCard !== null) {
+                setTimeout(() => drawTrendChart(expandedCard), 0);
+            }
+        }
+
+        function toggleCardExpand(idx) {
+            expandedCard = expandedCard === idx ? null : idx;
+            renderHealthCards();
+        }
+
+        function drawTrendChart(idx) {
+            const canvas = document.getElementById(`chart-${idx}`);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const data = trendData[idx];
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Grid lines
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = (height / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // Data line
+            ctx.strokeStyle = '#2196f3';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            data.forEach((value, i) => {
+                const x = (width / data.length) * i;
+                const y = height - (value / 100) * height;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // Points
+            ctx.fillStyle = '#2196f3';
+            data.forEach((value, i) => {
+                const x = (width / data.length) * i;
+                const y = height - (value / 100) * height;
+                ctx.fillRect(x - 2, y - 2, 4, 4);
+            });
+
+            // Labels
+            ctx.fillStyle = '#999';
+            ctx.font = '11px sans-serif';
+            ctx.fillText('0%', 5, height - 5);
+            ctx.fillText('100%', 5, 15);
+            ctx.fillText('Last 30 readings', width / 2 - 40, height + 15);
+        }
+
+        function renderPriorityQueue() {
+            const queue = document.getElementById('priorityQueue');
+            queue.innerHTML = '';
+
+            priorityItems.forEach(item => {
+                const element = document.createElement('div');
+                element.className = `priority-item priority-${item.severity}`;
+                element.innerHTML = `
+                    <div style="display: flex; align-items: flex-start;">
+                        <span class="priority-badge">${item.badge}</span>
+                        <div>
+                            <div class="priority-text">${item.title}</div>
+                            <div class="priority-subtext">${item.desc}</div>
+                        </div>
+                    </div>
+                `;
+                queue.appendChild(element);
+            });
+        }
+
+        function updateHoursDisplay() {
+            const hoursInput = document.getElementById('hoursPerDay');
+            const hoursValue = document.getElementById('hoursValue');
+            hoursPerDay = parseInt(hoursInput.value);
+            hoursValue.textContent = `${hoursPerDay} hrs/day`;
+            renderHealthCards();
+        }
+
+        function toggleTimeMode() {
+            const btn = document.getElementById('timeToggle');
+            currentMode = currentMode === 'hours' ? 'days' : 'hours';
+            btn.textContent = currentMode === 'hours' ? 'Show Hours' : 'Show Calendar Days';
+            btn.classList.toggle('active');
+            renderHealthCards();
+        }
+
+        function openAssessmentModal() {
+            document.getElementById('assessmentModal').classList.add('show');
+            document.getElementById('assessmentInput').focus();
+        }
+
+        function closeAssessmentModal() {
+            document.getElementById('assessmentModal').classList.remove('show');
+            document.getElementById('assessmentInput').value = '';
+            document.getElementById('feedback').classList.remove('show');
+        }
+
+        function submitAssessment() {
+            const input = document.getElementById('assessmentInput').value.trim();
+            const feedback = document.getElementById('feedback');
+            const feedbackText = document.getElementById('feedbackText');
+
+            if (input.length < 20) {
+                feedbackText.innerHTML = '<strong>Please provide a more detailed assessment.</strong>';
+                feedback.classList.add('show');
+                return;
+            }
+
+            // Simple keyword matching for feedback
+            let score = 0;
+            const keywords = ['filter', 'urgent', 'replace', 'fluid', 'change', 'maintenance', 'priority', 'risk', 'failure'];
+            keywords.forEach(keyword => {
+                if (input.toLowerCase().includes(keyword)) score++;
+            });
+
+            let feedbackMsg = '';
+            if (score >= 5) {
+                feedbackMsg = '<strong>Excellent assessment!</strong> You correctly identified critical maintenance needs and prioritized based on RUL and failure risk. Your reasoning demonstrates strong predictive maintenance thinking.';
+            } else if (score >= 3) {
+                feedbackMsg = '<strong>Good thinking!</strong> You considered some key factors. Remember to balance RUL with component criticality and potential system impact.';
+            } else {
+                feedbackMsg = '<strong>Consider this:</strong> Effective predictive maintenance prioritizes items with the shortest remaining useful life (RUL) and highest consequence of failure. Review the dashboard data for these indicators.';
+            }
+
+            feedbackText.innerHTML = feedbackMsg;
+            feedback.classList.add('show');
+
+            setTimeout(() => {
+                closeAssessmentModal();
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('hoursPerDay').addEventListener('input', updateHoursDisplay);
+        document.getElementById('timeToggle').addEventListener('click', toggleTimeMode);
+        document.getElementById('assessmentBtn').addEventListener('click', openAssessmentModal);
+
+        // Close modal on outside click
+        document.getElementById('assessmentModal').addEventListener('click', (e) => {
+            if (e.target.id === 'assessmentModal') closeAssessmentModal();
+        });
+
+        // Initial render
+        renderHealthCards();
+        renderPriorityQueue();
+    </script>
+</body>
+</html>

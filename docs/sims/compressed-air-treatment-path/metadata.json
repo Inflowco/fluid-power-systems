@@ -1,0 +1,62 @@
+{
+  "title": "Compressed Air Treatment Path",
+  "description": "Interactive flow diagram showing compressed air moving through each treatment stage — aftercooler, receiver, pre-filter, dryer, and after-filter — with contaminant levels displayed at each point. Students can toggle dryer type and adjust ambient humidity to see how each component improves air quality.",
+  "creator": "Peter Vinck",
+  "date": "2026-02-10",
+  "subject": [
+    "Compressed Air Systems",
+    "Air Treatment",
+    "Industrial Utilities",
+    "Fluid Power Systems"
+  ],
+  "type": "Interactive Simulation",
+  "format": "text/html",
+  "language": "en-US",
+  "rights": "CC BY-NC-SA 4.0",
+  "contributor": [
+    "Claude Code"
+  ],
+  "identifier": "https://dmccreary.github.io/fluid-power-systems/sims/compressed-air-treatment-path/",
+  "publisher": "Inflow Corp.",
+  "educationalLevel": "Undergraduate, Professional Training",
+  "learningResourceType": "simulation",
+  "audience": "Students, Technicians, Educators",
+  "version": "1.0.0",
+  "bloomLevel": [
+    "Understand"
+  ],
+  "concepts": [
+    "Compressed Air Treatment",
+    "Aftercooler",
+    "Receiver Tank",
+    "Coalescing Filter",
+    "Refrigerated Dryer",
+    "Desiccant Dryer",
+    "Air Quality Standards",
+    "ISO 8573-1",
+    "Contaminant Removal",
+    "Dew Point"
+  ],
+  "prerequisites": [
+    "Basic understanding of compressed air systems",
+    "Familiarity with pressure and temperature concepts",
+    "Understanding of moisture and condensation"
+  ],
+  "library": "p5.js",
+  "controls": [
+    {
+      "type": "button",
+      "label": "Refrigerated Dryer / Desiccant Dryer",
+      "description": "Toggles between refrigerated and desiccant dryer types to compare dew point performance"
+    },
+    {
+      "type": "slider",
+      "label": "Ambient Humidity",
+      "min": 20,
+      "max": 100,
+      "default": 60,
+      "unit": "%",
+      "description": "Adjusts ambient humidity to see how inlet moisture affects treatment load"
+    }
+  ]
+}

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydraulic Pump Types Comparison</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #p5-container {
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        input[type="range"] {
+            width: 150px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            max-width: 1400px;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .metric-good {
+            color: #27ae60;
+            font-weight: 500;
+        }
+
+        .metric-fair {
+            color: #f39c12;
+            font-weight: 500;
+        }
+
+        .metric-poor {
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        .pump-type {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 200px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .title h1 {
+            margin: 0 0 5px 0;
+            font-size: 28px;
+        }
+
+        .title p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">
+        <h1>Hydraulic Pump Types Comparison</h1>
+        <p>Interactive cross-section visualization of gear, vane, and axial piston pumps</p>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="speedSlider">Animation Speed:</label>
+            <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0">
+            <span id="speedValue">1.0x</span>
+        </div>
+
+        <div class="control-group">
+            <label for="tooltipToggle">
+                <input type="checkbox" id="tooltipToggle" checked>
+                Show Tooltips
+            </label>
+        </div>
+    </div>
+
+    <div id="p5-container"></div>
+
+    <div class="comparison-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Pump Type</th>
+                    <th>Max Pressure</th>
+                    <th>Efficiency</th>
+                    <th>Displacement</th>
+                    <th>Noise Level</th>
+                    <th>Cost</th>
+                    <th>Best Applications</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="pump-type">Gear Pump</td>
+                    <td><span class="metric-fair">210 bar</span></td>
+                    <td><span class="metric-fair">~90%</span></td>
+                    <td><span class="metric-fair">Fixed</span></td>
+                    <td><span class="metric-poor">High</span></td>
+                    <td><span class="metric-good">Low</span></td>
+                    <td>General industrial, rough service, low-cost systems</td>
+                </tr>
+                <tr>
+                    <td class="pump-type">Vane Pump</td>
+                    <td><span class="metric-fair">210 bar</span></td>
+                    <td><span class="metric-fair">~95%</span></td>
+                    <td><span class="metric-fair">Fixed or Variable</span></td>
+                    <td><span class="metric-fair">Medium</span></td>
+                    <td><span class="metric-fair">Medium</span></td>
+                    <td>Mobile equipment, medium pressure systems, smooth operation</td>
+                </tr>
+                <tr>
+                    <td class="pump-type">Axial Piston</td>
+                    <td><span class="metric-good">350+ bar</span></td>
+                    <td><span class="metric-good">~98%</span></td>
+                    <td><span class="metric-good">Variable</span></td>
+                    <td><span class="metric-good">Low</span></td>
+                    <td><span class="metric-poor">High</span></td>
+                    <td>High-performance, aerospace, precision control, energy-efficient</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="tooltip" class="tooltip" style="display: none;"></div>
+
+    <script>
+        let animationSpeed = 1.0;
+        let showTooltips = true;
+        let expandedPanel = -1;
+        let hoverComponent = null;
+
+        const components = {
+            gear: {
+                driveGear: "The powered gear that drives the pump",
+                idlerGear: "Rotates with the drive gear, trapping and moving fluid",
+                inlet: "Fluid enters from this port",
+                outlet: "Pressurized fluid exits through this port"
+            },
+            vane: {
+                rotor: "Eccentric rotor that rotates off-center",
+                vanes: "Slide in/out of rotor slots, creating expanding/contracting chambers",
+                camRing: "Circular housing that guides vane motion",
+                inlet: "Expanding chamber side where fluid enters",
+                outlet: "Compressing chamber side where fluid exits"
+            },
+            piston: {
+                swashplate: "Angled surface that converts rotation to reciprocating motion",
+                pistons: "Move back and forth, drawing and pushing fluid",
+                cylinderBarrel: "Rotates with pistons, houses piston bores",
+                valvePlate: "Directs fluid between inlet and outlet",
+                suction: "Piston pulling back, creating low pressure",
+                discharge: "Piston pushing forward, creating pressure"
+            }
+        };
+
+        function setup() {
+            const container = document.getElementById('p5-container');
+            const width = Math.min(container.clientWidth, 1400);
+            const height = 500;
+
+            let canvas = createCanvas(width, height);
+            canvas.parent('p5-container');
+        }
+
+        function windowResized() {
+            const container = document.getElementById('p5-container');
+            if (container && container.offsetParent !== null) {
+                const width = Math.min(container.clientWidth, 1400);
+                resizeCanvas(width, 500);
+            }
+        }
+
+        function draw() {
+            background(245, 247, 250);
+
+            const panelWidth = width / 3;
+            const panelHeight = height;
+
+            // Draw three panels
+            drawGearPumpPanel(0, 0, panelWidth, panelHeight);
+            drawVanePumpPanel(panelWidth, 0, panelWidth, panelHeight);
+            drawAxialPistonPanel(panelWidth * 2, 0, panelWidth, panelHeight);
+        }
+
+        function drawGearPumpPanel(x, y, w, h) {
+            // Panel background
+            fill(255);
+            stroke(200);
+            strokeWeight(2);
+            rect(x, y, w, h);
+
+            // Title
+            fill(51);
+            textSize(14);
+            textAlign(LEFT);
+            text("External Gear Pump", x + 15, y + 25);
+
+            // Draw pump
+            const centerX = x + w / 2;
+            const centerY = y + h / 2 + 20;
+            const radius = 45;
+
+            // Housing
+            fill(220);
+            stroke(100);
+            strokeWeight(2);
+            circle(centerX - 30, centerY, radius * 2);
+            circle(centerX + 30, centerY, radius * 2);
+
+            // Drive gear (left)
+            const gearAngle1 = frameCount * 0.05 * animationSpeed;
+            drawGear(centerX - 30, centerY, 40, gearAngle1, true);
+
+            // Idler gear (right)
+            drawGear(centerX + 30, centerY, 40, -gearAngle1, false);
+
+            // Inlet/Outlet indicators
+            fill(0);
+            textSize(11);
+            textAlign(CENTER);
+
+            // Inlet (blue)
+            fill(100, 150, 200);
+            circle(x + 20, centerY - 70, 12);
+            fill(0);
+            textSize(10);
+            text("IN", x + 20, centerY - 65);
+
+            // Outlet (red)
+            fill(220, 100, 100);
+            circle(w + x - 20, centerY + 70, 12);
+            fill(255);
+            text("OUT", w + x - 20, centerY + 72);
+
+            // Labels
+            fill(60);
+            textSize(10);
+            textAlign(CENTER);
+            text("Drive Gear", centerX - 30, centerY + 70);
+            text("Idler Gear", centerX + 30, centerY + 70);
+        }
+
+        function drawGear(cx, cy, size, angle, highlight) {
+            const teeth = 12;
+            const outerRadius = size;
+            const innerRadius = size * 0.6;
+            const toothHeight = 8;
+
+            push();
+            translate(cx, cy);
+            rotate(angle);
+
+            // Gear body
+            fill(highlight ? 150 : 140);
+            stroke(80);
+            strokeWeight(1.5);
+
+            beginShape();
+            for (let i = 0; i < teeth * 2; i++) {
+                const angle = TWO_PI / (teeth * 2) * i;
+                const r = i % 2 === 0 ? outerRadius : outerRadius - toothHeight;
+                const px = cos(angle) * r;
+                const py = sin(angle) * r;
+                vertex(px, py);
+            }
+            endShape(CLOSE);
+
+            // Center hole
+            fill(100);
+            circle(0, 0, 12);
+
+            pop();
+        }
+
+        function drawVanePumpPanel(x, y, w, h) {
+            fill(255);
+            stroke(200);
+            strokeWeight(2);
+            rect(x, y, w, h);
+
+            fill(51);
+            textSize(14);
+            textAlign(LEFT);
+            text("Vane Pump", x + 15, y + 25);
+
+            const centerX = x + w / 2;
+            const centerY = y + h / 2 + 20;
+
+            // Cam ring (circular housing)
+            fill(220);
+            stroke(100);
+            strokeWeight(2);
+            circle(centerX, centerY, 95);
+
+            // Rotor (eccentric)
+            const rotorAngle = frameCount * 0.05 * animationSpeed;
+            const rotorOffset = 18;
+            const rotorX = centerX + cos(rotorAngle) * rotorOffset;
+            const rotorY = centerY + sin(rotorAngle) * rotorOffset;
+
+            fill(180);
+            stroke(80);
+            strokeWeight(2);
+            circle(rotorX, rotorY, 35);
+
+            // Vanes
+            const vaneCount = 7;
+            for (let i = 0; i < vaneCount; i++) {
+                const angle = TWO_PI / vaneCount * i + rotorAngle;
+                const vaneLength = 45;
+                const vx1 = rotorX + cos(angle) * 10;
+                const vy1 = rotorY + sin(angle) * 10;
+                const vx2 = rotorX + cos(angle) * vaneLength;
+                const vy2 = rotorY + sin(angle) * vaneLength;
+
+                stroke(100);
+                strokeWeight(2);
+                line(vx1, vy1, vx2, vy2);
+                fill(160);
+                rect(vx1 - 2, vy1 - 2, 4, 4);
+            }
+
+            // Inlet/Outlet
+            fill(100, 150, 200);
+            circle(centerX - 65, centerY, 12);
+            fill(0);
+            textSize(10);
+            textAlign(CENTER);
+            text("IN", centerX - 65, centerY + 3);
+
+            fill(220, 100, 100);
+            circle(centerX + 65, centerY, 12);
+            fill(255);
+            text("OUT", centerX + 65, centerY + 3);
+
+            // Labels
+            fill(60);
+            textSize(10);
+            textAlign(CENTER);
+            text("Rotor", rotorX, rotorY + 25);
+            text("Cam Ring", centerX, centerY + 65);
+        }
+
+        function drawAxialPistonPanel(x, y, w, h) {
+            fill(255);
+            stroke(200);
+            strokeWeight(2);
+            rect(x, y, w, h);
+
+            fill(51);
+            textSize(14);
+            textAlign(LEFT);
+            text("Axial Piston Pump", x + 15, y + 25);
+
+            const centerX = x + w / 2;
+            const centerY = y + h / 2 - 10;
+
+            // Swashplate angle (adjustable)
+            const swashAngle = 0.4;
+
+            // Draw cylinder barrel
+            fill(200);
+            stroke(80);
+            strokeWeight(2);
+            rect(centerX - 35, centerY - 40, 70, 80);
+
+            // Draw swashplate
+            fill(180);
+            stroke(80);
+            strokeWeight(2);
+            push();
+            translate(centerX, centerY + 30);
+            rotate(swashAngle);
+            rect(-45, -8, 90, 16);
+            pop();
+
+            // Pistons (rotating around cylinder barrel)
+            const pistonCount = 6;
+            const barrelRotation = frameCount * 0.05 * animationSpeed;
+
+            for (let i = 0; i < pistonCount; i++) {
+                const angle = TWO_PI / pistonCount * i + barrelRotation;
+                const pistonRadius = 28;
+                const px = centerX + cos(angle) * pistonRadius;
+                const py = centerY - 10 + sin(angle) * pistonRadius;
+
+                // Piston stroke simulation
+                const strokeOffset = sin(angle + swashAngle) * 15;
+
+                fill(150);
+                stroke(80);
+                strokeWeight(1.5);
+                circle(px, py - strokeOffset, 8);
+            }
+
+            // Valve plate
+            fill(200);
+            stroke(80);
+            strokeWeight(2);
+            rect(centerX - 35, centerY + 45, 70, 8);
+
+            // Inlet/Outlet
+            fill(100, 150, 200);
+            circle(centerX - 50, centerY + 50, 10);
+            fill(0);
+            textSize(9);
+            textAlign(CENTER);
+            text("IN", centerX - 50, centerY + 52);
+
+            fill(220, 100, 100);
+            circle(centerX + 50, centerY + 50, 10);
+            fill(255);
+            text("OUT", centerX + 50, centerY + 52);
+
+            // Labels
+            fill(60);
+            textSize(10);
+            textAlign(CENTER);
+            text("Swashplate", centerX, centerY + 70);
+            text("Pistons", centerX, centerY - 60);
+        }
+
+        function mousePressed() {
+            // Click detection for panels
+            const panelWidth = width / 3;
+
+            if (mouseX < panelWidth) {
+                expandedPanel = (expandedPanel === 0) ? -1 : 0;
+            } else if (mouseX < panelWidth * 2) {
+                expandedPanel = (expandedPanel === 1) ? -1 : 1;
+            } else {
+                expandedPanel = (expandedPanel === 2) ? -1 : 2;
+            }
+        }
+
+        // Control listeners
+        document.getElementById('speedSlider').addEventListener('input', function(e) {
+            animationSpeed = parseFloat(e.target.value);
+            document.getElementById('speedValue').textContent = animationSpeed.toFixed(1) + 'x';
+        });
+
+        document.getElementById('tooltipToggle').addEventListener('change', function(e) {
+            showTooltips = e.target.checked;
+            document.getElementById('tooltip').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

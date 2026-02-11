@@ -1,0 +1,9 @@
+{
+  "title": "Pneumatic Conveying Energy Comparison",
+  "chapter": 13,
+  "type": "infographic",
+  "bloom_level": "L5 Evaluate",
+  "bloom_verbs": ["judge", "assess", "compare"],
+  "technology": "Chart.js",
+  "learning_objective": "Students will be able to assess the energy impact of different conveying design decisions and evaluate which efficiency strategies deliver the greatest savings."
+}

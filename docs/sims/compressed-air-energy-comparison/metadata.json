@@ -1,0 +1,159 @@
+{
+  "microsim": {
+    "dublinCore": {
+      "title": "Compressed Air Energy Comparison",
+      "creator": ["Claude AI", "Peter Vinck"],
+      "subject": [
+        "compressed air systems",
+        "energy efficiency",
+        "compressor types",
+        "control strategies",
+        "VFD",
+        "load/unload",
+        "modulation",
+        "industrial energy management"
+      ],
+      "description": "Interactive comparison showing energy consumption across four compressor types (Reciprocating, Rotary Screw, Rotary Vane, Centrifugal) and four control strategies (Load/Unload, Modulation, VFD, VFD + Storage), with adjustable parameters for system load, electricity rate, and operating hours to help students evaluate and justify energy-efficient compressed air system designs.",
+      "date": "2026-02-10",
+      "type": "Infographic",
+      "format": "text/html",
+      "language": "en",
+      "rights": "MIT License"
+    },
+    "search": {
+      "tags": [
+        "compressed air",
+        "energy comparison",
+        "compressor efficiency",
+        "VFD savings",
+        "part-load performance",
+        "centrifugal surge",
+        "rotary screw",
+        "reciprocating compressor",
+        "annual energy cost",
+        "CO2 emissions"
+      ],
+      "visualizationType": ["chart", "infographic", "dashboard"],
+      "interactionLevel": "high",
+      "complexity": 7,
+      "relatedConcepts": [
+        "specific power",
+        "affinity laws",
+        "motor efficiency",
+        "pressure control",
+        "variable frequency drives"
+      ],
+      "applicationDomains": ["education", "training", "analysis"]
+    },
+    "educational": {
+      "gradeLevel": ["Undergraduate", "Adult"],
+      "subjectArea": ["Engineering"],
+      "topic": [
+        "Compressed air system design",
+        "Compressor energy efficiency",
+        "Control strategy comparison",
+        "Variable frequency drives",
+        "Part-load efficiency"
+      ],
+      "learningObjectives": [
+        "Assess the energy consumption and cost of different compressor types and control strategies",
+        "Justify recommendations for energy-efficient compressed air system design",
+        "Identify the impact of partial load on compressor efficiency",
+        "Explain the efficiency cliff in centrifugal compressors below surge point"
+      ],
+      "bloomsTaxonomy": ["Evaluate"],
+      "prerequisites": [
+        "Basic compressed air system knowledge",
+        "Understanding of electrical energy units (kW, kWh)",
+        "Familiarity with compressor operating principles"
+      ],
+      "difficulty": "Advanced",
+      "duration": {
+        "typical": 45,
+        "range": {
+          "min": 20,
+          "max": 60
+        }
+      }
+    },
+    "technical": {
+      "framework": "vanilla-js",
+      "version": "1.0.0",
+      "canvasDimensions": {
+        "width": 1200,
+        "height": 600,
+        "responsive": true
+      },
+      "dependencies": [
+        "Chart.js 4.4.0"
+      ],
+      "browserCompatibility": [
+        "Chrome 90+",
+        "Firefox 88+",
+        "Safari 14+",
+        "Edge 90+"
+      ]
+    },
+    "userInterface": {
+      "layoutType": "multi-panel",
+      "layoutPattern": "two-panel-top-chart-bottom",
+      "controls": [
+        {
+          "id": "systemLoad",
+          "type": "slider",
+          "label": "Average System Load",
+          "properties": {
+            "min": 25,
+            "max": 100,
+            "default": 75,
+            "step": 25,
+            "units": "%"
+          }
+        },
+        {
+          "id": "elecRate",
+          "type": "slider",
+          "label": "Electricity Rate",
+          "properties": {
+            "min": 0.08,
+            "max": 0.25,
+            "default": 0.12,
+            "step": 0.01,
+            "units": "$/kWh"
+          }
+        },
+        {
+          "id": "opHours",
+          "type": "slider",
+          "label": "Operating Hours per Year",
+          "properties": {
+            "min": 2000,
+            "max": 8760,
+            "default": 6000,
+            "step": 500,
+            "units": "hours"
+          }
+        },
+        {
+          "id": "systemSize",
+          "type": "dropdown",
+          "label": "System Size",
+          "properties": {
+            "options": [
+              {"value": "25", "label": "25 HP"},
+              {"value": "50", "label": "50 HP"},
+              {"value": "100", "label": "100 HP"},
+              {"value": "200", "label": "200 HP"}
+            ],
+            "default": "100"
+          }
+        },
+        {
+          "id": "showCO2",
+          "type": "checkbox",
+          "label": "Show CO2 Impact"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Pneumatic Conveying System Configurations",
+  "chapter": 13,
+  "type": "diagram",
+  "bloom_level": "L2 Understand",
+  "bloom_verbs": ["explain", "compare"],
+  "technology": "p5.js",
+  "learning_objective": "Students will be able to explain how pressure, vacuum, and combined pneumatic conveying systems work and compare their advantages."
+}

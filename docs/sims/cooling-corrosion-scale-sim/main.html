@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrosion &amp; Scale Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f0f2f5;
+        }
+        main {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ======================================================================
+    //  Corrosion & Scale Simulator  -  Cooling Water MicroSim
+    // ======================================================================
+
+    // --- Canvas dimensions ---
+    let canvasW, canvasH;
+
+    // --- Default parameter values ---
+    const DEF = {
+        pH: 7.8, calcium: 300, alkalinity: 200,
+        tds: 1000, temp: 95, corrInhib: 5, scaleInhib: 5
+    };
+
+    // --- Custom canvas-drawn slider state ---
+    let sliders = [];
+    let slidersReady = false;
+    let activeSlider = -1;
+
+    // --- Computed outputs ---
+    let lsi = 0;
+    let corrosionRate = 0;   // mpy (0-20)
+    let scaleRate = 0;       // mm/year (0-10)
+
+    // --- Visual state (smooth interpolation targets) ---
+    let metalThick = 1;      // 0-1 normalized
+    let scaleThick = 0;      // 0-1 normalized
+    let displayCorr = 0;     // smoothed gauge value
+    let displayScale = 0;    // smoothed gauge value
+
+    // --- Pitting corrosion spots ---
+    let pits = [];
+
+    // --- Water flow bubbles ---
+    let bubbles = [];
+    let flowAngle = 0;
+
+    // --- Year simulation ---
+    let yearRunning = false;
+    let yearProgress = 0;    // 0-1
+    let yearStartCorr = 0;
+    let yearStartScale = 0;
+    let yearAccumCorr = 0;   // accumulated metal loss
+    let yearAccumScale = 0;  // accumulated scale
+
+    // --- Layout regions ---
+    let titleH, tubeH, sliderH, gaugeH;
+    let titleRegion, tubeRegion, sliderRegion, gaugeRegion;
+
+    // --- Button hit areas ---
+    let resetBtnBounds = {};
+    let yearBtnBounds = {};
+
+    // ======================================================================
+    //  SETUP & LAYOUT
+    // ======================================================================
+
+    function setup() {
+        computeLayout();
+        let canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+
+        // Seed bubbles for water flow animation
+        for (let i = 0; i < 30; i++) {
+            bubbles.push({
+                angle: random(TWO_PI),
+                rFrac: random(0.3, 0.95),
+                speed: random(0.006, 0.018),
+                size: random(2, 5),
+                opacity: random(100, 200)
+            });
+        }
+    }
+
+    function computeLayout() {
+        canvasW = min(windowWidth, 900);
+        titleH = 44;
+        tubeH = 310;
+        sliderH = 260;
+        gaugeH = 190;
+        canvasH = titleH + tubeH + sliderH + gaugeH;
+
+        let y = 0;
+        titleRegion  = { x: 0, y: y, w: canvasW, h: titleH };  y += titleH;
+        tubeRegion   = { x: 0, y: y, w: canvasW, h: tubeH };   y += tubeH;
+        sliderRegion = { x: 0, y: y, w: canvasW, h: sliderH }; y += sliderH;
+        gaugeRegion  = { x: 0, y: y, w: canvasW, h: gaugeH };
+    }
+
+    function windowResized() {
+        computeLayout();
+        resizeCanvas(canvasW, canvasH);
+    }
+
+    // ======================================================================
+    //  SLIDER INITIALIZATION
+    // ======================================================================
+
+    function initSliders() {
+        sliders = [
+            { label: 'pH',                   min: 6.0, max: 9.5,  value: DEF.pH,        step: 0.1,  unit: '',     fmt: 1 },
+            { label: 'Calcium Hardness',      min: 50,  max: 800,  value: DEF.calcium,   step: 10,   unit: ' ppm (CaCO\u2083)', fmt: 0 },
+            { label: 'Alkalinity',            min: 50,  max: 500,  value: DEF.alkalinity, step: 10,  unit: ' ppm (CaCO\u2083)', fmt: 0 },
+            { label: 'TDS',                   min: 200, max: 3000, value: DEF.tds,       step: 50,   unit: ' ppm', fmt: 0 },
+            { label: 'Temperature',           min: 70,  max: 130,  value: DEF.temp,      step: 1,    unit: ' \u00B0F', fmt: 0 },
+            { label: 'Corrosion Inhibitor',   min: 0,   max: 20,   value: DEF.corrInhib, step: 0.5,  unit: ' ppm', fmt: 1 },
+            { label: 'Scale Inhibitor',       min: 0,   max: 20,   value: DEF.scaleInhib, step: 0.5, unit: ' ppm', fmt: 1 }
+        ];
+        slidersReady = true;
+    }
+
+    function readSliders() {
+        if (!slidersReady) initSliders();
+        return {
+            pH:         sliders[0].value,
+            calcium:    sliders[1].value,
+            alkalinity: sliders[2].value,
+            tds:        sliders[3].value,
+            temp:       sliders[4].value,
+            corrInhib:  sliders[5].value,
+            scaleInhib: sliders[6].value
+        };
+    }
+
+    // ======================================================================
+    //  LSI CALCULATION  (Langelier Saturation Index)
+    // ======================================================================
+
+    function calcLSI(pH, Ca, Alk, TDS, tempF) {
+        // pHs = (9.3 + A + B) - (C + D)
+        // A = (log10(TDS) - 1) / 10
+        // B = -13.12 * log10(T_kelvin) + 34.55
+        // C = log10(Ca) - 0.4
+        // D = log10(Alk)
+        let tempC = (tempF - 32) * 5 / 9;
+        let TK = tempC + 273.15;
+        let A = (Math.log10(TDS) - 1) / 10;
+        let B = -13.12 * Math.log10(TK) + 34.55;
+        let C = Math.log10(max(1, Ca)) - 0.4;
+        let D = Math.log10(max(1, Alk));
+        let pHs = (9.3 + A + B) - (C + D);
+        return pH - pHs;
+    }
+
+    // ======================================================================
+    //  CORROSION & SCALE RATE MODELS
+    // ======================================================================
+
+    function calcCorrosionRate(pH, TDS, tempF, inhibPPM, lsiVal) {
+        // Lower pH => more corrosion
+        let pHFactor = map(pH, 6.0, 9.5, 16, 0.5);
+        pHFactor = max(0, pHFactor);
+
+        // Higher TDS => more corrosion
+        let tdsFactor = map(TDS, 200, 3000, 0.5, 2.5);
+
+        // Temperature effect
+        let tempFactor = map(tempF, 70, 130, 0.7, 1.5);
+
+        // Negative LSI amplifies corrosion
+        let lsiFactor = 1;
+        if (lsiVal < 0) {
+            lsiFactor = 1 + abs(lsiVal) * 0.9;
+        } else {
+            lsiFactor = max(0.2, 1 - lsiVal * 0.3);
+        }
+
+        // Inhibitor reduces corrosion (each ppm ~ 4.5% reduction)
+        let inhibFactor = max(0.08, 1 - inhibPPM * 0.045);
+
+        let rate = pHFactor * tdsFactor * tempFactor * lsiFactor * inhibFactor;
+        return constrain(rate, 0, 20);
+    }
+
+    function calcScaleRate(pH, Ca, Alk, tempF, inhibPPM, lsiVal) {
+        // Scale primarily forms when LSI > 0
+        let baseScale = 0;
+        if (lsiVal > 0) {
+            baseScale = lsiVal * 3.5;
+        }
+
+        // High calcium / alkalinity drive scale
+        let caFactor  = map(Ca,  50, 800, 0.3, 2.2);
+        let alkFactor = map(Alk, 50, 500, 0.3, 2.0);
+        let tempFactor = map(tempF, 70, 130, 0.6, 1.8);
+
+        // Inhibitor
+        let inhibFactor = max(0.05, 1 - inhibPPM * 0.05);
+
+        let rate = baseScale * caFactor * alkFactor * tempFactor * inhibFactor;
+        return constrain(rate, 0, 10);
+    }
+
+    // ======================================================================
+    //  MAIN DRAW LOOP
+    // ======================================================================
+
+    function draw() {
+        background(240, 242, 245);
+        cursor(ARROW);
+
+        let p = readSliders();
+
+        // Run-year fast-forward
+        if (yearRunning) {
+            yearProgress += 0.008;
+            if (yearProgress >= 1) {
+                yearRunning = false;
+                yearProgress = 0;
+            }
+        }
+
+        // Compute indices
+        lsi = calcLSI(p.pH, p.calcium, p.alkalinity, p.tds, p.temp);
+        corrosionRate = calcCorrosionRate(p.pH, p.tds, p.temp, p.corrInhib, lsi);
+        scaleRate = calcScaleRate(p.pH, p.calcium, p.alkalinity, p.temp, p.scaleInhib, lsi);
+
+        // Smooth gauge needles
+        displayCorr  = lerp(displayCorr,  corrosionRate, 0.08);
+        displayScale = lerp(displayScale, scaleRate,     0.08);
+
+        // Visual thicknesses (smooth)
+        let targetMetal = map(corrosionRate, 0, 20, 1.0, 0.35);
+        metalThick = lerp(metalThick, targetMetal, 0.04);
+
+        let targetScale = map(scaleRate, 0, 10, 0, 0.7);
+        scaleThick = lerp(scaleThick, targetScale, 0.04);
+
+        // Year fast-forward accumulation
+        if (yearRunning) {
+            yearAccumCorr  = lerp(yearAccumCorr,  corrosionRate * 0.04, 0.1);
+            yearAccumScale = lerp(yearAccumScale, scaleRate * 0.06,     0.1);
+            metalThick = max(0.2, metalThick - yearAccumCorr * 0.003);
+            scaleThick = min(0.9, scaleThick + yearAccumScale * 0.003);
+        }
+
+        // Update pitting
+        updatePitting(p);
+
+        // Draw all sections
+        drawTitle();
+        drawTubeSection();
+        drawSliderSection();
+        drawGaugeSection();
+
+        // Animate flow
+        flowAngle += 0.02;
+        for (let b of bubbles) {
+            b.angle += b.speed;
+            if (b.angle > TWO_PI) b.angle -= TWO_PI;
+        }
+    }
+
+    // ======================================================================
+    //  TITLE BAR
+    // ======================================================================
+
+    function drawTitle() {
+        let r = titleRegion;
+
+        // Gradient-style header
+        noStroke();
+        for (let i = 0; i < r.h; i++) {
+            let t = i / r.h;
+            fill(lerpColor(color(42, 60, 90), color(55, 80, 120), t));
+            rect(r.x, r.y + i, r.w, 1);
+        }
+
+        // Title text
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(20);
+        textStyle(BOLD);
+        text('Corrosion & Scale Simulator', r.x + r.w / 2, r.y + r.h / 2);
+        textStyle(NORMAL);
+    }
+
+    // ======================================================================
+    //  TUBE CROSS-SECTION VISUALIZATION
+    // ======================================================================
+
+    function drawTubeSection() {
+        let r = tubeRegion;
+
+        // Background
+        fill(230, 235, 245);
+        noStroke();
+        rect(r.x, r.y, r.w, r.h);
+
+        // Subsection title
+        fill(50, 60, 80);
+        textAlign(CENTER, TOP);
+        textSize(14);
+        textStyle(BOLD);
+        text('Heat Exchanger Tube Cross-Section', r.x + r.w / 2, r.y + 8);
+        textStyle(NORMAL);
+
+        // Center of tube drawing
+        let cx = r.x + r.w / 2;
+        let cy = r.y + r.h / 2 + 12;
+        let maxR = min(r.w * 0.36, (r.h - 40) * 0.42);
+
+        // --- Outer water region (ambient) ---
+        drawOuterWater(cx, cy, maxR * 1.4, maxR * 1.1);
+
+        // --- Metal wall ---
+        let metalOuter = maxR;
+        let metalInner = maxR * (1 - 0.22 * metalThick);
+
+        // Outer metal ring
+        fill(155, 160, 172);
+        stroke(125, 130, 140);
+        strokeWeight(2);
+        ellipse(cx, cy, metalOuter * 2, metalOuter * 2);
+
+        // Inner metal surface
+        fill(140, 145, 158);
+        stroke(115, 120, 130);
+        strokeWeight(1.5);
+        ellipse(cx, cy, metalInner * 2, metalInner * 2);
+
+        // --- Scale deposit layer ---
+        if (scaleThick > 0.015) {
+            drawScaleLayer(cx, cy, metalInner, scaleThick);
+        }
+
+        // --- Inner water (tube bore) ---
+        let boreR = metalInner * (1 - scaleThick * 0.45) - 2;
+        if (boreR > 8) {
+            drawInnerWater(cx, cy, boreR);
+        }
+
+        // --- Pitting corrosion spots ---
+        drawPits(cx, cy, metalOuter, metalInner);
+
+        // --- Annotation labels with leader lines ---
+        drawAnnotations(cx, cy, maxR);
+
+        // --- Legend ---
+        drawLegend(r.x + 16, r.y + 30);
+
+        // --- LSI display box ---
+        drawLSIBox(r.x + r.w - 155, r.y + 30);
+    }
+
+    function drawOuterWater(cx, cy, outerR, innerR) {
+        // Blue water zone
+        noStroke();
+        fill(110, 170, 225, 55);
+        ellipse(cx, cy, outerR * 2, outerR * 2);
+
+        // Animated flow arcs with arrows
+        stroke(80, 145, 215, 110);
+        strokeWeight(1.5);
+        noFill();
+        for (let i = 0; i < 8; i++) {
+            let a = flowAngle + (TWO_PI / 8) * i;
+            let rad = lerp(innerR, outerR, 0.3 + sin(a * 2.5) * 0.2);
+            let x1 = cx + cos(a) * rad;
+            let y1 = cy + sin(a) * rad;
+            let x2 = cx + cos(a + 0.28) * rad;
+            let y2 = cy + sin(a + 0.28) * rad;
+            line(x1, y1, x2, y2);
+
+            // Arrowhead
+            let aa = atan2(y2 - y1, x2 - x1);
+            push();
+            translate(x2, y2);
+            rotate(aa);
+            fill(80, 145, 215, 110);
+            noStroke();
+            triangle(0, 0, -5, -2.5, -5, 2.5);
+            pop();
+        }
+
+        // Dissolved particles / bubbles
+        for (let b of bubbles) {
+            let bx = cx + cos(b.angle) * lerp(innerR, outerR, b.rFrac);
+            let by = cy + sin(b.angle) * lerp(innerR, outerR, b.rFrac);
+            noStroke();
+            fill(180, 215, 245, b.opacity);
+            ellipse(bx, by, b.size, b.size);
+        }
+    }
+
+    function drawScaleLayer(cx, cy, metalInnerR, thickness) {
+        let scaleOuter = metalInnerR;
+        let scaleInner = metalInnerR * (1 - thickness * 0.45);
+
+        // Draw irregular scale ring using small blobs
+        noStroke();
+        for (let a = 0; a < TWO_PI; a += 0.04) {
+            let outerWobble = scaleOuter + sin(a * 9 + flowAngle * 1.5) * 1.8;
+            let innerWobble = scaleInner + cos(a * 7 - flowAngle) * 1.2;
+            let midR = (outerWobble + innerWobble) / 2;
+            let blobSize = (outerWobble - innerWobble);
+            if (blobSize < 1) continue;
+
+            let sx = cx + cos(a) * midR;
+            let sy = cy + sin(a) * midR;
+
+            // Scale color: light tan/white to darker tan as buildup increases
+            let scaleColor = lerpColor(
+                color(245, 240, 225),
+                color(200, 180, 140),
+                constrain(scaleRate / 5, 0, 1)
+            );
+            fill(scaleColor);
+            ellipse(sx, sy, blobSize * 1.2, blobSize * 1.2);
+        }
+
+        // Outline rings for clarity
+        stroke(205, 190, 160, 140);
+        strokeWeight(0.8);
+        noFill();
+        ellipse(cx, cy, scaleOuter * 2, scaleOuter * 2);
+        stroke(215, 200, 170, 100);
+        ellipse(cx, cy, scaleInner * 2, scaleInner * 2);
+    }
+
+    function drawInnerWater(cx, cy, rad) {
+        noStroke();
+        fill(125, 180, 235, 75);
+        ellipse(cx, cy, rad * 2, rad * 2);
+
+        // Swirl lines
+        stroke(95, 155, 225, 100);
+        strokeWeight(1);
+        noFill();
+        for (let i = 0; i < 5; i++) {
+            let a = flowAngle * 1.4 + (TWO_PI / 5) * i;
+            let r1 = rad * 0.25;
+            let r2 = rad * 0.65;
+            let x1 = cx + cos(a) * r1;
+            let y1 = cy + sin(a) * r1;
+            let x2 = cx + cos(a + 0.35) * r2;
+            let y2 = cy + sin(a + 0.35) * r2;
+            line(x1, y1, x2, y2);
+        }
+
+        // Center dot indicating flow into the page
+        fill(90, 150, 220, 90);
+        noStroke();
+        ellipse(cx, cy, 7, 7);
+
+        // Cross-hair to indicate flow "into page"
+        stroke(70, 130, 200, 120);
+        strokeWeight(1);
+        line(cx - 3, cy, cx + 3, cy);
+        line(cx, cy - 3, cx, cy + 3);
+    }
+
+    // ======================================================================
+    //  PITTING CORROSION
+    // ======================================================================
+
+    function updatePitting(p) {
+        let pittingChance = 0;
+        // Low pH + high TDS + low inhibitor => pitting
+        if (p.pH < 7.0 && p.corrInhib < 3) {
+            pittingChance = map(p.pH, 7.0, 6.0, 0, 0.04) * map(p.tds, 200, 3000, 0.5, 2.0);
+        }
+        if (corrosionRate > 10 && p.corrInhib < 5) {
+            pittingChance += 0.015;
+        }
+
+        // Spawn new pits
+        if (random() < pittingChance && pits.length < 24) {
+            pits.push({
+                angle: random(TWO_PI),
+                radialPos: random(0.15, 0.85),
+                depth: 0,
+                maxDepth: random(3, 9),
+                rate: random(0.02, 0.07)
+            });
+        }
+
+        // Grow or heal pits
+        for (let i = pits.length - 1; i >= 0; i--) {
+            let pit = pits[i];
+            if (corrosionRate > 5 && p.corrInhib < 8) {
+                pit.depth = min(pit.depth + pit.rate, pit.maxDepth);
+            } else {
+                pit.depth = max(0, pit.depth - 0.008);
+            }
+            if (pit.depth < 0.05 && corrosionRate < 3) {
+                pits.splice(i, 1);
+            }
+        }
+    }
+
+    function drawPits(cx, cy, outerR, innerR) {
+        for (let pit of pits) {
+            let rad = lerp(innerR, outerR, pit.radialPos);
+            let px = cx + cos(pit.angle) * rad;
+            let py = cy + sin(pit.angle) * rad;
+            let sz = pit.depth * 1.6;
+
+            // Rust-colored outer
+            noStroke();
+            fill(210, 100, 30, 170);
+            ellipse(px, py, sz, sz);
+
+            // Dark core
+            fill(160, 60, 15, 210);
+            ellipse(px, py, sz * 0.45, sz * 0.45);
+
+            // Red glow for severe pits
+            if (pit.depth > 5) {
+                fill(230, 50, 50, 60);
+                ellipse(px, py, sz * 1.6, sz * 1.6);
+            }
+        }
+    }
+
+    // ======================================================================
+    //  TUBE ANNOTATIONS & LEGEND
+    // ======================================================================
+
+    function drawAnnotations(cx, cy, maxR) {
+        // Right-side annotations with leader lines
+        let rightX = cx + maxR * 1.5;
+        let items = [
+            { label: 'Metal wall', targetR: maxR * 0.91, col: color(130, 135, 148) },
+            { label: 'Scale deposit', targetR: maxR * 0.72, col: color(210, 190, 150) },
+            { label: 'Water bore', targetR: maxR * 0.35, col: color(110, 170, 230) }
+        ];
+
+        textAlign(LEFT, CENTER);
+        textSize(10);
+
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i];
+            let labelY = cy - 30 + i * 24;
+            let targetX = cx + cos(-0.3 + i * 0.25) * item.targetR;
+            let targetY = cy + sin(-0.3 + i * 0.25) * item.targetR;
+
+            // Leader line
+            stroke(140, 140, 160, 120);
+            strokeWeight(0.8);
+            line(targetX, targetY, rightX - 4, labelY);
+
+            // Dot at target
+            fill(item.col);
+            noStroke();
+            ellipse(targetX, targetY, 4, 4);
+
+            // Label
+            fill(60, 65, 80);
+            noStroke();
+            text(item.label, rightX, labelY);
+        }
+    }
+
+    function drawLegend(x, y) {
+        let items = [
+            { col: color(110, 170, 225, 140), label: 'Cooling Water' },
+            { col: color(155, 160, 172),       label: 'Metal Wall' },
+            { col: color(235, 225, 200),       label: 'Scale Deposit' },
+            { col: color(210, 100, 30),        label: 'Pitting Corrosion' }
+        ];
+
+        textAlign(LEFT, CENTER);
+        textSize(10);
+
+        for (let i = 0; i < items.length; i++) {
+            let iy = y + i * 18;
+            fill(items[i].col);
+            stroke(120, 120, 130, 80);
+            strokeWeight(0.5);
+            rect(x, iy - 5, 12, 12, 2);
+
+            fill(55, 60, 75);
+            noStroke();
+            text(items[i].label, x + 18, iy + 1);
+        }
+    }
+
+    // ======================================================================
+    //  LSI DISPLAY BOX
+    // ======================================================================
+
+    function drawLSIBox(x, y) {
+        let bw = 145;
+        let bh = 100;
+
+        // Background with color coding
+        let bgCol, borderCol, statusLabel, valCol;
+        if (lsi < -0.5) {
+            bgCol = color(250, 230, 230);
+            borderCol = color(200, 100, 100);
+            valCol = color(200, 40, 40);
+            statusLabel = 'CORROSIVE';
+        } else if (lsi > 0.5) {
+            bgCol = color(255, 245, 220);
+            borderCol = color(200, 160, 60);
+            valCol = color(190, 130, 20);
+            statusLabel = 'SCALE-FORMING';
+        } else {
+            bgCol = color(225, 248, 225);
+            borderCol = color(80, 170, 80);
+            valCol = color(40, 140, 40);
+            statusLabel = 'BALANCED';
+        }
+
+        // Box
+        fill(bgCol);
+        stroke(borderCol);
+        strokeWeight(1.5);
+        rect(x, y, bw, bh, 8);
+
+        // Title
+        fill(60, 65, 80);
+        noStroke();
+        textAlign(CENTER, TOP);
+        textSize(11);
+        textStyle(BOLD);
+        text('Langelier Saturation Index', x + bw / 2, y + 6);
+        textStyle(NORMAL);
+
+        // Large value
+        fill(valCol);
+        textSize(28);
+        textStyle(BOLD);
+        text(nf(lsi, 1, 2), x + bw / 2, y + 22);
+        textStyle(NORMAL);
+
+        // Status label
+        textSize(11);
+        text(statusLabel, x + bw / 2, y + 56);
+
+        // Color bar indicator (-3 to +3 scale)
+        let barX = x + 12;
+        let barY = y + 76;
+        let barW = bw - 24;
+        let barH = 10;
+
+        // Draw gradient bar
+        for (let i = 0; i < barW; i++) {
+            let t = i / barW;
+            let c;
+            if (t < 0.4) {
+                c = lerpColor(color(210, 60, 60), color(80, 190, 80), t / 0.4);
+            } else if (t < 0.6) {
+                c = color(80, 190, 80);
+            } else {
+                c = lerpColor(color(80, 190, 80), color(220, 160, 30), (t - 0.6) / 0.4);
+            }
+            stroke(c);
+            strokeWeight(1);
+            line(barX + i, barY, barX + i, barY + barH);
+        }
+
+        // Border on bar
+        noFill();
+        stroke(160);
+        strokeWeight(1);
+        rect(barX, barY, barW, barH, 2);
+
+        // Pointer triangle for current LSI
+        let lsiClamped = constrain(lsi, -3, 3);
+        let ptrX = barX + map(lsiClamped, -3, 3, 0, barW);
+        fill(40);
+        noStroke();
+        triangle(ptrX - 4, barY - 1, ptrX + 4, barY - 1, ptrX, barY - 6);
+
+        // Labels
+        textSize(8);
+        fill(120);
+        textAlign(LEFT, TOP);
+        text('-3', barX, barY + barH + 2);
+        textAlign(RIGHT, TOP);
+        text('+3', barX + barW, barY + barH + 2);
+        textAlign(CENTER, TOP);
+        text('0', barX + barW / 2, barY + barH + 2);
+    }
+
+    // ======================================================================
+    //  SLIDER SECTION
+    // ======================================================================
+
+    function drawSliderSection() {
+        let r = sliderRegion;
+
+        // Background
+        fill(248, 249, 252);
+        stroke(215, 218, 225);
+        strokeWeight(1);
+        rect(r.x, r.y, r.w, r.h);
+
+        // Header bar
+        fill(50, 75, 120);
+        noStroke();
+        rect(r.x, r.y, r.w, 30);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(13);
+        textStyle(BOLD);
+        text('Water Chemistry Parameters', r.x + r.w / 2, r.y + 15);
+        textStyle(NORMAL);
+
+        if (!slidersReady) return;
+
+        // Two-column layout for 7 sliders
+        let marginX = 28;
+        let startY = r.y + 42;
+        let colW = (r.w - marginX * 3) / 2;
+        let rowH = 38;
+
+        for (let i = 0; i < sliders.length; i++) {
+            let col = (i < 4) ? 0 : 1;
+            let row = (i < 4) ? i : (i - 4);
+            let sx = r.x + marginX + col * (colW + marginX);
+            let sy = startY + row * rowH;
+            drawSlider(i, sx, sy, colW, rowH);
+        }
+
+        // Buttons row
+        let btnY = r.y + r.h - 42;
+        let btnH = 30;
+        let btnGap = 16;
+
+        // Reset button
+        let resetW = 150;
+        let resetX = r.x + r.w / 2 - resetW - btnGap / 2;
+
+        let resetHover = mouseX > resetX && mouseX < resetX + resetW &&
+                         mouseY > btnY && mouseY < btnY + btnH;
+
+        fill(resetHover ? color(55, 105, 175) : color(65, 115, 185));
+        stroke(45, 85, 145);
+        strokeWeight(1);
+        rect(resetX, btnY, resetW, btnH, 6);
+
+        fill(255);
+        noStroke();
+        textAlign(CENTER, CENTER);
+        textSize(12);
+        textStyle(BOLD);
+        text('Reset to Defaults', resetX + resetW / 2, btnY + btnH / 2);
+        textStyle(NORMAL);
+
+        resetBtnBounds = { x: resetX, y: btnY, w: resetW, h: btnH };
+        if (resetHover) cursor(HAND);
+
+        // Run 1 Year button
+        let yearW = 150;
+        let yearX = r.x + r.w / 2 + btnGap / 2;
+
+        let yearHover = mouseX > yearX && mouseX < yearX + yearW &&
+                        mouseY > btnY && mouseY < btnY + btnH;
+
+        if (yearRunning) {
+            fill(180, 100, 30);
+            stroke(140, 80, 20);
+        } else {
+            fill(yearHover ? color(30, 130, 75) : color(40, 145, 85));
+            stroke(25, 110, 60);
+        }
+        strokeWeight(1);
+        rect(yearX, btnY, yearW, btnH, 6);
+
+        // Progress bar overlay when running
+        if (yearRunning) {
+            fill(220, 140, 40, 100);
+            noStroke();
+            rect(yearX, btnY, yearW * yearProgress, btnH, 6);
+        }
+
+        fill(255);
+        noStroke();
+        textAlign(CENTER, CENTER);
+        textSize(12);
+        textStyle(BOLD);
+        text(yearRunning ? 'Simulating...' : 'Run 1 Year', yearX + yearW / 2, btnY + btnH / 2);
+        textStyle(NORMAL);
+
+        yearBtnBounds = { x: yearX, y: btnY, w: yearW, h: btnH };
+        if (yearHover && !yearRunning) cursor(HAND);
+    }
+
+    function drawSlider(idx, x, y, w, h) {
+        let s = sliders[idx];
+        let trackY = y + h * 0.68;
+        let trackX = x + 4;
+        let trackW = w - 8;
+        let trackH = 6;
+
+        // Label
+        fill(50, 55, 70);
+        noStroke();
+        textAlign(LEFT, BOTTOM);
+        textSize(11);
+        textStyle(BOLD);
+        text(s.label + ':', x + 2, trackY - 7);
+        textStyle(NORMAL);
+
+        // Value display
+        let valStr = nf(s.value, 0, s.fmt) + s.unit;
+        textAlign(RIGHT, BOTTOM);
+        fill(55, 85, 135);
+        textSize(11);
+        textStyle(BOLD);
+        text(valStr, x + w - 2, trackY - 7);
+        textStyle(NORMAL);
+
+        // Track background
+        fill(208, 212, 220);
+        noStroke();
+        rect(trackX, trackY, trackW, trackH, 3);
+
+        // Filled portion with color coding
+        let pct = (s.value - s.min) / (s.max - s.min);
+        fill(sliderColor(idx, s.value));
+        rect(trackX, trackY, trackW * pct, trackH, 3);
+
+        // Thumb
+        let thumbX = trackX + trackW * pct;
+        let thumbCY = trackY + trackH / 2;
+        let thumbR = 9;
+        let isHover = dist(mouseX, mouseY, thumbX, thumbCY) < thumbR + 5;
+        let isActive = (activeSlider === idx);
+
+        stroke(isActive ? color(35, 75, 155) : (isHover ? color(75, 115, 175) : color(145, 150, 160)));
+        strokeWeight(isActive ? 2.5 : 1.5);
+        fill(isActive ? color(65, 125, 210) : (isHover ? color(85, 140, 220) : color(255)));
+        ellipse(thumbX, thumbCY, thumbR * 2, thumbR * 2);
+
+        if (isHover || isActive) cursor(HAND);
+
+        // Store geometry for hit testing
+        s._trackX = trackX;
+        s._trackY = trackY;
+        s._trackW = trackW;
+        s._trackH = trackH;
+    }
+
+    function sliderColor(idx, val) {
+        switch (idx) {
+            case 0: // pH
+                if (val >= 7.5 && val <= 8.5) return color(75, 180, 75);
+                if (val < 7.0 || val > 9.0) return color(205, 75, 75);
+                return color(210, 185, 55);
+            case 1: // Calcium
+                if (val >= 200 && val <= 400) return color(75, 180, 75);
+                if (val < 100 || val > 600) return color(205, 75, 75);
+                return color(210, 185, 55);
+            case 2: // Alkalinity
+                if (val >= 100 && val <= 300) return color(75, 180, 75);
+                if (val < 80 || val > 400) return color(205, 75, 75);
+                return color(210, 185, 55);
+            case 3: // TDS
+                if (val <= 1500) return color(75, 180, 75);
+                if (val > 2500) return color(205, 75, 75);
+                return color(210, 185, 55);
+            case 4: // Temperature
+                if (val <= 100) return color(75, 180, 75);
+                if (val > 115) return color(205, 75, 75);
+                return color(210, 185, 55);
+            case 5: // Corrosion inhibitor
+            case 6: // Scale inhibitor
+                if (val >= 3 && val <= 12) return color(75, 180, 75);
+                if (val < 1) return color(205, 75, 75);
+                return color(210, 185, 55);
+            default:
+                return color(100, 150, 200);
+        }
+    }
+
+    // ======================================================================
+    //  GAUGE SECTION  (Semicircle arc meters with needles)
+    // ======================================================================
+
+    function drawGaugeSection() {
+        let r = gaugeRegion;
+
+        // Background
+        fill(235, 238, 245);
+        noStroke();
+        rect(r.x, r.y, r.w, r.h);
+
+        // Separator line
+        stroke(200, 205, 215);
+        strokeWeight(1);
+        line(r.x, r.y, r.x + r.w, r.y);
+
+        // Three gauges
+        let gw = r.w / 3;
+
+        drawArcGauge(
+            r.x + gw * 0.5, r.y + 12,
+            gw * 0.85, r.h - 16,
+            'Corrosion Rate', displayCorr, 0, 20, 'mpy',
+            [
+                [0, 3,  color(65, 185, 65)],
+                [3, 8,  color(235, 200, 45)],
+                [8, 20, color(215, 55, 55)]
+            ]
+        );
+
+        drawArcGauge(
+            r.x + gw * 1.5, r.y + 12,
+            gw * 0.85, r.h - 16,
+            'Scale Formation', displayScale, 0, 10, 'mm/yr',
+            [
+                [0, 1,  color(65, 185, 65)],
+                [1, 4,  color(235, 200, 45)],
+                [4, 10, color(215, 55, 55)]
+            ]
+        );
+
+        // Overall health gauge
+        let health = calcHealth();
+        drawArcGauge(
+            r.x + gw * 2.5, r.y + 12,
+            gw * 0.85, r.h - 16,
+            'System Health', health, 0, 100, '%',
+            [
+                [0, 35,  color(215, 55, 55)],
+                [35, 70, color(235, 200, 45)],
+                [70, 100, color(65, 185, 65)]
+            ]
+        );
+    }
+
+    function calcHealth() {
+        let corrScore  = map(corrosionRate, 0, 20, 100, 0);
+        let scaleScore = map(scaleRate, 0, 10, 100, 0);
+        let lsiScore   = map(abs(lsi), 0, 3, 100, 0);
+        return constrain((corrScore + scaleScore + lsiScore) / 3, 0, 100);
+    }
+
+    function drawArcGauge(cx, topY, w, h, label, value, minV, maxV, unit, zones) {
+        let gaugeR = min(w * 0.42, h * 0.42);
+        let gCY = topY + h * 0.48;
+
+        // Arc sweep from ~210 deg to ~330 deg
+        let arcStart = PI + QUARTER_PI * 0.65;
+        let arcEnd   = TWO_PI - QUARTER_PI * 0.65;
+        let arcSpan  = arcEnd - arcStart;
+
+        // Draw zone arcs (thick band)
+        let bandW = max(10, gaugeR * 0.2);
+        strokeWeight(bandW);
+        noFill();
+        for (let z of zones) {
+            let a1 = arcStart + ((z[0] - minV) / (maxV - minV)) * arcSpan;
+            let a2 = arcStart + ((z[1] - minV) / (maxV - minV)) * arcSpan;
+            stroke(z[2]);
+            arc(cx, gCY, gaugeR * 2, gaugeR * 2, a1, a2);
+        }
+
+        // Tick marks and labels
+        let numTicks = 10;
+        for (let i = 0; i <= numTicks; i++) {
+            let t = i / numTicks;
+            let a = arcStart + t * arcSpan;
+            let innerR = gaugeR - bandW / 2 - 3;
+            let outerR = gaugeR + bandW / 2 + 3;
+            let isMajor = (i % 2 === 0);
+
+            stroke(100, 105, 115);
+            strokeWeight(isMajor ? 1.5 : 0.8);
+            let r1 = isMajor ? innerR - 4 : innerR;
+            line(cx + cos(a) * r1, gCY + sin(a) * r1,
+                 cx + cos(a) * outerR, gCY + sin(a) * outerR);
+
+            // Numeric labels on major ticks
+            if (isMajor) {
+                let tickVal = minV + t * (maxV - minV);
+                let labelR = innerR - 12;
+                fill(90, 95, 105);
+                noStroke();
+                textAlign(CENTER, CENTER);
+                textSize(8);
+                text(nf(tickVal, 0, 0), cx + cos(a) * labelR, gCY + sin(a) * labelR);
+            }
+        }
+
+        // Needle
+        let needlePct = constrain((value - minV) / (maxV - minV), 0, 1);
+        let needleAngle = arcStart + needlePct * arcSpan;
+        let needleLen = gaugeR * 0.88;
+
+        // Needle shadow
+        stroke(0, 0, 0, 30);
+        strokeWeight(3);
+        let snx = cx + cos(needleAngle) * needleLen + 1;
+        let sny = gCY + sin(needleAngle) * needleLen + 1;
+        line(cx + 1, gCY + 1, snx, sny);
+
+        // Needle body (tapered)
+        let nx = cx + cos(needleAngle) * needleLen;
+        let ny = gCY + sin(needleAngle) * needleLen;
+
+        // Get color of current zone for needle
+        let needleCol = color(50, 55, 70);
+        for (let z of zones) {
+            if (value >= z[0] && value <= z[1]) {
+                needleCol = lerpColor(z[2], color(40, 45, 55), 0.3);
+                break;
+            }
+        }
+        if (value > zones[zones.length - 1][1]) {
+            needleCol = lerpColor(zones[zones.length - 1][2], color(40, 45, 55), 0.3);
+        }
+
+        stroke(needleCol);
+        strokeWeight(2.5);
+        line(cx, gCY, nx, ny);
+
+        // Hub
+        fill(60, 65, 75);
+        noStroke();
+        ellipse(cx, gCY, 10, 10);
+        fill(90, 95, 105);
+        ellipse(cx, gCY, 5, 5);
+
+        // Current value (large text)
+        fill(40, 50, 70);
+        textAlign(CENTER, TOP);
+        textSize(18);
+        textStyle(BOLD);
+        text(nf(value, 0, 1), cx, gCY + gaugeR * 0.28);
+        textStyle(NORMAL);
+
+        // Unit
+        fill(100, 105, 120);
+        textSize(11);
+        text(unit, cx, gCY + gaugeR * 0.28 + 22);
+
+        // Label
+        fill(55, 60, 80);
+        textSize(12);
+        textStyle(BOLD);
+        text(label, cx, gCY + gaugeR * 0.28 + 38);
+        textStyle(NORMAL);
+    }
+
+    // ======================================================================
+    //  MOUSE / TOUCH INTERACTION
+    // ======================================================================
+
+    function mousePressed() {
+        if (!slidersReady) return;
+
+        // Reset button
+        let rb = resetBtnBounds;
+        if (rb.w && mouseX > rb.x && mouseX < rb.x + rb.w &&
+            mouseY > rb.y && mouseY < rb.y + rb.h) {
+            resetAll();
+            return;
+        }
+
+        // Run 1 Year button
+        let yb = yearBtnBounds;
+        if (yb.w && !yearRunning && mouseX > yb.x && mouseX < yb.x + yb.w &&
+            mouseY > yb.y && mouseY < yb.y + yb.h) {
+            startYearSim();
+            return;
+        }
+
+        // Check sliders
+        for (let i = 0; i < sliders.length; i++) {
+            let s = sliders[i];
+            if (s._trackX === undefined) continue;
+
+            let thumbPct = (s.value - s.min) / (s.max - s.min);
+            let thumbX = s._trackX + s._trackW * thumbPct;
+            let thumbCY = s._trackY + s._trackH / 2;
+
+            if (dist(mouseX, mouseY, thumbX, thumbCY) < 18) {
+                activeSlider = i;
+                return;
+            }
+
+            // Click on track
+            if (mouseX >= s._trackX && mouseX <= s._trackX + s._trackW &&
+                mouseY >= s._trackY - 10 && mouseY <= s._trackY + s._trackH + 10) {
+                activeSlider = i;
+                setSliderFromMouse(i);
+                return;
+            }
+        }
+    }
+
+    function mouseDragged() {
+        if (activeSlider >= 0) {
+            setSliderFromMouse(activeSlider);
+        }
+    }
+
+    function mouseReleased() {
+        activeSlider = -1;
+    }
+
+    function setSliderFromMouse(idx) {
+        let s = sliders[idx];
+        if (s._trackX === undefined) return;
+        let pct = constrain((mouseX - s._trackX) / s._trackW, 0, 1);
+        let raw = s.min + pct * (s.max - s.min);
+        s.value = constrain(round(raw / s.step) * s.step, s.min, s.max);
+    }
+
+    function resetAll() {
+        sliders[0].value = DEF.pH;
+        sliders[1].value = DEF.calcium;
+        sliders[2].value = DEF.alkalinity;
+        sliders[3].value = DEF.tds;
+        sliders[4].value = DEF.temp;
+        sliders[5].value = DEF.corrInhib;
+        sliders[6].value = DEF.scaleInhib;
+        pits = [];
+        metalThick = 1;
+        scaleThick = 0;
+        yearRunning = false;
+        yearProgress = 0;
+        yearAccumCorr = 0;
+        yearAccumScale = 0;
+    }
+
+    function startYearSim() {
+        yearRunning = true;
+        yearProgress = 0;
+        yearAccumCorr = 0;
+        yearAccumScale = 0;
+    }
+
+    // Touch support for mobile
+    function touchStarted() {
+        let inSliders = (mouseY > sliderRegion.y && mouseY < sliderRegion.y + sliderRegion.h);
+        let inGauges = (mouseY > gaugeRegion.y && mouseY < gaugeRegion.y + gaugeRegion.h);
+        if (inSliders || inGauges) {
+            mousePressed();
+            return false;
+        }
+    }
+
+    function touchMoved() {
+        if (activeSlider >= 0) {
+            mouseDragged();
+            return false;
+        }
+    }
+
+    function touchEnded() {
+        mouseReleased();
+    }
+    </script>
+</body>
+</html>

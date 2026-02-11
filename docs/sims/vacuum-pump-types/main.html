@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vacuum Pump Types Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ══════════════════════════════════════════════════════════════════
+    //  GLOBAL STATE
+    // ══════════════════════════════════════════════════════════════════
+
+    let canvasW, canvasH;
+    let cols = 2;
+    let showGasFlow = false;
+
+    // Animation angles / phases
+    let rotaryAngle = 0;
+    let diaphragmPhase = 0;
+    let scrollPhase = 0;
+    let liquidRingAngle = 0;
+
+    // Pause states for each pump (click to toggle)
+    let paused = [false, false, false, false];
+
+    // Tooltip state
+    let tooltipText = '';
+    let tooltipX = 0;
+    let tooltipY = 0;
+    let showTooltip = false;
+
+    // Label hitboxes for hover detection [{x,y,w,h,text}]
+    let labelHitboxes = [];
+
+    // Pump cell bounding boxes for click detection
+    let pumpCells = []; // [{x,y,w,h}]
+
+    // Toggle button bounds
+    let toggleBtn = { x: 0, y: 0, w: 0, h: 0 };
+
+    // Spec cards data
+    let specs = [
+        { name: 'Rotary Vane', vacuum: '1 - 100 mbar', flow: 'Med', oilFree: 'No', app: 'Lab vacuum, packaging' },
+        { name: 'Diaphragm', vacuum: '2 - 100 mbar', flow: 'Low', oilFree: 'Yes', app: 'Chemistry labs, medical' },
+        { name: 'Scroll', vacuum: '0.01 - 10 mbar', flow: 'Med', oilFree: 'Yes', app: 'Semiconductor, analytical' },
+        { name: 'Liquid Ring', vacuum: '33 - 200 mbar', flow: 'High', oilFree: 'Yes*', app: 'Chemical process, mining' }
+    ];
+
+    // Label tooltip explanations
+    let labelExplanations = {
+        'Rotor': 'The off-center rotating element that drives the vanes.',
+        'Vanes': 'Spring-loaded sliding blades that seal against the housing wall.',
+        'Housing': 'Cylindrical chamber with inlet and exhaust ports.',
+        'Inlet': 'Port where gas enters the pump at low pressure.',
+        'Exhaust': 'Port where compressed gas is expelled from the pump.',
+        'Diaphragm': 'Flexible membrane that flexes to create suction and compression.',
+        'Inlet Valve': 'One-way valve that opens during expansion to admit gas.',
+        'Exhaust Valve': 'One-way valve that opens during compression to expel gas.',
+        'Chamber': 'Enclosed space where gas is compressed or expanded.',
+        'Fixed Scroll': 'Stationary spiral element forming sealed gas pockets.',
+        'Orbiting Scroll': 'Moving spiral that orbits to compress gas toward center.',
+        'Gas Pockets': 'Crescent-shaped trapped volumes that shrink as gas moves inward.',
+        'Impeller': 'Multi-blade rotor spinning inside the eccentric housing.',
+        'Liquid Ring': 'Rotating liquid seal formed by centrifugal force against the casing.',
+        'Blades': 'Impeller blades that create gas pockets between the liquid ring.',
+        'Eccentric Housing': 'Off-center casing that varies the gas pocket volume.'
+    };
+
+    function setup() {
+        computeLayout();
+        let canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+    }
+
+    function computeLayout() {
+        let maxW = min(windowWidth, 1000);
+        if (maxW < 600) {
+            cols = 1;
+        } else {
+            cols = 2;
+        }
+        canvasW = maxW;
+        let rows = (cols === 1) ? 4 : 2;
+        // Each cell: pump diagram area + spec card
+        let cellH = (cols === 1) ? 340 : 360;
+        let controlBarH = 44;
+        canvasH = rows * cellH + controlBarH;
+    }
+
+    function windowResized() {
+        computeLayout();
+        resizeCanvas(canvasW, canvasH);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  MAIN DRAW
+    // ══════════════════════════════════════════════════════════════════
+
+    function draw() {
+        background(245);
+        showTooltip = false;
+        labelHitboxes = [];
+        pumpCells = [];
+
+        let rows = (cols === 1) ? 4 : 2;
+        let cellW = canvasW / cols;
+        let cellH = (cols === 1) ? 340 : 360;
+        let controlBarH = 44;
+        let sf = cellW / 480; // scale factor
+
+        // Draw each pump
+        let pumpDrawFuncs = [drawRotaryVane, drawDiaphragm, drawScroll, drawLiquidRing];
+        let pumpNames = ['Rotary Vane Pump', 'Diaphragm Pump', 'Scroll Pump', 'Liquid Ring Pump'];
+
+        for (let i = 0; i < 4; i++) {
+            let col = (cols === 1) ? 0 : (i % 2);
+            let row = (cols === 1) ? i : floor(i / 2);
+            let cx = col * cellW;
+            let cy = row * cellH;
+
+            pumpCells.push({ x: cx, y: cy, w: cellW, h: cellH });
+
+            // Cell border
+            stroke(210);
+            strokeWeight(1);
+            noFill();
+            rect(cx + 2, cy + 2, cellW - 4, cellH - 4, 6);
+
+            // Title
+            noStroke();
+            fill(50);
+            textAlign(CENTER, TOP);
+            textSize(max(13, 15 * sf));
+            textStyle(BOLD);
+            text(pumpNames[i], cx + cellW / 2, cy + 8);
+            textStyle(NORMAL);
+
+            // Paused indicator
+            if (paused[i]) {
+                fill(180, 50, 50);
+                textSize(max(9, 10 * sf));
+                text('PAUSED (click to play)', cx + cellW / 2, cy + 26 * sf);
+            }
+
+            // Pump animation area
+            let animY = cy + 38 * sf;
+            let animH = cellH * 0.52;
+            push();
+            translate(cx + cellW / 2, animY + animH / 2);
+            pumpDrawFuncs[i](cellW * 0.9, animH, sf, i);
+            pop();
+
+            // Spec card
+            let cardY = animY + animH + 6 * sf;
+            let cardH = cellH - (cardY - cy) - 6;
+            drawSpecCard(cx + 8, cardY, cellW - 16, cardH, specs[i], sf);
+        }
+
+        // Update animation
+        let speed = 0.025;
+        if (!paused[0]) rotaryAngle += speed;
+        if (!paused[1]) diaphragmPhase += speed * 0.8;
+        if (!paused[2]) scrollPhase += speed * 0.6;
+        if (!paused[3]) liquidRingAngle += speed;
+
+        // ── Control bar ──────────────────────────────────────────────
+        let controlY = rows * cellH;
+        fill(230);
+        noStroke();
+        rect(0, controlY, canvasW, controlBarH);
+
+        // Toggle button
+        let btnW = max(140, 160 * sf);
+        let btnH = 30;
+        let btnX = canvasW / 2 - btnW / 2;
+        let btnY = controlY + (controlBarH - btnH) / 2;
+        toggleBtn = { x: btnX, y: btnY, w: btnW, h: btnH };
+
+        let hoveredBtn = mouseX > btnX && mouseX < btnX + btnW && mouseY > btnY && mouseY < btnY + btnH;
+        fill(showGasFlow ? color(50, 140, 80) : color(80, 130, 190));
+        if (hoveredBtn) {
+            fill(showGasFlow ? color(40, 160, 90) : color(60, 110, 210));
+            cursor(HAND);
+        }
+        stroke(showGasFlow ? color(30, 100, 60) : color(50, 90, 150));
+        strokeWeight(1.5);
+        rect(btnX, btnY, btnW, btnH, 6);
+        noStroke();
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(max(11, 13 * sf));
+        text(showGasFlow ? 'Hide Gas Flow' : 'Show Gas Flow', btnX + btnW / 2, btnY + btnH / 2);
+
+        // Hint text
+        fill(100);
+        textSize(max(9, 10 * sf));
+        textAlign(LEFT, CENTER);
+        text('Click a pump to pause/play', 12, controlY + controlBarH / 2);
+        textAlign(RIGHT, CENTER);
+        text('Hover labels for details', canvasW - 12, controlY + controlBarH / 2);
+
+        // Reset cursor if not on button
+        if (!hoveredBtn) cursor(ARROW);
+
+        // ── Tooltip ──────────────────────────────────────────────────
+        if (showTooltip && tooltipText.length > 0) {
+            drawTooltip(tooltipX, tooltipY, tooltipText, sf);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  ROTARY VANE PUMP
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawRotaryVane(w, h, sf, idx) {
+        let housingR = min(w, h) * 0.38;
+
+        // Housing (circular)
+        fill(180, 185, 190);
+        stroke(120);
+        strokeWeight(2 * sf);
+        ellipse(0, 0, housingR * 2, housingR * 2);
+
+        // Inner fluid region
+        noStroke();
+        fill(200, 220, 240, 100);
+        ellipse(0, 0, housingR * 1.9, housingR * 1.9);
+
+        // Inlet port (top-left)
+        let inletAngle = PI + PI / 4;
+        let inX = cos(inletAngle) * housingR;
+        let inY = sin(inletAngle) * housingR;
+        fill(140);
+        stroke(100);
+        strokeWeight(1.5 * sf);
+        push();
+        translate(inX, inY);
+        rotate(inletAngle);
+        rectMode(CENTER);
+        rect(-14 * sf, 0, 28 * sf, 16 * sf, 3 * sf);
+        pop();
+
+        // Exhaust port (top-right)
+        let exAngle = -PI / 4;
+        let exX = cos(exAngle) * housingR;
+        let exY = sin(exAngle) * housingR;
+        fill(140);
+        stroke(100);
+        push();
+        translate(exX, exY);
+        rotate(exAngle);
+        rectMode(CENTER);
+        rect(14 * sf, 0, 28 * sf, 16 * sf, 3 * sf);
+        pop();
+
+        // Off-center rotor
+        let offset = housingR * 0.18;
+        let rotorR = housingR * 0.52;
+        let rotorCX = offset;
+        let rotorCY = 0;
+
+        // Rotor body
+        fill(170, 175, 185);
+        stroke(110);
+        strokeWeight(1.5 * sf);
+        ellipse(rotorCX, rotorCY, rotorR * 2, rotorR * 2);
+
+        // Vanes (4 sliding vanes)
+        let numVanes = 4;
+        for (let i = 0; i < numVanes; i++) {
+            let va = rotaryAngle + (TWO_PI / numVanes) * i;
+            let vCosA = cos(va);
+            let vSinA = sin(va);
+
+            // Calculate vane extension: distance from rotor center to housing wall
+            // Vane tip must touch the housing inner wall
+            // Housing center is at (0,0), rotor center at (rotorCX, rotorCY)
+            // Ray from rotor center in direction va intersects housing circle
+            let dx = vCosA;
+            let dy = vSinA;
+            // Solve: |rotorCenter + t*dir|^2 = housingR^2
+            let a_coeff = 1;
+            let b_coeff = 2 * (rotorCX * dx + rotorCY * dy);
+            let c_coeff = rotorCX * rotorCX + rotorCY * rotorCY - (housingR - 3 * sf) * (housingR - 3 * sf);
+            let disc = b_coeff * b_coeff - 4 * a_coeff * c_coeff;
+            let t_ext = (-b_coeff + sqrt(max(0, disc))) / (2 * a_coeff);
+
+            // Vane drawn from inside rotor out to housing wall
+            let vaneInner = rotorR * 0.25;
+            let vaneOuter = t_ext;
+            let vaneThickness = max(3, 4 * sf);
+
+            push();
+            translate(rotorCX, rotorCY);
+            rotate(va);
+            // Vane body
+            fill(200, 190, 160);
+            stroke(150, 140, 110);
+            strokeWeight(1 * sf);
+            rectMode(CORNER);
+            rect(vaneInner, -vaneThickness / 2, vaneOuter - vaneInner, vaneThickness, 1 * sf);
+            pop();
+        }
+
+        // Rotor center hub
+        fill(150);
+        stroke(100);
+        strokeWeight(1.5 * sf);
+        ellipse(rotorCX, rotorCY, rotorR * 0.35, rotorR * 0.35);
+        fill(120);
+        noStroke();
+        ellipse(rotorCX, rotorCY, rotorR * 0.15, rotorR * 0.15);
+
+        // Gas coloring: show expanding / compressing regions
+        if (showGasFlow) {
+            for (let i = 0; i < numVanes; i++) {
+                let va1 = rotaryAngle + (TWO_PI / numVanes) * i;
+                let va2 = va1 + (TWO_PI / numVanes);
+                let midA = (va1 + va2) / 2;
+
+                // Determine pocket position relative to inlet/exhaust
+                let normalizedA = ((midA % TWO_PI) + TWO_PI) % TWO_PI;
+                let inletRegion = (normalizedA > PI * 0.6 && normalizedA < PI * 1.5);
+                let exhaustRegion = (normalizedA > PI * 1.5 || normalizedA < PI * 0.4);
+
+                // Draw colored arc segment
+                noStroke();
+                if (inletRegion) {
+                    fill(80, 140, 220, 70); // blue for inlet gas
+                } else if (exhaustRegion) {
+                    fill(220, 120, 60, 70); // orange for compressed
+                } else {
+                    fill(160, 160, 80, 50); // transition
+                }
+                arc(0, 0, housingR * 1.7, housingR * 1.7, va1, va2, PIE);
+            }
+
+            // Gas flow arrows
+            stroke(80, 140, 220);
+            strokeWeight(2.5 * sf);
+            fill(80, 140, 220);
+            drawCurvedArrow(inX - 18 * sf, inY - 5 * sf, inX + 10 * sf, inY + 10 * sf, 6 * sf);
+            stroke(220, 120, 60);
+            fill(220, 120, 60);
+            drawCurvedArrow(exX - 10 * sf, exY + 10 * sf, exX + 22 * sf, exY - 5 * sf, 6 * sf);
+        }
+
+        // Labels
+        addLabel('Rotor', rotorCX, rotorCY - rotorR - 12 * sf, sf);
+        addLabel('Vanes', rotorCX + rotorR + 14 * sf, rotorCY, sf);
+        addLabel('Housing', 0, housingR + 12 * sf, sf);
+        addLabel('Inlet', inX - 14 * sf, inY + 16 * sf, sf);
+        addLabel('Exhaust', exX + 14 * sf, exY + 16 * sf, sf);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  DIAPHRAGM PUMP
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawDiaphragm(w, h, sf, idx) {
+        let chamberW = w * 0.55;
+        let chamberH = h * 0.55;
+        let phase = sin(diaphragmPhase); // -1 to 1
+
+        // Chamber walls
+        fill(180, 185, 190);
+        stroke(120);
+        strokeWeight(2 * sf);
+        rectMode(CENTER);
+        rect(0, 0, chamberW, chamberH, 6 * sf);
+
+        // Inner chamber background
+        noStroke();
+        fill(230, 235, 240);
+        rect(0, 0, chamberW - 6 * sf, chamberH - 6 * sf, 4 * sf);
+
+        // Diaphragm (flexible membrane)
+        let diaphY = phase * chamberH * 0.18;
+        let membraneColor = color(120, 80, 160);
+        stroke(membraneColor);
+        strokeWeight(3.5 * sf);
+        noFill();
+        beginShape();
+        let numPts = 30;
+        for (let i = 0; i <= numPts; i++) {
+            let t = i / numPts;
+            let px = lerp(-chamberW / 2 + 6 * sf, chamberW / 2 - 6 * sf, t);
+            let curvature = sin(t * PI) * diaphY;
+            let py = curvature;
+            vertex(px, py);
+        }
+        endShape();
+
+        // Fill above/below diaphragm with gas color when showGasFlow
+        if (showGasFlow) {
+            // Upper chamber (connects to inlet when expanding upward, exhaust otherwise)
+            noStroke();
+            if (phase < 0) {
+                // Diaphragm moves down => upper chamber expands => gas intake (blue)
+                fill(80, 140, 220, 60);
+            } else {
+                // Diaphragm moves up => upper chamber compresses => gas out (orange)
+                fill(220, 120, 60, 60);
+            }
+            beginShape();
+            vertex(-chamberW / 2 + 4 * sf, -chamberH / 2 + 4 * sf);
+            vertex(chamberW / 2 - 4 * sf, -chamberH / 2 + 4 * sf);
+            for (let i = numPts; i >= 0; i--) {
+                let t = i / numPts;
+                let px = lerp(-chamberW / 2 + 6 * sf, chamberW / 2 - 6 * sf, t);
+                let curvature = sin(t * PI) * diaphY;
+                vertex(px, curvature);
+            }
+            endShape(CLOSE);
+        }
+
+        // Inlet valve (top-left)
+        let valveW = 18 * sf;
+        let valveH = 14 * sf;
+        let inletVX = -chamberW * 0.28;
+        let inletVY = -chamberH / 2;
+        let inletOpen = phase < -0.2; // Opens when diaphragm pulls down
+
+        fill(inletOpen ? color(80, 180, 80) : color(180, 80, 80));
+        stroke(100);
+        strokeWeight(1.5 * sf);
+        rectMode(CENTER);
+        // Valve flap
+        push();
+        translate(inletVX, inletVY);
+        let inletFlapAngle = inletOpen ? -PI / 5 : 0;
+        rotate(inletFlapAngle);
+        rect(0, -valveH / 4, valveW, valveH / 2, 2 * sf);
+        pop();
+        // Valve seat
+        fill(150);
+        stroke(100);
+        rect(inletVX, inletVY, valveW + 4 * sf, 4 * sf);
+
+        // Exhaust valve (top-right)
+        let exVX = chamberW * 0.28;
+        let exVY = -chamberH / 2;
+        let exOpen = phase > 0.2; // Opens when diaphragm pushes up
+
+        fill(exOpen ? color(80, 180, 80) : color(180, 80, 80));
+        stroke(100);
+        push();
+        translate(exVX, exVY);
+        let exFlapAngle = exOpen ? -PI / 5 : 0;
+        rotate(exFlapAngle);
+        rect(0, -valveH / 4, valveW, valveH / 2, 2 * sf);
+        pop();
+        fill(150);
+        stroke(100);
+        rect(exVX, exVY, valveW + 4 * sf, 4 * sf);
+
+        // Pipe stubs above valves
+        fill(160);
+        stroke(110);
+        strokeWeight(1.5 * sf);
+        rect(inletVX, inletVY - 18 * sf, 14 * sf, 22 * sf, 2 * sf);
+        rect(exVX, exVY - 18 * sf, 14 * sf, 22 * sf, 2 * sf);
+
+        // Gas flow arrows
+        if (showGasFlow) {
+            if (inletOpen) {
+                stroke(80, 140, 220);
+                fill(80, 140, 220);
+                strokeWeight(2 * sf);
+                drawArrowLine(inletVX, inletVY - 30 * sf, inletVX, inletVY - 6 * sf, 6 * sf);
+            }
+            if (exOpen) {
+                stroke(220, 120, 60);
+                fill(220, 120, 60);
+                strokeWeight(2 * sf);
+                drawArrowLine(exVX, exVY - 6 * sf, exVX, exVY - 30 * sf, 6 * sf);
+            }
+        }
+
+        // Connecting rod below diaphragm
+        stroke(140);
+        strokeWeight(3 * sf);
+        line(0, diaphY * 0.6, 0, chamberH / 2 + 10 * sf);
+
+        // Eccentric drive indicator
+        fill(160);
+        stroke(110);
+        strokeWeight(1.5 * sf);
+        let driveY = chamberH / 2 + 18 * sf;
+        ellipse(0, driveY, 16 * sf, 16 * sf);
+        fill(130);
+        noStroke();
+        let eccX = cos(diaphragmPhase) * 4 * sf;
+        let eccY = driveY + sin(diaphragmPhase) * 4 * sf;
+        ellipse(eccX, eccY, 6 * sf, 6 * sf);
+
+        // Labels
+        addLabel('Diaphragm', chamberW / 2 + 14 * sf, diaphY, sf);
+        addLabel('Inlet Valve', inletVX, inletVY - 34 * sf, sf);
+        addLabel('Exhaust Valve', exVX, exVY - 34 * sf, sf);
+        addLabel('Chamber', 0, chamberH / 2 + 30 * sf, sf);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  SCROLL PUMP
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawScroll(w, h, sf, idx) {
+        let scrollR = min(w, h) * 0.38;
+        let orbitR = scrollR * 0.08; // small orbit radius
+
+        // Outer housing
+        fill(180, 185, 190);
+        stroke(120);
+        strokeWeight(2 * sf);
+        ellipse(0, 0, scrollR * 2.1, scrollR * 2.1);
+
+        // Inner area
+        noStroke();
+        fill(230, 235, 240);
+        ellipse(0, 0, scrollR * 1.95, scrollR * 1.95);
+
+        // Gas pockets visualization
+        if (showGasFlow) {
+            let numPockets = 4;
+            for (let i = 0; i < numPockets; i++) {
+                let pocketAngle = scrollPhase * 2 + (TWO_PI / numPockets) * i;
+                let pocketR = scrollR * (0.85 - i * 0.18);
+                if (pocketR > scrollR * 0.15) {
+                    let px = cos(pocketAngle) * pocketR * 0.3;
+                    let py = sin(pocketAngle) * pocketR * 0.3;
+                    let alphaVal = map(i, 0, numPockets - 1, 50, 100);
+                    let rCol = map(i, 0, numPockets - 1, 80, 220);
+                    let gCol = map(i, 0, numPockets - 1, 140, 100);
+                    let bCol = map(i, 0, numPockets - 1, 220, 60);
+                    fill(rCol, gCol, bCol, alphaVal);
+                    noStroke();
+                    ellipse(px, py, pocketR * 0.5, pocketR * 0.4);
+                }
+            }
+        }
+
+        // Fixed scroll (dark gray spiral)
+        drawSpiral(0, 0, scrollR * 0.85, 2.8, sf, color(100, 105, 115), 3.5 * sf, 0);
+
+        // Orbiting scroll (lighter spiral, offset by orbit)
+        let orbX = cos(scrollPhase) * orbitR;
+        let orbY = sin(scrollPhase) * orbitR;
+        drawSpiral(orbX, orbY, scrollR * 0.85, 2.8, sf, color(160, 130, 90), 3 * sf, PI);
+
+        // Center exhaust port
+        fill(100);
+        stroke(80);
+        strokeWeight(1.5 * sf);
+        ellipse(0, 0, 14 * sf, 14 * sf);
+
+        // Inlet indicators on outside
+        if (showGasFlow) {
+            stroke(80, 140, 220);
+            fill(80, 140, 220);
+            strokeWeight(2 * sf);
+            drawArrowLine(-scrollR - 8 * sf, 0, -scrollR + 14 * sf, 0, 5 * sf);
+            drawArrowLine(scrollR - 14 * sf, 0, scrollR + 8 * sf, 0, 5 * sf);
+
+            // Center exhaust arrow
+            stroke(220, 120, 60);
+            fill(220, 120, 60);
+            drawArrowLine(0, 10 * sf, 0, 30 * sf, 5 * sf);
+        }
+
+        // Labels
+        addLabel('Fixed Scroll', -scrollR * 0.5, -scrollR - 12 * sf, sf);
+        addLabel('Orbiting Scroll', scrollR * 0.4, -scrollR - 12 * sf, sf);
+        addLabel('Gas Pockets', -scrollR * 0.7, scrollR * 0.5, sf);
+        addLabel('Exhaust', 0, scrollR + 14 * sf, sf);
+        addLabel('Inlet', -scrollR - 6 * sf, -16 * sf, sf);
+    }
+
+    function drawSpiral(cx, cy, maxR, turns, sf, col, weight, offsetAngle) {
+        push();
+        translate(cx, cy);
+        stroke(col);
+        strokeWeight(weight);
+        noFill();
+        beginShape();
+        let steps = 100;
+        for (let i = 0; i <= steps; i++) {
+            let t = i / steps;
+            let angle = t * turns * TWO_PI + offsetAngle;
+            let r = maxR * 0.1 + t * (maxR * 0.75);
+            vertex(cos(angle) * r, sin(angle) * r);
+        }
+        endShape();
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  LIQUID RING PUMP
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawLiquidRing(w, h, sf, idx) {
+        let housingR = min(w, h) * 0.38;
+        let eccentricity = housingR * 0.15; // offset
+
+        // Eccentric housing (outer)
+        fill(180, 185, 190);
+        stroke(120);
+        strokeWeight(2 * sf);
+        ellipse(0, 0, housingR * 2, housingR * 2);
+
+        // Liquid ring (light blue, thicker on one side due to eccentricity)
+        noStroke();
+        beginShape();
+        for (let a = 0; a <= TWO_PI + 0.1; a += 0.08) {
+            // Outer edge follows housing
+            let outerR = housingR - 3 * sf;
+            vertex(cos(a) * outerR, sin(a) * outerR);
+        }
+        // Inner edge: eccentric circle representing the liquid ring inner surface
+        for (let a = TWO_PI; a >= -0.1; a -= 0.08) {
+            // The liquid ring varies in thickness
+            let ringThickness = housingR * 0.28 + cos(a) * eccentricity * 1.5;
+            let innerR = housingR - ringThickness;
+            let ix = eccentricity + cos(a) * innerR;
+            let iy = sin(a) * innerR;
+            vertex(ix, iy);
+        }
+        endShape(CLOSE);
+        // Recolor the ring shape
+        fill(140, 190, 230, 180);
+        noStroke();
+        beginShape();
+        for (let a = 0; a <= TWO_PI + 0.1; a += 0.08) {
+            let outerR = housingR - 3 * sf;
+            vertex(cos(a) * outerR, sin(a) * outerR);
+        }
+        for (let a = TWO_PI; a >= -0.1; a -= 0.08) {
+            let ringThickness = housingR * 0.28 + cos(a) * eccentricity * 1.5;
+            let innerR = housingR - ringThickness;
+            let ix = eccentricity + cos(a) * innerR;
+            let iy = sin(a) * innerR;
+            vertex(ix, iy);
+        }
+        endShape(CLOSE);
+
+        // Animate liquid ring surface with ripples
+        noFill();
+        stroke(100, 160, 210, 120);
+        strokeWeight(1 * sf);
+        for (let a = 0; a < TWO_PI; a += 0.3) {
+            let ringThickness = housingR * 0.28 + cos(a) * eccentricity * 1.5;
+            let innerR = housingR - ringThickness;
+            let ix = eccentricity + cos(a) * innerR;
+            let iy = sin(a) * innerR;
+            let rippleR = 3 * sf + sin(liquidRingAngle * 3 + a * 5) * 2 * sf;
+            ellipse(ix, iy, rippleR, rippleR);
+        }
+
+        // Inner gas area
+        noStroke();
+        fill(230, 235, 240, 120);
+        ellipse(eccentricity, 0, housingR * 0.9, housingR * 0.9);
+
+        // Impeller (centered, but housing is eccentric)
+        let impellerCX = eccentricity;
+        let impR = housingR * 0.6;
+        let numBlades = 12;
+
+        // Gas pocket coloring between blades
+        if (showGasFlow) {
+            for (let i = 0; i < numBlades; i++) {
+                let a1 = liquidRingAngle + (TWO_PI / numBlades) * i;
+                let a2 = a1 + (TWO_PI / numBlades);
+                let midA = (a1 + a2) / 2;
+
+                // Pocket size varies with eccentricity
+                let normalizedMidA = ((midA % TWO_PI) + TWO_PI) % TWO_PI;
+                // Larger pockets on the side away from the eccentric offset (left)
+                // Smaller pockets on the right (near housing wall)
+                let isInlet = (normalizedMidA > PI * 0.5 && normalizedMidA < PI * 1.3);
+                let isExhaust = (normalizedMidA > PI * 1.5 || normalizedMidA < PI * 0.3);
+
+                if (isInlet) {
+                    fill(80, 140, 220, 50);
+                } else if (isExhaust) {
+                    fill(220, 120, 60, 50);
+                } else {
+                    fill(160, 160, 80, 35);
+                }
+                noStroke();
+                arc(impellerCX, 0, impR * 1.5, impR * 1.5, a1, a2, PIE);
+            }
+        }
+
+        // Blade spokes
+        for (let i = 0; i < numBlades; i++) {
+            let a = liquidRingAngle + (TWO_PI / numBlades) * i;
+            let x1 = impellerCX + cos(a) * housingR * 0.12;
+            let y1 = sin(a) * housingR * 0.12;
+            let x2 = impellerCX + cos(a) * impR;
+            let y2 = sin(a) * impR;
+            stroke(170, 175, 185);
+            strokeWeight(max(2, 2.5 * sf));
+            line(x1, y1, x2, y2);
+        }
+
+        // Impeller hub
+        fill(160);
+        stroke(110);
+        strokeWeight(1.5 * sf);
+        ellipse(impellerCX, 0, housingR * 0.2, housingR * 0.2);
+        fill(130);
+        noStroke();
+        ellipse(impellerCX, 0, housingR * 0.08, housingR * 0.08);
+
+        // Inlet / Exhaust ports (at center, axial)
+        fill(140);
+        stroke(100);
+        strokeWeight(1.5 * sf);
+        rectMode(CENTER);
+        // Inlet port (top)
+        rect(0, -housingR - 12 * sf, 20 * sf, 20 * sf, 3 * sf);
+        // Exhaust port (bottom)
+        rect(0, housingR + 12 * sf, 20 * sf, 20 * sf, 3 * sf);
+
+        if (showGasFlow) {
+            stroke(80, 140, 220);
+            fill(80, 140, 220);
+            strokeWeight(2 * sf);
+            drawArrowLine(0, -housingR - 28 * sf, 0, -housingR - 4 * sf, 5 * sf);
+
+            stroke(220, 120, 60);
+            fill(220, 120, 60);
+            drawArrowLine(0, housingR + 4 * sf, 0, housingR + 28 * sf, 5 * sf);
+        }
+
+        // Labels
+        addLabel('Impeller', impellerCX, -impR - 14 * sf, sf);
+        addLabel('Liquid Ring', -housingR * 0.6, housingR * 0.7, sf);
+        addLabel('Blades', impellerCX + impR + 8 * sf, 0, sf);
+        addLabel('Eccentric Housing', 0, housingR + 30 * sf, sf);
+        addLabel('Inlet', -22 * sf, -housingR - 12 * sf, sf);
+        addLabel('Exhaust', -22 * sf, housingR + 12 * sf, sf);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  SPEC CARD
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawSpecCard(x, y, w, h, spec, sf) {
+        // Card background
+        fill(252, 253, 255);
+        stroke(200);
+        strokeWeight(1);
+        rectMode(CORNER);
+        rect(x, y, w, h, 5 * sf);
+
+        // Header bar
+        fill(70, 120, 180);
+        noStroke();
+        rect(x, y, w, 20 * sf, 5 * sf, 5 * sf, 0, 0);
+        // Cover bottom corners of header
+        rect(x, y + 12 * sf, w, 8 * sf);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(max(10, 11 * sf));
+        textStyle(BOLD);
+        text(spec.name, x + w / 2, y + 10 * sf);
+        textStyle(NORMAL);
+
+        // Spec rows
+        let rowH = max(14, 16 * sf);
+        let startY = y + 26 * sf;
+        let labelX = x + 10 * sf;
+        let valueX = x + w * 0.52;
+
+        textAlign(LEFT, TOP);
+        textSize(max(9, 10 * sf));
+
+        let rows = [
+            ['Ultimate Vacuum:', spec.vacuum],
+            ['Flow Rate:', spec.flow],
+            ['Oil-Free:', spec.oilFree],
+            ['Best Application:', spec.app]
+        ];
+
+        for (let i = 0; i < rows.length; i++) {
+            let ry = startY + i * rowH;
+            // Alternating row background
+            if (i % 2 === 0) {
+                noStroke();
+                fill(240, 244, 250);
+                rectMode(CORNER);
+                rect(x + 4, ry - 1, w - 8, rowH, 2);
+            }
+            fill(80);
+            textStyle(BOLD);
+            text(rows[i][0], labelX, ry);
+            textStyle(NORMAL);
+            fill(50);
+            text(rows[i][1], valueX, ry);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  LABEL HELPER (with hitbox for tooltip)
+    // ══════════════════════════════════════════════════════════════════
+
+    function addLabel(name, lx, ly, sf) {
+        noStroke();
+        fill(40, 90, 160);
+        textAlign(CENTER, CENTER);
+        textSize(max(8, 9.5 * sf));
+        textStyle(BOLD);
+        text(name, lx, ly);
+        textStyle(NORMAL);
+
+        // Compute hitbox in screen coords (we are inside push/pop from draw)
+        // We need the actual screen position; since we draw labels inside
+        // a translated context, we use p5's model transforms.
+        let sw = textWidth(name) + 8 * sf;
+        let sh = max(12, 14 * sf);
+
+        // Store screen-space hitbox for hover detection
+        // Use the current transform via screenX/screenY
+        let sx = screenX(lx, ly);
+        let sy = screenY(lx, ly);
+
+        labelHitboxes.push({
+            x: sx - sw / 2,
+            y: sy - sh / 2,
+            w: sw,
+            h: sh,
+            name: name
+        });
+
+        // Check hover NOW for immediate visual feedback
+        if (mouseX > sx - sw / 2 && mouseX < sx + sw / 2 &&
+            mouseY > sy - sh / 2 && mouseY < sy + sh / 2) {
+            // Underline effect
+            stroke(40, 90, 160);
+            strokeWeight(1.2 * sf);
+            line(lx - sw / 2 + 4 * sf, ly + sh / 2 - 2 * sf,
+                 lx + sw / 2 - 4 * sf, ly + sh / 2 - 2 * sf);
+
+            if (labelExplanations[name]) {
+                showTooltip = true;
+                tooltipText = name + ': ' + labelExplanations[name];
+                tooltipX = mouseX;
+                tooltipY = mouseY;
+            }
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  TOOLTIP
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawTooltip(tx, ty, msg, sf) {
+        push();
+        // Reset any transforms so tooltip draws in screen space
+        resetMatrix();
+        textSize(max(10, 11 * sf));
+        let maxTipW = canvasW * 0.38;
+        let lines = [];
+        let words = msg.split(' ');
+        let currentLine = '';
+        for (let w of words) {
+            let test = currentLine + (currentLine.length > 0 ? ' ' : '') + w;
+            if (textWidth(test) > maxTipW && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = w;
+            } else {
+                currentLine = test;
+            }
+        }
+        if (currentLine.length > 0) lines.push(currentLine);
+
+        let lineH = max(14, 16 * sf);
+        let tipH = lines.length * lineH + 12 * sf;
+        let tipW = maxTipW + 20 * sf;
+
+        let tipX = tx + 14 * sf;
+        let tipY = ty - tipH - 10 * sf;
+        if (tipX + tipW > canvasW) tipX = canvasW - tipW - 6;
+        if (tipY < 0) tipY = ty + 22 * sf;
+
+        // Shadow
+        noStroke();
+        fill(0, 0, 0, 30);
+        rectMode(CORNER);
+        rect(tipX + 3, tipY + 3, tipW, tipH, 6 * sf);
+
+        // Background
+        fill(35, 40, 50, 235);
+        rect(tipX, tipY, tipW, tipH, 6 * sf);
+
+        // Text
+        fill(255);
+        textAlign(LEFT, TOP);
+        for (let i = 0; i < lines.length; i++) {
+            text(lines[i], tipX + 10 * sf, tipY + 6 * sf + i * lineH);
+        }
+
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  UTILITY: ARROWS
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawArrowLine(x1, y1, x2, y2, headSize) {
+        line(x1, y1, x2, y2);
+        let angle = atan2(y2 - y1, x2 - x1);
+        push();
+        translate(x2, y2);
+        rotate(angle);
+        noStroke();
+        triangle(0, 0, -headSize, -headSize * 0.45, -headSize, headSize * 0.45);
+        pop();
+    }
+
+    function drawCurvedArrow(x1, y1, x2, y2, headSize) {
+        let mx = (x1 + x2) / 2;
+        let my = (y1 + y2) / 2 - 10;
+        noFill();
+        beginShape();
+        vertex(x1, y1);
+        quadraticVertex(mx, my, x2, y2);
+        endShape();
+        let angle = atan2(y2 - my, x2 - mx);
+        push();
+        translate(x2, y2);
+        rotate(angle);
+        noStroke();
+        triangle(0, 0, -headSize, -headSize * 0.45, -headSize, headSize * 0.45);
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  MOUSE INTERACTION
+    // ══════════════════════════════════════════════════════════════════
+
+    function mousePressed() {
+        // Check toggle button
+        if (mouseX > toggleBtn.x && mouseX < toggleBtn.x + toggleBtn.w &&
+            mouseY > toggleBtn.y && mouseY < toggleBtn.y + toggleBtn.h) {
+            showGasFlow = !showGasFlow;
+            return;
+        }
+
+        // Check pump cells for pause/play
+        for (let i = 0; i < pumpCells.length; i++) {
+            let c = pumpCells[i];
+            if (mouseX > c.x && mouseX < c.x + c.w &&
+                mouseY > c.y && mouseY < c.y + c.h) {
+                paused[i] = !paused[i];
+                return;
+            }
+        }
+    }
+    </script>
+</body>
+</html>

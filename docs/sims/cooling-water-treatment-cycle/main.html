@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cooling Water Treatment Cycle</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+        main { display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ======================================================================
+    //  Cooling Water Treatment Cycle MicroSim
+    //  Interactive circular flow diagram showing the cooling water treatment
+    //  cycle with chemical injection, water quality indicators, and animated
+    //  water particles, evaporation, blowdown, and contaminant effects.
+    // ======================================================================
+
+    // -- Canvas dimensions --
+    let canvasW, canvasH;
+    let drawH;
+    let controlH = 90;
+
+    // -- Simulation state --
+    let cyclesOfConc = 4;
+    let showChemicals = true;
+    let showContaminants = false;
+    let draggingSlider = false;
+
+    // -- Layout geometry --
+    let cx, cy, rx, ry;
+    let pathPts = [];
+    let pathCumLen = [];
+    let totalLen = 0;
+
+    // -- Component data --
+    const COMP_KEYS = [
+        'tower', 'basin', 'makeup', 'chemA',
+        'pump', 'chemB', 'filter', 'hx', 'returnLine'
+    ];
+    const COMP_NAMES = {
+        tower: 'Cooling Tower',
+        basin: 'Basin / Sump',
+        makeup: 'Makeup Water Treatment',
+        chemA: 'Chemical Injection A',
+        pump: 'Circulating Pump',
+        chemB: 'Chemical Injection B',
+        filter: 'Strainer / Filter',
+        hx: 'Heat Exchanger',
+        returnLine: 'Return Line'
+    };
+    const COMP_COLORS = {
+        tower: [80, 155, 210],
+        basin: [70, 130, 185],
+        makeup: [50, 175, 220],
+        chemA: [150, 70, 200],
+        pump: [90, 115, 165],
+        chemB: [150, 70, 200],
+        filter: [170, 155, 50],
+        hx: [215, 125, 55],
+        returnLine: [210, 145, 75]
+    };
+    const COMP_INFO = {
+        tower: 'Rejects heat to atmosphere via evaporative cooling. Warm water is distributed over fill media; evaporation cools water by 10-15 deg F. Induced-draft fan draws air counter to water flow. Typical range: 85-95 deg F supply.',
+        basin: 'Collects cooled water at tower base. Serves as system reservoir (typical 5-15 min retention). Blowdown valve discharges concentrated water to control TDS. Makeup water enters here to replace losses.',
+        makeup: 'Fresh water supply (city or well) softened or RO-treated before entering system. Softener removes hardness (Ca/Mg) to prevent scale. RO removes 95-99% dissolved solids. Flow rate = evaporation + blowdown + drift.',
+        chemA: 'Corrosion inhibitor (phosphonate/molybdate, 5-15 ppm) protects metal piping and heat transfer surfaces. Scale inhibitor (polymer/phosphate, 10-25 ppm) prevents mineral deposits. Metering pumps dose proportionally to flow.',
+        pump: 'Centrifugal pump drives water through the recirculating loop. Sized for system head loss (typically 40-80 ft). Usually 2-3 pumps installed with one on standby. Flow: 500-10,000+ GPM.',
+        chemB: 'Biocide injection controls biological growth: Legionella, algae, and biofilm. Oxidizing biocide (chlorine/bromine, 0.2-0.5 ppm residual) or non-oxidizing (isothiazoline). Slug-fed or continuous dosing.',
+        filter: 'Removes suspended solids, debris, and biological matter. Side-stream filtration treats 5-15% of recirculating flow. Basket strainer (>100 micron) or sand filter (>25 micron). Protects heat exchanger tubes.',
+        hx: 'Transfers heat from process fluid to cooling water. Shell-and-tube or plate-and-frame design. Cooling water enters at 80-85 deg F, exits at 90-100 deg F. Approach temperature 5-10 deg F.',
+        returnLine: 'Returns warm water from heat exchangers back to cooling tower. Water temperature is 10-15 deg F above supply. Velocity typically 5-10 ft/s in main headers.'
+    };
+
+    // Component positions (computed)
+    let compPos = {};
+
+    // -- Particles --
+    let waterParts = [];
+    let evapParts = [];
+    let blowParts = [];
+    let makeupParts = [];
+    let chemPulses = [];
+    let contParts = [];
+
+    // -- Blowdown timer --
+    let blowTimer = 0;
+    let blowActive = false;
+
+    // -- Tooltip --
+    let hoveredComp = null;
+    let tipX = 0, tipY = 0;
+
+    // -- Clicked quality indicator --
+    let clickedQI = null;
+    let clickedQITimer = 0;
+
+    // -- Control hit zones --
+    let sliderZone = {};
+    let chemBtnZone = {};
+    let contBtnZone = {};
+
+    // ======================================================================
+    //  SETUP
+    // ======================================================================
+
+    function setup() {
+        computeSize();
+        let canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+        computeLayout();
+        spawnWaterParticles();
+    }
+
+    function computeSize() {
+        let w = min(windowWidth, 1100);
+        canvasW = max(580, w);
+        drawH = max(420, min(580, canvasW * 0.58));
+        canvasH = drawH + controlH;
+    }
+
+    function windowResized() {
+        computeSize();
+        resizeCanvas(canvasW, canvasH);
+        computeLayout();
+    }
+
+    // ======================================================================
+    //  LAYOUT - compute elliptical path and component positions
+    // ======================================================================
+
+    function computeLayout() {
+        cx = canvasW * 0.5;
+        cy = drawH * 0.47;
+        rx = canvasW * 0.30;
+        ry = drawH * 0.28;
+
+        // Angles around ellipse (clockwise from top = tower)
+        // -PI/2 = top, 0 = right, PI/2 = bottom, PI = left
+        let angles = {
+            tower:      -Math.PI / 2,
+            basin:      -Math.PI / 2 + Math.PI * 0.18,
+            makeup:     -Math.PI / 2 + Math.PI * 0.33,
+            chemA:       Math.PI * 0.08,
+            pump:        Math.PI * 0.28,
+            chemB:       Math.PI * 0.48,
+            filter:      Math.PI * 0.68,
+            hx:          Math.PI,
+            returnLine: -Math.PI + Math.PI * 0.25
+        };
+
+        compPos = {};
+        for (let k of COMP_KEYS) {
+            let a = angles[k];
+            compPos[k] = {
+                x: cx + Math.cos(a) * rx,
+                y: cy + Math.sin(a) * ry,
+                angle: a
+            };
+        }
+
+        // Build smooth elliptical path (200 segments)
+        pathPts = [];
+        let N = 240;
+        for (let i = 0; i <= N; i++) {
+            let t = i / N;
+            let a = -Math.PI / 2 + t * Math.PI * 2;
+            pathPts.push({
+                x: cx + Math.cos(a) * rx,
+                y: cy + Math.sin(a) * ry
+            });
+        }
+
+        // Cumulative arc lengths
+        pathCumLen = [0];
+        totalLen = 0;
+        for (let i = 1; i < pathPts.length; i++) {
+            let dx = pathPts[i].x - pathPts[i - 1].x;
+            let dy = pathPts[i].y - pathPts[i - 1].y;
+            totalLen += Math.sqrt(dx * dx + dy * dy);
+            pathCumLen.push(totalLen);
+        }
+    }
+
+    // Get (x,y) on the elliptical path at parameter t in [0,1)
+    function posOnPath(t) {
+        t = ((t % 1) + 1) % 1;
+        let target = t * totalLen;
+        for (let i = 1; i < pathCumLen.length; i++) {
+            if (target <= pathCumLen[i]) {
+                let seg = pathCumLen[i] - pathCumLen[i - 1];
+                let f = seg > 0 ? (target - pathCumLen[i - 1]) / seg : 0;
+                return {
+                    x: lerp(pathPts[i - 1].x, pathPts[i].x, f),
+                    y: lerp(pathPts[i - 1].y, pathPts[i].y, f)
+                };
+            }
+        }
+        return pathPts[pathPts.length - 1];
+    }
+
+    // Direction vector at t
+    function dirOnPath(t) {
+        let p1 = posOnPath(t);
+        let p2 = posOnPath(t + 0.005);
+        let dx = p2.x - p1.x;
+        let dy = p2.y - p1.y;
+        let d = Math.sqrt(dx * dx + dy * dy);
+        return d > 0 ? { x: dx / d, y: dy / d } : { x: 1, y: 0 };
+    }
+
+    // ======================================================================
+    //  WATER COLOR by position (cool blue -> warm orange)
+    // ======================================================================
+
+    function waterColor(t) {
+        // t=0 tower (cool out), ~0.5 heat exchanger (warm out)
+        let cool = [90, 175, 240];
+        let warm = [235, 155, 70];
+        let green = [80, 200, 140];
+
+        if (t < 0.05) {
+            // Tower outlet: cool
+            return cool;
+        } else if (t < 0.20) {
+            // After treatment: greenish tint
+            let f = (t - 0.05) / 0.15;
+            return lerpC(cool, green, sin(f * PI) * 0.3);
+        } else if (t < 0.42) {
+            return cool;
+        } else if (t < 0.55) {
+            // Heating through HX
+            let f = (t - 0.42) / 0.13;
+            return lerpC(cool, warm, f);
+        } else if (t < 0.90) {
+            return warm;
+        } else {
+            // Cooling back at tower
+            let f = (t - 0.90) / 0.10;
+            return lerpC(warm, cool, f);
+        }
+    }
+
+    function lerpC(a, b, f) {
+        return [lerp(a[0], b[0], f), lerp(a[1], b[1], f), lerp(a[2], b[2], f)];
+    }
+
+    // ======================================================================
+    //  PARTICLE INIT
+    // ======================================================================
+
+    function spawnWaterParticles() {
+        waterParts = [];
+        let n = 90;
+        for (let i = 0; i < n; i++) {
+            waterParts.push({
+                t: random(),
+                speed: random(0.0013, 0.0024),
+                sz: random(3.5, 6.5),
+                off: random(-2.5, 2.5)  // perpendicular offset for visual width
+            });
+        }
+    }
+
+    // ======================================================================
+    //  MAIN DRAW
+    // ======================================================================
+
+    function draw() {
+        background(244, 247, 252);
+
+        drawTitle();
+        drawPipeLoop();
+        updateDrawWaterParticles();
+        drawComponents();
+        drawQualityIndicators();
+        updateDrawEvaporation();
+        updateDrawBlowdown();
+        updateDrawMakeup();
+
+        if (showChemicals) updateDrawChemPulses();
+        if (showContaminants) updateDrawContaminants();
+
+        drawTooltipBox();
+        drawClickedQIPanel();
+        drawControlBar();
+    }
+
+    // ======================================================================
+    //  TITLE
+    // ======================================================================
+
+    function drawTitle() {
+        push();
+        noStroke();
+        fill(35, 40, 55);
+        textAlign(CENTER, TOP);
+        textSize(max(15, canvasW * 0.020));
+        textStyle(BOLD);
+        text('Cooling Water Treatment Cycle', canvasW / 2, 7);
+        textStyle(NORMAL);
+        pop();
+    }
+
+    // ======================================================================
+    //  PIPE LOOP
+    // ======================================================================
+
+    function drawPipeLoop() {
+        push();
+        // Outer pipe
+        noFill();
+        strokeWeight(16);
+        stroke(175, 195, 215);
+        beginShape();
+        for (let p of pathPts) vertex(p.x, p.y);
+        endShape();
+
+        // Inner gradient pipe
+        strokeWeight(9);
+        for (let i = 0; i < pathPts.length - 1; i++) {
+            let t = i / (pathPts.length - 1);
+            let c = waterColor(t);
+            stroke(c[0], c[1], c[2], 130);
+            line(pathPts[i].x, pathPts[i].y, pathPts[i + 1].x, pathPts[i + 1].y);
+        }
+
+        // Flow arrows
+        noStroke();
+        let arrowTs = [0.04, 0.15, 0.28, 0.42, 0.58, 0.72, 0.85, 0.95];
+        for (let at of arrowTs) {
+            let p = posOnPath(at);
+            let d = dirOnPath(at);
+            let c = waterColor(at);
+            push();
+            translate(p.x, p.y);
+            rotate(atan2(d.y, d.x));
+            fill(c[0] * 0.55, c[1] * 0.55, c[2] * 0.55, 160);
+            triangle(7, 0, -4, -4.5, -4, 4.5);
+            pop();
+        }
+        pop();
+    }
+
+    // ======================================================================
+    //  WATER PARTICLES
+    // ======================================================================
+
+    function updateDrawWaterParticles() {
+        push();
+        noStroke();
+        for (let p of waterParts) {
+            p.t += p.speed;
+            if (p.t > 1) p.t -= 1;
+            let pos = posOnPath(p.t);
+            let d = dirOnPath(p.t);
+            // Offset perpendicular to direction
+            let px = pos.x + (-d.y) * p.off;
+            let py = pos.y + d.x * p.off;
+            let c = waterColor(p.t);
+            fill(c[0], c[1], c[2], 210);
+            ellipse(px, py, p.sz, p.sz);
+        }
+        pop();
+    }
+
+    // ======================================================================
+    //  DRAW COMPONENTS
+    // ======================================================================
+
+    function drawComponents() {
+        hoveredComp = null;
+
+        for (let k of COMP_KEYS) {
+            let pos = compPos[k];
+            let col = COMP_COLORS[k];
+            let name = COMP_NAMES[k];
+
+            // Sizes
+            let w, h;
+            if (k === 'tower') { w = 88; h = 68; }
+            else if (k === 'basin') { w = 78; h = 38; }
+            else if (k === 'hx') { w = 88; h = 54; }
+            else if (k === 'pump') { w = 56; h = 56; }
+            else if (k === 'filter') { w = 72; h = 42; }
+            else if (k === 'makeup') { w = 68; h = 36; }
+            else if (k === 'chemA' || k === 'chemB') { w = 60; h = 38; }
+            else { w = 66; h = 38; }
+
+            let bx = pos.x - w / 2;
+            let by = pos.y - h / 2;
+
+            let hov = mouseX > bx && mouseX < bx + w && mouseY > by && mouseY < by + h && mouseY < drawH;
+            if (hov) {
+                hoveredComp = k;
+                tipX = mouseX;
+                tipY = mouseY;
+            }
+
+            push();
+
+            // Draw specific shapes
+            if (k === 'tower') drawTower(pos.x, pos.y, w, h, hov, col);
+            else if (k === 'basin') drawBasin(pos.x, pos.y, w, h, hov, col);
+            else if (k === 'hx') drawHX(pos.x, pos.y, w, h, hov, col);
+            else if (k === 'pump') drawPump(pos.x, pos.y, w, h, hov, col);
+            else if (k === 'filter') drawFilter(pos.x, pos.y, w, h, hov, col);
+            else if (k === 'makeup') drawMakeup(pos.x, pos.y, w, h, hov, col);
+            else if (k === 'chemA') drawChemBox(pos.x, pos.y, w, h, hov, col, 'A');
+            else if (k === 'chemB') drawChemBox(pos.x, pos.y, w, h, hov, col, 'B');
+            else if (k === 'returnLine') drawReturn(pos.x, pos.y, w, h, hov, col);
+            else drawGenericBox(pos.x, pos.y, w, h, hov, col);
+
+            // Label
+            noStroke();
+            fill(35, 40, 55);
+            textAlign(CENTER, TOP);
+            textSize(max(8.5, canvasW * 0.011));
+            textStyle(BOLD);
+
+            // Labels positioned outside the ellipse
+            let outward = (pos.y < cy) ? -(h / 2 + 13) : (h / 2 + 5);
+            if (k === 'hx' || k === 'returnLine') outward = -(h / 2 + 13);
+            text(name, pos.x, pos.y + outward);
+            textStyle(NORMAL);
+
+            pop();
+        }
+    }
+
+    // -- Individual component drawings --
+
+    function drawTower(x, y, w, h, hov, col) {
+        // Trapezoid narrower at bottom with fill media
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        beginShape();
+        vertex(x - w * 0.50, y - h / 2);
+        vertex(x + w * 0.50, y - h / 2);
+        vertex(x + w * 0.34, y + h / 2);
+        vertex(x - w * 0.34, y + h / 2);
+        endShape(CLOSE);
+
+        // Fill media lines
+        stroke(255, 255, 255, 80);
+        strokeWeight(1);
+        for (let i = 0; i < 5; i++) {
+            let fy = y - h / 4 + i * (h / 6);
+            let hw = map(fy, y - h / 2, y + h / 2, w * 0.46, w * 0.30);
+            line(x - hw + 6, fy, x + hw - 6, fy);
+        }
+
+        // Fan at top
+        noFill();
+        stroke(255, 255, 255, 200);
+        strokeWeight(1.5);
+        let fanY = y - h * 0.32;
+        let rot = (frameCount * 0.07) % TAU;
+        for (let a = 0; a < TAU; a += PI / 2) {
+            arc(x, fanY, 14, 14, a + rot, a + rot + PI / 3.5);
+        }
+
+        // Warm water in label
+        noStroke();
+        fill(230, 120, 60, 180);
+        textSize(7);
+        textAlign(CENTER, CENTER);
+        text('WARM IN', x, y - h / 2 + 9);
+        fill(80, 170, 230, 180);
+        text('COOL OUT', x, y + h / 2 - 9);
+    }
+
+    function drawBasin(x, y, w, h, hov, col) {
+        // U-shape
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        beginShape();
+        vertex(x - w / 2, y - h / 2);
+        vertex(x - w / 2, y + h / 2);
+        vertex(x + w / 2, y + h / 2);
+        vertex(x + w / 2, y - h / 2);
+        vertex(x + w / 2 - 5, y - h / 2);
+        vertex(x + w / 2 - 5, y + h / 2 - 5);
+        vertex(x - w / 2 + 5, y + h / 2 - 5);
+        vertex(x - w / 2 + 5, y - h / 2);
+        endShape(CLOSE);
+
+        // Wavy surface
+        stroke(60, 160, 230, 130);
+        strokeWeight(1.2);
+        let wy = y - h / 6;
+        for (let wx = x - w / 2 + 8; wx < x + w / 2 - 8; wx += 5) {
+            let wwy = wy + sin((wx + frameCount * 0.8) * 0.12) * 1.5;
+            line(wx, wwy, wx + 3, wwy);
+        }
+    }
+
+    function drawHX(x, y, w, h, hov, col) {
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        rect(x - w / 2, y - h / 2, w, h, 5);
+
+        // Internal tubes
+        stroke(255, 255, 255, 100);
+        strokeWeight(2);
+        for (let i = 0; i < 4; i++) {
+            let ty = y - h / 3.5 + i * (h / 5.5);
+            line(x - w / 3, ty, x + w / 3, ty);
+        }
+
+        // Labels
+        noStroke();
+        fill(240, 80, 50, 200);
+        textSize(8);
+        textAlign(CENTER, CENTER);
+        text('PROCESS', x, y - h / 4);
+        text('(HOT)', x, y - h / 4 + 10);
+
+        fill(60, 150, 230, 200);
+        text('CW IN', x - w / 3.2, y + h / 3.5);
+
+        fill(230, 140, 60, 200);
+        text('CW OUT', x + w / 3.2, y + h / 3.5);
+    }
+
+    function drawPump(x, y, w, h, hov, col) {
+        let r = min(w, h) * 0.44;
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        ellipse(x, y, r * 2, r * 2);
+
+        // Discharge pipe nub
+        noStroke();
+        fill(col[0] * 0.85, col[1] * 0.85, col[2] * 0.85, hov ? 235 : 185);
+        rect(x + r - 2, y - 5, 10, 10, 2);
+
+        // Rotating impeller
+        stroke(255, 255, 255, 160);
+        strokeWeight(2);
+        let rot = (frameCount * 0.09) % TAU;
+        for (let a = 0; a < TAU; a += PI / 2) {
+            let ax = x + cos(a + rot) * r * 0.6;
+            let ay = y + sin(a + rot) * r * 0.6;
+            line(x, y, ax, ay);
+        }
+        // Hub
+        fill(255, 255, 255, 100);
+        noStroke();
+        ellipse(x, y, 6, 6);
+    }
+
+    function drawFilter(x, y, w, h, hov, col) {
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        rect(x - w / 2, y - h / 2, w, h, 4);
+
+        // Mesh pattern
+        stroke(255, 255, 255, 90);
+        strokeWeight(0.8);
+        for (let i = 0; i < 6; i++) {
+            let fx = x - w / 3 + i * (w / 8);
+            line(fx, y - h / 3, fx, y + h / 3);
+        }
+        for (let i = 0; i < 4; i++) {
+            let fy = y - h / 3 + i * (h / 5);
+            line(x - w / 3, fy, x + w / 3, fy);
+        }
+    }
+
+    function drawMakeup(x, y, w, h, hov, col) {
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        rect(x - w / 2, y - h / 2, w, h, 5);
+
+        // Water drop
+        fill(255, 255, 255, 190);
+        noStroke();
+        let dy = y - 1;
+        beginShape();
+        vertex(x, dy - 8);
+        bezierVertex(x - 6, dy, x - 6, dy + 5, x, dy + 7);
+        bezierVertex(x + 6, dy + 5, x + 6, dy, x, dy - 8);
+        endShape(CLOSE);
+    }
+
+    function drawChemBox(x, y, w, h, hov, col, label) {
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        rect(x - w / 2, y - h / 2, w, h, 5);
+
+        // Syringe icon
+        stroke(255, 255, 255, 200);
+        strokeWeight(2);
+        line(x - 9, y, x + 9, y);
+        line(x + 9, y, x + 5, y - 3);
+        line(x + 9, y, x + 5, y + 3);
+
+        // Pulsing dot when chemicals are on
+        if (showChemicals) {
+            let pulse = sin(frameCount * 0.12) * 0.5 + 0.5;
+            noStroke();
+            fill(255, 255, 255, pulse * 220);
+            ellipse(x, y - h / 3, 5, 5);
+        }
+    }
+
+    function drawReturn(x, y, w, h, hov, col) {
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        rect(x - w / 2, y - h / 2, w, h, 5);
+
+        // Arrow icon
+        fill(255, 255, 255, 190);
+        noStroke();
+        triangle(x + 10, y, x - 5, y - 6, x - 5, y + 6);
+    }
+
+    function drawGenericBox(x, y, w, h, hov, col) {
+        fill(col[0], col[1], col[2], hov ? 235 : 185);
+        stroke(col[0] * 0.7, col[1] * 0.7, col[2] * 0.7);
+        strokeWeight(hov ? 2.5 : 1.5);
+        rect(x - w / 2, y - h / 2, w, h, 5);
+    }
+
+    // ======================================================================
+    //  WATER QUALITY INDICATORS
+    // ======================================================================
+
+    function getSystemTDS() {
+        // Makeup TDS ~150 ppm, concentrated by COC
+        return Math.round(150 * cyclesOfConc);
+    }
+
+    function getBlowdownPct() {
+        // Higher COC = less blowdown
+        return Math.round(100 / (cyclesOfConc - 1));
+    }
+
+    function drawQualityIndicators() {
+        let tds = getSystemTDS();
+        let makeupTDS = 150;
+
+        // Quality indicator points along the path
+        let qiData = [
+            {
+                t: 0.0, id: 'qi_tower', label: 'Tower Basin',
+                pH: 8.0, tds: tds, cond: Math.round(tds * 1.56),
+                biocide: '0.3 ppm', temp: 82,
+                detail: 'Cooled water leaving tower. Evaporation has concentrated dissolved solids. pH buffered by treatment chemicals.'
+            },
+            {
+                t: 0.16, id: 'qi_chemA', label: 'After Chem A',
+                pH: 8.3, tds: tds, cond: Math.round(tds * 1.56),
+                biocide: '0.3 ppm', temp: 80,
+                detail: 'Corrosion and scale inhibitors added. pH elevated by chemical treatment. Phosphonate: 5-15 ppm, polymer: 10-25 ppm.'
+            },
+            {
+                t: 0.35, id: 'qi_pump', label: 'After Biocide',
+                pH: 8.1, tds: tds, cond: Math.round(tds * 1.56),
+                biocide: '0.5 ppm', temp: 79,
+                detail: 'Biocide residual at peak after injection. Free chlorine target: 0.2-0.5 ppm. ORP target: 350-450 mV.'
+            },
+            {
+                t: 0.55, id: 'qi_hx', label: 'HX Outlet',
+                pH: 7.9, tds: Math.round(tds * 1.02), cond: Math.round(tds * 1.02 * 1.56),
+                biocide: '0.2 ppm', temp: 95,
+                detail: 'Warm water exiting heat exchanger. Temperature rise of 10-15 deg F. Biocide residual reduced by thermal decomposition.'
+            },
+            {
+                t: 0.13, id: 'qi_makeup', label: 'Makeup Water',
+                pH: 7.2, tds: makeupTDS, cond: Math.round(makeupTDS * 1.56),
+                biocide: '0.0 ppm', temp: 65,
+                detail: 'Fresh makeup water after softening/RO. Low TDS, neutral pH. Flow rate equals evaporation + blowdown + drift losses.'
+            }
+        ];
+
+        push();
+        for (let qi of qiData) {
+            let pos = posOnPath(qi.t);
+            let dx = pos.x - cx;
+            let dy = pos.y - cy;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            let offDist = max(52, canvasW * 0.058);
+            let indX = pos.x + (dx / dist) * offDist;
+            let indY = pos.y + (dy / dist) * offDist;
+
+            // Keep card on screen
+            let cw = 80, ch = 48;
+            indX = constrain(indX, cw / 2 + 4, canvasW - cw / 2 - 4);
+            indY = constrain(indY, 30, drawH - ch / 2 - 4);
+
+            // Dashed connection line
+            stroke(165, 175, 185);
+            strokeWeight(1);
+            drawDashedLine(pos.x, pos.y, indX, indY, 4);
+
+            // Card background
+            let cardX = indX - cw / 2;
+            let cardY = indY - ch / 2;
+
+            // Highlight if clicked
+            let isClicked = (clickedQI && clickedQI.id === qi.id && clickedQITimer > 0);
+
+            fill(255, 255, 255, isClicked ? 250 : 225);
+            stroke(isClicked ? color(60, 130, 200) : color(160, 175, 190));
+            strokeWeight(isClicked ? 2 : 1);
+            rect(cardX, cardY, cw, ch, 4);
+
+            // Card text
+            noStroke();
+            textAlign(LEFT, TOP);
+            textSize(max(7.5, canvasW * 0.009));
+            textStyle(BOLD);
+            fill(50);
+            text(qi.label, cardX + 3, cardY + 2);
+            textStyle(NORMAL);
+
+            let lh = max(8, canvasW * 0.01);
+            let ty = cardY + 12;
+            textSize(max(7, canvasW * 0.0085));
+
+            fill(35, 120, 75);
+            text('pH: ' + qi.pH.toFixed(1), cardX + 3, ty);
+
+            fill(175, 95, 25);
+            text('TDS: ' + qi.tds, cardX + 3, ty + lh);
+
+            fill(115, 55, 160);
+            text('Bio: ' + qi.biocide, cardX + 3, ty + lh * 2);
+
+            fill(200, 75, 45);
+            text(qi.temp + '\u00B0F', cardX + cw - 28, ty + lh);
+        }
+        pop();
+
+        // Store for click detection
+        this._qiData = qiData;
+    }
+
+    function drawDashedLine(x1, y1, x2, y2, dashLen) {
+        let dx = x2 - x1, dy = y2 - y1;
+        let len = Math.sqrt(dx * dx + dy * dy);
+        let steps = Math.floor(len / (dashLen * 2));
+        for (let s = 0; s < steps; s++) {
+            let f1 = (s * 2 * dashLen) / len;
+            let f2 = Math.min(((s * 2 + 1) * dashLen) / len, 1);
+            line(lerp(x1, x2, f1), lerp(y1, y2, f1),
+                 lerp(x1, x2, f2), lerp(y1, y2, f2));
+        }
+    }
+
+    // ======================================================================
+    //  CLICKED QI DETAIL PANEL
+    // ======================================================================
+
+    function drawClickedQIPanel() {
+        if (!clickedQI || clickedQITimer <= 0) {
+            clickedQI = null;
+            return;
+        }
+        clickedQITimer--;
+
+        push();
+        let pw = min(280, canvasW * 0.35);
+        let ph = 110;
+        let px = canvasW / 2 - pw / 2;
+        let py = drawH - ph - 8;
+
+        // Shadow
+        noStroke();
+        fill(0, 0, 0, 25);
+        rect(px + 3, py + 3, pw, ph, 7);
+
+        // Background
+        fill(252, 253, 255, 245);
+        stroke(60, 130, 200);
+        strokeWeight(2);
+        rect(px, py, pw, ph, 7);
+
+        // Title
+        noStroke();
+        fill(50);
+        textAlign(LEFT, TOP);
+        textSize(max(10, canvasW * 0.013));
+        textStyle(BOLD);
+        text(clickedQI.label + ' - Water Quality', px + 10, py + 8);
+        textStyle(NORMAL);
+
+        // Parameter table
+        textSize(max(9, canvasW * 0.011));
+        let row = py + 28;
+        let rh = 14;
+
+        fill(35, 120, 75); text('pH:  ' + clickedQI.pH.toFixed(1), px + 10, row);
+        fill(175, 95, 25); text('TDS:  ' + clickedQI.tds + ' ppm', px + pw / 2, row);
+        row += rh;
+        fill(100, 70, 40); text('Conductivity:  ' + clickedQI.cond + ' \u00B5S/cm', px + 10, row);
+        fill(200, 75, 45); text('Temp:  ' + clickedQI.temp + '\u00B0F', px + pw / 2, row);
+        row += rh;
+        fill(115, 55, 160); text('Biocide Residual:  ' + clickedQI.biocide, px + 10, row);
+        row += rh + 4;
+
+        fill(80);
+        textSize(max(8, canvasW * 0.010));
+        text(clickedQI.detail, px + 10, row, pw - 20, ph - (row - py) - 6);
+
+        pop();
+    }
+
+    // ======================================================================
+    //  EVAPORATION
+    // ======================================================================
+
+    function updateDrawEvaporation() {
+        let towerPos = compPos.tower;
+
+        // Spawn vapor
+        if (frameCount % 6 === 0) {
+            evapParts.push({
+                x: towerPos.x + random(-22, 22),
+                y: towerPos.y - 38,
+                vx: random(-0.4, 0.4),
+                vy: random(-1.0, -0.4),
+                alpha: 190,
+                sz: random(3, 8)
+            });
+        }
+
+        push();
+        noStroke();
+        for (let i = evapParts.length - 1; i >= 0; i--) {
+            let p = evapParts[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 2.2;
+            p.sz += 0.06;
+            fill(195, 215, 240, p.alpha);
+            ellipse(p.x, p.y, p.sz, p.sz);
+            if (p.alpha <= 0) evapParts.splice(i, 1);
+        }
+
+        // Label
+        if (evapParts.length > 0) {
+            fill(130, 155, 195, 180);
+            textSize(7.5);
+            textAlign(CENTER, BOTTOM);
+            text('EVAPORATION', towerPos.x, towerPos.y - 52);
+        }
+        pop();
+
+        if (evapParts.length > 50) evapParts.splice(0, evapParts.length - 50);
+    }
+
+    // ======================================================================
+    //  BLOWDOWN
+    // ======================================================================
+
+    function updateDrawBlowdown() {
+        blowTimer++;
+        // Higher COC = longer between blowdowns (less blowdown needed)
+        let interval = map(cyclesOfConc, 2, 8, 90, 280);
+        if (blowTimer > interval && !blowActive) blowActive = true;
+        if (blowActive && blowTimer > interval + 45) {
+            blowActive = false;
+            blowTimer = 0;
+        }
+
+        let basinPos = compPos.basin;
+
+        if (blowActive && frameCount % 3 === 0) {
+            blowParts.push({
+                x: basinPos.x + random(-5, 5),
+                y: basinPos.y + 20,
+                vy: random(1.2, 2.2),
+                alpha: 220,
+                sz: random(2.5, 4.5)
+            });
+        }
+
+        push();
+        noStroke();
+        for (let i = blowParts.length - 1; i >= 0; i--) {
+            let p = blowParts[i];
+            p.y += p.vy;
+            p.alpha -= 4.5;
+            fill(165, 135, 75, p.alpha);
+            ellipse(p.x + random(-0.5, 0.5), p.y, p.sz, p.sz);
+            if (p.alpha <= 0) blowParts.splice(i, 1);
+        }
+
+        if (blowActive) {
+            fill(180, 105, 40, 200);
+            textSize(7.5);
+            textAlign(CENTER, TOP);
+            text('BLOWDOWN', basinPos.x, basinPos.y + 36);
+
+            // Blowdown rate info
+            textSize(6.5);
+            fill(140, 90, 40);
+            text(getBlowdownPct() + '% of recirc', basinPos.x, basinPos.y + 46);
+        }
+        pop();
+    }
+
+    // ======================================================================
+    //  MAKEUP WATER
+    // ======================================================================
+
+    function updateDrawMakeup() {
+        let mkPos = compPos.makeup;
+
+        // Continuous trickle of makeup particles toward the basin
+        if (frameCount % 10 === 0) {
+            let basinPos = compPos.basin;
+            makeupParts.push({
+                x: mkPos.x,
+                y: mkPos.y,
+                tx: basinPos.x,
+                ty: basinPos.y,
+                t: 0,
+                speed: random(0.015, 0.025),
+                sz: random(2, 4)
+            });
+        }
+
+        push();
+        noStroke();
+        for (let i = makeupParts.length - 1; i >= 0; i--) {
+            let p = makeupParts[i];
+            p.t += p.speed;
+            let px = lerp(p.x, p.tx, p.t);
+            let py = lerp(p.y, p.ty, p.t);
+            let alpha = map(p.t, 0, 1, 200, 50);
+            fill(70, 190, 240, alpha);
+            ellipse(px, py, p.sz, p.sz);
+            if (p.t >= 1) makeupParts.splice(i, 1);
+        }
+        pop();
+
+        if (makeupParts.length > 20) makeupParts.splice(0, makeupParts.length - 20);
+    }
+
+    // ======================================================================
+    //  CHEMICAL INJECTION PULSES
+    // ======================================================================
+
+    function updateDrawChemPulses() {
+        let chemAPos = compPos.chemA;
+        let chemBPos = compPos.chemB;
+
+        // Spawn radiating pulses
+        if (frameCount % 28 === 0) {
+            chemPulses.push({
+                x: chemAPos.x, y: chemAPos.y,
+                r: 2, maxR: 28, alpha: 210,
+                col: [145, 60, 210]  // purple
+            });
+        }
+        if (frameCount % 40 === 0) {
+            chemPulses.push({
+                x: chemBPos.x, y: chemBPos.y,
+                r: 2, maxR: 24, alpha: 210,
+                col: [50, 185, 120]  // green-teal
+            });
+        }
+
+        push();
+        noFill();
+        for (let i = chemPulses.length - 1; i >= 0; i--) {
+            let p = chemPulses[i];
+            p.r += 0.55;
+            p.alpha -= 4.5;
+            stroke(p.col[0], p.col[1], p.col[2], p.alpha);
+            strokeWeight(2.2);
+            ellipse(p.x, p.y, p.r * 2, p.r * 2);
+            if (p.alpha <= 0 || p.r > p.maxR) chemPulses.splice(i, 1);
+        }
+
+        // Chemical type labels
+        noStroke();
+        textSize(max(7, canvasW * 0.009));
+        textAlign(CENTER, CENTER);
+
+        // Chem A labels
+        let aOff = getOutwardOffset(chemAPos, 42);
+        fill(145, 60, 210, 200);
+        text('Corrosion Inh.', aOff.x, aOff.y - 5);
+        text('Scale Inh.', aOff.x, aOff.y + 7);
+
+        // Chem B label
+        let bOff = getOutwardOffset(chemBPos, 38);
+        fill(50, 155, 100, 200);
+        text('Biocide', bOff.x, bOff.y);
+
+        pop();
+
+        if (chemPulses.length > 25) chemPulses.splice(0, chemPulses.length - 25);
+    }
+
+    function getOutwardOffset(pos, dist) {
+        let dx = pos.x - cx;
+        let dy = pos.y - cy;
+        let d = Math.sqrt(dx * dx + dy * dy);
+        return { x: pos.x + (dx / d) * dist, y: pos.y + (dy / d) * dist };
+    }
+
+    // ======================================================================
+    //  CONTAMINANT PARTICLES
+    // ======================================================================
+
+    function updateDrawContaminants() {
+        // Scale near HX
+        if (frameCount % 20 === 0) {
+            let hxPos = compPos.hx;
+            contParts.push({
+                x: hxPos.x + random(-18, 18), y: hxPos.y + random(-12, 12),
+                vx: random(-0.25, 0.25), vy: random(-0.25, 0.25),
+                alpha: 210, sz: random(3, 6), type: 'scale', life: 130
+            });
+        }
+        // Bio near tower
+        if (frameCount % 35 === 0) {
+            let tPos = compPos.tower;
+            contParts.push({
+                x: tPos.x + random(-22, 22), y: tPos.y + random(-8, 18),
+                vx: random(-0.2, 0.2), vy: random(-0.2, 0.2),
+                alpha: 190, sz: random(4, 7), type: 'bio', life: 110
+            });
+        }
+        // Corrosion near pump/pipes
+        if (frameCount % 30 === 0) {
+            let pPos = compPos.pump;
+            contParts.push({
+                x: pPos.x + random(-14, 14), y: pPos.y + random(-14, 14),
+                vx: random(-0.2, 0.2), vy: random(-0.2, 0.2),
+                alpha: 190, sz: random(2.5, 4.5), type: 'corrosion', life: 100
+            });
+        }
+
+        push();
+        noStroke();
+        for (let i = contParts.length - 1; i >= 0; i--) {
+            let p = contParts[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life--;
+            if (p.life < 30) p.alpha -= 7;
+
+            if (p.type === 'scale') fill(210, 185, 90, p.alpha);
+            else if (p.type === 'bio') fill(70, 190, 70, p.alpha);
+            else fill(210, 95, 70, p.alpha);
+
+            ellipse(p.x, p.y, p.sz, p.sz);
+            if (p.alpha <= 0 || p.life <= 0) contParts.splice(i, 1);
+        }
+
+        // Legend card (bottom-right)
+        let lx = canvasW - 128;
+        let ly = drawH - 58;
+        fill(255, 255, 255, 215);
+        stroke(195);
+        strokeWeight(1);
+        rect(lx, ly, 122, 52, 4);
+
+        noStroke();
+        textSize(7.5);
+        textStyle(BOLD);
+        fill(60);
+        textAlign(LEFT, TOP);
+        text('Contaminants', lx + 5, ly + 3);
+        textStyle(NORMAL);
+
+        let items = [
+            { c: [210, 185, 90], label: 'Scale deposit (CaCO3)' },
+            { c: [70, 190, 70], label: 'Biological growth' },
+            { c: [210, 95, 70], label: 'Corrosion product (Fe2O3)' }
+        ];
+        for (let i = 0; i < items.length; i++) {
+            let iy = ly + 16 + i * 12;
+            fill(items[i].c[0], items[i].c[1], items[i].c[2]);
+            ellipse(lx + 9, iy + 2, 6, 6);
+            fill(70);
+            textSize(7);
+            text(items[i].label, lx + 16, iy - 2);
+        }
+        pop();
+
+        if (contParts.length > 40) contParts.splice(0, contParts.length - 40);
+    }
+
+    // ======================================================================
+    //  TOOLTIP
+    // ======================================================================
+
+    function drawTooltipBox() {
+        if (!hoveredComp) return;
+
+        let name = COMP_NAMES[hoveredComp];
+        let info = COMP_INFO[hoveredComp];
+        let col = COMP_COLORS[hoveredComp];
+
+        let tw = min(270, canvasW * 0.34);
+        let th = 80;
+
+        // Word-wrap info text to estimate height
+        push();
+        textSize(max(8.5, canvasW * 0.011));
+        let words = info.split(' ');
+        let lines = [];
+        let cur = '';
+        for (let w of words) {
+            let test = cur + (cur.length > 0 ? ' ' : '') + w;
+            if (textWidth(test) > tw - 18 && cur.length > 0) {
+                lines.push(cur);
+                cur = w;
+            } else {
+                cur = test;
+            }
+        }
+        if (cur.length > 0) lines.push(cur);
+        th = 22 + lines.length * max(11, canvasW * 0.013) + 6;
+        pop();
+
+        let tx = tipX + 16;
+        let ty = tipY - th - 12;
+        if (tx + tw > canvasW - 4) tx = tipX - tw - 16;
+        if (ty < 4) ty = tipY + 18;
+        if (ty + th > drawH) ty = drawH - th - 4;
+
+        push();
+        // Shadow
+        noStroke();
+        fill(0, 0, 0, 22);
+        rect(tx + 3, ty + 3, tw, th, 7);
+
+        // Background
+        fill(255, 255, 255, 248);
+        stroke(col[0], col[1], col[2]);
+        strokeWeight(2);
+        rect(tx, ty, tw, th, 7);
+
+        // Title
+        noStroke();
+        fill(col[0], col[1], col[2]);
+        textAlign(LEFT, TOP);
+        textSize(max(10, canvasW * 0.013));
+        textStyle(BOLD);
+        text(name, tx + 9, ty + 5);
+        textStyle(NORMAL);
+
+        // Body
+        fill(50);
+        textSize(max(8.5, canvasW * 0.011));
+        let lineH = max(11, canvasW * 0.013);
+        for (let i = 0; i < lines.length; i++) {
+            text(lines[i], tx + 9, ty + 21 + i * lineH);
+        }
+        pop();
+    }
+
+    // ======================================================================
+    //  CONTROL BAR
+    // ======================================================================
+
+    function drawControlBar() {
+        push();
+        let barY = drawH;
+
+        // Background
+        noStroke();
+        fill(235, 238, 243);
+        rect(0, barY, canvasW, controlH);
+        stroke(210);
+        strokeWeight(1);
+        line(0, barY, canvasW, barY);
+
+        let padX = 14;
+        let rowY = barY + 16;
+
+        // ---- COC SLIDER ----
+        let sliderW = min(170, canvasW * 0.20);
+        let sx = padX;
+
+        noStroke();
+        fill(50);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text('Cycles of Concentration', sx, rowY - 12);
+
+        // Track
+        fill(200);
+        rect(sx, rowY + 6, sliderW, 8, 4);
+
+        // Filled portion
+        let frac = (cyclesOfConc - 2) / 6;
+        fill(70, 135, 200);
+        rect(sx, rowY + 6, sliderW * frac, 8, 4);
+
+        // Knob
+        let knobX = sx + frac * sliderW;
+        fill(55, 115, 190);
+        noStroke();
+        ellipse(knobX, rowY + 10, 16, 16);
+        fill(255);
+        textSize(7);
+        textAlign(CENTER, CENTER);
+        text(cyclesOfConc.toFixed(1), knobX, rowY + 10);
+
+        // Value display
+        fill(50);
+        textSize(12);
+        textStyle(BOLD);
+        textAlign(LEFT, TOP);
+        text(cyclesOfConc.toFixed(1) + 'x', sx + sliderW + 10, rowY + 1);
+        textStyle(NORMAL);
+
+        // Range labels
+        textSize(8);
+        fill(120);
+        textAlign(LEFT, TOP);
+        text('2x', sx, rowY + 20);
+        textAlign(RIGHT, TOP);
+        text('8x', sx + sliderW, rowY + 20);
+
+        sliderZone = { x: sx, y: rowY, w: sliderW, h: 26 };
+
+        // ---- TOGGLE: Show Chemicals ----
+        let tgX = sx + sliderW + 55;
+        drawToggle(tgX, rowY - 6, 'Show Chemical Injection', showChemicals);
+        chemBtnZone = { x: tgX, y: rowY - 6, w: textWidthApprox('Show Chemical Injection') + 36, h: 28 };
+
+        // ---- TOGGLE: Show Contaminants ----
+        let tg2X = tgX + chemBtnZone.w + 15;
+        drawToggle(tg2X, rowY - 6, 'Show Contaminants', showContaminants);
+        contBtnZone = { x: tg2X, y: rowY - 6, w: textWidthApprox('Show Contaminants') + 36, h: 28 };
+
+        // ---- System TDS readout ----
+        let tdsX = tg2X + contBtnZone.w + 20;
+        if (tdsX + 100 < canvasW) {
+            let tds = getSystemTDS();
+            noStroke();
+            fill(50);
+            textSize(10);
+            textAlign(LEFT, TOP);
+            text('System TDS:', tdsX, rowY - 6);
+            textStyle(BOLD);
+            textSize(15);
+            let tdsCol = tds > 900 ? color(200, 75, 40) : tds > 500 ? color(200, 160, 40) : color(40, 150, 80);
+            fill(tdsCol);
+            text(Math.round(tds) + ' ppm', tdsX, rowY + 8);
+            textStyle(NORMAL);
+
+            // Blowdown %
+            fill(130, 90, 40);
+            textSize(9);
+            text('Blowdown: ~' + getBlowdownPct() + '%', tdsX, rowY + 28);
+        }
+
+        // ---- Bottom row: COC explanation ----
+        fill(110);
+        textSize(max(7.5, canvasW * 0.009));
+        textAlign(LEFT, TOP);
+        let infoY = barY + controlH - 20;
+        text('COC = ratio of dissolved solids in recirculating water vs. makeup water. Higher COC = less water waste but more concentrated chemistry.', padX, infoY, canvasW - padX * 2, 18);
+
+        pop();
+    }
+
+    function textWidthApprox(s) {
+        return s.length * 6.5 + 10;
+    }
+
+    function drawToggle(x, y, label, isOn) {
+        push();
+        let btnW = textWidthApprox(label) + 30;
+        let btnH = 26;
+
+        // Button background
+        let onCol = color(55, 145, 95);
+        let offCol = color(155, 158, 165);
+        fill(isOn ? onCol : offCol);
+        stroke(isOn ? color(35, 125, 75) : color(135, 138, 145));
+        strokeWeight(1);
+        rect(x, y, btnW, btnH, 5);
+
+        // Checkbox
+        let ckX = x + 9;
+        let ckY = y + btnH / 2;
+        fill(255);
+        noStroke();
+        rect(ckX - 5, ckY - 5, 10, 10, 2);
+        if (isOn) {
+            fill(35, 125, 75);
+            textSize(11);
+            textAlign(CENTER, CENTER);
+            text('\u2713', ckX, ckY);
+        }
+
+        // Label
+        fill(255);
+        textSize(10);
+        textAlign(LEFT, CENTER);
+        text(label, ckX + 10, ckY);
+        pop();
+    }
+
+    // ======================================================================
+    //  MOUSE INTERACTION
+    // ======================================================================
+
+    function mousePressed() {
+        // COC slider
+        if (isIn(mouseX, mouseY, sliderZone)) {
+            draggingSlider = true;
+            updateSlider();
+            return;
+        }
+
+        // Chemical toggle
+        if (isIn(mouseX, mouseY, chemBtnZone)) {
+            showChemicals = !showChemicals;
+            if (!showChemicals) chemPulses = [];
+            return;
+        }
+
+        // Contaminant toggle
+        if (isIn(mouseX, mouseY, contBtnZone)) {
+            showContaminants = !showContaminants;
+            if (!showContaminants) contParts = [];
+            return;
+        }
+
+        // Click on quality indicator cards
+        if (typeof this._qiData !== 'undefined') {
+            for (let qi of this._qiData) {
+                let pos = posOnPath(qi.t);
+                let dx = pos.x - cx;
+                let dy = pos.y - cy;
+                let dist = Math.sqrt(dx * dx + dy * dy);
+                let offDist = max(52, canvasW * 0.058);
+                let indX = pos.x + (dx / dist) * offDist;
+                let indY = pos.y + (dy / dist) * offDist;
+                indX = constrain(indX, 44, canvasW - 44);
+                indY = constrain(indY, 30, drawH - 28);
+
+                let cw = 80, ch = 48;
+                if (mouseX > indX - cw / 2 && mouseX < indX + cw / 2 &&
+                    mouseY > indY - ch / 2 && mouseY < indY + ch / 2) {
+                    clickedQI = qi;
+                    clickedQITimer = 300;  // ~5 seconds at 60fps
+                    return;
+                }
+            }
+        }
+
+        // Click anywhere else clears QI panel
+        clickedQI = null;
+        clickedQITimer = 0;
+    }
+
+    function mouseDragged() {
+        if (draggingSlider) updateSlider();
+    }
+
+    function mouseReleased() {
+        draggingSlider = false;
+    }
+
+    function updateSlider() {
+        let f = constrain((mouseX - sliderZone.x) / sliderZone.w, 0, 1);
+        cyclesOfConc = 2 + f * 6;
+        cyclesOfConc = Math.round(cyclesOfConc * 2) / 2;  // snap 0.5
+        cyclesOfConc = constrain(cyclesOfConc, 2, 8);
+    }
+
+    function isIn(mx, my, zone) {
+        return mx >= zone.x && mx <= zone.x + zone.w &&
+               my >= zone.y && my <= zone.y + zone.h;
+    }
+
+    // Prevent dragging from scrolling the page
+    function touchMoved() {
+        if (draggingSlider) return false;
+    }
+    </script>
+</body>
+</html>

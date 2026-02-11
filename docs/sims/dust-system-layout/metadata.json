@@ -1,0 +1,9 @@
+{
+  "title": "Dust Collection System Layout",
+  "chapter": 7,
+  "type": "diagram",
+  "bloom_level": "L3",
+  "bloom_verb": ["demonstrate", "use"],
+  "learning_objective": "Trace airflow through a multi-branch dust collection system and identify component functions",
+  "technology": "p5.js"
+}

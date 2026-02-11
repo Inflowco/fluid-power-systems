@@ -1,0 +1,46 @@
+{
+  "title": "Compressed Air Compressor Types Comparison",
+  "description": "Interactive animated cross-section diagrams comparing four common air compressor types: reciprocating, rotary screw, rotary vane, and centrifugal. Each compressor shows moving internal parts with labels, hover tooltips, and a specification summary card. Includes toggle for air flow visualization.",
+  "creator": "Peter Vinck",
+  "date": "2026-02-10",
+  "subject": [
+    "Compressed Air Systems",
+    "Compressor Types",
+    "Reciprocating Compressor",
+    "Rotary Screw Compressor",
+    "Rotary Vane Compressor",
+    "Centrifugal Compressor",
+    "Fluid Power Systems",
+    "Industrial Equipment"
+  ],
+  "type": "Interactive Simulation",
+  "format": "text/html",
+  "language": "en-US",
+  "rights": "CC BY-NC-SA 4.0",
+  "contributor": [
+    "Claude Code"
+  ],
+  "identifier": "https://dmccreary.github.io/fluid-power-systems/sims/compressed-air-compressor-types/",
+  "publisher": "Fluid Power Systems Intelligent Textbook",
+  "educationalLevel": "Undergraduate, Technical",
+  "learningResourceType": "simulation",
+  "audience": "Students, Educators, Technicians",
+  "version": "1.0.0",
+  "bloomLevel": [
+    "Understand"
+  ],
+  "concepts": [
+    "Positive Displacement Compression",
+    "Dynamic Compression",
+    "Reciprocating Motion",
+    "Rotary Motion",
+    "Centrifugal Force",
+    "Air Flow Path",
+    "Compression Ratio"
+  ],
+  "prerequisites": [
+    "Basic understanding of pressure and gas behavior",
+    "Familiarity with mechanical concepts (pistons, rotors, valves)"
+  ],
+  "library": "p5.js"
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Pneumatic Conveying Modes Comparison",
+  "chapter": 13,
+  "type": "diagram",
+  "bloom_level": "L2 Understand",
+  "bloom_verbs": ["compare", "contrast"],
+  "technology": "p5.js",
+  "learning_objective": "Students will be able to compare dilute-phase and dense-phase pneumatic conveying modes by their velocity, material behavior, and applications."
+}

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HVAC Maintenance Checklist</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f4f8;color:#333;padding:12px;min-height:100vh}
+  h1{text-align:center;font-size:1.4rem;color:#1a3c5e;margin-bottom:4px}
+
+  /* ---- progress bar ---- */
+  .progress-wrapper{max-width:960px;margin:0 auto 10px;display:flex;align-items:center;gap:10px}
+  .progress-bar-bg{flex:1;height:22px;background:#d4dbe4;border-radius:11px;overflow:hidden;position:relative}
+  .progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#27ae60,#2ecc71);border-radius:11px;transition:width .4s ease}
+  .progress-text{font-weight:600;font-size:.85rem;min-width:48px;text-align:right;color:#1a3c5e}
+  .reset-btn{background:#e74c3c;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-size:.8rem;font-weight:600;transition:background .2s}
+  .reset-btn:hover{background:#c0392b}
+
+  /* ---- grid ---- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:12px;max-width:960px;margin:0 auto}
+
+  /* central illustration -- overlaid at center on wide screens */
+  .center-illustration{display:none}
+
+  /* ---- quadrant card ---- */
+  .quadrant{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:8px;position:relative}
+  .quadrant-header{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+  .quadrant-header h2{font-size:1rem;color:#1a3c5e;margin:0}
+  .icon-wrap{width:56px;height:56px;flex-shrink:0;cursor:pointer;position:relative}
+  .icon-wrap svg{width:100%;height:100%}
+  .tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a3c5e;color:#fff;padding:6px 10px;border-radius:6px;font-size:.72rem;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s;z-index:10}
+  .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1a3c5e}
+  .icon-wrap:hover .tooltip{opacity:1}
+
+  /* ---- checklist ---- */
+  .checklist{list-style:none;display:flex;flex-direction:column;gap:6px}
+  .checklist li{display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:5px 8px;border-radius:6px;transition:background .2s;font-size:.82rem;line-height:1.35;user-select:none}
+  .checklist li:hover{background:#eaf6ee}
+  .checklist li.critical{border-left:3px solid #e74c3c;padding-left:5px}
+  .check-box{width:20px;height:20px;flex-shrink:0;margin-top:1px;border:2px solid #aab;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:border-color .25s,background .25s}
+  .checklist li.checked .check-box{border-color:#27ae60;background:#27ae60}
+  .check-box svg{opacity:0;transition:opacity .25s}
+  .checklist li.checked .check-box svg{opacity:1}
+  .checklist li.checked .item-text{color:#555;text-decoration:line-through}
+  .item-text{flex:1;color:#333;transition:color .25s}
+
+  /* ---- responsive ---- */
+  @media(max-width:768px){
+    .grid{grid-template-columns:1fr}
+    h1{font-size:1.15rem}
+  }
+
+  /* large-screen center illustration */
+  @media(min-width:769px){
+    .grid{position:relative}
+    .center-illustration{display:flex;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;pointer-events:none;width:140px;height:140px;background:#fff;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,.12);align-items:center;justify-content:center}
+    .center-illustration svg{width:110px;height:110px}
+  }
+</style>
+</head>
+<body>
+
+<h1>HVAC Maintenance Checklist</h1>
+
+<!-- Progress Bar -->
+<div class="progress-wrapper">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <span class="progress-text" id="progressText">0%</span>
+  <button class="reset-btn" id="resetBtn">Reset Checklist</button>
+</div>
+
+<!-- Grid -->
+<div class="grid">
+
+  <!-- Central HVAC Illustration (visible on wide screens) -->
+  <div class="center-illustration">
+    <!-- Simplified air handler unit -->
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <!-- cabinet -->
+      <rect x="15" y="20" width="90" height="80" rx="6" fill="#dce6f0" stroke="#1a3c5e" stroke-width="2"/>
+      <!-- filter section (left) -->
+      <rect x="18" y="25" width="20" height="30" rx="2" fill="#a8d5a2" stroke="#27ae60" stroke-width="1"/>
+      <line x1="22" y1="25" x2="22" y2="55" stroke="#27ae60" stroke-width=".6"/>
+      <line x1="26" y1="25" x2="26" y2="55" stroke="#27ae60" stroke-width=".6"/>
+      <line x1="30" y1="25" x2="30" y2="55" stroke="#27ae60" stroke-width=".6"/>
+      <line x1="34" y1="25" x2="34" y2="55" stroke="#27ae60" stroke-width=".6"/>
+      <!-- coil section (right-top) -->
+      <rect x="82" y="25" width="20" height="30" rx="2" fill="#a2c4d5" stroke="#2980b9" stroke-width="1"/>
+      <line x1="82" y1="30" x2="102" y2="30" stroke="#2980b9" stroke-width=".6"/>
+      <line x1="82" y1="35" x2="102" y2="35" stroke="#2980b9" stroke-width=".6"/>
+      <line x1="82" y1="40" x2="102" y2="40" stroke="#2980b9" stroke-width=".6"/>
+      <line x1="82" y1="45" x2="102" y2="45" stroke="#2980b9" stroke-width=".6"/>
+      <line x1="82" y1="50" x2="102" y2="50" stroke="#2980b9" stroke-width=".6"/>
+      <!-- fan / blower (center) -->
+      <circle cx="60" cy="40" r="14" fill="#f5f5f5" stroke="#1a3c5e" stroke-width="1.5"/>
+      <path d="M60 26 C64 34,68 34,60 40 C52 34,56 34,60 26Z" fill="#1a3c5e" opacity=".6"/>
+      <path d="M60 40 C64 46,68 46,74 40 C68 36,64 36,60 40Z" fill="#1a3c5e" opacity=".6" transform="rotate(120 60 40)"/>
+      <path d="M60 40 C64 46,68 46,74 40 C68 36,64 36,60 40Z" fill="#1a3c5e" opacity=".6" transform="rotate(240 60 40)"/>
+      <!-- duct (bottom-left) -->
+      <rect x="18" y="62" width="38" height="14" rx="2" fill="#d5c9a2" stroke="#b8860b" stroke-width="1"/>
+      <line x1="18" y1="66" x2="56" y2="66" stroke="#b8860b" stroke-width=".4" stroke-dasharray="3 2"/>
+      <line x1="18" y1="72" x2="56" y2="72" stroke="#b8860b" stroke-width=".4" stroke-dasharray="3 2"/>
+      <!-- condensate pan (bottom-right) -->
+      <rect x="62" y="68" width="38" height="8" rx="2" fill="#a2d5d0" stroke="#16a085" stroke-width="1"/>
+      <line x1="92" y1="76" x2="92" y2="95" stroke="#16a085" stroke-width="1.5"/>
+      <circle cx="92" cy="97" r="2.5" fill="#16a085"/>
+      <!-- airflow arrows -->
+      <polygon points="5,38 15,33 15,43" fill="#27ae60" opacity=".7"/>
+      <polygon points="105,38 115,33 115,43" fill="#e74c3c" opacity=".6" transform="rotate(180 110 38)"/>
+      <!-- labels -->
+      <text x="28" y="17" font-size="6" fill="#27ae60" text-anchor="middle" font-weight="bold">Filter</text>
+      <text x="92" y="17" font-size="6" fill="#2980b9" text-anchor="middle" font-weight="bold">Coil</text>
+      <text x="37" y="90" font-size="6" fill="#b8860b" text-anchor="middle" font-weight="bold">Duct</text>
+      <text x="81" y="90" font-size="6" fill="#16a085" text-anchor="middle" font-weight="bold">Drain</text>
+    </svg>
+  </div>
+
+  <!-- Q1: Filters (top-left) -->
+  <div class="quadrant" id="q-filters">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Pleated air filter -- removes particulates from the air stream before it reaches the coil and blower.</span>
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- filter frame -->
+          <rect x="10" y="8" width="44" height="48" rx="3" fill="#e8f5e9" stroke="#27ae60" stroke-width="2"/>
+          <!-- pleats -->
+          <polyline points="14,12 14,52" stroke="#66bb6a" stroke-width="1.2"/>
+          <polyline points="20,12 20,52" stroke="#66bb6a" stroke-width="1.2"/>
+          <polyline points="26,12 26,52" stroke="#66bb6a" stroke-width="1.2"/>
+          <polyline points="32,12 32,52" stroke="#66bb6a" stroke-width="1.2"/>
+          <polyline points="38,12 38,52" stroke="#66bb6a" stroke-width="1.2"/>
+          <polyline points="44,12 44,52" stroke="#66bb6a" stroke-width="1.2"/>
+          <polyline points="50,12 50,52" stroke="#66bb6a" stroke-width="1.2"/>
+          <!-- airflow arrows -->
+          <polygon points="1,26 8,22 8,30" fill="#27ae60" opacity=".8"/>
+          <polygon points="1,38 8,34 8,42" fill="#27ae60" opacity=".8"/>
+          <polygon points="56,26 63,22 63,30" fill="#27ae60" opacity=".5"/>
+          <polygon points="56,38 63,34 63,42" fill="#27ae60" opacity=".5"/>
+        </svg>
+      </div>
+      <h2>Filters</h2>
+    </div>
+    <ul class="checklist" data-group="filters">
+      <li data-id="f1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check differential pressure reading</span></li>
+      <li data-id="f2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect filter for visible loading (dirt accumulation)</span></li>
+      <li data-id="f3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Replace disposable filter or wash reusable filter</span></li>
+      <li data-id="f4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify correct filter size and MERV rating</span></li>
+      <li data-id="f5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Document filter change with date and reading</span></li>
+    </ul>
+  </div>
+
+  <!-- Q2: Coils (top-right) -->
+  <div class="quadrant" id="q-coils">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Finned-tube coil cross-section -- transfers heat between refrigerant/water and the air stream.</span>
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- fins (horizontal) -->
+          <rect x="8" y="8" width="48" height="3" rx="1" fill="#bbdefb"/>
+          <rect x="8" y="14" width="48" height="3" rx="1" fill="#bbdefb"/>
+          <rect x="8" y="20" width="48" height="3" rx="1" fill="#bbdefb"/>
+          <rect x="8" y="26" width="48" height="3" rx="1" fill="#bbdefb"/>
+          <rect x="8" y="32" width="48" height="3" rx="1" fill="#bbdefb"/>
+          <rect x="8" y="38" width="48" height="3" rx="1" fill="#bbdefb"/>
+          <rect x="8" y="44" width="48" height="3" rx="1" fill="#bbdefb"/>
+          <rect x="8" y="50" width="48" height="3" rx="1" fill="#bbdefb"/>
+          <!-- tubes (vertical circles) -->
+          <circle cx="20" cy="10" r="3" fill="#1565c0" opacity=".7"/><circle cx="20" cy="22" r="3" fill="#1565c0" opacity=".7"/><circle cx="20" cy="34" r="3" fill="#1565c0" opacity=".7"/><circle cx="20" cy="46" r="3" fill="#1565c0" opacity=".7"/>
+          <circle cx="36" cy="16" r="3" fill="#1565c0" opacity=".7"/><circle cx="36" cy="28" r="3" fill="#1565c0" opacity=".7"/><circle cx="36" cy="40" r="3" fill="#1565c0" opacity=".7"/><circle cx="36" cy="52" r="3" fill="#1565c0" opacity=".7"/>
+          <circle cx="50" cy="10" r="3" fill="#1565c0" opacity=".7"/><circle cx="50" cy="22" r="3" fill="#1565c0" opacity=".7"/><circle cx="50" cy="34" r="3" fill="#1565c0" opacity=".7"/><circle cx="50" cy="46" r="3" fill="#1565c0" opacity=".7"/>
+          <!-- frame -->
+          <rect x="6" y="5" width="52" height="54" rx="3" fill="none" stroke="#2980b9" stroke-width="2"/>
+        </svg>
+      </div>
+      <h2>Coils</h2>
+    </div>
+    <ul class="checklist" data-group="coils">
+      <li data-id="c1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Visual inspection for dirt, biological growth, or damage</span></li>
+      <li data-id="c2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Apply coil cleaner solution and rinse with low-pressure water</span></li>
+      <li data-id="c3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Straighten bent fins with fin comb</span></li>
+      <li data-id="c4" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check refrigerant lines for frost (indicates airflow or charge issues)</span></li>
+      <li data-id="c5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify coil temperature drop (delta-T) matches design</span></li>
+    </ul>
+  </div>
+
+  <!-- Q3: Ductwork (bottom-left) -->
+  <div class="quadrant" id="q-ductwork">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Rectangular duct section with insulation -- distributes conditioned air throughout the building.</span>
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- insulation (outer) -->
+          <rect x="4" y="12" width="56" height="40" rx="4" fill="#fff3e0" stroke="#e65100" stroke-width="1" stroke-dasharray="3 2"/>
+          <!-- duct (inner) -->
+          <rect x="10" y="18" width="44" height="28" rx="2" fill="#e0e0e0" stroke="#757575" stroke-width="2"/>
+          <!-- joint lines -->
+          <line x1="32" y1="18" x2="32" y2="46" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="4 2"/>
+          <!-- airflow arrows inside -->
+          <polygon points="16,30 24,27 24,33" fill="#b8860b" opacity=".7"/>
+          <polygon points="36,30 44,27 44,33" fill="#b8860b" opacity=".7"/>
+          <!-- insulation hatching -->
+          <line x1="6" y1="14" x2="10" y2="18" stroke="#e65100" stroke-width=".5" opacity=".5"/>
+          <line x1="14" y1="12" x2="18" y2="18" stroke="#e65100" stroke-width=".5" opacity=".5"/>
+          <line x1="22" y1="12" x2="26" y2="18" stroke="#e65100" stroke-width=".5" opacity=".5"/>
+          <line x1="6" y1="48" x2="10" y2="44" stroke="#e65100" stroke-width=".5" opacity=".5"/>
+          <line x1="14" y1="52" x2="18" y2="46" stroke="#e65100" stroke-width=".5" opacity=".5"/>
+          <line x1="22" y1="52" x2="26" y2="46" stroke="#e65100" stroke-width=".5" opacity=".5"/>
+        </svg>
+      </div>
+      <h2>Ductwork</h2>
+    </div>
+    <ul class="checklist" data-group="ductwork">
+      <li data-id="d1" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect accessible duct joints for air leaks</span></li>
+      <li data-id="d2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Seal leaks with mastic or approved duct tape</span></li>
+      <li data-id="d3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check insulation for damage or moisture</span></li>
+      <li data-id="d4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify dampers operate freely</span></li>
+      <li data-id="d5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Measure airflow at key supply diffusers</span></li>
+    </ul>
+  </div>
+
+  <!-- Q4: Condensate (bottom-right) -->
+  <div class="quadrant" id="q-condensate">
+    <div class="quadrant-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Drain pan with condensate line -- collects and removes moisture that forms on the cooling coil.</span>
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- drain pan -->
+          <path d="M8,22 L8,38 Q8,42 12,42 L52,42 Q56,42 56,38 L56,22" fill="#e0f2f1" stroke="#16a085" stroke-width="2" fill-opacity=".6"/>
+          <!-- water surface -->
+          <path d="M12,32 Q22,28 32,32 Q42,36 52,32" fill="none" stroke="#2196f3" stroke-width="1.5" opacity=".6"/>
+          <path d="M12,36 Q22,32 32,36 Q42,40 52,36" fill="none" stroke="#2196f3" stroke-width="1" opacity=".4"/>
+          <!-- drain line -->
+          <line x1="50" y1="42" x2="50" y2="48" stroke="#16a085" stroke-width="2"/>
+          <line x1="50" y1="48" x2="58" y2="48" stroke="#16a085" stroke-width="2"/>
+          <line x1="58" y1="48" x2="58" y2="58" stroke="#16a085" stroke-width="2"/>
+          <!-- drip -->
+          <ellipse cx="58" cy="62" rx="2" ry="2.5" fill="#2196f3" opacity=".6"/>
+          <!-- pan rim -->
+          <line x1="4" y1="22" x2="60" y2="22" stroke="#16a085" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- algae dots -->
+          <circle cx="20" cy="36" r="1.5" fill="#4caf50" opacity=".4"/>
+          <circle cx="30" cy="38" r="1" fill="#4caf50" opacity=".4"/>
+          <circle cx="38" cy="35" r="1.2" fill="#4caf50" opacity=".4"/>
+        </svg>
+      </div>
+      <h2>Condensate</h2>
+    </div>
+    <ul class="checklist" data-group="condensate">
+      <li data-id="n1" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect drain pan for standing water or algae</span></li>
+      <li data-id="n2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Clean drain pan and treat with algae prevention</span></li>
+      <li data-id="n3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Flush condensate drain line</span></li>
+      <li data-id="n4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify drain line slope is adequate</span></li>
+      <li data-id="n5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Test condensate pump operation (if equipped)</span></li>
+    </ul>
+  </div>
+
+</div><!-- /grid -->
+
+<script>
+(function(){
+  // --- state ---
+  var items = document.querySelectorAll('.checklist li');
+  var total = items.length;
+  var fillBar = document.getElementById('progressFill');
+  var progressText = document.getElementById('progressText');
+  var resetBtn = document.getElementById('resetBtn');
+
+  function updateProgress(){
+    var checked = document.querySelectorAll('.checklist li.checked').length;
+    var pct = Math.round((checked / total) * 100);
+    fillBar.style.width = pct + '%';
+    progressText.textContent = pct + '%';
+  }
+
+  items.forEach(function(li){
+    li.addEventListener('click', function(){
+      li.classList.toggle('checked');
+      updateProgress();
+    });
+  });
+
+  resetBtn.addEventListener('click', function(){
+    items.forEach(function(li){ li.classList.remove('checked'); });
+    updateProgress();
+  });
+
+  // initial
+  updateProgress();
+})();
+</script>
+</body>
+</html>

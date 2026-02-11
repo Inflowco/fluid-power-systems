@@ -1,0 +1,68 @@
+{
+    "title": "Compressed Air Leak Detector",
+    "description": "Interactive simulation where students use an ultrasonic leak detector to diagnose compressed air leaks throughout a system schematic and prioritize repairs based on cost impact analysis. Supports Bloom's Analyze level with diagnose and prioritize verbs.",
+    "creator": "Peter Vinck, Inflow Corp.",
+    "date": "2026-02-10",
+    "subject": [
+        "Compressed Air Systems",
+        "Leak Detection",
+        "Energy Efficiency",
+        "Maintenance Prioritization",
+        "Ultrasonic Testing",
+        "Fluid Power Systems"
+    ],
+    "type": "Interactive Simulation",
+    "format": "text/html",
+    "language": "en",
+    "rights": "CC BY 4.0",
+    "educational": {
+        "bloomLevel": "Analyze",
+        "bloomVerb": ["diagnose", "prioritize"],
+        "gradeLevel": "Technical/Undergraduate",
+        "duration": "15-30 minutes",
+        "prerequisites": [
+            "Basic compressed air system components",
+            "Understanding of CFM, dB, and kWh units",
+            "Familiarity with energy cost calculations"
+        ],
+        "concepts": [
+            "Acoustic leak detection",
+            "Compressed air system efficiency",
+            "Cost-based repair prioritization",
+            "Pareto principle in maintenance",
+            "Energy waste quantification"
+        ],
+        "library": "p5.js"
+    },
+    "controls": [
+        {
+            "type": "click",
+            "description": "Click on 8 test points to probe with ultrasonic detector"
+        },
+        {
+            "type": "button",
+            "label": "Tag Leak",
+            "description": "Records the current location as a detected leak"
+        },
+        {
+            "type": "button",
+            "label": "Prioritize",
+            "description": "Sorts tagged leaks by cost impact and calculates score"
+        },
+        {
+            "type": "button",
+            "label": "New Scenario",
+            "description": "Generates a new random set of leaks"
+        },
+        {
+            "type": "slider",
+            "label": "Electricity Rate",
+            "min": 0.08,
+            "max": 0.25,
+            "default": 0.12,
+            "step": 0.01,
+            "unit": "$/kWh",
+            "description": "Adjusts electricity rate to recalculate all annual costs"
+        }
+    ]
+}

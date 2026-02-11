@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pneumatic Conveying Modes Comparison</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .controls {
+            margin-bottom: 30px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #0066cc;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0066cc;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0066cc;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .velocity-display {
+            min-width: 120px;
+            text-align: center;
+            font-weight: 600;
+            color: #0066cc;
+            font-size: 14px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        button.active {
+            background: #0066cc;
+            color: white;
+            border-color: #0066cc;
+        }
+
+        button:hover:not(.active) {
+            border-color: #0066cc;
+            color: #0066cc;
+        }
+
+        #p5-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            font-size: 13px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .comparison-table th {
+            background: #f0f0f0;
+            font-weight: 600;
+            color: #333;
+            border-top: 2px solid #ccc;
+            border-bottom: 2px solid #ccc;
+        }
+
+        .comparison-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .property-name {
+            font-weight: 500;
+            width: 25%;
+        }
+
+        .dilute-phase,
+        .dense-phase {
+            color: #555;
+        }
+
+        .mode-label {
+            font-weight: 600;
+            color: #0066cc;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .slider-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .button-group {
+                justify-content: center;
+            }
+
+            .comparison-table {
+                font-size: 12px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pneumatic Conveying Modes Comparison</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label class="control-label">Air Velocity (m/s)</label>
+                <div class="slider-container">
+                    <input type="range" id="velocitySlider" min="5" max="35" value="20" step="1">
+                    <div class="velocity-display">
+                        <span id="velocityValue">20</span> m/s
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">Material Type</label>
+                <div class="button-group">
+                    <button class="material-btn active" data-material="plastic">Plastic Pellets</button>
+                    <button class="material-btn" data-material="flour">Flour</button>
+                    <button class="material-btn" data-material="sand">Sand</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="p5-container"></div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th class="mode-label">Dilute Phase</th>
+                    <th class="mode-label">Dense Phase</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="property-name">Velocity Range</td>
+                    <td class="dilute-phase">12-40 m/s</td>
+                    <td class="dense-phase">4-8 m/s</td>
+                </tr>
+                <tr>
+                    <td class="property-name">Solid Loading Ratio (SLR)</td>
+                    <td class="dilute-phase">1-5</td>
+                    <td class="dense-phase">5-25</td>
+                </tr>
+                <tr>
+                    <td class="property-name">Material Distribution</td>
+                    <td class="dilute-phase">Fully suspended, scattered throughout</td>
+                    <td class="dense-phase">Plug/slug formation, clustered</td>
+                </tr>
+                <tr>
+                    <td class="property-name">Pipe Wear</td>
+                    <td class="dilute-phase">High (due to high velocity impacts)</td>
+                    <td class="dense-phase">Low (slower moving material)</td>
+                </tr>
+                <tr>
+                    <td class="property-name">Energy Consumption</td>
+                    <td class="dilute-phase">High (high velocity required)</td>
+                    <td class="dense-phase">Low (lower velocity needed)</td>
+                </tr>
+                <tr>
+                    <td class="property-name">Best For</td>
+                    <td class="dilute-phase">Lighter, granular materials; short distances</td>
+                    <td class="dense-phase">Heavier materials; longer distances; sensitive materials</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentVelocity = 20;
+        let currentMaterial = 'plastic';
+        let sketchInstance;
+
+        // Initialize p5.js sketch
+        function initSketch(p) {
+            const container = document.getElementById('p5-container');
+            let canvasWidth = container.offsetWidth;
+            let canvasHeight = 400;
+
+            p.setup = function() {
+                let canvas = p.createCanvas(canvasWidth, canvasHeight);
+                canvas.parent('p5-container');
+            };
+
+            p.windowResized = function() {
+                const container = document.getElementById('p5-container');
+                if (container && container.offsetWidth > 0) {
+                    let newWidth = container.offsetWidth;
+                    if (newWidth !== p.width) {
+                        p.resizeCanvas(newWidth, 400);
+                    }
+                }
+            };
+
+            p.draw = function() {
+                p.background(250);
+
+                // Calculate SLR based on velocity
+                let slr = calculateSLR(currentVelocity);
+                let isLow = slr < 5;
+
+                // Draw dilute phase (top)
+                drawDilutePhase(p, isLow);
+
+                // Draw dense phase (bottom)
+                drawDensePhase(p, isLow);
+
+                // Draw legend and info
+                drawLegendAndInfo(p, slr, isLow);
+            };
+
+            function drawDilutePhase(p, isLow) {
+                let startY = 20;
+                let pipeStartX = 80;
+                let pipeWidth = p.width - 160;
+                let pipeHeight = 80;
+
+                // Pipe
+                p.stroke(100);
+                p.strokeWeight(3);
+                p.fill(220);
+                p.rect(pipeStartX, startY, pipeWidth, pipeHeight);
+
+                // Label
+                p.fill(0);
+                p.textSize(14);
+                p.textAlign(p.LEFT);
+                p.text('DILUTE PHASE', pipeStartX - 70, startY + 35);
+
+                // Air flow (light blue background)
+                p.fill(200, 230, 255, 100);
+                p.noStroke();
+                p.rect(pipeStartX, startY, pipeWidth, pipeHeight);
+
+                // Draw particles (fully suspended, scattered)
+                let particleCount = 15;
+                p.randomSeed(42);
+
+                for (let i = 0; i < particleCount; i++) {
+                    let x = pipeStartX + p.random(pipeWidth);
+                    let y = startY + p.random(pipeHeight);
+
+                    // Animate particles moving right
+                    let time = p.frameCount * 0.02;
+                    x = (pipeStartX + (p.sin(i + time) * pipeWidth * 0.3 + pipeWidth * 0.5)) % (pipeStartX + pipeWidth);
+
+                    drawParticle(p, x, y, currentMaterial, 4);
+                }
+
+                // Draw impact at bend
+                p.fill(255, 100, 100, 150);
+                p.ellipse(pipeStartX + pipeWidth - 10, startY + 15, 20, 15);
+                p.fill(0);
+                p.textSize(10);
+                p.textAlign(p.CENTER);
+                p.text('IMPACT', pipeStartX + pipeWidth - 10, startY + 17);
+
+                // Velocity and SLR info
+                p.fill(0);
+                p.textSize(11);
+                p.textAlign(p.RIGHT);
+                p.text('Velocity: ' + currentVelocity + ' m/s | SLR: ' + slr.toFixed(1), p.width - 20, startY + pipeHeight + 30);
+            }
+
+            function drawDensePhase(p, isLow) {
+                let startY = 130;
+                let pipeStartX = 80;
+                let pipeWidth = p.width - 160;
+                let pipeHeight = 80;
+
+                // Pipe
+                p.stroke(100);
+                p.strokeWeight(3);
+                p.fill(220);
+                p.rect(pipeStartX, startY, pipeWidth, pipeHeight);
+
+                // Label
+                p.fill(0);
+                p.textSize(14);
+                p.textAlign(p.LEFT);
+                p.text('DENSE PHASE', pipeStartX - 70, startY + 35);
+
+                // Air flow (lighter blue background)
+                p.fill(200, 230, 255, 60);
+                p.noStroke();
+                p.rect(pipeStartX, startY, pipeWidth, pipeHeight);
+
+                // Draw plugs/slugs (dense clusters)
+                let plugCount = 3;
+                let plugWidth = (pipeWidth - 30) / plugCount;
+
+                for (let i = 0; i < plugCount; i++) {
+                    let plugX = pipeStartX + 15 + i * (plugWidth + 10);
+
+                    // Animate plugs moving right slowly
+                    let time = p.frameCount * 0.005;
+                    plugX = (pipeStartX + 15 + (i + time * 0.1) % (plugCount + 1) * (plugWidth + 10));
+
+                    // Draw plug boundary
+                    p.stroke(150);
+                    p.strokeWeight(2);
+                    p.noFill();
+                    p.rect(plugX, startY + 10, plugWidth, pipeHeight - 20);
+
+                    // Fill plug with particles
+                    let particlesPerPlug = 12;
+                    p.randomSeed(i);
+                    for (let j = 0; j < particlesPerPlug; j++) {
+                        let x = plugX + p.random(plugWidth);
+                        let y = startY + 10 + p.random(pipeHeight - 20);
+                        drawParticle(p, x, y, currentMaterial, 5);
+                    }
+
+                    // Air gap label
+                    if (i < plugCount - 1) {
+                        p.fill(150, 150, 200, 100);
+                        p.noStroke();
+                        p.rect(plugX + plugWidth, startY + 10, 10, pipeHeight - 20);
+                        p.fill(100);
+                        p.textSize(9);
+                        p.textAlign(p.CENTER);
+                        p.text('AIR', plugX + plugWidth + 5, startY + pipeHeight / 2 + 5);
+                    }
+                }
+
+                // Velocity and SLR info
+                p.fill(0);
+                p.textSize(11);
+                p.textAlign(p.RIGHT);
+                p.text('Velocity: 6 m/s | SLR: 15', p.width - 20, startY + pipeHeight + 30);
+            }
+
+            function drawParticle(p, x, y, material, size) {
+                switch(material) {
+                    case 'plastic':
+                        p.fill(200, 150, 80);
+                        p.stroke(180, 130, 60);
+                        break;
+                    case 'flour':
+                        p.fill(230, 200, 150);
+                        p.stroke(210, 180, 130);
+                        break;
+                    case 'sand':
+                        p.fill(210, 180, 100);
+                        p.stroke(190, 160, 80);
+                        break;
+                }
+                p.strokeWeight(1);
+                p.ellipse(x, y, size, size);
+            }
+
+            function calculateSLR(velocity) {
+                // SLR decreases with velocity (linear approximation)
+                // At 5 m/s: SLR ~= 25 (dense phase)
+                // At 35 m/s: SLR ~= 1 (dilute phase)
+                return 26 - (velocity * 0.714);
+            }
+
+            function drawLegendAndInfo(p, slr, isLow) {
+                p.fill(0);
+                p.textSize(12);
+                p.textAlign(p.LEFT);
+
+                let modeText = isLow ? 'Dense Phase Mode' : 'Dilute Phase Mode';
+                let modeColor = isLow ? [100, 150, 255] : [255, 150, 100];
+
+                p.fill(...modeColor);
+                p.textSize(12);
+                p.text(modeText, 20, p.height - 15);
+
+                // Material indicator
+                let materialDisplay = currentMaterial.charAt(0).toUpperCase() + currentMaterial.slice(1);
+                p.fill(100);
+                p.textSize(11);
+                p.textAlign(p.RIGHT);
+                p.text('Material: ' + materialDisplay, p.width - 20, p.height - 15);
+            }
+        }
+
+        // Initialize sketch
+        sketchInstance = new p5(initSketch);
+
+        // Control event listeners
+        document.getElementById('velocitySlider').addEventListener('input', function(e) {
+            currentVelocity = parseFloat(e.target.value);
+            document.getElementById('velocityValue').textContent = currentVelocity;
+        });
+
+        document.querySelectorAll('.material-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                document.querySelectorAll('.material-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentMaterial = this.dataset.material;
+            });
+        });
+    </script>
+</body>
+</html>

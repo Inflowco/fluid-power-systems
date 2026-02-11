@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dust Collection Safety & Maintenance Checklist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #da190b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .progress-container {
+            padding: 16px 24px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .progress-label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background-color: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 40px;
+        }
+
+        main {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .section-header {
+            background-color: #f5f5f5;
+            padding: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s ease;
+        }
+
+        .section-header:hover {
+            background-color: #eeeeee;
+        }
+
+        .section-header.expanded {
+            background-color: #e3f2fd;
+            border-bottom-color: #2196F3;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1976D2;
+            flex: 1;
+        }
+
+        .section-progress {
+            font-size: 13px;
+            color: #666;
+            margin-right: 12px;
+        }
+
+        .toggle-icon {
+            font-size: 20px;
+            color: #666;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .section-header.expanded .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            display: none;
+            padding: 16px;
+        }
+
+        .section-content.expanded {
+            display: block;
+        }
+
+        .item {
+            margin-bottom: 16px;
+            padding: 12px;
+            background-color: #fafafa;
+            border-radius: 6px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+
+        .item-title {
+            font-weight: 500;
+            color: #333;
+            flex: 1;
+        }
+
+        .item-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .status-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 2px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            min-width: 70px;
+        }
+
+        .status-btn.unchecked {
+            border-color: #999;
+            color: #666;
+        }
+
+        .status-btn.unchecked:hover {
+            border-color: #666;
+            background-color: #f5f5f5;
+        }
+
+        .status-btn.pass {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .status-btn.pass:hover {
+            background-color: #45a049;
+            border-color: #45a049;
+        }
+
+        .status-btn.fail {
+            background-color: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+
+        .status-btn.fail:hover {
+            background-color: #da190b;
+            border-color: #da190b;
+        }
+
+        .item-notes {
+            display: none;
+            margin-top: 8px;
+        }
+
+        .item-notes.expanded {
+            display: block;
+        }
+
+        .notes-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .item-details {
+            display: none;
+            margin-top: 8px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .item-details.expanded {
+            display: block;
+        }
+
+        .toggle-details {
+            font-size: 13px;
+            color: #2196F3;
+            cursor: pointer;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .toggle-details:hover {
+            text-decoration: underline;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 32px;
+            border-radius: 8px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1976D2;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .modal-section-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .modal-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .modal-stat-pass {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        .modal-stat-fail {
+            color: #f44336;
+            font-weight: 600;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            justify-content: flex-end;
+        }
+
+        .btn-close {
+            background-color: #666;
+            color: white;
+        }
+
+        .btn-close:hover {
+            background-color: #555;
+        }
+
+        .btn-print {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .btn-print:hover {
+            background-color: #1976D2;
+        }
+
+        /* Confirmation Dialog */
+        .confirmation-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            z-index: 1001;
+            display: none;
+            min-width: 320px;
+        }
+
+        .confirmation-dialog.active {
+            display: block;
+        }
+
+        .confirmation-text {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-confirm {
+            background-color: #f44336;
+        }
+
+        .btn-confirm:hover {
+            background-color: #da190b;
+        }
+
+        .btn-cancel {
+            background-color: #666;
+        }
+
+        .btn-cancel:hover {
+            background-color: #555;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                min-height: auto;
+            }
+
+            header h1 {
+                font-size: 22px;
+            }
+
+            header {
+                padding: 16px;
+            }
+
+            main {
+                padding: 16px;
+            }
+
+            .header-controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-progress {
+                margin-right: 0;
+                margin-top: 8px;
+            }
+
+            .item-buttons {
+                flex-wrap: wrap;
+            }
+
+            .modal-content {
+                max-width: 90%;
+                padding: 20px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            header, main {
+                box-shadow: none;
+            }
+
+            button, .header-controls {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dust Collection Safety & Maintenance Checklist</h1>
+            <div class="header-controls">
+                <button class="btn-primary" id="generateBtn">Generate Report</button>
+                <button class="btn-secondary" id="resetBtn">Reset All</button>
+            </div>
+        </header>
+
+        <div class="progress-container">
+            <div class="progress-label">Overall Progress</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+
+        <main id="mainContent">
+            <!-- Sections will be generated by JavaScript -->
+        </main>
+    </div>
+
+    <!-- Modal for Report -->
+    <div class="modal" id="reportModal">
+        <div class="modal-content">
+            <div class="modal-header">Maintenance Report</div>
+            <div id="reportContent"></div>
+            <div class="modal-footer">
+                <button class="btn-print" onclick="window.print()">Print Report</button>
+                <button class="btn-close" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal" id="modalOverlay" onclick="closeModal()"></div>
+
+    <!-- Confirmation Dialog -->
+    <div class="confirmation-dialog" id="confirmDialog">
+        <div class="confirmation-text">Are you sure you want to reset all items? This cannot be undone.</div>
+        <div class="confirmation-buttons">
+            <button class="btn-cancel" onclick="cancelReset()">Cancel</button>
+            <button class="btn-confirm" onclick="confirmReset()">Reset All</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'dustCollectionChecklist';
+
+        const sections = [
+            {
+                title: 'Hoods and Ductwork',
+                items: [
+                    {
+                        title: 'Hood condition and positioning',
+                        details: 'Check hood integrity, cleanliness, and proper positioning near dust source. Verify no cracks or loose connections.'
+                    },
+                    {
+                        title: 'Duct joints and connections (air leaks, dust deposits)',
+                        details: 'Inspect all duct joints for air leaks and excessive dust accumulation. Use smoke test to detect leaks. Clean or seal as needed.'
+                    },
+                    {
+                        title: 'Blast gate operation',
+                        details: 'Test all blast gates (entry gates) for smooth operation, complete closure, and proper sealing. Lubricate hinges if needed.'
+                    },
+                    {
+                        title: 'Flex hose condition',
+                        details: 'Examine flexible hose sections for damage, cracks, or separation. Check clamps are tight and secure. Replace if deteriorated.'
+                    },
+                    {
+                        title: 'Transport velocity check',
+                        details: 'Verify duct transport velocity meets requirements (typically 3,500-4,500 fpm for woodworking dust). Measure with anemometer if needed.'
+                    },
+                    {
+                        title: 'Duct wall thickness at elbows',
+                        details: 'Inspect elbows for wall thinning due to abrasion. Check for pinholes or thin spots. Plan replacement if severely worn.'
+                    }
+                ]
+            },
+            {
+                title: 'Collector Unit',
+                items: [
+                    {
+                        title: 'Differential pressure reading',
+                        details: 'Check ΔP gauge reading. Should be within normal range (typically 3-6" WC). High readings indicate clogged filters; low readings indicate leak.'
+                    },
+                    {
+                        title: 'Filter bag/cartridge condition',
+                        details: 'Inspect bags/cartridges for holes, tears, or deterioration. Check for cake buildup or wet spots. Replace if damaged or clogged.'
+                    },
+                    {
+                        title: 'Dust hopper level',
+                        details: 'Check hopper level indicator. Empty if near capacity to prevent dust bypass. Inspect hopper for leaks or damage.'
+                    },
+                    {
+                        title: 'Explosion vent panels',
+                        details: 'Verify vent panels are intact, properly sealed, and operational. Check hinges and gaskets. Test with pressure if equipped.'
+                    },
+                    {
+                        title: 'Access doors and gaskets',
+                        details: 'Inspect all access doors for proper closure and seal integrity. Replace damaged gaskets. Ensure latch mechanisms work smoothly.'
+                    },
+                    {
+                        title: 'Compressed air supply pressure (90-100 psi)',
+                        details: 'Verify air pressure at cleaning manifold is 90-100 psi. Check for pressure drops, leaks, or regulator issues. Adjust if necessary.'
+                    },
+                    {
+                        title: 'Solenoid valve function',
+                        details: 'Test solenoid valves for proper operation (click sound, air flow). Listen for leaks. Replace if sluggish or non-responsive.'
+                    }
+                ]
+            },
+            {
+                title: 'Fan and Motor',
+                items: [
+                    {
+                        title: 'Belt tension and alignment',
+                        details: 'Check belt tension (should flex ~1/2" under thumb pressure). Verify pulleys are aligned using straightedge. Adjust or replace if worn.'
+                    },
+                    {
+                        title: 'Bearing lubrication and temperature',
+                        details: 'Verify bearings are properly lubricated. Check bearing temperature with infrared thermometer (should not exceed 80°C). Add grease if needed.'
+                    },
+                    {
+                        title: 'Vibration levels',
+                        details: 'Check for excessive vibration. Place hand on motor/bearing housings. Vibration should be minimal. Investigate unusual vibration immediately.'
+                    },
+                    {
+                        title: 'Impeller condition',
+                        details: 'Inspect impeller blades for cracks, erosion, or damage. Check for dust buildup reducing efficiency. Clean or replace if significantly damaged.'
+                    },
+                    {
+                        title: 'Motor amperage vs nameplate',
+                        details: 'Measure motor current draw and compare to nameplate rating. High amperage indicates overload (dirty filters, blocked ductwork). Investigate cause.'
+                    }
+                ]
+            },
+            {
+                title: 'Safety Systems',
+                items: [
+                    {
+                        title: 'Explosion vents integrity',
+                        details: 'Verify explosion vent panels are properly installed, not blocked, and free to operate. Check gaskets and hinges. Ensure area around vents is clear.'
+                    },
+                    {
+                        title: 'Spark detection system test',
+                        details: 'If equipped, test spark detection sensors and abort system. Verify sensors are clean and properly positioned. Check abort valve response.'
+                    },
+                    {
+                        title: 'Abort/isolation gate test',
+                        details: 'Test isolation gate operation manually and automatically (if equipped). Verify it closes completely and seals properly.'
+                    },
+                    {
+                        title: 'Grounding and bonding continuity',
+                        details: 'Test electrical continuity of grounding and bonding straps using multimeter. Resistance should be less than 1 ohm. Add bonding straps if missing.'
+                    },
+                    {
+                        title: 'Fire suppression inspection date',
+                        details: 'Check fire suppression cartridge/system inspection tag. Ensure inspection is current (typically annual). Schedule if overdue.'
+                    },
+                    {
+                        title: 'Interlock systems verification',
+                        details: 'Test all interlocks (emergency stops, door switches). Verify system shuts down when triggered. Check for jumpers or bypassed interlocks.'
+                    },
+                    {
+                        title: 'Combustible dust housekeeping',
+                        details: 'Inspect collector and surrounding area for accumulated dust. Clean surfaces thoroughly. Ensure no dust buildup on motors, ledges, or horizontal surfaces.'
+                    }
+                ]
+            },
+            {
+                title: 'Controls and Monitoring',
+                items: [
+                    {
+                        title: 'ΔP gauge/sensor calibration',
+                        details: 'Verify ΔP gauge is calibrated and reading accurately. If using electronic sensor, check calibration certificate and recalibrate if expired.'
+                    },
+                    {
+                        title: 'Airflow sensor readings vs design',
+                        details: 'Compare airflow sensor readings to design specifications. Should match system CFM rating. Investigate significant deviations.'
+                    },
+                    {
+                        title: 'PLC/timer settings for pulse cleaning',
+                        details: 'Review pulse cleaning timer settings in PLC or controller. Verify timing intervals are appropriate for system and dust type. Adjust if cleaning is inadequate.'
+                    },
+                    {
+                        title: 'Alarm setpoints verified',
+                        details: 'Check all alarm setpoints (high ΔP, low airflow, etc.) are set correctly. Verify alarms trigger at proper thresholds.'
+                    },
+                    {
+                        title: 'Data logging system operational',
+                        details: 'If equipped with data logging, verify system is recording data properly. Check logs for trends. Download and archive historical data.'
+                    }
+                ]
+            }
+        ];
+
+        let checklistData = loadData();
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            return initializeData();
+        }
+
+        function initializeData() {
+            const data = {};
+            sections.forEach((section, sIdx) => {
+                data[sIdx] = {};
+                section.items.forEach((item, iIdx) => {
+                    data[sIdx][iIdx] = {
+                        status: 'unchecked', // unchecked, pass, fail
+                        notes: ''
+                    };
+                });
+            });
+            return data;
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(checklistData));
+            updateProgress();
+        }
+
+        function renderChecklist() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '';
+
+            sections.forEach((section, sIdx) => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'section';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'section-header';
+                headerDiv.onclick = () => toggleSection(sectionDiv, headerDiv);
+
+                const itemsCompleted = Object.values(checklistData[sIdx]).filter(item => item.status !== 'unchecked').length;
+                const totalItems = section.items.length;
+
+                headerDiv.innerHTML = `
+                    <div class="section-title">${section.title}</div>
+                    <div class="section-progress">${itemsCompleted}/${totalItems}</div>
+                    <div class="toggle-icon">▼</div>
+                `;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'section-content';
+
+                section.items.forEach((item, iIdx) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+
+                    const itemStatus = checklistData[sIdx][iIdx];
+
+                    itemDiv.innerHTML = `
+                        <div class="item-header">
+                            <div class="item-title">${item.title}</div>
+                        </div>
+                        <div class="item-buttons">
+                            <button class="status-btn ${itemStatus.status === 'unchecked' ? 'unchecked' : ''}" onclick="setStatus(${sIdx}, ${iIdx}, 'unchecked')">
+                                ${itemStatus.status === 'unchecked' ? '○ Unchecked' : 'Unchecked'}
+                            </button>
+                            <button class="status-btn ${itemStatus.status === 'pass' ? 'pass' : ''}" onclick="setStatus(${sIdx}, ${iIdx}, 'pass')">
+                                ${itemStatus.status === 'pass' ? '✓ Pass' : 'Pass'}
+                            </button>
+                            <button class="status-btn ${itemStatus.status === 'fail' ? 'fail' : ''}" onclick="setStatus(${sIdx}, ${iIdx}, 'fail')">
+                                ${itemStatus.status === 'fail' ? '✕ Fail' : 'Fail'}
+                            </button>
+                        </div>
+                        <div class="toggle-details" onclick="toggleDetails(this)">Show Details</div>
+                        <div class="item-details">
+                            <p>${item.details}</p>
+                        </div>
+                        <div class="item-notes">
+                            <textarea class="notes-input" placeholder="Add notes for this item..." onchange="setNotes(${sIdx}, ${iIdx}, this.value)">${itemStatus.notes}</textarea>
+                        </div>
+                    `;
+
+                    contentDiv.appendChild(itemDiv);
+                });
+
+                sectionDiv.appendChild(headerDiv);
+                sectionDiv.appendChild(contentDiv);
+                mainContent.appendChild(sectionDiv);
+            });
+
+            updateProgress();
+        }
+
+        function toggleSection(sectionDiv, headerDiv) {
+            const contentDiv = sectionDiv.querySelector('.section-content');
+            const notesFields = sectionDiv.querySelectorAll('.item-notes');
+
+            headerDiv.classList.toggle('expanded');
+            contentDiv.classList.toggle('expanded');
+
+            if (contentDiv.classList.contains('expanded')) {
+                notesFields.forEach(notes => notes.classList.add('expanded'));
+            } else {
+                notesFields.forEach(notes => notes.classList.remove('expanded'));
+            }
+        }
+
+        function toggleDetails(element) {
+            const detailsDiv = element.nextElementSibling;
+            detailsDiv.classList.toggle('expanded');
+            element.textContent = detailsDiv.classList.contains('expanded') ? 'Hide Details' : 'Show Details';
+        }
+
+        function setStatus(sIdx, iIdx, status) {
+            checklistData[sIdx][iIdx].status = status;
+            saveData();
+            renderChecklist();
+        }
+
+        function setNotes(sIdx, iIdx, notes) {
+            checklistData[sIdx][iIdx].notes = notes;
+            saveData();
+        }
+
+        function updateProgress() {
+            let totalItems = 0;
+            let completedItems = 0;
+
+            sections.forEach((section, sIdx) => {
+                section.items.forEach((item, iIdx) => {
+                    totalItems++;
+                    if (checklistData[sIdx][iIdx].status !== 'unchecked') {
+                        completedItems++;
+                    }
+                });
+            });
+
+            const percentage = totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = percentage + '%';
+        }
+
+        function generateReport() {
+            let reportHTML = '';
+
+            sections.forEach((section, sIdx) => {
+                let passCount = 0;
+                let failCount = 0;
+                let uncheckedCount = 0;
+
+                section.items.forEach((item, iIdx) => {
+                    const status = checklistData[sIdx][iIdx].status;
+                    if (status === 'pass') passCount++;
+                    if (status === 'fail') failCount++;
+                    if (status === 'unchecked') uncheckedCount++;
+                });
+
+                reportHTML += `
+                    <div class="modal-section">
+                        <div class="modal-section-title">${section.title}</div>
+                        <div class="modal-stat">
+                            <span>Total Items:</span>
+                            <span>${section.items.length}</span>
+                        </div>
+                        <div class="modal-stat">
+                            <span>Passed:</span>
+                            <span class="modal-stat-pass">${passCount}</span>
+                        </div>
+                        <div class="modal-stat">
+                            <span>Failed:</span>
+                            <span class="modal-stat-fail">${failCount}</span>
+                        </div>
+                        <div class="modal-stat">
+                            <span>Unchecked:</span>
+                            <span>${uncheckedCount}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('reportContent').innerHTML = reportHTML;
+            openModal();
+        }
+
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById('reportModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('reportModal').classList.remove('active');
+        }
+
+        function showResetConfirmation() {
+            document.getElementById('confirmDialog').classList.add('active');
+        }
+
+        function cancelReset() {
+            document.getElementById('confirmDialog').classList.remove('active');
+        }
+
+        function confirmReset() {
+            localStorage.removeItem(STORAGE_KEY);
+            checklistData = initializeData();
+            saveData();
+            renderChecklist();
+            document.getElementById('confirmDialog').classList.remove('active');
+        }
+
+        // Event Listeners
+        document.getElementById('generateBtn').addEventListener('click', generateReport);
+        document.getElementById('resetBtn').addEventListener('click', showResetConfirmation);
+
+        // Initial render
+        renderChecklist();
+    </script>
+</body>
+</html>
