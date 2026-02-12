@@ -1,0 +1,8 @@
+{
+  "title": "Affinity Laws Energy Calculator",
+  "chapter": 9,
+  "bloom_level": "L3 Apply",
+  "bloom_verb": "Calculate",
+  "technology": "p5.js",
+  "learning_objective": "Apply affinity laws to calculate energy savings from VFD speed reduction vs. valve throttling"
+}

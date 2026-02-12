@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lifecycle Cost Calculator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #fff;
+    color: #333;
+    line-height: 1.5;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #1565C0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  /* ---------- Chart area ---------- */
+  .chart-area {
+    width: 100%;
+    height: 380px;
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ---------- Bottom section ---------- */
+  .bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .controls-col, .results-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* ---------- Control groups ---------- */
+  .control-group {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .control-group h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #1565C0;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #1565C0;
+    padding-bottom: 4px;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+
+  .slider-row:last-child { margin-bottom: 0; }
+
+  .slider-row label {
+    flex: 0 0 140px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #555;
+  }
+
+  .slider-row input[type="range"] {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ccc;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #1565C0;
+    cursor: pointer;
+  }
+
+  .slider-row input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #1565C0;
+    cursor: pointer;
+    border: none;
+  }
+
+  .slider-row .value-display {
+    flex: 0 0 80px;
+    text-align: right;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: #333;
+  }
+
+  /* ---------- Result cards ---------- */
+  .result-card {
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+
+  .result-card h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+  }
+
+  .result-card .total {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .result-card ul {
+    list-style: none;
+    font-size: 0.78rem;
+  }
+
+  .result-card ul li {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    border-bottom: 1px dotted #ccc;
+  }
+
+  .result-card ul li:last-child { border-bottom: none; }
+
+  .card-a {
+    background: #fce4ec;
+    border: 1px solid #ef9a9a;
+  }
+
+  .card-a h3 { color: #c62828; }
+  .card-a .total { color: #c62828; }
+
+  .card-b {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+  }
+
+  .card-b h3 { color: #2e7d32; }
+  .card-b .total { color: #2e7d32; }
+
+  .card-savings {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border: 2px solid #1565C0;
+  }
+
+  .card-savings h3 { color: #1565C0; }
+
+  .card-savings .total {
+    color: #1565C0;
+    font-size: 1.3rem;
+  }
+
+  .savings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 0.82rem;
+    border-bottom: 1px dotted rgba(21,101,192,0.3);
+  }
+
+  .savings-row:last-child { border-bottom: none; }
+
+  .savings-label { color: #555; }
+
+  .savings-value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .payback-green { color: #2e7d32; }
+  .payback-yellow { color: #f9a825; }
+  .payback-red { color: #c62828; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 768px) {
+    .bottom {
+      grid-template-columns: 1fr;
+    }
+    .slider-row label {
+      flex: 0 0 110px;
+      font-size: 0.75rem;
+    }
+    .slider-row .value-display { flex: 0 0 65px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Lifecycle Cost Calculator</h1>
+
+  <!-- Chart -->
+  <div class="chart-area">
+    <canvas id="chart"></canvas>
+  </div>
+
+  <!-- Bottom: Controls + Results -->
+  <div class="bottom">
+
+    <!-- Left: Controls -->
+    <div class="controls-col">
+      <div class="control-group">
+        <h3>Equipment Parameters</h3>
+
+        <div class="slider-row">
+          <label>Option A Price</label>
+          <input type="range" id="priceA" min="3000" max="20000" step="250" value="5000">
+          <span class="value-display" id="priceAVal"></span>
+        </div>
+
+        <div class="slider-row">
+          <label>Option B Price</label>
+          <input type="range" id="priceB" min="3000" max="25000" step="250" value="7500">
+          <span class="value-display" id="priceBVal"></span>
+        </div>
+
+        <div class="slider-row">
+          <label>Option A Efficiency</label>
+          <input type="range" id="effA" min="70" max="85" step="1" value="75">
+          <span class="value-display" id="effAVal"></span>
+        </div>
+
+        <div class="slider-row">
+          <label>Option B Efficiency</label>
+          <input type="range" id="effB" min="80" max="95" step="1" value="85">
+          <span class="value-display" id="effBVal"></span>
+        </div>
+
+        <div class="slider-row">
+          <label>Motor HP</label>
+          <input type="range" id="hp" min="5" max="100" step="5" value="25">
+          <span class="value-display" id="hpVal"></span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <h3>Operating Parameters</h3>
+
+        <div class="slider-row">
+          <label>Hours / Year</label>
+          <input type="range" id="hours" min="2000" max="8760" step="100" value="6000">
+          <span class="value-display" id="hoursVal"></span>
+        </div>
+
+        <div class="slider-row">
+          <label>Electricity Rate</label>
+          <input type="range" id="rate" min="0.05" max="0.25" step="0.01" value="0.12">
+          <span class="value-display" id="rateVal"></span>
+        </div>
+
+        <div class="slider-row">
+          <label>Equipment Life</label>
+          <input type="range" id="life" min="10" max="30" step="1" value="20">
+          <span class="value-display" id="lifeVal"></span>
+        </div>
+
+        <div class="slider-row">
+          <label>Annual Maint %</label>
+          <input type="range" id="maint" min="2" max="5" step="0.5" value="3">
+          <span class="value-display" id="maintVal"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div class="results-col">
+      <div class="result-card card-a">
+        <h3>Option A &mdash; Standard</h3>
+        <div class="total" id="totalA"></div>
+        <ul id="breakdownA"></ul>
+      </div>
+
+      <div class="result-card card-b">
+        <h3>Option B &mdash; High Efficiency</h3>
+        <div class="total" id="totalB"></div>
+        <ul id="breakdownB"></ul>
+      </div>
+
+      <div class="result-card card-savings">
+        <h3>Savings Analysis</h3>
+        <div id="savingsContent"></div>
+      </div>
+    </div>
+
+  </div><!-- /bottom -->
+</div>
+
+<script>
+// ─── Helpers ───
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+const fmtDec = (n, d) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+// ─── Sliders ───
+const sliders = {
+  priceA:  { el: $('priceA'),  out: $('priceAVal'),  format: v => fmt(v) },
+  priceB:  { el: $('priceB'),  out: $('priceBVal'),  format: v => fmt(v) },
+  effA:    { el: $('effA'),    out: $('effAVal'),     format: v => v + '%' },
+  effB:    { el: $('effB'),    out: $('effBVal'),     format: v => v + '%' },
+  hp:      { el: $('hp'),      out: $('hpVal'),       format: v => v + ' HP' },
+  hours:   { el: $('hours'),   out: $('hoursVal'),    format: v => Number(v).toLocaleString('en-US') + ' h' },
+  rate:    { el: $('rate'),    out: $('rateVal'),     format: v => fmtDec(Number(v), 2) + '/kWh' },
+  life:    { el: $('life'),    out: $('lifeVal'),     format: v => v + ' yrs' },
+  maint:   { el: $('maint'),   out: $('maintVal'),    format: v => v + '%' },
+};
+
+Object.values(sliders).forEach(s => {
+  s.el.addEventListener('input', update);
+});
+
+// ─── Calculation ───
+function calc() {
+  const pA = Number(sliders.priceA.el.value);
+  const pB = Number(sliders.priceB.el.value);
+  const eA = Number(sliders.effA.el.value) / 100;
+  const eB = Number(sliders.effB.el.value) / 100;
+  const hp = Number(sliders.hp.el.value);
+  const hrs = Number(sliders.hours.el.value);
+  const rate = Number(sliders.rate.el.value);
+  const yrs = Number(sliders.life.el.value);
+  const maintPct = Number(sliders.maint.el.value) / 100;
+
+  const kw = hp * 0.746;
+
+  const annualEnergyA = (kw / eA) * hrs * rate;
+  const annualEnergyB = (kw / eB) * hrs * rate;
+  const energyA = annualEnergyA * yrs;
+  const energyB = annualEnergyB * yrs;
+
+  const installA = pA * 0.60;
+  const installB = pB * 0.60;
+
+  const maintA = pA * maintPct * yrs;
+  const maintB = pB * maintPct * yrs;
+
+  const downtimeA = pA * 0.02 * yrs;
+  const downtimeB = pB * 0.01 * yrs;
+
+  const disposal = 500;
+
+  const totalA = pA + installA + energyA + maintA + downtimeA + disposal;
+  const totalB = pB + installB + energyB + maintB + downtimeB + disposal;
+
+  const savings = totalA - totalB;
+  const priceDiff = pB - pA;
+  const annualSavings = annualEnergyA - annualEnergyB;
+  const payback = priceDiff > 0 && annualSavings > 0 ? priceDiff / annualSavings : 0;
+  const roi = priceDiff > 0 ? ((savings - priceDiff) / priceDiff) * 100 : 0;
+
+  return {
+    a: { purchase: pA, install: installA, energy: energyA, maint: maintA, downtime: downtimeA, disposal, total: totalA },
+    b: { purchase: pB, install: installB, energy: energyB, maint: maintB, downtime: downtimeB, disposal, total: totalB },
+    savings, payback, roi, annualSavings, priceDiff
+  };
+}
+
+// ─── Segment config ───
+const segments = [
+  { key: 'purchase',  label: 'Purchase Price',   color: '#2196F3' },
+  { key: 'install',   label: 'Installation',      color: '#9E9E9E' },
+  { key: 'energy',    label: 'Energy Cost',        color: '#F44336' },
+  { key: 'maint',     label: 'Maintenance',        color: '#FFC107' },
+  { key: 'downtime',  label: 'Downtime Losses',    color: '#FF9800' },
+  { key: 'disposal',  label: 'Disposal',           color: '#795548' },
+];
+
+// ─── Canvas drawing ───
+function drawChart(data) {
+  const canvas = $('chart');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = rect.width;
+  const H = rect.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Layout constants
+  const padTop = 40;
+  const padBottom = 50;
+  const padLeft = 80;
+  const padRight = 30;
+  const chartH = H - padTop - padBottom;
+  const chartW = W - padLeft - padRight;
+
+  const maxVal = Math.max(data.a.total, data.b.total) * 1.12;
+
+  // Y-axis scale
+  const nTicks = 5;
+  const tickStep = maxVal / nTicks;
+
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 1;
+  ctx.fillStyle = '#888';
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+
+  for (let i = 0; i <= nTicks; i++) {
+    const v = tickStep * i;
+    const y = padTop + chartH - (v / maxVal) * chartH;
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(W - padRight, y);
+    ctx.stroke();
+    ctx.fillText(fmt(v), padLeft - 8, y);
+  }
+
+  // Y-axis label
+  ctx.save();
+  ctx.translate(16, padTop + chartH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = '#555';
+  ctx.font = '12px -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Total Lifecycle Cost ($)', 0, 0);
+  ctx.restore();
+
+  // Bar dimensions
+  const barW = Math.min(140, chartW * 0.25);
+  const gap = chartW * 0.15;
+  const barAx = padLeft + (chartW / 2) - gap / 2 - barW;
+  const barBx = padLeft + (chartW / 2) + gap / 2;
+
+  // Draw stacked bar
+  function drawBar(x, d, label) {
+    let y = padTop + chartH;
+    segments.forEach(seg => {
+      const segH = (d[seg.key] / maxVal) * chartH;
+      y -= segH;
+      ctx.fillStyle = seg.color;
+      ctx.fillRect(x, y, barW, segH);
+      // Segment value label if tall enough
+      if (segH > 16) {
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 11px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fmt(d[seg.key]), x + barW / 2, y + segH / 2);
+      }
+    });
+
+    // Total above bar
+    const topY = padTop + chartH - (d.total / maxVal) * chartH;
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 14px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(fmt(d.total), x + barW / 2, topY - 6);
+
+    // Label below bar
+    ctx.fillStyle = '#555';
+    ctx.font = '12px -apple-system, sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillText(label, x + barW / 2, padTop + chartH + 6);
+  }
+
+  drawBar(barAx, data.a, 'Option A \u2014 Standard');
+  drawBar(barBx, data.b, 'Option B \u2014 High Efficiency');
+
+  // Savings arrow between bars
+  if (data.savings > 0) {
+    const midX = padLeft + chartW / 2;
+    const arrowY = padTop + chartH * 0.32;
+
+    // Arrow line from A bar to B bar
+    const arrowLeft = barAx + barW + 8;
+    const arrowRight = barBx - 8;
+
+    ctx.strokeStyle = '#2e7d32';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(arrowLeft, arrowY);
+    ctx.lineTo(arrowRight, arrowY);
+    ctx.stroke();
+
+    // Arrowhead pointing right
+    ctx.fillStyle = '#2e7d32';
+    ctx.beginPath();
+    ctx.moveTo(arrowRight, arrowY);
+    ctx.lineTo(arrowRight - 10, arrowY - 6);
+    ctx.lineTo(arrowRight - 10, arrowY + 6);
+    ctx.closePath();
+    ctx.fill();
+
+    // Savings text
+    const pct = ((data.savings / data.a.total) * 100).toFixed(1);
+    ctx.fillStyle = '#2e7d32';
+    ctx.font = 'bold 13px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('Save ' + fmt(data.savings), midX, arrowY - 8);
+    ctx.font = '11px -apple-system, sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillText('(' + pct + '% less)', midX, arrowY + 6);
+  }
+
+  // Legend
+  const legendY = padTop + chartH + 26;
+  const legendItemW = Math.floor(chartW / 3);
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+
+  segments.forEach((seg, i) => {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const lx = padLeft + col * legendItemW;
+    const ly = legendY + row * 16;
+
+    ctx.fillStyle = seg.color;
+    ctx.fillRect(lx, ly - 5, 12, 12);
+    ctx.fillStyle = '#555';
+    ctx.fillText(seg.label, lx + 16, ly + 1);
+  });
+}
+
+// ─── Update results cards ───
+function updateResults(data) {
+  // Option A
+  $('totalA').textContent = fmt(data.a.total);
+  $('breakdownA').innerHTML = segments.map(s =>
+    `<li><span>${s.label}</span><span>${fmt(data.a[s.key])}</span></li>`
+  ).join('');
+
+  // Option B
+  $('totalB').textContent = fmt(data.b.total);
+  $('breakdownB').innerHTML = segments.map(s =>
+    `<li><span>${s.label}</span><span>${fmt(data.b[s.key])}</span></li>`
+  ).join('');
+
+  // Savings
+  let paybackClass = 'payback-green';
+  if (data.payback > 5) paybackClass = 'payback-red';
+  else if (data.payback > 3) paybackClass = 'payback-yellow';
+
+  const paybackText = data.payback > 0 ? data.payback.toFixed(1) + ' years' : 'Immediate';
+  const roiText = data.roi > 0 ? data.roi.toFixed(0) + '%' : 'N/A';
+
+  $('savingsContent').innerHTML = `
+    <div class="savings-row">
+      <span class="savings-label">Total Savings</span>
+      <span class="savings-value" style="color:#2e7d32">${fmt(data.savings)}</span>
+    </div>
+    <div class="savings-row">
+      <span class="savings-label">Payback Period</span>
+      <span class="savings-value ${paybackClass}">${paybackText}</span>
+    </div>
+    <div class="savings-row">
+      <span class="savings-label">ROI</span>
+      <span class="savings-value" style="color:#1565C0">${roiText}</span>
+    </div>
+    <div class="savings-row">
+      <span class="savings-label">Annual Energy Savings</span>
+      <span class="savings-value" style="color:#2e7d32">${fmt(data.annualSavings)}/year</span>
+    </div>
+  `;
+}
+
+// ─── Master update ───
+function update() {
+  // Update slider displays
+  Object.values(sliders).forEach(s => {
+    s.out.textContent = s.format(s.el.value);
+  });
+
+  const data = calc();
+  drawChart(data);
+  updateResults(data);
+}
+
+// ─── Init ───
+window.addEventListener('resize', update);
+update();
+</script>
+</body>
+</html>

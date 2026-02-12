@@ -1,0 +1,7 @@
+{
+  "name": "Safety Hazard Identifier",
+  "chapter": 12,
+  "bloom_level": "L4 Analyze",
+  "technology": "p5.js",
+  "learning_objective": "Examine fluid power system scenarios and identify specific hazards by type and recommend control measures"
+}

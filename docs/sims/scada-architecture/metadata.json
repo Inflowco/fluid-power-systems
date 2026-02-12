@@ -1,0 +1,8 @@
+{
+  "title": "SCADA System Architecture",
+  "chapter": 11,
+  "bloom_level": "L2 Understand",
+  "bloom_verb": "Explain",
+  "technology": "p5.js",
+  "learning_objective": "Explain the layered architecture of a SCADA system and how data flows between field devices, servers, and operator displays"
+}

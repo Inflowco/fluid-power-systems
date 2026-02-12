@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pump Performance Curve Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+        main {
+            display: flex;
+            justify-content: center;
+        }
+        #controls {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 8px 16px 12px 16px;
+            background: #fff;
+            border-top: 1px solid #ddd;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            align-items: flex-start;
+        }
+        .ctrl-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .ctrl-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        .ctrl-group input[type="range"] {
+            width: 180px;
+            cursor: pointer;
+        }
+        .ctrl-group .val {
+            font-size: 11px;
+            color: #555;
+            min-width: 80px;
+        }
+        .cb-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .cb-group span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .cb-group label {
+            font-size: 11px;
+            color: #444;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #readouts {
+            background: #f0f4f8;
+            border: 1px solid #d0d8e0;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #333;
+            line-height: 1.6;
+            min-width: 200px;
+        }
+        #readouts b { color: #111; }
+    </style>
+</head>
+<body>
+    <main></main>
+
+    <div id="controls">
+        <div class="ctrl-group">
+            <label>Flow Rate</label>
+            <input type="range" id="flowSlider" min="0" max="500" value="300" step="1">
+            <div class="val" id="flowVal">300 GPM</div>
+        </div>
+        <div class="ctrl-group">
+            <label>Pump Speed</label>
+            <input type="range" id="speedSlider" min="50" max="100" value="100" step="1">
+            <div class="val" id="speedVal">100%</div>
+        </div>
+        <div class="cb-group">
+            <span>Show Curves</span>
+            <label><input type="checkbox" id="cbHead" checked> Head (ft)</label>
+            <label><input type="checkbox" id="cbEff" checked> Efficiency (%)</label>
+            <label><input type="checkbox" id="cbBHP" checked> Power / BHP (hp)</label>
+            <label><input type="checkbox" id="cbNPSH" checked> NPSHr (ft)</label>
+            <label><input type="checkbox" id="cbSys" checked> System Curve</label>
+        </div>
+        <div id="readouts">
+            <b>Operating Point</b><br>
+            <span id="rFlow">Flow: 300 GPM</span><br>
+            <span id="rHead">Head: -- ft</span><br>
+            <span id="rEff">Efficiency: -- %</span><br>
+            <span id="rBHP">BHP: -- hp</span><br>
+            <span id="rNPSH">NPSHr: -- ft</span>
+        </div>
+    </div>
+
+    <script>
+    // ── Pump Performance Curve Explorer MicroSim ──
+
+    // --- Layout constants ---
+    let canvasW, canvasH;
+    const GRAPH_PAD_LEFT = 80;
+    const GRAPH_PAD_RIGHT = 80;
+    const GRAPH_PAD_TOP = 50;
+    const GRAPH_PAD_BOTTOM = 50;
+    let graphX, graphY, graphW, graphH;
+
+    // --- Curve parameters (at 100% speed) ---
+    const Q_MAX = 500;  // GPM
+
+    // Head curve: H(Q) = H0 - a*Q^2  (downward parabola)
+    const H0 = 120;     // shut-off head (ft)
+    const Ha = (H0 - 20) / (Q_MAX * Q_MAX); // drops to ~20 ft at 500 GPM
+
+    // Efficiency curve: bell shape peaking at BEP
+    const EFF_PEAK = 82;
+    const EFF_Q_PEAK = 300; // BEP flow
+    const EFF_SIGMA = 160;  // spread
+
+    // BHP curve: BHP = (Q * H * SG) / (3960 * eff)  -- but we approximate
+    // We compute from head and efficiency directly
+
+    // NPSHr curve: rising with flow -- quadratic
+    const NPSH_BASE = 4;
+    const NPSH_A = (20 - NPSH_BASE) / (Q_MAX * Q_MAX);
+
+    // System curve: H_sys = H_static + K * Q^2
+    const SYS_H_STATIC = 15; // ft static head
+    const SYS_K = (85 - SYS_H_STATIC) / (400 * 400); // passes through ~85 ft at 400 GPM
+
+    // --- Y-axis ranges ---
+    const HEAD_MAX = 140;
+    const EFF_MAX = 100;
+    const BHP_MAX = 30;
+    const NPSH_MAX = 25;
+
+    // --- State ---
+    let flowRate = 300;
+    let pumpSpeed = 100; // percent
+    let showHead = true;
+    let showEff = true;
+    let showBHP = true;
+    let showNPSH = true;
+    let showSys = true;
+
+    // --- Curve functions ---
+    function headCurve(Q, spd) {
+        // Affinity laws: Q' = Q*(N/N0), H' = H*(N/N0)^2
+        let ratio = spd / 100;
+        let Qr = Q / ratio; // equivalent flow at full speed
+        if (Qr > Q_MAX) return null;
+        let H = H0 - Ha * Qr * Qr;
+        return H * ratio * ratio;
+    }
+
+    function effCurve(Q, spd) {
+        let ratio = spd / 100;
+        let Qr = Q / ratio;
+        if (Qr > Q_MAX || Qr < 0) return null;
+        // Efficiency shape stays roughly similar, slight drop at reduced speed
+        let speedPenalty = 1 - 0.08 * (1 - ratio); // small penalty at lower speeds
+        let eff = EFF_PEAK * speedPenalty * Math.exp(-0.5 * Math.pow((Qr - EFF_Q_PEAK) / EFF_SIGMA, 2));
+        return Math.max(0, eff);
+    }
+
+    function bhpCurve(Q, spd) {
+        let H = headCurve(Q, spd);
+        let eff = effCurve(Q, spd);
+        if (H === null || eff === null || eff < 1) return null;
+        // BHP = (Q * H * SG) / (3960 * eff/100)
+        let bhp = (Q * H * 1.0) / (3960 * (eff / 100));
+        return bhp;
+    }
+
+    function npshCurve(Q, spd) {
+        let ratio = spd / 100;
+        let Qr = Q / ratio;
+        if (Qr > Q_MAX) return null;
+        let npsh = NPSH_BASE + NPSH_A * Qr * Qr;
+        // NPSHr scales roughly with (N/N0)^2
+        return npsh * ratio * ratio;
+    }
+
+    function sysCurve(Q) {
+        return SYS_H_STATIC + SYS_K * Q * Q;
+    }
+
+    // --- BEP finder ---
+    function findBEP(spd) {
+        let bestQ = 0;
+        let bestEff = 0;
+        let maxQ = Q_MAX * (spd / 100);
+        for (let q = 0; q <= maxQ; q += 1) {
+            let e = effCurve(q, spd);
+            if (e !== null && e > bestEff) {
+                bestEff = e;
+                bestQ = q;
+            }
+        }
+        return { q: bestQ, eff: bestEff, head: headCurve(bestQ, spd) };
+    }
+
+    // --- Operating point (system curve intersects head curve) ---
+    function findOperatingPoint(spd) {
+        let maxQ = Q_MAX * (spd / 100);
+        for (let q = 0; q <= maxQ; q += 0.5) {
+            let h = headCurve(q, spd);
+            let hs = sysCurve(q);
+            if (h !== null && hs >= h) {
+                return q;
+            }
+        }
+        return maxQ;
+    }
+
+    // --- p5 coordinate helpers ---
+    function qToX(q) {
+        return graphX + (q / Q_MAX) * graphW;
+    }
+
+    function valToY(val, vMax) {
+        return graphY + graphH - (val / vMax) * graphH;
+    }
+
+    // --- Setup ---
+    function setup() {
+        canvasW = Math.min(900, windowWidth - 10);
+        canvasH = 470;
+        const canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+
+        computeGraphBounds();
+        bindControls();
+        textFont('Arial');
+    }
+
+    function computeGraphBounds() {
+        graphX = GRAPH_PAD_LEFT;
+        graphY = GRAPH_PAD_TOP;
+        graphW = canvasW - GRAPH_PAD_LEFT - GRAPH_PAD_RIGHT;
+        graphH = canvasH - GRAPH_PAD_TOP - GRAPH_PAD_BOTTOM;
+    }
+
+    function bindControls() {
+        document.getElementById('flowSlider').addEventListener('input', function() {
+            flowRate = parseInt(this.value);
+            document.getElementById('flowVal').textContent = flowRate + ' GPM';
+        });
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            pumpSpeed = parseInt(this.value);
+            document.getElementById('speedVal').textContent = pumpSpeed + '%';
+        });
+        document.getElementById('cbHead').addEventListener('change', function() { showHead = this.checked; });
+        document.getElementById('cbEff').addEventListener('change', function() { showEff = this.checked; });
+        document.getElementById('cbBHP').addEventListener('change', function() { showBHP = this.checked; });
+        document.getElementById('cbNPSH').addEventListener('change', function() { showNPSH = this.checked; });
+        document.getElementById('cbSys').addEventListener('change', function() { showSys = this.checked; });
+    }
+
+    // --- Draw ---
+    function draw() {
+        background(255);
+        drawTitle();
+        drawGrid();
+        drawAxes();
+        drawCurves();
+        drawOperatingLine();
+        drawBEPMarker();
+        drawLegend();
+        updateReadouts();
+    }
+
+    function drawTitle() {
+        fill(30);
+        noStroke();
+        textSize(16);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text('Pump Performance Curves', canvasW / 2, 10);
+        textStyle(NORMAL);
+        textSize(11);
+        fill(100);
+        text('Centrifugal Pump  |  Speed: ' + pumpSpeed + '%', canvasW / 2, 30);
+    }
+
+    function drawGrid() {
+        stroke(230);
+        strokeWeight(0.5);
+
+        // Vertical grid lines (flow)
+        for (let q = 0; q <= Q_MAX; q += 50) {
+            let x = qToX(q);
+            line(x, graphY, x, graphY + graphH);
+        }
+
+        // Horizontal grid lines (head scale -- 10 divisions)
+        for (let i = 0; i <= 10; i++) {
+            let y = graphY + (i / 10) * graphH;
+            line(graphX, y, graphX + graphW, y);
+        }
+    }
+
+    function drawAxes() {
+        // Graph border
+        stroke(80);
+        strokeWeight(1.5);
+        noFill();
+        rect(graphX, graphY, graphW, graphH);
+
+        // X-axis labels
+        fill(50);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, TOP);
+        for (let q = 0; q <= Q_MAX; q += 50) {
+            let x = qToX(q);
+            text(q, x, graphY + graphH + 5);
+        }
+        textSize(12);
+        textStyle(BOLD);
+        text('Flow Rate (GPM)', graphX + graphW / 2, graphY + graphH + 22);
+        textStyle(NORMAL);
+
+        // --- Left Y-axis: Head (ft) ---
+        push();
+        fill(40, 100, 200);
+        textSize(10);
+        textAlign(RIGHT, CENTER);
+        for (let v = 0; v <= HEAD_MAX; v += 20) {
+            let y = valToY(v, HEAD_MAX);
+            text(v, graphX - 6, y);
+            // small tick
+            stroke(40, 100, 200);
+            strokeWeight(1);
+            line(graphX - 3, y, graphX, y);
+            noStroke();
+        }
+        // Axis label
+        push();
+        translate(graphX - 50, graphY + graphH / 2);
+        rotate(-HALF_PI);
+        textSize(11);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        fill(40, 100, 200);
+        text('Head (ft)', 0, 0);
+        textStyle(NORMAL);
+        pop();
+        pop();
+
+        // --- Right Y-axis #1: Efficiency (%) ---
+        push();
+        fill(30, 150, 50);
+        textSize(10);
+        textAlign(LEFT, CENTER);
+        for (let v = 0; v <= EFF_MAX; v += 20) {
+            let y = valToY(v, EFF_MAX);
+            text(v, graphX + graphW + 6, y);
+            stroke(30, 150, 50);
+            strokeWeight(1);
+            line(graphX + graphW, y, graphX + graphW + 3, y);
+            noStroke();
+        }
+        push();
+        translate(graphX + graphW + 40, graphY + graphH / 2);
+        rotate(HALF_PI);
+        textSize(11);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        fill(30, 150, 50);
+        text('Efficiency (%)', 0, 0);
+        textStyle(NORMAL);
+        pop();
+        pop();
+
+        // --- Far-left Y-axis: BHP (hp) ---
+        push();
+        fill(200, 40, 40);
+        textSize(9);
+        textAlign(RIGHT, CENTER);
+        for (let v = 0; v <= BHP_MAX; v += 5) {
+            let y = valToY(v, BHP_MAX);
+            text(v, graphX - 40, y);
+        }
+        push();
+        translate(graphX - 70, graphY + graphH / 2);
+        rotate(-HALF_PI);
+        textSize(10);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        fill(200, 40, 40);
+        text('BHP (hp)', 0, 0);
+        textStyle(NORMAL);
+        pop();
+        pop();
+
+        // --- Far-right Y-axis: NPSHr (ft) ---
+        push();
+        fill(220, 140, 20);
+        textSize(9);
+        textAlign(LEFT, CENTER);
+        for (let v = 0; v <= NPSH_MAX; v += 5) {
+            let y = valToY(v, NPSH_MAX);
+            text(v, graphX + graphW + 42, y);
+        }
+        push();
+        translate(graphX + graphW + 68, graphY + graphH / 2);
+        rotate(HALF_PI);
+        textSize(10);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        fill(220, 140, 20);
+        text('NPSHr (ft)', 0, 0);
+        textStyle(NORMAL);
+        pop();
+        pop();
+    }
+
+    function drawCurves() {
+        let maxQ = Q_MAX * (pumpSpeed / 100);
+        let step = 2;
+
+        // --- Ghost curves at 100% if speed is reduced ---
+        if (pumpSpeed < 100) {
+            let ghostAlpha = 50;
+
+            if (showHead) {
+                stroke(40, 100, 200, ghostAlpha);
+                strokeWeight(1);
+                noFill();
+                drawingContext.setLineDash([4, 4]);
+                beginShape();
+                for (let q = 0; q <= Q_MAX; q += step) {
+                    let h = headCurve(q, 100);
+                    if (h !== null && h >= 0) vertex(qToX(q), valToY(h, HEAD_MAX));
+                }
+                endShape();
+                drawingContext.setLineDash([]);
+            }
+
+            if (showEff) {
+                stroke(30, 150, 50, ghostAlpha);
+                strokeWeight(1);
+                noFill();
+                drawingContext.setLineDash([4, 4]);
+                beginShape();
+                for (let q = 0; q <= Q_MAX; q += step) {
+                    let e = effCurve(q, 100);
+                    if (e !== null) vertex(qToX(q), valToY(e, EFF_MAX));
+                }
+                endShape();
+                drawingContext.setLineDash([]);
+            }
+
+            if (showBHP) {
+                stroke(200, 40, 40, ghostAlpha);
+                strokeWeight(1);
+                noFill();
+                drawingContext.setLineDash([4, 4]);
+                beginShape();
+                for (let q = 0; q <= Q_MAX; q += step) {
+                    let b = bhpCurve(q, 100);
+                    if (b !== null && b >= 0) vertex(qToX(q), valToY(b, BHP_MAX));
+                }
+                endShape();
+                drawingContext.setLineDash([]);
+            }
+
+            if (showNPSH) {
+                stroke(220, 140, 20, ghostAlpha);
+                strokeWeight(1);
+                noFill();
+                drawingContext.setLineDash([4, 4]);
+                beginShape();
+                for (let q = 0; q <= Q_MAX; q += step) {
+                    let n = npshCurve(q, 100);
+                    if (n !== null) vertex(qToX(q), valToY(n, NPSH_MAX));
+                }
+                endShape();
+                drawingContext.setLineDash([]);
+            }
+        }
+
+        // --- Head curve ---
+        if (showHead) {
+            stroke(40, 100, 200);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let q = 0; q <= maxQ; q += step) {
+                let h = headCurve(q, pumpSpeed);
+                if (h !== null && h >= 0) vertex(qToX(q), valToY(h, HEAD_MAX));
+            }
+            endShape();
+        }
+
+        // --- Efficiency curve ---
+        if (showEff) {
+            stroke(30, 150, 50);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let q = 0; q <= maxQ; q += step) {
+                let e = effCurve(q, pumpSpeed);
+                if (e !== null) vertex(qToX(q), valToY(e, EFF_MAX));
+            }
+            endShape();
+        }
+
+        // --- BHP curve ---
+        if (showBHP) {
+            stroke(200, 40, 40);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let q = 0; q <= maxQ; q += step) {
+                let b = bhpCurve(q, pumpSpeed);
+                if (b !== null && b >= 0) vertex(qToX(q), valToY(b, BHP_MAX));
+            }
+            endShape();
+        }
+
+        // --- NPSHr curve ---
+        if (showNPSH) {
+            stroke(220, 140, 20);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let q = 0; q <= maxQ; q += step) {
+                let n = npshCurve(q, pumpSpeed);
+                if (n !== null) vertex(qToX(q), valToY(n, NPSH_MAX));
+            }
+            endShape();
+        }
+
+        // --- System curve ---
+        if (showSys) {
+            stroke(130);
+            strokeWeight(1.8);
+            noFill();
+            drawingContext.setLineDash([8, 5]);
+            beginShape();
+            for (let q = 0; q <= Q_MAX; q += step) {
+                let hs = sysCurve(q);
+                if (hs <= HEAD_MAX) vertex(qToX(q), valToY(hs, HEAD_MAX));
+            }
+            endShape();
+            drawingContext.setLineDash([]);
+        }
+    }
+
+    function drawOperatingLine() {
+        let x = qToX(flowRate);
+        if (x < graphX || x > graphX + graphW) return;
+
+        stroke(80, 80, 80, 180);
+        strokeWeight(1.2);
+        drawingContext.setLineDash([5, 4]);
+        line(x, graphY, x, graphY + graphH);
+        drawingContext.setLineDash([]);
+
+        // Small label at top
+        noStroke();
+        fill(80);
+        textSize(9);
+        textAlign(CENTER, BOTTOM);
+        text(flowRate + ' GPM', x, graphY - 3);
+
+        // Draw dots at intersection with each visible curve
+        let dotR = 6;
+        let h = headCurve(flowRate, pumpSpeed);
+        let e = effCurve(flowRate, pumpSpeed);
+        let b = bhpCurve(flowRate, pumpSpeed);
+        let n = npshCurve(flowRate, pumpSpeed);
+
+        if (showHead && h !== null && h >= 0) {
+            fill(40, 100, 200);
+            noStroke();
+            ellipse(x, valToY(h, HEAD_MAX), dotR, dotR);
+        }
+        if (showEff && e !== null) {
+            fill(30, 150, 50);
+            noStroke();
+            ellipse(x, valToY(e, EFF_MAX), dotR, dotR);
+        }
+        if (showBHP && b !== null && b >= 0) {
+            fill(200, 40, 40);
+            noStroke();
+            ellipse(x, valToY(b, BHP_MAX), dotR, dotR);
+        }
+        if (showNPSH && n !== null) {
+            fill(220, 140, 20);
+            noStroke();
+            ellipse(x, valToY(n, NPSH_MAX), dotR, dotR);
+        }
+
+        // System curve intersection dot
+        if (showSys) {
+            let hs = sysCurve(flowRate);
+            if (hs <= HEAD_MAX) {
+                fill(130);
+                noStroke();
+                ellipse(x, valToY(hs, HEAD_MAX), dotR, dotR);
+            }
+        }
+    }
+
+    function drawBEPMarker() {
+        let bep = findBEP(pumpSpeed);
+        let x = qToX(bep.q);
+        let y = valToY(bep.eff, EFF_MAX);
+
+        if (x < graphX || x > graphX + graphW) return;
+        if (y < graphY || y > graphY + graphH) return;
+
+        // Draw star marker
+        push();
+        translate(x, y);
+        fill(255, 200, 0);
+        stroke(80);
+        strokeWeight(1);
+        drawStar(0, 0, 6, 12, 5);
+        pop();
+
+        // Label
+        noStroke();
+        fill(60);
+        textSize(9);
+        textAlign(LEFT, CENTER);
+        text('BEP', x + 14, y);
+        textSize(8);
+        fill(100);
+        text(Math.round(bep.q) + ' GPM, ' + bep.eff.toFixed(1) + '%', x + 14, y + 11);
+    }
+
+    function drawStar(x, y, r1, r2, npoints) {
+        let angle = TWO_PI / npoints;
+        let halfAngle = angle / 2.0;
+        beginShape();
+        for (let a = -HALF_PI; a < TWO_PI - HALF_PI; a += angle) {
+            let sx = x + cos(a) * r2;
+            let sy = y + sin(a) * r2;
+            vertex(sx, sy);
+            sx = x + cos(a + halfAngle) * r1;
+            sy = y + sin(a + halfAngle) * r1;
+            vertex(sx, sy);
+        }
+        endShape(CLOSE);
+    }
+
+    function drawLegend() {
+        let lx = graphX + 10;
+        let ly = graphY + 10;
+        let lineLen = 22;
+        let lineH = 16;
+        let items = [];
+
+        if (showHead) items.push({ label: 'Head (ft)', col: [40, 100, 200], dash: false });
+        if (showEff)  items.push({ label: 'Efficiency (%)', col: [30, 150, 50], dash: false });
+        if (showBHP)  items.push({ label: 'BHP (hp)', col: [200, 40, 40], dash: false });
+        if (showNPSH) items.push({ label: 'NPSHr (ft)', col: [220, 140, 20], dash: false });
+        if (showSys)  items.push({ label: 'System Curve', col: [130, 130, 130], dash: true });
+
+        if (items.length === 0) return;
+
+        // Background box
+        let boxW = 120;
+        let boxH = items.length * lineH + 10;
+        fill(255, 255, 255, 220);
+        stroke(200);
+        strokeWeight(0.5);
+        rect(lx, ly, boxW, boxH, 4);
+
+        for (let i = 0; i < items.length; i++) {
+            let yy = ly + 8 + i * lineH;
+            let it = items[i];
+
+            stroke(it.col[0], it.col[1], it.col[2]);
+            strokeWeight(2.5);
+            if (it.dash) {
+                drawingContext.setLineDash([5, 3]);
+            }
+            line(lx + 6, yy + 4, lx + 6 + lineLen, yy + 4);
+            drawingContext.setLineDash([]);
+
+            noStroke();
+            fill(50);
+            textSize(10);
+            textAlign(LEFT, CENTER);
+            text(it.label, lx + 6 + lineLen + 5, yy + 4);
+        }
+    }
+
+    function updateReadouts() {
+        let h = headCurve(flowRate, pumpSpeed);
+        let e = effCurve(flowRate, pumpSpeed);
+        let b = bhpCurve(flowRate, pumpSpeed);
+        let n = npshCurve(flowRate, pumpSpeed);
+
+        document.getElementById('rFlow').textContent =
+            'Flow: ' + flowRate + ' GPM';
+        document.getElementById('rHead').textContent =
+            'Head: ' + (h !== null && h >= 0 ? h.toFixed(1) : '--') + ' ft';
+        document.getElementById('rEff').textContent =
+            'Efficiency: ' + (e !== null ? e.toFixed(1) : '--') + ' %';
+        document.getElementById('rBHP').textContent =
+            'BHP: ' + (b !== null && b >= 0 ? b.toFixed(2) : '--') + ' hp';
+        document.getElementById('rNPSH').textContent =
+            'NPSHr: ' + (n !== null ? n.toFixed(1) : '--') + ' ft';
+    }
+
+    // --- Responsive resize ---
+    function windowResized() {
+        canvasW = Math.min(900, windowWidth - 10);
+        canvasH = 470;
+        resizeCanvas(canvasW, canvasH);
+        computeGraphBounds();
+    }
+    </script>
+</body>
+</html>

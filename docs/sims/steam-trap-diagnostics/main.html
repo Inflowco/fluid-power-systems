@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Trap Types and Testing</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: #1565c0; font-size: 1.4em; text-align: center; margin-bottom: 6px; }
+        .subtitle { color: #666; font-size: 0.9em; text-align: center; margin-bottom: 20px; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 16px; justify-content: center; }
+        .tab { padding: 8px 16px; border-radius: 20px; border: 2px solid #1565c0; background: white; color: #1565c0; cursor: pointer; font-size: 0.85em; }
+        .tab.active { background: #1565c0; color: white; }
+        .panel { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .trap-info { display: none; }
+        .trap-info.active { display: block; }
+        .trap-info h2 { font-size: 1.1em; color: #333; margin: 0 0 4px 0; }
+        .trap-info .principle { color: #1565c0; font-weight: bold; font-size: 0.85em; margin-bottom: 12px; }
+        .trap-info p { font-size: 0.9em; line-height: 1.6; color: #444; }
+        .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .spec { background: #f5f5f5; padding: 10px; border-radius: 6px; font-size: 0.85em; }
+        .spec strong { color: #333; }
+        .quiz-section { margin-top: 24px; border-top: 2px solid #e0e0e0; padding-top: 20px; }
+        .quiz-section h2 { font-size: 1.1em; color: #333; text-align: center; }
+        .trap-test { background: #f5f5f5; border-radius: 8px; padding: 16px; margin: 12px 0; }
+        .trap-test .readings { font-size: 0.85em; color: #555; margin-bottom: 10px; }
+        .btn-group { display: flex; gap: 8px; }
+        .diag-btn { padding: 6px 14px; border-radius: 4px; border: 1px solid #ccc; background: white; cursor: pointer; font-size: 0.8em; }
+        .diag-btn:hover { background: #e3f2fd; }
+        .diag-btn.correct { background: #c8e6c9; border-color: #2e7d32; }
+        .diag-btn.wrong { background: #ffcdd2; border-color: #c62828; }
+        .feedback { font-size: 0.8em; margin-top: 8px; display: none; }
+        .score { text-align: center; font-size: 1em; color: #1565c0; font-weight: bold; margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Steam Trap Types and Testing</h1>
+        <p class="subtitle">Learn trap operating principles, then diagnose trap conditions</p>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTrap(0)">Float & Thermostatic</div>
+            <div class="tab" onclick="showTrap(1)">Inverted Bucket</div>
+            <div class="tab" onclick="showTrap(2)">Thermodynamic Disc</div>
+            <div class="tab" onclick="showTrap(3)">Balanced Pressure</div>
+        </div>
+
+        <div class="panel">
+            <div class="trap-info active" id="trap0">
+                <h2>Float & Thermostatic (F&T) Trap</h2>
+                <div class="principle">Operating Principle: Density (mechanical)</div>
+                <p>A ball float rises as condensate fills the trap body, opening a valve to discharge condensate continuously. A separate thermostatic air vent at the top releases air and non-condensable gases. The most versatile trap type for process applications.</p>
+                <div class="specs-grid">
+                    <div class="spec"><strong>Best for:</strong> Process equipment, variable loads</div>
+                    <div class="spec"><strong>Air handling:</strong> Excellent (thermostatic vent)</div>
+                    <div class="spec"><strong>Discharge:</strong> Continuous</div>
+                    <div class="spec"><strong>Durability:</strong> Good — float can be damaged by water hammer</div>
+                </div>
+            </div>
+            <div class="trap-info" id="trap1">
+                <h2>Inverted Bucket Trap</h2>
+                <div class="principle">Operating Principle: Density (mechanical)</div>
+                <p>An inverted bucket inside the trap body floats when steam enters (closing the valve) and sinks when condensate fills it (opening the valve). Requires a water seal to operate. Extremely durable and resistant to water hammer.</p>
+                <div class="specs-grid">
+                    <div class="spec"><strong>Best for:</strong> Main drip legs, steady loads</div>
+                    <div class="spec"><strong>Air handling:</strong> Fair — limited by small vent hole</div>
+                    <div class="spec"><strong>Discharge:</strong> Intermittent (blast discharge)</div>
+                    <div class="spec"><strong>Durability:</strong> Excellent — simple, rugged design</div>
+                </div>
+            </div>
+            <div class="trap-info" id="trap2">
+                <h2>Thermodynamic (Disc) Trap</h2>
+                <div class="principle">Operating Principle: Velocity and pressure</div>
+                <p>A flat disc sits on a seat. When condensate enters, it lifts the disc and flows through. Flash steam from hot condensate creates a low-pressure zone above the disc, pulling it down to close. When flash steam condenses, the disc lifts again.</p>
+                <div class="specs-grid">
+                    <div class="spec"><strong>Best for:</strong> Drip legs, steam tracing</div>
+                    <div class="spec"><strong>Air handling:</strong> Fair</div>
+                    <div class="spec"><strong>Discharge:</strong> Intermittent (cyclic click)</div>
+                    <div class="spec"><strong>Durability:</strong> Good — only one moving part</div>
+                </div>
+            </div>
+            <div class="trap-info" id="trap3">
+                <h2>Balanced Pressure (Thermostatic) Trap</h2>
+                <div class="principle">Operating Principle: Temperature</div>
+                <p>A fluid-filled capsule expands when heated by steam (closing the valve) and contracts as condensate cools below steam temperature (opening the valve). Provides excellent air venting and is self-adjusting to different pressures.</p>
+                <div class="specs-grid">
+                    <div class="spec"><strong>Best for:</strong> Light loads, air venting, tracing</div>
+                    <div class="spec"><strong>Air handling:</strong> Excellent — opens wide on startup</div>
+                    <div class="spec"><strong>Discharge:</strong> Modulating (opens as condensate cools)</div>
+                    <div class="spec"><strong>Durability:</strong> Moderate — capsule sensitive to water hammer</div>
+                </div>
+            </div>
+
+            <div class="quiz-section">
+                <h2>Diagnostic Challenge</h2>
+                <p style="text-align:center; font-size:0.85em; color:#666;">Evaluate each trap's readings and diagnose its condition.</p>
+
+                <div class="trap-test">
+                    <strong>Trap #1</strong> (Inverted bucket on 125 psig header drip)
+                    <div class="readings">Upstream temp: 353°F | Downstream temp: 348°F | Ultrasonic: Continuous loud rushing</div>
+                    <div class="btn-group">
+                        <button class="diag-btn" onclick="diagnose(this, 'wrong')">Working</button>
+                        <button class="diag-btn" onclick="diagnose(this, 'correct')">Failed Open</button>
+                        <button class="diag-btn" onclick="diagnose(this, 'wrong')">Failed Closed</button>
+                    </div>
+                    <div class="feedback">Continuous loud rushing sound with near-equal temperatures upstream and downstream indicates live steam passing through — <strong>failed open</strong>.</div>
+                </div>
+
+                <div class="trap-test">
+                    <strong>Trap #2</strong> (F&T on heat exchanger at 50 psig)
+                    <div class="readings">Upstream temp: 298°F | Downstream temp: 220°F | Ultrasonic: Intermittent gurgling</div>
+                    <div class="btn-group">
+                        <button class="diag-btn" onclick="diagnose(this, 'correct')">Working</button>
+                        <button class="diag-btn" onclick="diagnose(this, 'wrong')">Failed Open</button>
+                        <button class="diag-btn" onclick="diagnose(this, 'wrong')">Failed Closed</button>
+                    </div>
+                    <div class="feedback">Temperature drop downstream and intermittent gurgling are normal for a working F&T trap discharging condensate — <strong>working correctly</strong>.</div>
+                </div>
+
+                <div class="trap-test">
+                    <strong>Trap #3</strong> (Disc trap on steam tracing at 100 psig)
+                    <div class="readings">Upstream temp: 190°F | Downstream temp: 140°F | Ultrasonic: Silent</div>
+                    <div class="btn-group">
+                        <button class="diag-btn" onclick="diagnose(this, 'wrong')">Working</button>
+                        <button class="diag-btn" onclick="diagnose(this, 'wrong')">Failed Open</button>
+                        <button class="diag-btn" onclick="diagnose(this, 'correct')">Failed Closed</button>
+                    </div>
+                    <div class="feedback">Upstream temperature far below saturation (338°F at 100 psig) with silence indicates condensate is backing up — <strong>failed closed</strong>.</div>
+                </div>
+            </div>
+            <div class="score" id="scoreDisplay"></div>
+        </div>
+    </div>
+    <script>
+        let correct = 0, total = 0;
+        function showTrap(idx) {
+            document.querySelectorAll('.trap-info').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('trap' + idx).classList.add('active');
+            document.querySelectorAll('.tab')[idx].classList.add('active');
+        }
+        function diagnose(btn, result) {
+            if (btn.parentElement.querySelector('.correct, .wrong')) return;
+            total++;
+            btn.classList.add(result);
+            if (result === 'correct') correct++;
+            btn.parentElement.parentElement.querySelector('.feedback').style.display = 'block';
+            document.getElementById('scoreDisplay').textContent = 'Score: ' + correct + ' / ' + total;
+        }
+    </script>
+</body>
+</html>

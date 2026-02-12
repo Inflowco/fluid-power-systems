@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Boiler Types Comparison</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: #1565c0; font-size: 1.4em; text-align: center; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .card.active { border: 2px solid #1565c0; }
+        .card h2 { font-size: 1.1em; color: #333; margin: 0 0 8px 0; }
+        .card .type-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; color: white; margin-bottom: 8px; }
+        .firetube .type-badge { background: #e65100; }
+        .watertube .type-badge { background: #1565c0; }
+        .electric .type-badge { background: #2e7d32; }
+        .condensing .type-badge { background: #6a1b9a; }
+        .specs { font-size: 0.85em; color: #555; line-height: 1.6; }
+        .specs strong { color: #333; }
+        .placeholder-note { text-align: center; color: #999; font-size: 0.8em; margin-top: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Steam Boiler Types Comparison</h1>
+        <div class="grid">
+            <div class="card firetube" onclick="this.classList.toggle('active')">
+                <h2>Firetube Boiler</h2>
+                <span class="type-badge">Scotch Marine</span>
+                <div class="specs">
+                    <strong>Principle:</strong> Hot gases inside tubes, water outside<br>
+                    <strong>Capacity:</strong> Up to ~800 HP<br>
+                    <strong>Pressure:</strong> Up to 250 psig<br>
+                    <strong>Efficiency:</strong> 80–85%<br>
+                    <strong>Best for:</strong> Building heating, food processing, small-medium industrial
+                </div>
+            </div>
+            <div class="card watertube" onclick="this.classList.toggle('active')">
+                <h2>Watertube Boiler</h2>
+                <span class="type-badge">High Pressure</span>
+                <div class="specs">
+                    <strong>Principle:</strong> Water inside tubes, hot gases outside<br>
+                    <strong>Capacity:</strong> 10–1,000+ MMBtu/hr<br>
+                    <strong>Pressure:</strong> Up to 3,000+ psig<br>
+                    <strong>Efficiency:</strong> 80–88%<br>
+                    <strong>Best for:</strong> Power plants, refineries, large industrial
+                </div>
+            </div>
+            <div class="card electric" onclick="this.classList.toggle('active')">
+                <h2>Electric Boiler</h2>
+                <span class="type-badge">Zero Emissions</span>
+                <div class="specs">
+                    <strong>Principle:</strong> Electrode or resistance heating<br>
+                    <strong>Capacity:</strong> Up to ~100 MMBtu/hr<br>
+                    <strong>Pressure:</strong> Up to 250 psig<br>
+                    <strong>Efficiency:</strong> 98–99%<br>
+                    <strong>Best for:</strong> Clean environments, emission-restricted areas
+                </div>
+            </div>
+            <div class="card condensing" onclick="this.classList.toggle('active')">
+                <h2>Condensing Boiler</h2>
+                <span class="type-badge">High Efficiency</span>
+                <div class="specs">
+                    <strong>Principle:</strong> Flue gas latent heat recovery<br>
+                    <strong>Capacity:</strong> Up to ~20 MMBtu/hr<br>
+                    <strong>Pressure:</strong> Typically low pressure<br>
+                    <strong>Efficiency:</strong> 95–98%<br>
+                    <strong>Best for:</strong> Low-temp hot water, hydronic heating
+                </div>
+            </div>
+        </div>
+        <p class="placeholder-note">Click a card to highlight. Full animated cross-sections coming soon.</p>
+    </div>
+</body>
+</html>

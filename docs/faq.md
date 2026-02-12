@@ -36,7 +36,7 @@ AI is integrated throughout the course as a tool to enhance traditional fluid po
 
 ### What software tools will I learn to use?
 
-Students learn to use several categories of software including CMMS (Computerized Maintenance Management Systems) for scheduling and work order management, SCADA (Supervisory Control and Data Acquisition) systems for monitoring, AI dashboards for data visualization and predictive analytics, IoT sensor platforms for real-time data collection, and control system programming interfaces. See [Chapter 11: Systems and Software](chapters/11-systems/index.md) for software deployment details.
+Students learn to use several categories of software including CMMS (Computerized Maintenance Management Systems) for scheduling and work order management, SCADA (Supervisory Control and Data Acquisition) systems for monitoring, AI dashboards for data visualization and predictive analytics, IoT sensor platforms for real-time data collection, and control system programming interfaces. See [Chapter 11: Systems and Software](chapters/13-systems/index.md) for software deployment details.
 
 ### Are there hands-on labs in this course?
 
@@ -44,7 +44,7 @@ Yes, every week includes a practical laboratory exercise. Labs range from explor
 
 ### What career paths does this course prepare me for?
 
-This course prepares students for roles in smart, technology-enhanced industries. Career paths include fluid power technician, HVAC technician, industrial maintenance technician, controls technician, building automation specialist, and predictive maintenance analyst. The integration of AI and data skills differentiates graduates in an increasingly automated workforce. See [Chapter 12: Safety](chapters/12-safety/index.md) for career path discussions.
+This course prepares students for roles in smart, technology-enhanced industries. Career paths include fluid power technician, HVAC technician, industrial maintenance technician, controls technician, building automation specialist, and predictive maintenance analyst. The integration of AI and data skills differentiates graduates in an increasingly automated workforce. See [Chapter 12: Safety](chapters/14-safety/index.md) for career path discussions.
 
 ### How does this course address sustainability?
 
@@ -66,7 +66,7 @@ Hydraulic systems use incompressible liquids (typically oil) to transmit force, 
 
 ### What is predictive maintenance?
 
-Predictive maintenance is a strategy that uses data analysis tools and techniques to determine the condition of equipment and predict when maintenance should be performed. Unlike reactive maintenance (fixing after failure) or preventive maintenance (scheduled intervals), predictive maintenance monitors actual equipment condition using sensors and AI analytics to forecast failures before they occur. Benefits include 30-50% reduction in unplanned downtime, 10-40% increase in equipment life, and 25-30% savings in maintenance costs. See [Chapter 8: Hydraulic Systems](chapters/08-hydraulic/index.md) and the [Glossary](glossary.md).
+Predictive maintenance is a strategy that uses data analysis tools and techniques to determine the condition of equipment and predict when maintenance should be performed. Unlike reactive maintenance (fixing after failure) or preventive maintenance (scheduled intervals), predictive maintenance monitors actual equipment condition using sensors and AI analytics to forecast failures before they occur. Benefits include 30-50% reduction in unplanned downtime, 10-40% increase in equipment life, and 25-30% savings in maintenance costs. See [Chapter 8: Hydraulic Systems](chapters/10-hydraulic/index.md) and the [Glossary](glossary.md).
 
 ### What is a PLC and how is it used in fluid power systems?
 
@@ -74,19 +74,19 @@ A Programmable Logic Controller (PLC) is a ruggedized industrial computer that c
 
 ### What is the Internet of Things (IoT) and how does it apply to fluid power?
 
-The Internet of Things (IoT) is a network of physical objects embedded with sensors, software, and connectivity that enables them to exchange data with other devices and systems. In fluid power systems, IoT sensors monitor parameters like pressure, temperature, flow rate, vibration, and power consumption in real time. This data feeds into AI analytics platforms for predictive maintenance, performance optimization, and remote monitoring. See [Chapter 6: Cooling](chapters/06-cooling/index.md) and the [Glossary](glossary.md).
+The Internet of Things (IoT) is a network of physical objects embedded with sensors, software, and connectivity that enables them to exchange data with other devices and systems. In fluid power systems, IoT sensors monitor parameters like pressure, temperature, flow rate, vibration, and power consumption in real time. This data feeds into AI analytics platforms for predictive maintenance, performance optimization, and remote monitoring. See [Chapter 6: Cooling](chapters/07-cooling/index.md) and the [Glossary](glossary.md).
 
 ### What is SCADA and why do technicians need to understand it?
 
-SCADA (Supervisory Control and Data Acquisition) is a system of software and hardware that allows industrial organizations to control processes, monitor and gather real-time data, interact with sensors, valves, pumps, and motors through HMI software, and record events. Technicians need SCADA knowledge because modern fluid power facilities use it as the central nervous system for monitoring and controlling multiple systems from a single interface. See [Chapter 11: Systems and Software](chapters/11-systems/index.md) and the [Glossary](glossary.md).
+SCADA (Supervisory Control and Data Acquisition) is a system of software and hardware that allows industrial organizations to control processes, monitor and gather real-time data, interact with sensors, valves, pumps, and motors through HMI software, and record events. Technicians need SCADA knowledge because modern fluid power facilities use it as the central nervous system for monitoring and controlling multiple systems from a single interface. See [Chapter 11: Systems and Software](chapters/13-systems/index.md) and the [Glossary](glossary.md).
 
 ### What is a CMMS and how does it help technicians?
 
-A Computerized Maintenance Management System (CMMS) is software that centralizes maintenance information and facilitates maintenance operations, including scheduling, inventory control, and work order management. For technicians, CMMS helps organize daily tasks, track maintenance history, manage spare parts inventory, and when integrated with AI, provides predictive maintenance scheduling based on equipment performance data. See [Chapter 11: Systems and Software](chapters/11-systems/index.md) and the [Glossary](glossary.md).
+A Computerized Maintenance Management System (CMMS) is software that centralizes maintenance information and facilitates maintenance operations, including scheduling, inventory control, and work order management. For technicians, CMMS helps organize daily tasks, track maintenance history, manage spare parts inventory, and when integrated with AI, provides predictive maintenance scheduling based on equipment performance data. See [Chapter 11: Systems and Software](chapters/13-systems/index.md) and the [Glossary](glossary.md).
 
 ### What is cavitation and why is it dangerous?
 
-Cavitation is a phenomenon where vapor bubbles form and collapse in a liquid due to pressure variations, causing noise, vibration, and material damage. It occurs when local pressure drops below the vapor pressure of the liquid, typically at pump inlets or in areas of rapid flow change. Cavitation can severely damage pump impellers, valve seats, and pipe walls, leading to costly repairs and system downtime. Prevention involves maintaining proper inlet conditions, avoiding excessive suction lift, and monitoring system parameters. See [Chapter 9: Pumping Systems](chapters/09-pumping/index.md) and the [Glossary](glossary.md).
+Cavitation is a phenomenon where vapor bubbles form and collapse in a liquid due to pressure variations, causing noise, vibration, and material damage. It occurs when local pressure drops below the vapor pressure of the liquid, typically at pump inlets or in areas of rapid flow change. Cavitation can severely damage pump impellers, valve seats, and pipe walls, leading to costly repairs and system downtime. Prevention involves maintaining proper inlet conditions, avoiding excessive suction lift, and monitoring system parameters. See [Chapter 9: Pumping Systems](chapters/11-pumping/index.md) and the [Glossary](glossary.md).
 
 ### What is a Variable Frequency Drive (VFD)?
 
@@ -148,11 +148,11 @@ Differential pressure is the difference in fluid pressure between two points in 
 
 ### What are the key properties of hydraulic fluid?
 
-Hydraulic fluid must provide effective power transmission, lubrication, and system protection. Key properties include viscosity (resistance to flow, typically measured in centistokes), viscosity index (stability of viscosity across temperatures), oxidation resistance, anti-wear characteristics, corrosion protection, foam resistance, and water separation ability. Proper fluid selection and maintenance through regular sampling and analysis are critical for system longevity. See [Chapter 8: Hydraulic Systems](chapters/08-hydraulic/index.md) and the [Glossary](glossary.md).
+Hydraulic fluid must provide effective power transmission, lubrication, and system protection. Key properties include viscosity (resistance to flow, typically measured in centistokes), viscosity index (stability of viscosity across temperatures), oxidation resistance, anti-wear characteristics, corrosion protection, foam resistance, and water separation ability. Proper fluid selection and maintenance through regular sampling and analysis are critical for system longevity. See [Chapter 8: Hydraulic Systems](chapters/10-hydraulic/index.md) and the [Glossary](glossary.md).
 
 ### What is the difference between SCADA and CMMS?
 
-SCADA focuses on real-time monitoring and control of industrial processes, providing live data displays, automated control actions, and alarm management. CMMS focuses on maintenance management, handling work orders, maintenance scheduling, spare parts inventory, and maintenance history tracking. In modern facilities, these systems are often integrated: SCADA detects issues in real time and automatically generates work orders in the CMMS. See [Chapter 11: Systems and Software](chapters/11-systems/index.md).
+SCADA focuses on real-time monitoring and control of industrial processes, providing live data displays, automated control actions, and alarm management. CMMS focuses on maintenance management, handling work orders, maintenance scheduling, spare parts inventory, and maintenance history tracking. In modern facilities, these systems are often integrated: SCADA detects issues in real time and automatically generates work orders in the CMMS. See [Chapter 11: Systems and Software](chapters/13-systems/index.md).
 
 ### How do IoT sensors communicate data?
 
@@ -160,31 +160,31 @@ IoT sensors use various wireless communication protocols including Wi-Fi, Blueto
 
 ### What is a cooling tower and how does it work?
 
-A cooling tower is a heat rejection device that uses evaporation to transfer waste heat from a fluid to the atmosphere. Hot water from industrial processes or HVAC systems is sprayed over fill media while fans draw air through the tower. As water evaporates, it absorbs heat, cooling the remaining water. Key maintenance concerns include water quality management, corrosion prevention, scale prevention, biological growth control, and fan maintenance. See [Chapter 6: Cooling](chapters/06-cooling/index.md) and the [Glossary](glossary.md).
+A cooling tower is a heat rejection device that uses evaporation to transfer waste heat from a fluid to the atmosphere. Hot water from industrial processes or HVAC systems is sprayed over fill media while fans draw air through the tower. As water evaporates, it absorbs heat, cooling the remaining water. Key maintenance concerns include water quality management, corrosion prevention, scale prevention, biological growth control, and fan maintenance. See [Chapter 6: Cooling](chapters/07-cooling/index.md) and the [Glossary](glossary.md).
 
 ### What is combustible dust and why is it a safety concern?
 
-Combustible dust consists of fine solid particles that present an explosion hazard when suspended in air under certain conditions. Many industrial processes generate combustible dust including wood, metal, grain, and chemical processing. When dust reaches sufficient concentration and encounters an ignition source, it can cause devastating explosions. Dust collection systems must be designed and maintained according to NFPA standards to prevent these hazards. See [Chapter 7: Dust Collection](chapters/07-dust-collection/index.md) and the [Glossary](glossary.md).
+Combustible dust consists of fine solid particles that present an explosion hazard when suspended in air under certain conditions. Many industrial processes generate combustible dust including wood, metal, grain, and chemical processing. When dust reaches sufficient concentration and encounters an ignition source, it can cause devastating explosions. Dust collection systems must be designed and maintained according to NFPA standards to prevent these hazards. See [Chapter 7: Dust Collection](chapters/09-dust-collection/index.md) and the [Glossary](glossary.md).
 
 ### What is water hammer and how is it prevented?
 
-Water hammer is a pressure surge that occurs when fluid in motion is forced to stop or change direction suddenly, typically when a valve closes rapidly. The resulting shock wave can damage pipes, fittings, and equipment. Prevention methods include slowly closing valves, using check valves, installing pressure relief devices, maintaining proper system design, and using surge tanks or accumulators. See [Chapter 9: Pumping Systems](chapters/09-pumping/index.md).
+Water hammer is a pressure surge that occurs when fluid in motion is forced to stop or change direction suddenly, typically when a valve closes rapidly. The resulting shock wave can damage pipes, fittings, and equipment. Prevention methods include slowly closing valves, using check valves, installing pressure relief devices, maintaining proper system design, and using surge tanks or accumulators. See [Chapter 9: Pumping Systems](chapters/11-pumping/index.md).
 
 ### What is vibration analysis used for?
 
-Vibration analysis is the process of measuring and analyzing vibration characteristics of mechanical systems to detect faults, imbalances, or misalignments. In fluid power systems, vibration analysis identifies bearing wear, shaft misalignment, impeller damage, loose mounting, and structural resonance problems in pumps, fans, and motors. Modern AI systems continuously analyze vibration data to detect developing problems long before they cause failures. See [Chapter 10: Fans](chapters/10-fan/index.md) and the [Glossary](glossary.md).
+Vibration analysis is the process of measuring and analyzing vibration characteristics of mechanical systems to detect faults, imbalances, or misalignments. In fluid power systems, vibration analysis identifies bearing wear, shaft misalignment, impeller damage, loose mounting, and structural resonance problems in pumps, fans, and motors. Modern AI systems continuously analyze vibration data to detect developing problems long before they cause failures. See [Chapter 10: Fans](chapters/12-fan/index.md) and the [Glossary](glossary.md).
 
 ### What is leak detection and what methods are used?
 
-Leak detection is the process of identifying fluid escapes from a system. Methods include ultrasonic testing (detecting high-frequency sounds from leaks), pressure decay testing (monitoring pressure loss over time), visual inspection, thermal imaging (detecting temperature differences from leaking fluid), and soap bubble testing for gas leaks. AI-enhanced leak detection uses sensor data to identify, locate, and prioritize leaks based on energy waste and system impact. See [Chapter 5: Compressed Air](chapters/05-compressed-air/index.md) and the [Glossary](glossary.md).
+Leak detection is the process of identifying fluid escapes from a system. Methods include ultrasonic testing (detecting high-frequency sounds from leaks), pressure decay testing (monitoring pressure loss over time), visual inspection, thermal imaging (detecting temperature differences from leaking fluid), and soap bubble testing for gas leaks. AI-enhanced leak detection uses sensor data to identify, locate, and prioritize leaks based on energy waste and system impact. See [Chapter 5: Compressed Air](chapters/06-compressed-air/index.md) and the [Glossary](glossary.md).
 
 ### What is corrosion and how is it prevented in cooling water systems?
 
-Corrosion is the gradual destruction of materials, usually metals, by chemical or electrochemical reaction with their environment. In cooling water systems, corrosion is prevented through water treatment programs (controlling pH, alkalinity, and dissolved minerals), corrosion inhibitors, proper material selection (using compatible metals and coatings), cathodic protection, and continuous monitoring of water quality parameters. AI systems can predict corrosion rates and optimize treatment programs. See [Chapter 6: Cooling](chapters/06-cooling/index.md) and the [Glossary](glossary.md).
+Corrosion is the gradual destruction of materials, usually metals, by chemical or electrochemical reaction with their environment. In cooling water systems, corrosion is prevented through water treatment programs (controlling pH, alkalinity, and dissolved minerals), corrosion inhibitors, proper material selection (using compatible metals and coatings), cathodic protection, and continuous monitoring of water quality parameters. AI systems can predict corrosion rates and optimize treatment programs. See [Chapter 6: Cooling](chapters/07-cooling/index.md) and the [Glossary](glossary.md).
 
 ### What is scaling and how does it affect system performance?
 
-Scaling is the formation of mineral deposits on heat transfer surfaces or fluid handling equipment due to precipitation of dissolved solids. Scale acts as an insulator, reducing heat transfer efficiency in cooling systems, and restricts flow in pipes and valves. Prevention involves monitoring water chemistry, using water treatment chemicals, controlling temperature, and implementing blowdown schedules. Even a thin layer of scale can significantly reduce system efficiency. See [Chapter 6: Cooling](chapters/06-cooling/index.md) and the [Glossary](glossary.md).
+Scaling is the formation of mineral deposits on heat transfer surfaces or fluid handling equipment due to precipitation of dissolved solids. Scale acts as an insulator, reducing heat transfer efficiency in cooling systems, and restricts flow in pipes and valves. Prevention involves monitoring water chemistry, using water treatment chemicals, controlling temperature, and implementing blowdown schedules. Even a thin layer of scale can significantly reduce system efficiency. See [Chapter 6: Cooling](chapters/07-cooling/index.md) and the [Glossary](glossary.md).
 
 ### How do pressure sensors work in fluid power systems?
 
@@ -192,7 +192,7 @@ Pressure sensors (also called pressure transducers) convert fluid pressure into 
 
 ### What are the different types of compressors?
 
-The three main types of air compressors are reciprocating (piston-driven, good for intermittent use), rotary screw (continuous duty, common in industrial settings), and centrifugal (high-volume, large-scale applications). Selection depends on required air volume, pressure, duty cycle, and efficiency requirements. Modern compressors often include integrated controls and IoT connectivity for monitoring and optimization. See [Chapter 5: Compressed Air](chapters/05-compressed-air/index.md) and the [Glossary](glossary.md).
+The three main types of air compressors are reciprocating (piston-driven, good for intermittent use), rotary screw (continuous duty, common in industrial settings), and centrifugal (high-volume, large-scale applications). Selection depends on required air volume, pressure, duty cycle, and efficiency requirements. Modern compressors often include integrated controls and IoT connectivity for monitoring and optimization. See [Chapter 5: Compressed Air](chapters/06-compressed-air/index.md) and the [Glossary](glossary.md).
 
 ## Common Challenge Questions
 
@@ -202,7 +202,7 @@ Start by identifying whether the pressure loss is sudden or gradual. For sudden 
 
 ### What should I do when I hear unusual noises from a pump?
 
-Unusual pump noises often indicate specific problems: cavitation produces a crackling or gravel-like sound, bearing wear creates a grinding or rumbling noise, and misalignment causes a rhythmic knocking. First, check the inlet for restrictions that could cause cavitation. Verify that fluid levels are adequate and inlet pressure is sufficient. Use vibration analysis to confirm the diagnosis. If cavitation is occurring, reduce suction lift, increase pipe diameter, or lower fluid temperature. For bearing issues, schedule replacement before catastrophic failure. See [Chapter 9: Pumping Systems](chapters/09-pumping/index.md).
+Unusual pump noises often indicate specific problems: cavitation produces a crackling or gravel-like sound, bearing wear creates a grinding or rumbling noise, and misalignment causes a rhythmic knocking. First, check the inlet for restrictions that could cause cavitation. Verify that fluid levels are adequate and inlet pressure is sufficient. Use vibration analysis to confirm the diagnosis. If cavitation is occurring, reduce suction lift, increase pipe diameter, or lower fluid temperature. For bearing issues, schedule replacement before catastrophic failure. See [Chapter 9: Pumping Systems](chapters/11-pumping/index.md).
 
 ### How do I interpret AI-generated maintenance alerts?
 
@@ -210,15 +210,15 @@ AI maintenance alerts typically include the alert severity (critical, warning, i
 
 ### What are common causes of compressed air system inefficiency?
 
-The most common causes are air leaks (which can waste 20-30% of compressor output), excessive system pressure (every 2 psi increase above requirement wastes about 1% energy), poor condensate management, undersized piping creating excessive pressure drops, running compressors at partial load, and inadequate storage capacity. AI diagnostic tools can quantify these losses and prioritize repairs based on energy and cost impact. Regular leak detection audits are essential. See [Chapter 5: Compressed Air](chapters/05-compressed-air/index.md).
+The most common causes are air leaks (which can waste 20-30% of compressor output), excessive system pressure (every 2 psi increase above requirement wastes about 1% energy), poor condensate management, undersized piping creating excessive pressure drops, running compressors at partial load, and inadequate storage capacity. AI diagnostic tools can quantify these losses and prioritize repairs based on energy and cost impact. Regular leak detection audits are essential. See [Chapter 5: Compressed Air](chapters/06-compressed-air/index.md).
 
 ### How do I prevent filter-related problems in dust collection systems?
 
-Monitor differential pressure across filters continuously, as rising pressure indicates dust loading. Ensure automated cleaning systems (pulse-jet or reverse air) are functioning properly and timed correctly. Verify that the air-to-cloth ratio is within design specifications. Check for damaged or improperly seated filter bags or cartridges during scheduled inspections. Maintain proper conveying velocities to prevent dust settling in ductwork. Always follow combustible dust safety protocols when servicing filter systems. See [Chapter 7: Dust Collection](chapters/07-dust-collection/index.md).
+Monitor differential pressure across filters continuously, as rising pressure indicates dust loading. Ensure automated cleaning systems (pulse-jet or reverse air) are functioning properly and timed correctly. Verify that the air-to-cloth ratio is within design specifications. Check for damaged or improperly seated filter bags or cartridges during scheduled inspections. Maintain proper conveying velocities to prevent dust settling in ductwork. Always follow combustible dust safety protocols when servicing filter systems. See [Chapter 7: Dust Collection](chapters/09-dust-collection/index.md).
 
 ### What should I do if a hydraulic system is overheating?
 
-Hydraulic system overheating is typically caused by insufficient cooling capacity, internal leakage (worn pump or cylinder seals), relief valve set too low (causing constant bypass), contaminated fluid increasing friction, or operating above design capacity. Check the heat exchanger for blockage or fouling, verify fluid level and condition, inspect for internal leakage using flow and temperature measurements, verify relief valve settings, and check that fans on air-cooled heat exchangers are operating correctly. See [Chapter 8: Hydraulic Systems](chapters/08-hydraulic/index.md).
+Hydraulic system overheating is typically caused by insufficient cooling capacity, internal leakage (worn pump or cylinder seals), relief valve set too low (causing constant bypass), contaminated fluid increasing friction, or operating above design capacity. Check the heat exchanger for blockage or fouling, verify fluid level and condition, inspect for internal leakage using flow and temperature measurements, verify relief valve settings, and check that fans on air-cooled heat exchangers are operating correctly. See [Chapter 8: Hydraulic Systems](chapters/10-hydraulic/index.md).
 
 ### How do I handle sensor data that seems incorrect?
 
@@ -226,21 +226,21 @@ First, verify the sensor physically by comparing its reading to a known-good ref
 
 ### What are the most common safety hazards in fluid power systems?
 
-Key hazards include high-pressure fluid injection injuries (hydraulic fluid can penetrate skin), stored energy release (from accumulators and compressed air receivers), electrical hazards from control systems, chemical exposure from fluids and treatments, noise exposure from compressors and fans, combustible dust explosions, hot surfaces from heat exchangers, and slip/fall hazards from fluid leaks. Always follow lockout/tagout procedures, wear appropriate PPE, and verify zero energy state before performing maintenance. See [Chapter 12: Safety](chapters/12-safety/index.md).
+Key hazards include high-pressure fluid injection injuries (hydraulic fluid can penetrate skin), stored energy release (from accumulators and compressed air receivers), electrical hazards from control systems, chemical exposure from fluids and treatments, noise exposure from compressors and fans, combustible dust explosions, hot surfaces from heat exchangers, and slip/fall hazards from fluid leaks. Always follow lockout/tagout procedures, wear appropriate PPE, and verify zero energy state before performing maintenance. See [Chapter 12: Safety](chapters/14-safety/index.md).
 
 ### How do I optimize energy use across multiple fluid power systems?
 
-Start with an energy audit to establish baselines for each system. Prioritize the largest energy consumers first. Install VFDs on pumps and fans to match speed to actual demand. Fix all leaks in compressed air systems. Optimize control setpoints based on actual requirements rather than conservative estimates. Use AI tools to identify energy waste patterns and correlate consumption with production needs. Implement heat recovery where possible. Track energy metrics continuously to verify improvements and detect regression. See [Chapter 11: Systems and Software](chapters/11-systems/index.md).
+Start with an energy audit to establish baselines for each system. Prioritize the largest energy consumers first. Install VFDs on pumps and fans to match speed to actual demand. Fix all leaks in compressed air systems. Optimize control setpoints based on actual requirements rather than conservative estimates. Use AI tools to identify energy waste patterns and correlate consumption with production needs. Implement heat recovery where possible. Track energy metrics continuously to verify improvements and detect regression. See [Chapter 11: Systems and Software](chapters/13-systems/index.md).
 
 ### What challenges might I face when integrating legacy systems with modern AI tools?
 
-Common challenges include incompatible communication protocols between old and new equipment, lack of sensor instrumentation on legacy equipment, data quality issues from aging sensors, insufficient network infrastructure, resistance to change from experienced staff, and cybersecurity concerns when connecting operational technology to networks. Solutions include using protocol converters and gateways, retrofitting sensors onto existing equipment, implementing edge computing for local data processing, and phased integration approaches. See [Chapter 11: Systems and Software](chapters/11-systems/index.md).
+Common challenges include incompatible communication protocols between old and new equipment, lack of sensor instrumentation on legacy equipment, data quality issues from aging sensors, insufficient network infrastructure, resistance to change from experienced staff, and cybersecurity concerns when connecting operational technology to networks. Solutions include using protocol converters and gateways, retrofitting sensors onto existing equipment, implementing edge computing for local data processing, and phased integration approaches. See [Chapter 11: Systems and Software](chapters/13-systems/index.md).
 
 ## Best Practice Questions
 
 ### When should I use predictive maintenance versus preventive maintenance?
 
-Use predictive maintenance for critical, expensive, or failure-prone equipment where the cost of monitoring is justified by the consequences of failure. Use preventive maintenance for simple, low-cost components where sensor installation is impractical or uneconomical (such as belt replacements or filter changes on small units). Many facilities use a hybrid approach: predictive maintenance for major equipment like large pumps, compressors, and fans, combined with preventive maintenance for auxiliary components. The goal is to maximize reliability while minimizing total maintenance cost. See [Chapter 8: Hydraulic Systems](chapters/08-hydraulic/index.md).
+Use predictive maintenance for critical, expensive, or failure-prone equipment where the cost of monitoring is justified by the consequences of failure. Use preventive maintenance for simple, low-cost components where sensor installation is impractical or uneconomical (such as belt replacements or filter changes on small units). Many facilities use a hybrid approach: predictive maintenance for major equipment like large pumps, compressors, and fans, combined with preventive maintenance for auxiliary components. The goal is to maximize reliability while minimizing total maintenance cost. See [Chapter 8: Hydraulic Systems](chapters/10-hydraulic/index.md).
 
 ### How do I select the right sensors for a fluid power monitoring system?
 
@@ -248,19 +248,19 @@ Consider the measurement parameter (pressure, temperature, flow, vibration), the
 
 ### What is the best approach to implementing AI in an existing facility?
 
-Start with a pilot project on a single critical system where the potential benefits are clear and measurable. Install sensors, establish data collection, and build baseline performance profiles before attempting AI analytics. Work with experienced staff to validate AI recommendations against their knowledge. Expand gradually based on demonstrated results. Key success factors include management support, adequate training, reliable data infrastructure, and realistic expectations about the learning curve for both the AI system and the technicians. See [Chapter 11: Systems and Software](chapters/11-systems/index.md).
+Start with a pilot project on a single critical system where the potential benefits are clear and measurable. Install sensors, establish data collection, and build baseline performance profiles before attempting AI analytics. Work with experienced staff to validate AI recommendations against their knowledge. Expand gradually based on demonstrated results. Key success factors include management support, adequate training, reliable data infrastructure, and realistic expectations about the learning curve for both the AI system and the technicians. See [Chapter 11: Systems and Software](chapters/13-systems/index.md).
 
 ### How do I maintain water quality in cooling water systems?
 
-Implement a comprehensive water treatment program that includes regular testing of pH, conductivity, hardness, alkalinity, and biological activity. Use appropriate chemical treatments for corrosion inhibition, scale prevention, and biological control. Monitor makeup water quality and blowdown rates. Install IoT sensors for continuous water quality monitoring and use AI to optimize chemical dosing. Inspect cooling towers regularly for biological growth, scale buildup, and corrosion. Maintain detailed records of water chemistry and treatment activities. See [Chapter 6: Cooling](chapters/06-cooling/index.md).
+Implement a comprehensive water treatment program that includes regular testing of pH, conductivity, hardness, alkalinity, and biological activity. Use appropriate chemical treatments for corrosion inhibition, scale prevention, and biological control. Monitor makeup water quality and blowdown rates. Install IoT sensors for continuous water quality monitoring and use AI to optimize chemical dosing. Inspect cooling towers regularly for biological growth, scale buildup, and corrosion. Maintain detailed records of water chemistry and treatment activities. See [Chapter 6: Cooling](chapters/07-cooling/index.md).
 
 ### What are the best practices for compressed air system management?
 
-Maintain a regular leak detection and repair program (quarterly minimum). Set system pressure to the minimum required for operations. Use pressure/flow controllers to stabilize supply pressure. Ensure adequate air storage to handle demand peaks. Maintain filters, dryers, and drains on schedule. Monitor compressor performance and efficiency regularly. Use AI tools to analyze demand patterns and optimize compressor sequencing. Consider heat recovery from compressors for space heating or process water. See [Chapter 5: Compressed Air](chapters/05-compressed-air/index.md).
+Maintain a regular leak detection and repair program (quarterly minimum). Set system pressure to the minimum required for operations. Use pressure/flow controllers to stabilize supply pressure. Ensure adequate air storage to handle demand peaks. Maintain filters, dryers, and drains on schedule. Monitor compressor performance and efficiency regularly. Use AI tools to analyze demand patterns and optimize compressor sequencing. Consider heat recovery from compressors for space heating or process water. See [Chapter 5: Compressed Air](chapters/06-compressed-air/index.md).
 
 ### How should I document maintenance activities for AI systems?
 
-Record detailed information including the equipment ID, date and time, work performed, parts replaced, measurements taken (before and after), root cause of any failure, total labor time, and any anomalies observed. Use structured data entry in CMMS rather than free-text notes when possible. This data feeds AI learning algorithms and improves prediction accuracy over time. Consistent, detailed documentation is the foundation for effective predictive maintenance. See [Chapter 11: Systems and Software](chapters/11-systems/index.md).
+Record detailed information including the equipment ID, date and time, work performed, parts replaced, measurements taken (before and after), root cause of any failure, total labor time, and any anomalies observed. Use structured data entry in CMMS rather than free-text notes when possible. This data feeds AI learning algorithms and improves prediction accuracy over time. Consistent, detailed documentation is the foundation for effective predictive maintenance. See [Chapter 11: Systems and Software](chapters/13-systems/index.md).
 
 ### What sustainability practices should technicians prioritize?
 
@@ -282,7 +282,7 @@ Industry 4.0 refers to the fourth industrial revolution, characterized by the in
 
 ### How can AI be used to optimize energy consumption across an entire facility?
 
-Facility-wide AI optimization involves connecting all fluid power systems to a central analytics platform, analyzing interactions between systems (for example, how HVAC load affects cooling water demand), identifying opportunities for heat recovery and load shifting, optimizing system scheduling based on production plans, energy pricing, and weather forecasts, and implementing multi-parameter optimization that balances energy cost, system reliability, and production requirements. This requires comprehensive sensor networks, reliable data infrastructure, and sophisticated AI algorithms. See [Chapter 11: Systems and Software](chapters/11-systems/index.md).
+Facility-wide AI optimization involves connecting all fluid power systems to a central analytics platform, analyzing interactions between systems (for example, how HVAC load affects cooling water demand), identifying opportunities for heat recovery and load shifting, optimizing system scheduling based on production plans, energy pricing, and weather forecasts, and implementing multi-parameter optimization that balances energy cost, system reliability, and production requirements. This requires comprehensive sensor networks, reliable data infrastructure, and sophisticated AI algorithms. See [Chapter 11: Systems and Software](chapters/13-systems/index.md).
 
 ### What role does edge computing play in modern fluid power monitoring?
 

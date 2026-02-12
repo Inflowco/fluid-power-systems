@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan Vibration Analysis Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 10px 15px;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background-color: #16213e;
+            border-radius: 6px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            color: #a0b4c8;
+            white-space: nowrap;
+        }
+
+        select {
+            padding: 6px 10px;
+            border: 1px solid #00d4ff;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: #2a2a4e;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        select:hover {
+            background-color: #3a3a5e;
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+        }
+
+        input[type="range"] {
+            width: 120px;
+            accent-color: #00d4ff;
+            cursor: pointer;
+        }
+
+        .rpm-value {
+            font-size: 13px;
+            font-weight: bold;
+            color: #00d4ff;
+            min-width: 65px;
+        }
+
+        .sensor-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sensor-group input[type="radio"] {
+            accent-color: #00d4ff;
+            cursor: pointer;
+        }
+
+        .sensor-group label {
+            font-size: 12px;
+            color: #a0b4c8;
+            cursor: pointer;
+        }
+
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        canvas {
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Fan Vibration Analysis Dashboard</div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="faultSelect">Fault Condition:</label>
+                <select id="faultSelect">
+                    <option value="0">Normal</option>
+                    <option value="1">Imbalance</option>
+                    <option value="2">Angular Misalignment</option>
+                    <option value="3">Parallel Misalignment</option>
+                    <option value="4">Mechanical Looseness</option>
+                    <option value="5">Bearing Defect</option>
+                    <option value="6">Belt Wear</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="rpmSlider">Fan Speed:</label>
+                <input type="range" id="rpmSlider" min="600" max="1800" value="1750" step="10">
+                <span class="rpm-value" id="rpmDisplay">1750 RPM</span>
+            </div>
+
+            <div class="sensor-group">
+                <label>Sensor:</label>
+                <input type="radio" name="sensor" id="sensorIB" value="IB" checked>
+                <label for="sensorIB">Inboard (IB)</label>
+                <input type="radio" name="sensor" id="sensorOB" value="OB">
+                <label for="sensorOB">Outboard (OB)</label>
+            </div>
+        </div>
+
+        <div id="canvas-container"></div>
+    </div>
+
+    <script>
+    // ---- Fault data definitions ----
+    const faultData = [
+        { // 0 - Normal
+            name: "Normal",
+            peaks: [{mult: 1.0, amp: 0.06}],
+            noiseFloor: 0.005,
+            overallIB: 0.065,
+            overallOB: 0.058,
+            severity: "Good",
+            dominant: "1x RPM",
+            cause: "Residual imbalance (normal)",
+            recommendation: "All vibration levels within normal limits. Continue standard monitoring schedule per ISO 10816 guidelines."
+        },
+        { // 1 - Imbalance
+            name: "Imbalance",
+            peaks: [{mult: 1.0, amp: 0.28}],
+            noiseFloor: 0.006,
+            overallIB: 0.29,
+            overallOB: 0.24,
+            severity: "Unsatisfactory",
+            dominant: "1x RPM",
+            cause: "Rotor imbalance",
+            recommendation: "Dominant 1x peak indicates rotor imbalance. Schedule single-plane balance procedure. Check for blade buildup or erosion."
+        },
+        { // 2 - Angular Misalignment
+            name: "Angular Misalignment",
+            peaks: [{mult: 1.0, amp: 0.15}, {mult: 2.0, amp: 0.22}],
+            noiseFloor: 0.006,
+            overallIB: 0.27,
+            overallOB: 0.23,
+            severity: "Unsatisfactory",
+            dominant: "2x RPM",
+            cause: "Angular misalignment",
+            recommendation: "1x and 2x peaks suggest angular misalignment. Check coupling alignment and re-align using laser tools."
+        },
+        { // 3 - Parallel Misalignment
+            name: "Parallel Misalignment",
+            peaks: [{mult: 1.0, amp: 0.12}, {mult: 2.0, amp: 0.25}],
+            noiseFloor: 0.006,
+            overallIB: 0.28,
+            overallOB: 0.22,
+            severity: "Unsatisfactory",
+            dominant: "2x RPM",
+            cause: "Parallel (offset) misalignment",
+            recommendation: "Strong 2x peak indicates parallel (offset) misalignment. Re-align motor-to-fan coupling."
+        },
+        { // 4 - Mechanical Looseness
+            name: "Mechanical Looseness",
+            peaks: [
+                {mult: 0.5, amp: 0.08},
+                {mult: 1.0, amp: 0.10},
+                {mult: 2.0, amp: 0.10},
+                {mult: 3.0, amp: 0.10},
+                {mult: 4.0, amp: 0.10},
+                {mult: 5.0, amp: 0.10}
+            ],
+            noiseFloor: 0.010,
+            overallIB: 0.32,
+            overallOB: 0.28,
+            severity: "Unacceptable",
+            dominant: "Multiple harmonics",
+            cause: "Structural looseness",
+            recommendation: "Multiple harmonics with sub-harmonics indicate structural looseness. Inspect foundation bolts, bearing housing, and shaft fit."
+        },
+        { // 5 - Bearing Defect
+            name: "Bearing Defect",
+            peaks: [
+                {mult: 1.0, amp: 0.05},
+                {mult: 3.7, amp: 0.18},
+                {mult: 7.4, amp: 0.14}
+            ],
+            noiseFloor: 0.020,
+            overallIB: 0.30,
+            overallOB: 0.22,
+            severity: "Unacceptable",
+            dominant: "3.7x / 7.4x RPM",
+            cause: "Bearing defect (BPFO/BPFI)",
+            recommendation: "High-frequency peaks at bearing defect frequencies indicate inner/outer race damage. Plan bearing replacement within 30 days."
+        },
+        { // 6 - Belt Wear
+            name: "Belt Wear",
+            peaks: [
+                {mult: 0.8, amp: 0.16},
+                {mult: 1.0, amp: 0.05},
+                {mult: 1.6, amp: 0.10},
+                {mult: 2.4, amp: 0.07}
+            ],
+            noiseFloor: 0.008,
+            overallIB: 0.22,
+            overallOB: 0.20,
+            severity: "Unsatisfactory",
+            dominant: "0.8x RPM",
+            cause: "Belt wear / tension",
+            recommendation: "Sub-synchronous peaks at belt frequency indicate belt wear or tension issues. Inspect and replace belts."
+        }
+    ];
+
+    // ---- p5.js sketch ----
+    let canvasW, canvasH;
+    let currentFault = 0;
+    let fanRPM = 1750;
+    let sensorIB = true;
+    let pulsePhase = 0;
+
+    function setup() {
+        canvasW = min(windowWidth - 40, 1080);
+        canvasH = 470;
+        let cnv = createCanvas(canvasW, canvasH);
+        cnv.parent('canvas-container');
+        textFont('Segoe UI');
+        noLoop();
+
+        // Wire up controls
+        select('#faultSelect').elt.addEventListener('change', function() {
+            currentFault = parseInt(this.value);
+            redraw();
+        });
+
+        select('#rpmSlider').elt.addEventListener('input', function() {
+            fanRPM = parseInt(this.value);
+            select('#rpmDisplay').elt.textContent = fanRPM + ' RPM';
+            redraw();
+        });
+
+        document.querySelectorAll('input[name="sensor"]').forEach(function(r) {
+            r.addEventListener('change', function() {
+                sensorIB = (this.value === 'IB');
+                redraw();
+            });
+        });
+
+        // Animate pulsing dot
+        setInterval(function() {
+            pulsePhase += 0.15;
+            redraw();
+        }, 50);
+    }
+
+    function draw() {
+        background(26, 26, 46);
+        let fault = faultData[currentFault];
+
+        // --- Layout regions ---
+        let specX = 55, specY = 10;
+        let specW = canvasW - 80, specH = canvasH * 0.52;
+
+        let bottomY = specY + specH + 15;
+        let bottomH = canvasH - bottomY - 5;
+        let diagX = 10, diagW = canvasW * 0.38;
+        let panelX = diagX + diagW + 15;
+        let panelW = canvasW - panelX - 10;
+
+        drawSpectrum(specX, specY, specW, specH, fault);
+        drawMachineDiagram(diagX, bottomY, diagW, bottomH);
+        drawDiagnosisPanel(panelX, bottomY, panelW, bottomH, fault);
+    }
+
+    // ---- Frequency Spectrum Chart ----
+    function drawSpectrum(sx, sy, sw, sh, fault) {
+        let maxFreqMult = 10;
+        let maxAmp = 0.5;
+
+        // Background severity zones
+        let greenH = map(0.15, 0, maxAmp, 0, sh);
+        let yellowH = map(0.30, 0, maxAmp, 0, sh);
+
+        // Red zone (0.30+)
+        noStroke();
+        fill(80, 20, 20, 100);
+        rect(sx, sy, sw, sh - yellowH);
+
+        // Yellow zone (0.15 - 0.30)
+        fill(80, 70, 10, 100);
+        rect(sx, sy + sh - yellowH, sw, yellowH - greenH);
+
+        // Green zone (0 - 0.15)
+        fill(15, 60, 30, 100);
+        rect(sx, sy + sh - greenH, sw, greenH);
+
+        // Zone labels
+        fill(255, 255, 255, 60);
+        textSize(9);
+        textAlign(LEFT, CENTER);
+        text("DANGER", sx + 4, sy + (sh - yellowH) / 2);
+        text("WARNING", sx + 4, sy + sh - yellowH + (yellowH - greenH) / 2);
+        text("GOOD", sx + 4, sy + sh - greenH / 2);
+
+        // Grid lines
+        stroke(255, 255, 255, 30);
+        strokeWeight(0.5);
+        for (let a = 0; a <= maxAmp; a += 0.05) {
+            let yy = sy + sh - map(a, 0, maxAmp, 0, sh);
+            line(sx, yy, sx + sw, yy);
+        }
+        for (let f = 0; f <= maxFreqMult; f += 1) {
+            let xx = sx + map(f, 0, maxFreqMult, 0, sw);
+            line(xx, sy, xx, sy + sh);
+        }
+
+        // Noise floor
+        let nf = fault.noiseFloor;
+        let nfH = map(nf, 0, maxAmp, 0, sh);
+        noStroke();
+        fill(100, 100, 120, 60);
+        rect(sx, sy + sh - nfH, sw, nfH);
+
+        // Draw spectral peaks as bars
+        let sensorScale = sensorIB ? 1.0 : 0.85;
+        let barW = max(sw / 60, 6);
+
+        for (let pk of fault.peaks) {
+            let amp = pk.amp * sensorScale;
+            let freqX = sx + map(pk.mult, 0, maxFreqMult, 0, sw);
+            let barH = map(amp, 0, maxAmp, 0, sh);
+            let barTop = sy + sh - barH;
+
+            // Bar color by amplitude
+            let c;
+            if (amp < 0.15) c = color(0, 200, 100);
+            else if (amp < 0.30) c = color(255, 200, 0);
+            else c = color(255, 60, 60);
+
+            noStroke();
+            fill(c);
+            rect(freqX - barW / 2, barTop, barW, barH, 2, 2, 0, 0);
+
+            // Peak label
+            fill(255);
+            textSize(10);
+            textAlign(CENTER, BOTTOM);
+            let label = pk.mult % 1 === 0 ? pk.mult + 'x' : pk.mult.toFixed(1) + 'x';
+            text(label, freqX, barTop - 3);
+
+            // Amplitude value
+            textSize(8);
+            fill(200, 220, 255);
+            text(amp.toFixed(2), freqX, barTop - 14);
+        }
+
+        // Axes
+        stroke(200);
+        strokeWeight(1);
+        line(sx, sy, sx, sy + sh);
+        line(sx, sy + sh, sx + sw, sy + sh);
+
+        // Y-axis labels
+        fill(180);
+        noStroke();
+        textSize(9);
+        textAlign(RIGHT, CENTER);
+        for (let a = 0; a <= maxAmp; a += 0.10) {
+            let yy = sy + sh - map(a, 0, maxAmp, 0, sh);
+            text(a.toFixed(2), sx - 5, yy);
+        }
+
+        // Y-axis title
+        push();
+        translate(sx - 42, sy + sh / 2);
+        rotate(-HALF_PI);
+        textAlign(CENTER, CENTER);
+        textSize(10);
+        fill(160, 200, 255);
+        text("Amplitude (in/s)", 0, 0);
+        pop();
+
+        // X-axis labels (frequency multiples)
+        textAlign(CENTER, TOP);
+        textSize(9);
+        fill(180);
+        for (let f = 0; f <= maxFreqMult; f += 1) {
+            let xx = sx + map(f, 0, maxFreqMult, 0, sw);
+            text(f + 'x', xx, sy + sh + 3);
+        }
+
+        // X-axis CPM values
+        textSize(7);
+        fill(120, 160, 200);
+        for (let f = 0; f <= maxFreqMult; f += 2) {
+            let xx = sx + map(f, 0, maxFreqMult, 0, sw);
+            let cpm = f * fanRPM;
+            text(cpm.toLocaleString() + ' CPM', xx, sy + sh + 15);
+        }
+
+        // X-axis title
+        textSize(10);
+        fill(160, 200, 255);
+        textAlign(CENTER, TOP);
+        text("Frequency (multiples of RPM)", sx + sw / 2, sy + sh + 26);
+    }
+
+    // ---- Machine Diagram ----
+    function drawMachineDiagram(dx, dy, dw, dh) {
+        // Background panel
+        noStroke();
+        fill(22, 33, 62);
+        rect(dx, dy, dw, dh, 6);
+
+        // Title
+        fill(160, 200, 255);
+        textSize(11);
+        textAlign(CENTER, TOP);
+        text("Belt-Driven Fan Assembly", dx + dw / 2, dy + 5);
+
+        let cx = dx + dw / 2;
+        let cy = dy + dh / 2 + 10;
+
+        // Base / foundation
+        fill(60, 70, 90);
+        stroke(100, 110, 130);
+        strokeWeight(1);
+        rect(cx - 105, cy + 30, 210, 12, 2);
+
+        // Motor body
+        fill(70, 80, 110);
+        stroke(100, 120, 160);
+        strokeWeight(1.5);
+        rect(cx - 100, cy - 18, 55, 40, 4);
+        fill(140, 160, 200);
+        textSize(9);
+        textAlign(CENTER, CENTER);
+        text("MOTOR", cx - 72, cy + 2);
+
+        // Motor shaft
+        stroke(180, 190, 210);
+        strokeWeight(3);
+        line(cx - 45, cy + 2, cx - 30, cy + 2);
+
+        // Drive pulley (motor side)
+        fill(90, 100, 130);
+        stroke(140, 150, 180);
+        strokeWeight(1);
+        ellipse(cx - 30, cy + 2, 16, 16);
+
+        // Belt
+        stroke(160, 130, 80);
+        strokeWeight(2);
+        noFill();
+        // Top belt run
+        line(cx - 30, cy + 2 - 8, cx + 30, cy + 2 - 10);
+        // Bottom belt run
+        line(cx - 30, cy + 2 + 8, cx + 30, cy + 2 + 10);
+
+        // Driven pulley (fan side)
+        fill(90, 100, 130);
+        stroke(140, 150, 180);
+        strokeWeight(1);
+        ellipse(cx + 30, cy + 2, 20, 20);
+
+        // Fan shaft
+        stroke(180, 190, 210);
+        strokeWeight(3);
+        line(cx + 40, cy + 2, cx + 70, cy + 2);
+
+        // Bearing pedestals
+        fill(80, 90, 120);
+        stroke(120, 130, 160);
+        strokeWeight(1);
+        // Inboard bearing (near pulley)
+        rect(cx + 38, cy - 8, 12, 20, 2);
+        rect(cx + 38, cy + 12, 12, 18, 2);
+        // Outboard bearing (near fan)
+        rect(cx + 60, cy - 8, 12, 20, 2);
+        rect(cx + 60, cy + 12, 12, 18, 2);
+
+        // Fan housing / scroll
+        noFill();
+        stroke(100, 180, 255);
+        strokeWeight(2);
+        arc(cx + 85, cy + 2, 40, 44, -HALF_PI, PI + HALF_PI);
+        line(cx + 85, cy + 2 - 22, cx + 105, cy + 2 - 22);
+        line(cx + 85, cy + 2 + 22, cx + 100, cy + 2 + 22);
+        line(cx + 100, cy + 2 + 22, cx + 105, cy + 2 - 22);
+
+        // Fan blades inside scroll
+        stroke(100, 180, 255, 150);
+        strokeWeight(1);
+        for (let a = 0; a < TWO_PI; a += PI / 3) {
+            let bx = cx + 85 + cos(a + millis() * 0.003) * 12;
+            let by = cy + 2 + sin(a + millis() * 0.003) * 12;
+            line(cx + 85, cy + 2, bx, by);
+        }
+
+        // Labels: IB and OB
+        noStroke();
+        fill(0, 212, 255);
+        textSize(9);
+        textAlign(CENTER, TOP);
+        text("IB", cx + 44, cy + 34);
+        text("OB", cx + 66, cy + 34);
+
+        // Pulsing sensor dot
+        let pulseR = 5 + sin(pulsePhase) * 2.5;
+        let sensorX = sensorIB ? cx + 44 : cx + 66;
+        let sensorY = cy - 12;
+
+        noStroke();
+        // Outer glow
+        fill(0, 255, 100, 40 + sin(pulsePhase) * 30);
+        ellipse(sensorX, sensorY, pulseR * 3, pulseR * 3);
+        // Inner dot
+        fill(0, 255, 100);
+        ellipse(sensorX, sensorY, pulseR, pulseR);
+
+        // Sensor label
+        fill(0, 255, 100);
+        textSize(8);
+        textAlign(CENTER, BOTTOM);
+        text("SENSOR", sensorX, sensorY - 10);
+
+        // Airflow arrow
+        stroke(100, 180, 255, 120);
+        strokeWeight(1);
+        fill(100, 180, 255, 120);
+        let arrowX = cx + 108;
+        let arrowY = cy - 10;
+        line(arrowX, arrowY, arrowX + 15, arrowY);
+        triangle(arrowX + 15, arrowY - 3, arrowX + 15, arrowY + 3, arrowX + 20, arrowY);
+        noStroke();
+        textSize(7);
+        textAlign(LEFT, CENTER);
+        fill(100, 180, 255, 180);
+        text("AIR", arrowX + 4, arrowY - 8);
+    }
+
+    // ---- Diagnosis Panel ----
+    function drawDiagnosisPanel(px, py, pw, ph, fault) {
+        // Background panel
+        noStroke();
+        fill(22, 33, 62);
+        rect(px, py, pw, ph, 6);
+
+        let sensorScale = sensorIB ? 1.0 : 0.85;
+        let overall = sensorIB ? fault.overallIB : fault.overallOB;
+
+        // Panel title
+        fill(160, 200, 255);
+        textSize(11);
+        textAlign(CENTER, TOP);
+        text("Vibration Diagnosis", px + pw / 2, py + 5);
+
+        let leftCol = px + 12;
+        let rightCol = px + pw / 2 + 5;
+        let yStart = py + 28;
+
+        // Overall vibration level - large display
+        let levelColor;
+        if (overall < 0.15) levelColor = color(0, 200, 100);
+        else if (overall < 0.30) levelColor = color(255, 200, 0);
+        else levelColor = color(255, 60, 60);
+
+        // Level box
+        fill(16, 20, 40);
+        stroke(levelColor);
+        strokeWeight(1.5);
+        rect(leftCol, yStart, pw / 2 - 22, 50, 4);
+
+        // Large number
+        noStroke();
+        fill(levelColor);
+        textSize(28);
+        textAlign(CENTER, CENTER);
+        text(overall.toFixed(3), leftCol + (pw / 2 - 22) / 2, yStart + 18);
+
+        // Unit
+        fill(160, 180, 200);
+        textSize(10);
+        text("in/s velocity", leftCol + (pw / 2 - 22) / 2, yStart + 40);
+
+        // ISO severity box
+        let sevColor;
+        if (fault.severity === "Good") sevColor = color(0, 200, 100);
+        else if (fault.severity === "Satisfactory") sevColor = color(100, 200, 50);
+        else if (fault.severity === "Unsatisfactory") sevColor = color(255, 200, 0);
+        else sevColor = color(255, 60, 60);
+
+        fill(16, 20, 40);
+        stroke(sevColor);
+        strokeWeight(1.5);
+        rect(rightCol, yStart, pw / 2 - 22, 50, 4);
+
+        noStroke();
+        fill(sevColor);
+        textSize(14);
+        textAlign(CENTER, CENTER);
+        text(fault.severity, rightCol + (pw / 2 - 22) / 2, yStart + 16);
+
+        fill(160, 180, 200);
+        textSize(9);
+        text("ISO 10816", rightCol + (pw / 2 - 22) / 2, yStart + 38);
+
+        // Details section
+        let detY = yStart + 60;
+
+        fill(100, 140, 180);
+        textSize(9);
+        textAlign(LEFT, TOP);
+        text("DOMINANT FREQUENCY", leftCol, detY);
+
+        fill(255);
+        textSize(12);
+        text(fault.dominant, leftCol, detY + 13);
+
+        text("(" + (fanRPM) + " RPM base)", leftCol + textWidth(fault.dominant) + 8, detY + 13);
+
+        detY += 32;
+
+        fill(100, 140, 180);
+        textSize(9);
+        text("PROBABLE CAUSE", leftCol, detY);
+
+        fill(255, 220, 100);
+        textSize(12);
+        text(fault.cause, leftCol, detY + 13);
+
+        detY += 32;
+
+        // AI Recommendation box
+        fill(100, 140, 180);
+        textSize(9);
+        textAlign(LEFT, TOP);
+        text("AI RECOMMENDATION", leftCol, detY);
+
+        detY += 14;
+        fill(20, 30, 50);
+        stroke(0, 160, 255, 80);
+        strokeWeight(1);
+        let recBoxW = pw - 24;
+        let recBoxH = ph - (detY - py) - 8;
+        rect(leftCol, detY, recBoxW, recBoxH, 4);
+
+        noStroke();
+        fill(180, 220, 255);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        textWrap(WORD);
+        text(fault.recommendation, leftCol + 8, detY + 6, recBoxW - 16);
+
+        // Small AI icon
+        fill(0, 200, 255, 80);
+        textSize(8);
+        textAlign(RIGHT, BOTTOM);
+        text("AI-Assisted Analysis", leftCol + recBoxW - 6, detY + recBoxH - 3);
+    }
+
+    function windowResized() {
+        canvasW = min(windowWidth - 40, 1080);
+        canvasH = 470;
+        resizeCanvas(canvasW, canvasH);
+        redraw();
+    }
+    </script>
+</body>
+</html>

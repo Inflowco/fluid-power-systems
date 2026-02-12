@@ -1,0 +1,8 @@
+{
+  "title": "Fan Vibration Analysis Dashboard",
+  "chapter": 10,
+  "bloom_level": "L4 Analyze",
+  "bloom_verb": "Differentiate",
+  "technology": "p5.js",
+  "learning_objective": "Analyze vibration frequency spectra to differentiate between common fan fault conditions"
+}

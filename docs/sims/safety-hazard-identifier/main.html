@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety Hazard Identifier - Fluid Power Systems</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { overflow: hidden; background: #1a1a2e; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<script>
+// ============================================================
+// Safety Hazard Identifier MicroSim
+// Interactive fluid power facility hazard discovery exercise
+// ============================================================
+
+// ---- Color palette for hazard types ----
+const HAZARD_COLORS = {
+  pressure:       [220,  50,  50],   // red
+  mechanical:     [240, 150,  30],   // orange
+  electrical:     [240, 220,  40],   // yellow
+  chemical:       [160,  60, 200],   // purple
+  noise:          [  0, 200, 220],   // cyan
+  'dust/explosion': [160, 100,  50], // brown
+  fall:           [240, 120, 180]    // pink
+};
+
+// ---- Facility zone definitions (relative to facilityW/facilityH) ----
+// Each zone: { id, label, x, y, w, h, fillColor }
+// Coordinates are fractions of the facility drawing area
+const ZONES = [
+  { id: 'hydraulic',   label: 'Hydraulic\nPress Area',    rx: 0.02, ry: 0.02, rw: 0.30, rh: 0.42, fill: [40, 60, 90] },
+  { id: 'compressor',  label: 'Compressor\nRoom',          rx: 0.34, ry: 0.02, rw: 0.30, rh: 0.20, fill: [50, 70, 80] },
+  { id: 'fan',         label: 'Fan System\nArea',          rx: 0.66, ry: 0.02, rw: 0.32, rh: 0.28, fill: [45, 65, 85] },
+  { id: 'control',     label: 'Control\nPanel Room',       rx: 0.34, ry: 0.24, rw: 0.30, rh: 0.20, fill: [55, 55, 80] },
+  { id: 'cooling',     label: 'Cooling\nTower Section',    rx: 0.66, ry: 0.32, rw: 0.32, rh: 0.34, fill: [40, 70, 75] },
+  { id: 'dust',        label: 'Dust\nCollector Area',      rx: 0.02, ry: 0.46, rw: 0.30, rh: 0.32, fill: [65, 55, 45] },
+  { id: 'piping',      label: 'Compressed Air\nPiping Run', rx: 0.34, ry: 0.46, rw: 0.30, rh: 0.32, fill: [50, 60, 75] }
+];
+
+// ---- Hazard definitions ----
+// rx, ry are relative to facility area; tied to zone
+const HAZARDS = [
+  {
+    id: 1, name: 'Hydraulic Hose Injection Injury Risk',
+    type: 'pressure', risk: 'Critical',
+    rx: 0.12, ry: 0.18,
+    ppe: 'Hydraulic-rated gloves, face shield, long sleeves',
+    engineering: 'Install hose guards and whip checks on all high-pressure lines',
+    administrative: 'Lockout/tagout before any hose maintenance; never search for leaks with bare hands'
+  },
+  {
+    id: 2, name: 'Hydraulic Accumulator Stored Energy',
+    type: 'pressure', risk: 'High',
+    rx: 0.24, ry: 0.35,
+    ppe: 'Safety glasses, hydraulic-rated gloves',
+    engineering: 'Install pressure gauge and manual bleed valve on accumulator',
+    administrative: 'Verify zero energy state before maintenance; post warning signs'
+  },
+  {
+    id: 3, name: 'Exposed Belt Drive on Fan',
+    type: 'mechanical', risk: 'High',
+    rx: 0.76, ry: 0.10,
+    ppe: 'Close-fitting clothing, no loose jewelry',
+    engineering: 'Install OSHA-compliant belt guard enclosure',
+    administrative: 'Lockout/tagout before servicing; quarterly guard inspection'
+  },
+  {
+    id: 4, name: 'Rotating Fan Blades',
+    type: 'mechanical', risk: 'Medium',
+    rx: 0.88, ry: 0.20,
+    ppe: 'Safety glasses, hearing protection',
+    engineering: 'Install inlet/outlet finger guards and vibration sensors',
+    administrative: 'Do not operate with guards removed; annual blade inspection'
+  },
+  {
+    id: 5, name: 'Unlocked Electrical Panel',
+    type: 'electrical', risk: 'High',
+    rx: 0.42, ry: 0.30,
+    ppe: 'Arc-rated PPE (CAT 2 minimum), voltage-rated gloves',
+    engineering: 'Install keyed locks on all panel doors; add presence sensors',
+    administrative: 'Only qualified electricians may open panels; enforce NFPA 70E'
+  },
+  {
+    id: 6, name: 'VFD With No Arc Flash Label',
+    type: 'electrical', risk: 'Medium',
+    rx: 0.56, ry: 0.38,
+    ppe: 'Arc-rated PPE per incident energy calculation',
+    engineering: 'Perform arc flash study and install labels per NFPA 70E',
+    administrative: 'Complete arc flash risk assessment; update every 5 years'
+  },
+  {
+    id: 7, name: 'Compressed Air Leak',
+    type: 'pressure', risk: 'Medium',
+    rx: 0.48, ry: 0.58,
+    ppe: 'Hearing protection, safety glasses',
+    engineering: 'Repair fitting; install ultrasonic leak detection system',
+    administrative: 'Monthly leak audit program; track and report energy waste'
+  },
+  {
+    id: 8, name: 'Cooling Tower Chemicals Without Labels',
+    type: 'chemical', risk: 'High',
+    rx: 0.78, ry: 0.48,
+    ppe: 'Chemical splash goggles, nitrile gloves, chemical apron',
+    engineering: 'Install secondary containment and chemical labeling station',
+    administrative: 'Maintain SDS binder on-site; GHS labeling training for all staff'
+  },
+  {
+    id: 9, name: 'No Fall Protection at Cooling Tower',
+    type: 'fall', risk: 'Critical',
+    rx: 0.90, ry: 0.58,
+    ppe: 'Full-body harness with shock-absorbing lanyard',
+    engineering: 'Install permanent guardrails, self-closing gates, and anchor points',
+    administrative: 'Fall protection plan; only trained & authorized personnel at height'
+  },
+  {
+    id: 10, name: 'Compressor Room Noise > 95 dBA',
+    type: 'noise', risk: 'High',
+    rx: 0.48, ry: 0.08,
+    ppe: 'Dual hearing protection (plugs + muffs) above 100 dBA',
+    engineering: 'Install acoustic enclosures and vibration isolation mounts',
+    administrative: 'Post noise warning signs; enroll workers in hearing conservation program'
+  },
+  {
+    id: 11, name: 'Dust Accumulation on Surfaces',
+    type: 'dust/explosion', risk: 'Critical',
+    rx: 0.10, ry: 0.58,
+    ppe: 'N95 respirator, anti-static clothing, safety glasses',
+    engineering: 'Improve capture at source; install explosion venting on collector',
+    administrative: 'Housekeeping schedule per NFPA 652; combustible dust hazard analysis'
+  },
+  {
+    id: 12, name: 'Missing Grounding on Dust Collector Ductwork',
+    type: 'dust/explosion', risk: 'High',
+    rx: 0.22, ry: 0.70,
+    ppe: 'Anti-static footwear, ESD wrist strap during maintenance',
+    engineering: 'Bond and ground all ductwork per NFPA 77; install static dissipators',
+    administrative: 'Annual grounding resistance testing; include in PM schedule'
+  }
+];
+
+// ---- State variables ----
+let discovered = [];        // boolean array, true if hazard found
+let selectedHazard = null;  // index into HAZARDS or null
+let showAll = false;
+let pulsePhase = 0;         // for pulsing animation
+let activeFilter = 'all';   // hazard type filter
+let facilityX, facilityY, facilityW, facilityH;
+let panelX, panelW;
+let buttons = [];           // {label, x, y, w, h, action, type?}
+let filterButtons = [];
+let discoveryAnimations = []; // {index, startFrame, duration}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  textFont('Segoe UI, Tahoma, sans-serif');
+  resetGame();
+}
+
+function resetGame() {
+  discovered = new Array(HAZARDS.length).fill(false);
+  selectedHazard = null;
+  showAll = false;
+  activeFilter = 'all';
+  discoveryAnimations = [];
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+
+// ---- Layout calculations ----
+function computeLayout() {
+  panelW = min(280, windowWidth * 0.28);
+  panelX = windowWidth - panelW;
+  let topBar = 50;
+  facilityX = 10;
+  facilityY = topBar + 10;
+  facilityW = panelX - 20;
+  facilityH = windowHeight - topBar - 20;
+}
+
+// Convert relative coords to absolute facility coords
+function relToAbs(rx, ry) {
+  return { x: facilityX + rx * facilityW, y: facilityY + ry * facilityH };
+}
+
+// ---- Draw ----
+function draw() {
+  computeLayout();
+  pulsePhase += 0.04;
+  background(26, 26, 46);
+
+  drawTopBar();
+  drawFacility();
+  drawHazards();
+  drawSidePanel();
+}
+
+// ---- Top bar with title and buttons ----
+function drawTopBar() {
+  fill(20, 20, 40);
+  noStroke();
+  rect(0, 0, windowWidth, 50);
+
+  fill(230, 230, 250);
+  textAlign(LEFT, CENTER);
+  textSize(min(18, windowWidth * 0.022));
+  textStyle(BOLD);
+  text('Safety Hazard Identifier', 14, 25);
+  textStyle(NORMAL);
+
+  // Score
+  let found = discovered.filter(d => d).length;
+  textAlign(CENTER, CENTER);
+  textSize(min(14, windowWidth * 0.016));
+  fill(180, 220, 255);
+  text('Hazards Found: ' + found + ' / ' + HAZARDS.length, windowWidth / 2, 25);
+
+  // Buttons in top bar
+  buttons = [];
+  let btnW = 75, btnH = 28;
+  let btnY = 11;
+
+  // Show All button
+  let saX = panelX - btnW * 2 - 20;
+  drawButton(saX, btnY, btnW, btnH, showAll ? 'Hide All' : 'Show All', [60, 130, 180]);
+  buttons.push({ label: 'showAll', x: saX, y: btnY, w: btnW, h: btnH });
+
+  // Reset button
+  let rX = panelX - btnW - 8;
+  drawButton(rX, btnY, btnW, btnH, 'Reset', [150, 60, 60]);
+  buttons.push({ label: 'reset', x: rX, y: btnY, w: btnW, h: btnH });
+}
+
+function drawButton(bx, by, bw, bh, label, col) {
+  let hov = mouseX > bx && mouseX < bx + bw && mouseY > by && mouseY < by + bh;
+  fill(hov ? [col[0] + 30, col[1] + 30, col[2] + 30] : col);
+  stroke(255, 255, 255, 40);
+  strokeWeight(1);
+  rect(bx, by, bw, bh, 5);
+  noStroke();
+  fill(240);
+  textAlign(CENTER, CENTER);
+  textSize(12);
+  textStyle(BOLD);
+  text(label, bx + bw / 2, by + bh / 2);
+  textStyle(NORMAL);
+}
+
+// ---- Facility drawing ----
+function drawFacility() {
+  // Facility background
+  fill(30, 35, 55);
+  stroke(60, 70, 100);
+  strokeWeight(2);
+  rect(facilityX, facilityY, facilityW, facilityH, 6);
+
+  // Draw zones
+  for (let z of ZONES) {
+    let zx = facilityX + z.rx * facilityW;
+    let zy = facilityY + z.ry * facilityH;
+    let zw = z.rw * facilityW;
+    let zh = z.rh * facilityH;
+
+    // Zone fill
+    fill(z.fill[0], z.fill[1], z.fill[2], 180);
+    stroke(80, 90, 120);
+    strokeWeight(1);
+    rect(zx, zy, zw, zh, 4);
+
+    // Zone label
+    noStroke();
+    fill(200, 210, 230);
+    textAlign(CENTER, CENTER);
+    textSize(constrain(facilityW * 0.018, 9, 14));
+    textStyle(BOLD);
+    let lines = z.label.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      text(lines[i], zx + zw / 2, zy + zh / 2 + (i - (lines.length - 1) / 2) * (facilityW * 0.022));
+    }
+    textStyle(NORMAL);
+
+    // Draw decorative elements inside zones
+    drawZoneDetails(z, zx, zy, zw, zh);
+  }
+
+  // Draw compressed air piping lines connecting compressor to piping area
+  stroke(100, 160, 220, 120);
+  strokeWeight(3);
+  let compOut = relToAbs(0.49, 0.22);
+  let pipeIn = relToAbs(0.49, 0.46);
+  line(compOut.x, compOut.y, pipeIn.x, pipeIn.y);
+
+  // Piping run horizontal
+  let pStart = relToAbs(0.34, 0.55);
+  let pEnd = relToAbs(0.64, 0.55);
+  line(pStart.x, pStart.y, pEnd.x, pEnd.y);
+
+  // Piping branches
+  let branch1 = relToAbs(0.42, 0.55);
+  let branch1End = relToAbs(0.42, 0.65);
+  line(branch1.x, branch1.y, branch1End.x, branch1End.y);
+
+  let branch2 = relToAbs(0.56, 0.55);
+  let branch2End = relToAbs(0.56, 0.65);
+  line(branch2.x, branch2.y, branch2End.x, branch2End.y);
+  noStroke();
+
+  // Draw leak indicator (small animated lines near hazard 7)
+  let leakPos = relToAbs(0.48, 0.58);
+  stroke(100, 200, 255, 120 + 80 * sin(pulsePhase * 3));
+  strokeWeight(1);
+  for (let i = 0; i < 5; i++) {
+    let angle = pulsePhase * 2 + i * TWO_PI / 5;
+    let len = 6 + 3 * sin(pulsePhase * 2 + i);
+    line(leakPos.x, leakPos.y,
+         leakPos.x + cos(angle) * len,
+         leakPos.y + sin(angle) * len);
+  }
+  noStroke();
+}
+
+// Draw decorative details inside zones
+function drawZoneDetails(z, zx, zy, zw, zh) {
+  push();
+  noStroke();
+
+  if (z.id === 'hydraulic') {
+    // Hydraulic press shape
+    fill(70, 90, 120);
+    let px = zx + zw * 0.3, py = zy + zh * 0.25;
+    let pw = zw * 0.4, ph = zh * 0.5;
+    rect(px, py, pw, ph, 3);
+    fill(90, 110, 140);
+    rect(px + pw * 0.15, py + ph * 0.1, pw * 0.7, ph * 0.3, 2);
+    // Cylinder
+    fill(100, 130, 160);
+    rect(px + pw * 0.35, py - ph * 0.15, pw * 0.3, ph * 0.2, 2);
+    // Hoses
+    stroke(60, 80, 110);
+    strokeWeight(2);
+    noFill();
+    bezier(px, py + ph * 0.5, px - zw * 0.1, py + ph * 0.7,
+           px - zw * 0.05, py + ph * 0.9, px + pw * 0.2, py + ph * 0.85);
+    noStroke();
+    // Accumulator
+    fill(120, 80, 80);
+    ellipse(zx + zw * 0.82, zy + zh * 0.7, zw * 0.12, zh * 0.25);
+    fill(140, 100, 100);
+    ellipse(zx + zw * 0.82, zy + zh * 0.62, zw * 0.12, zh * 0.08);
+  }
+
+  if (z.id === 'compressor') {
+    // Compressor box
+    fill(80, 100, 110);
+    rect(zx + zw * 0.2, zy + zh * 0.2, zw * 0.6, zh * 0.6, 4);
+    fill(100, 120, 130);
+    rect(zx + zw * 0.25, zy + zh * 0.3, zw * 0.2, zh * 0.4, 2);
+    // Motor
+    fill(110, 110, 90);
+    ellipse(zx + zw * 0.65, zy + zh * 0.5, zw * 0.18, zh * 0.35);
+    // Noise waves
+    noFill();
+    stroke(0, 200, 220, 60 + 40 * sin(pulsePhase * 2));
+    strokeWeight(1);
+    for (let i = 1; i <= 3; i++) {
+      arc(zx + zw * 0.65, zy + zh * 0.5, zw * 0.18 + i * 12, zh * 0.35 + i * 8, -PI / 3, PI / 3);
+    }
+    noStroke();
+  }
+
+  if (z.id === 'fan') {
+    // Fan housing
+    fill(70, 95, 115);
+    ellipse(zx + zw * 0.65, zy + zh * 0.55, zw * 0.35, zh * 0.55);
+    // Blades (rotating)
+    fill(90, 115, 135);
+    push();
+    translate(zx + zw * 0.65, zy + zh * 0.55);
+    let bladeAngle = pulsePhase * 1.5;
+    for (let i = 0; i < 6; i++) {
+      rotate(TWO_PI / 6);
+      push();
+      rotate(bladeAngle);
+      fill(90, 115, 135, 200);
+      ellipse(0, -zh * 0.12, zw * 0.04, zh * 0.22);
+      pop();
+    }
+    pop();
+    // Belt drive
+    fill(100, 80, 60);
+    let bx1 = zx + zw * 0.2, by1 = zy + zh * 0.35;
+    ellipse(bx1, by1, zw * 0.1, zh * 0.15);
+    ellipse(bx1 + zw * 0.25, by1, zw * 0.08, zh * 0.12);
+    stroke(100, 80, 60);
+    strokeWeight(2);
+    line(bx1, by1 - zh * 0.07, bx1 + zw * 0.25, by1 - zh * 0.055);
+    line(bx1, by1 + zh * 0.07, bx1 + zw * 0.25, by1 + zh * 0.055);
+    noStroke();
+  }
+
+  if (z.id === 'control') {
+    // Panel cabinets
+    for (let i = 0; i < 3; i++) {
+      fill(75, 75, 95);
+      let cx = zx + zw * 0.1 + i * zw * 0.3;
+      rect(cx, zy + zh * 0.15, zw * 0.22, zh * 0.7, 3);
+      // Door handle
+      fill(140, 140, 160);
+      rect(cx + zw * 0.17, zy + zh * 0.45, zw * 0.03, zh * 0.12, 1);
+      // Status lights
+      fill(50, 200, 80);
+      ellipse(cx + zw * 0.11, zy + zh * 0.25, 6, 6);
+      fill(200, 180, 40);
+      ellipse(cx + zw * 0.11, zy + zh * 0.35, 6, 6);
+    }
+  }
+
+  if (z.id === 'cooling') {
+    // Tower structure
+    fill(70, 100, 95);
+    rect(zx + zw * 0.15, zy + zh * 0.1, zw * 0.5, zh * 0.75, 3);
+    // Fill media
+    for (let row = 0; row < 4; row++) {
+      fill(60, 90, 85, 150);
+      rect(zx + zw * 0.18, zy + zh * 0.2 + row * zh * 0.14, zw * 0.44, zh * 0.08, 1);
+    }
+    // Basin
+    fill(40, 80, 110);
+    rect(zx + zw * 0.1, zy + zh * 0.78, zw * 0.6, zh * 0.12, 2);
+    // Chemical drums
+    fill(130, 70, 160);
+    rect(zx + zw * 0.75, zy + zh * 0.55, zw * 0.15, zh * 0.25, 3);
+    fill(150, 90, 180);
+    rect(zx + zw * 0.78, zy + zh * 0.58, zw * 0.09, zh * 0.05, 1);
+    // Ladder (fall hazard area)
+    stroke(120, 120, 140);
+    strokeWeight(2);
+    let lx = zx + zw * 0.68;
+    line(lx, zy + zh * 0.1, lx, zy + zh * 0.85);
+    line(lx + 10, zy + zh * 0.1, lx + 10, zy + zh * 0.85);
+    for (let r = 0; r < 6; r++) {
+      line(lx, zy + zh * 0.15 + r * zh * 0.12, lx + 10, zy + zh * 0.15 + r * zh * 0.12);
+    }
+    noStroke();
+  }
+
+  if (z.id === 'dust') {
+    // Collector body
+    fill(95, 80, 65);
+    rect(zx + zw * 0.3, zy + zh * 0.1, zw * 0.4, zh * 0.7, 4);
+    // Hopper
+    fill(85, 70, 55);
+    triangle(zx + zw * 0.3, zy + zh * 0.8,
+             zx + zw * 0.7, zy + zh * 0.8,
+             zx + zw * 0.5, zy + zh * 0.95);
+    // Ductwork
+    stroke(110, 95, 80);
+    strokeWeight(4);
+    line(zx + zw * 0.5, zy + zh * 0.1, zx + zw * 0.5, zy - zh * 0.05);
+    line(zx + zw * 0.5, zy - zh * 0.05, zx + zw * 0.85, zy - zh * 0.05);
+    noStroke();
+    // Dust particles
+    fill(180, 160, 130, 100 + 50 * sin(pulsePhase));
+    for (let d = 0; d < 8; d++) {
+      let dx = zx + zw * (0.15 + random() * 0.7);
+      let dy = zy + zh * (0.1 + random() * 0.6);
+      ellipse(dx, dy, 3, 3);
+    }
+  }
+
+  if (z.id === 'piping') {
+    // Main header pipe
+    stroke(100, 160, 220);
+    strokeWeight(4);
+    line(zx + zw * 0.05, zy + zh * 0.3, zx + zw * 0.95, zy + zh * 0.3);
+    // Branch pipes
+    strokeWeight(3);
+    for (let b = 0; b < 4; b++) {
+      let bx = zx + zw * (0.15 + b * 0.22);
+      line(bx, zy + zh * 0.3, bx, zy + zh * 0.7);
+      // Valves
+      noStroke();
+      fill(140, 160, 180);
+      rect(bx - 5, zy + zh * 0.45, 10, 8, 2);
+      stroke(100, 160, 220);
+      strokeWeight(3);
+    }
+    // Pressure gauges
+    noStroke();
+    for (let g = 0; g < 3; g++) {
+      let gx = zx + zw * (0.25 + g * 0.25);
+      fill(40, 50, 70);
+      ellipse(gx, zy + zh * 0.3, 14, 14);
+      fill(200, 80, 80);
+      stroke(200, 80, 80);
+      strokeWeight(1);
+      line(gx, zy + zh * 0.3, gx + 4 * cos(-PI / 4 + g * 0.3), zy + zh * 0.3 + 4 * sin(-PI / 4 + g * 0.3));
+      noStroke();
+    }
+  }
+
+  pop();
+}
+
+// ---- Draw hazard hotspots ----
+function drawHazards() {
+  let hotspotRadius = constrain(facilityW * 0.018, 10, 20);
+
+  for (let i = 0; i < HAZARDS.length; i++) {
+    let h = HAZARDS[i];
+    let pos = relToAbs(h.rx, h.ry);
+    let col = HAZARD_COLORS[h.type];
+    let isVisible = discovered[i] || showAll;
+
+    // Apply filter
+    if (activeFilter !== 'all' && h.type !== activeFilter) {
+      if (isVisible) {
+        // Draw dimmed
+        fill(col[0], col[1], col[2], 40);
+        noStroke();
+        ellipse(pos.x, pos.y, hotspotRadius * 1.4, hotspotRadius * 1.4);
+      }
+      continue;
+    }
+
+    if (isVisible) {
+      // Pulse effect
+      let pulse = sin(pulsePhase + i * 0.5) * 0.3 + 0.7;
+      let outerR = hotspotRadius * (1.8 + pulse * 0.6);
+
+      // Outer glow
+      noFill();
+      stroke(col[0], col[1], col[2], 60 * pulse);
+      strokeWeight(2);
+      ellipse(pos.x, pos.y, outerR * 2, outerR * 2);
+
+      // Discovery animation
+      let anim = discoveryAnimations.find(a => a.index === i);
+      let animProgress = 1;
+      if (anim) {
+        animProgress = constrain((frameCount - anim.startFrame) / anim.duration, 0, 1);
+        // Expanding ring on discovery
+        if (animProgress < 1) {
+          let ringR = hotspotRadius * (1 + animProgress * 4);
+          noFill();
+          stroke(col[0], col[1], col[2], 200 * (1 - animProgress));
+          strokeWeight(3 * (1 - animProgress));
+          ellipse(pos.x, pos.y, ringR * 2, ringR * 2);
+        }
+      }
+
+      // Filled circle
+      fill(col[0], col[1], col[2], 180);
+      stroke(col[0], col[1], col[2]);
+      strokeWeight(2);
+      ellipse(pos.x, pos.y, hotspotRadius * 1.6, hotspotRadius * 1.6);
+
+      // Hazard number
+      fill(255);
+      noStroke();
+      textAlign(CENTER, CENTER);
+      textSize(constrain(hotspotRadius * 0.8, 8, 14));
+      textStyle(BOLD);
+      text(h.id, pos.x, pos.y);
+      textStyle(NORMAL);
+
+      // Highlight selected
+      if (selectedHazard === i) {
+        noFill();
+        stroke(255, 255, 255, 180);
+        strokeWeight(3);
+        ellipse(pos.x, pos.y, hotspotRadius * 2.4, hotspotRadius * 2.4);
+        noStroke();
+      }
+    } else {
+      // Invisible hotspot - draw subtle hint on hover
+      let d = dist(mouseX, mouseY, pos.x, pos.y);
+      if (d < hotspotRadius * 2.5) {
+        fill(255, 255, 255, 15 + 10 * sin(pulsePhase * 2));
+        noStroke();
+        ellipse(pos.x, pos.y, hotspotRadius * 2.2, hotspotRadius * 2.2);
+        // Cursor hint
+        fill(200, 200, 220, 60);
+        textAlign(CENTER, CENTER);
+        textSize(10);
+        text('?', pos.x, pos.y);
+      }
+    }
+  }
+}
+
+// ---- Side panel ----
+function drawSidePanel() {
+  // Panel background
+  fill(22, 24, 42);
+  stroke(50, 55, 80);
+  strokeWeight(1);
+  rect(panelX, 0, panelW, windowHeight);
+  noStroke();
+
+  let py = 60;
+  let px = panelX + 12;
+  let pw = panelW - 24;
+
+  // Score section
+  let found = discovered.filter(d => d).length;
+  fill(200, 215, 240);
+  textAlign(LEFT, TOP);
+  textSize(14);
+  textStyle(BOLD);
+  text('Progress', px, py);
+  textStyle(NORMAL);
+  py += 22;
+
+  // Progress bar
+  let barH = 14;
+  fill(40, 45, 65);
+  rect(px, py, pw, barH, 7);
+  let progress = found / HAZARDS.length;
+  if (progress > 0) {
+    // Gradient-like fill
+    let barCol = lerpColor(color(220, 80, 60), color(60, 200, 100), progress);
+    fill(barCol);
+    rect(px, py, pw * progress, barH, 7);
+  }
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(10);
+  textStyle(BOLD);
+  text(found + ' / ' + HAZARDS.length, px + pw / 2, py + barH / 2);
+  textStyle(NORMAL);
+  py += barH + 8;
+
+  // Completion message
+  if (found === HAZARDS.length) {
+    fill(80, 220, 120);
+    textAlign(CENTER, TOP);
+    textSize(12);
+    textStyle(BOLD);
+    text('All hazards identified!', px + pw / 2, py);
+    textStyle(NORMAL);
+    py += 20;
+  }
+
+  py += 6;
+
+  // Filter buttons
+  fill(180, 190, 210);
+  textAlign(LEFT, TOP);
+  textSize(12);
+  textStyle(BOLD);
+  text('Filter by Type', px, py);
+  textStyle(NORMAL);
+  py += 18;
+
+  filterButtons = [];
+  let filterTypes = ['all', 'pressure', 'mechanical', 'electrical', 'chemical', 'noise', 'dust/explosion', 'fall'];
+  let filterLabels = ['All', 'Pressure', 'Mechanical', 'Electrical', 'Chemical', 'Noise', 'Dust/Expl.', 'Fall'];
+
+  let fbW = (pw - 4) / 2;
+  let fbH = 20;
+  for (let fi = 0; fi < filterTypes.length; fi++) {
+    let col = fi === 0 ? [80, 80, 100] : HAZARD_COLORS[filterTypes[fi]];
+    let fx = px + (fi % 2) * (fbW + 4);
+    let fy = py + floor(fi / 2) * (fbH + 3);
+    let isActive = activeFilter === filterTypes[fi];
+
+    // Button background
+    if (isActive) {
+      fill(col[0], col[1], col[2], 200);
+    } else {
+      fill(col[0] * 0.3, col[1] * 0.3, col[2] * 0.3, 180);
+    }
+    stroke(col[0], col[1], col[2], isActive ? 255 : 80);
+    strokeWeight(1);
+    rect(fx, fy, fbW, fbH, 3);
+    noStroke();
+
+    // Label
+    fill(isActive ? 255 : 180);
+    textAlign(CENTER, CENTER);
+    textSize(10);
+    text(filterLabels[fi], fx + fbW / 2, fy + fbH / 2);
+
+    filterButtons.push({ type: filterTypes[fi], x: fx, y: fy, w: fbW, h: fbH });
+  }
+
+  py += ceil(filterTypes.length / 2) * (fbH + 3) + 12;
+
+  // Divider
+  stroke(50, 55, 80);
+  strokeWeight(1);
+  line(px, py, px + pw, py);
+  noStroke();
+  py += 10;
+
+  // Selected hazard details
+  if (selectedHazard !== null) {
+    let h = HAZARDS[selectedHazard];
+    let col = HAZARD_COLORS[h.type];
+
+    // Hazard name
+    fill(240, 240, 255);
+    textAlign(LEFT, TOP);
+    textSize(13);
+    textStyle(BOLD);
+    let nameLines = wrapText(h.name, pw, 13);
+    for (let nl of nameLines) {
+      text(nl, px, py);
+      py += 17;
+    }
+    textStyle(NORMAL);
+    py += 4;
+
+    // Type badge
+    fill(col[0], col[1], col[2], 200);
+    let typeLabel = h.type.charAt(0).toUpperCase() + h.type.slice(1);
+    let badgeW = textWidth(typeLabel) + 16;
+    rect(px, py, badgeW, 20, 10);
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(11);
+    textStyle(BOLD);
+    text(typeLabel, px + badgeW / 2, py + 10);
+    textStyle(NORMAL);
+
+    // Risk level badge
+    let riskCol = getRiskColor(h.risk);
+    let riskLabel = h.risk;
+    textSize(11);
+    let riskW = textWidth(riskLabel) + 16;
+    fill(riskCol);
+    rect(px + badgeW + 6, py, riskW, 20, 10);
+    fill(h.risk === 'Critical' ? 255 : 30);
+    textAlign(CENTER, CENTER);
+    textStyle(BOLD);
+    text(riskLabel, px + badgeW + 6 + riskW / 2, py + 10);
+    textStyle(NORMAL);
+
+    py += 30;
+
+    // Controls section
+    let sections = [
+      { title: 'PPE Required', content: h.ppe, icon: 'shield' },
+      { title: 'Engineering Control', content: h.engineering, icon: 'wrench' },
+      { title: 'Administrative Control', content: h.administrative, icon: 'clipboard' }
+    ];
+
+    for (let s of sections) {
+      // Section header
+      fill(140, 160, 200);
+      textAlign(LEFT, TOP);
+      textSize(11);
+      textStyle(BOLD);
+      text(s.title, px, py);
+      textStyle(NORMAL);
+      py += 15;
+
+      // Section content
+      fill(190, 200, 220);
+      textSize(10);
+      let contentLines = wrapText(s.content, pw - 4, 10);
+      for (let cl of contentLines) {
+        text(cl, px + 4, py);
+        py += 13;
+      }
+      py += 8;
+
+      // Check if we're running out of space
+      if (py > windowHeight - 20) break;
+    }
+  } else {
+    // No hazard selected
+    fill(120, 130, 160);
+    textAlign(CENTER, TOP);
+    textSize(12);
+    let msg = found === 0
+      ? 'Click on the facility\nto discover hazards'
+      : 'Click a hazard marker\nto view details';
+    let msgLines = msg.split('\n');
+    for (let ml of msgLines) {
+      text(ml, px + pw / 2, py);
+      py += 18;
+    }
+  }
+
+  // Legend at bottom of panel
+  let legendY = windowHeight - 16;
+  fill(100, 110, 130);
+  textAlign(CENTER, BOTTOM);
+  textSize(9);
+  text('Click facility areas to find hazards', px + pw / 2, legendY);
+}
+
+// ---- Risk color helper ----
+function getRiskColor(risk) {
+  switch (risk) {
+    case 'Critical': return color(220, 40, 40);
+    case 'High':     return color(240, 160, 40);
+    case 'Medium':   return color(240, 220, 60);
+    case 'Low':      return color(100, 200, 100);
+    default:         return color(150);
+  }
+}
+
+// ---- Text wrapping helper ----
+function wrapText(txt, maxW, fontSize) {
+  textSize(fontSize);
+  let words = txt.split(' ');
+  let lines = [];
+  let currentLine = '';
+  for (let w of words) {
+    let testLine = currentLine.length === 0 ? w : currentLine + ' ' + w;
+    if (textWidth(testLine) > maxW && currentLine.length > 0) {
+      lines.push(currentLine);
+      currentLine = w;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine.length > 0) lines.push(currentLine);
+  return lines;
+}
+
+// ---- Mouse interaction ----
+function mousePressed() {
+  // Check top bar buttons
+  for (let b of buttons) {
+    if (mouseX > b.x && mouseX < b.x + b.w && mouseY > b.y && mouseY < b.y + b.h) {
+      if (b.label === 'showAll') {
+        showAll = !showAll;
+        return;
+      }
+      if (b.label === 'reset') {
+        resetGame();
+        return;
+      }
+    }
+  }
+
+  // Check filter buttons
+  for (let fb of filterButtons) {
+    if (mouseX > fb.x && mouseX < fb.x + fb.w && mouseY > fb.y && mouseY < fb.y + fb.h) {
+      activeFilter = fb.type;
+      return;
+    }
+  }
+
+  // Check hazard hotspots
+  let hotspotRadius = constrain(facilityW * 0.018, 10, 20);
+  let clickRadius = hotspotRadius * 2.5; // Generous click target
+
+  for (let i = 0; i < HAZARDS.length; i++) {
+    let h = HAZARDS[i];
+    let pos = relToAbs(h.rx, h.ry);
+    let d = dist(mouseX, mouseY, pos.x, pos.y);
+
+    if (d < clickRadius) {
+      if (!discovered[i]) {
+        discovered[i] = true;
+        discoveryAnimations.push({ index: i, startFrame: frameCount, duration: 40 });
+      }
+      selectedHazard = i;
+      return;
+    }
+  }
+
+  // Clicked on facility but not on a hazard - deselect
+  if (mouseX > facilityX && mouseX < facilityX + facilityW &&
+      mouseY > facilityY && mouseY < facilityY + facilityH) {
+    selectedHazard = null;
+  }
+}
+
+// ---- Touch support for mobile ----
+function touchStarted() {
+  mousePressed();
+  return false; // Prevent default
+}
+</script>
+</body>
+</html>

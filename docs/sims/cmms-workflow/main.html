@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMMS Workflow Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .app-container { display: flex; flex: 1; overflow: hidden; }
+
+  .sidebar {
+    width: 200px;
+    min-width: 200px;
+    background: #1565C0;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding-top: 12px;
+  }
+
+  .sidebar-brand {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 8px 12px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    margin-bottom: 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: background 0.15s;
+    border-left: 3px solid transparent;
+  }
+
+  .nav-item:hover { background: rgba(255,255,255,0.1); }
+  .nav-item.active {
+    background: rgba(255,255,255,0.18);
+    border-left-color: #fff;
+  }
+
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ── Main content ── */
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+  }
+
+  .tab-page { display: none; }
+  .tab-page.active { display: block; }
+
+  /* ── Cards ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .kpi-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 18px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+
+  .kpi-card h4 {
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #777;
+    margin-bottom: 10px;
+    letter-spacing: 0.4px;
+  }
+
+  /* Circular gauge */
+  .gauge-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 6px;
+  }
+
+  .gauge-wrap svg { transform: rotate(-90deg); }
+
+  .gauge-bg { fill: none; stroke: #e0e0e0; stroke-width: 8; }
+  .gauge-fg { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease, stroke 0.4s; }
+
+  .gauge-label {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1565C0;
+  }
+
+  .kpi-trend { font-size: 13px; margin-top: 2px; }
+  .trend-up { color: #2e7d32; }
+  .trend-down { color: #c62828; }
+
+  .kpi-badge {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    background: #1565C0;
+    border-radius: 50%;
+    width: 64px; height: 64px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 6px;
+  }
+
+  /* ── Tables ── */
+  .section-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    padding: 16px 20px;
+    margin-bottom: 18px;
+  }
+
+  .section-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #1565C0;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #e0e0e0; color: #555; font-weight: 600; font-size: 11.5px; text-transform: uppercase; }
+  td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+  tr:hover td { background: #f9f9f9; }
+
+  .priority-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .priority-high { background: #c62828; }
+  .priority-medium { background: #f9a825; }
+  .priority-low { background: #2e7d32; }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .status-open { background: #e3f2fd; color: #1565C0; }
+  .status-in-progress { background: #fff3e0; color: #e65100; }
+  .status-completed { background: #e8f5e9; color: #2e7d32; }
+
+  .pm-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+  }
+
+  .pm-item:last-child { border-bottom: none; }
+  .pm-due { color: #888; font-size: 12px; }
+
+  /* ── Work Orders tab ── */
+  .wo-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 6px 16px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background: #fff;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .filter-btn:hover { border-color: #1565C0; color: #1565C0; }
+  .filter-btn.active { background: #1565C0; color: #fff; border-color: #1565C0; }
+
+  .btn-primary {
+    padding: 7px 18px;
+    background: #1565C0;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+    transition: background 0.15s;
+  }
+
+  .btn-primary:hover { background: #0d47a1; }
+
+  .wo-row { cursor: pointer; }
+  .wo-row.selected td { background: #e3f2fd; }
+
+  .wo-detail-panel {
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-top: 16px;
+    display: none;
+  }
+
+  .wo-detail-panel.visible { display: block; }
+
+  .wo-detail-panel h3 {
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: #1565C0;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .detail-grid dt { font-weight: 600; color: #555; }
+  .detail-grid dd { margin: 0 0 6px; }
+
+  .action-btn {
+    padding: 7px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: background 0.15s;
+  }
+
+  .action-btn.start { background: #ff9800; color: #fff; }
+  .action-btn.start:hover { background: #f57c00; }
+  .action-btn.complete { background: #2e7d32; color: #fff; }
+  .action-btn.complete:hover { background: #1b5e20; }
+  .action-btn:disabled { opacity: 0.45; cursor: default; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.visible { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: #fff;
+    border-radius: 10px;
+    width: 440px;
+    max-width: 95vw;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    padding: 24px;
+  }
+
+  .modal h2 {
+    font-size: 18px;
+    margin-bottom: 18px;
+    color: #1565C0;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 4px;
+  }
+
+  .form-group select,
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+
+  .form-group textarea { resize: vertical; min-height: 70px; }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+  }
+
+  .btn-cancel {
+    padding: 7px 18px;
+    background: #eee;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  /* ── PM Schedule tab ── */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    background: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .cal-header {
+    background: #1565C0;
+    color: #fff;
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .cal-cell {
+    background: #fff;
+    min-height: 90px;
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .cal-block {
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin-bottom: 3px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+  }
+
+  .cal-hvac { background: #1976d2; }
+  .cal-pump { background: #388e3c; }
+  .cal-air { background: #e65100; }
+
+  /* ── Assets tab ── */
+  .status-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 5px;
+  }
+
+  .status-running { background: #2e7d32; }
+  .status-down { background: #c62828; }
+  .status-maintenance { background: #f9a825; }
+
+  /* ── Bottom bar ── */
+  .bottom-bar {
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 46px;
+  }
+
+  .bottom-bar .btn-primary { margin-left: 0; }
+
+  .activity-log {
+    flex: 1;
+    font-size: 12px;
+    color: #555;
+    max-height: 28px;
+    overflow-y: auto;
+  }
+
+  .activity-log span {
+    display: inline;
+    margin-right: 14px;
+  }
+
+  .log-entry-new {
+    animation: logFlash 1.2s ease;
+  }
+
+  @keyframes logFlash {
+    0% { color: #1565C0; font-weight: 700; }
+    100% { color: #555; font-weight: 400; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 800px) {
+    .sidebar { width: 56px; min-width: 56px; }
+    .sidebar-brand, .nav-label { display: none; }
+    .nav-item { justify-content: center; padding: 14px 0; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">CMMS</div>
+    <div class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <span class="nav-icon">&#8962;</span><span class="nav-label">Dashboard</span>
+    </div>
+    <div class="nav-item" data-tab="workorders" onclick="switchTab('workorders')">
+      <span class="nav-icon">&#128295;</span><span class="nav-label">Work Orders</span>
+    </div>
+    <div class="nav-item" data-tab="schedule" onclick="switchTab('schedule')">
+      <span class="nav-icon">&#128197;</span><span class="nav-label">PM Schedule</span>
+    </div>
+    <div class="nav-item" data-tab="assets" onclick="switchTab('assets')">
+      <span class="nav-icon">&#9881;</span><span class="nav-label">Assets</span>
+    </div>
+  </nav>
+
+  <!-- Main content area -->
+  <div class="main-content">
+    <!-- ═══════ DASHBOARD TAB ═══════ -->
+    <div id="tab-dashboard" class="tab-page active">
+      <div class="kpi-row">
+        <!-- PM Compliance gauge -->
+        <div class="kpi-card">
+          <h4>PM Compliance</h4>
+          <div class="gauge-wrap">
+            <svg viewBox="0 0 80 80" width="80" height="80">
+              <circle class="gauge-bg" cx="40" cy="40" r="34"></circle>
+              <circle id="gauge-fg" class="gauge-fg" cx="40" cy="40" r="34"
+                stroke-dasharray="213.6" stroke-dashoffset="32"></circle>
+            </svg>
+            <span id="gauge-label" class="gauge-label">85%</span>
+          </div>
+        </div>
+        <!-- MTBF -->
+        <div class="kpi-card">
+          <h4>MTBF</h4>
+          <div class="kpi-value" id="kpi-mtbf">342 hrs</div>
+          <div class="kpi-trend trend-up" id="kpi-mtbf-trend">&#9650; 5%</div>
+        </div>
+        <!-- MTTR -->
+        <div class="kpi-card">
+          <h4>MTTR</h4>
+          <div class="kpi-value" id="kpi-mttr">4.2 hrs</div>
+          <div class="kpi-trend trend-down" id="kpi-mttr-trend">&#9660; 3%</div>
+        </div>
+        <!-- Open WOs -->
+        <div class="kpi-card">
+          <h4>Open Work Orders</h4>
+          <div class="kpi-badge" id="kpi-open-wo">12</div>
+        </div>
+      </div>
+
+      <!-- Recent Work Orders -->
+      <div class="section-card">
+        <h3>Recent Work Orders</h3>
+        <table>
+          <thead>
+            <tr><th>WO#</th><th>Equipment</th><th>Priority</th><th>Status</th><th>Assigned To</th></tr>
+          </thead>
+          <tbody id="dashboard-wo-table"></tbody>
+        </table>
+      </div>
+
+      <!-- Upcoming PM -->
+      <div class="section-card">
+        <h3>Upcoming PM Tasks</h3>
+        <div id="upcoming-pm-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══════ WORK ORDERS TAB ═══════ -->
+    <div id="tab-workorders" class="tab-page">
+      <div class="wo-toolbar">
+        <button class="filter-btn active" data-filter="all" onclick="filterWO('all')">All</button>
+        <button class="filter-btn" data-filter="Open" onclick="filterWO('Open')">Open</button>
+        <button class="filter-btn" data-filter="In Progress" onclick="filterWO('In Progress')">In Progress</button>
+        <button class="filter-btn" data-filter="Completed" onclick="filterWO('Completed')">Completed</button>
+        <button class="btn-primary" onclick="openNewWOModal()">+ New Work Order</button>
+      </div>
+      <div class="section-card" style="padding:0;overflow:auto;">
+        <table>
+          <thead>
+            <tr><th>WO#</th><th>Date</th><th>Equipment</th><th>Priority</th><th>Description</th><th>Status</th><th>Technician</th></tr>
+          </thead>
+          <tbody id="wo-table-body"></tbody>
+        </table>
+      </div>
+      <div id="wo-detail-panel" class="wo-detail-panel"></div>
+    </div>
+
+    <!-- ═══════ PM SCHEDULE TAB ═══════ -->
+    <div id="tab-schedule" class="tab-page">
+      <div class="section-card">
+        <h3>Weekly PM Schedule</h3>
+        <div class="calendar-grid" id="pm-calendar"></div>
+      </div>
+    </div>
+
+    <!-- ═══════ ASSETS TAB ═══════ -->
+    <div id="tab-assets" class="tab-page">
+      <div class="section-card" style="padding:0;overflow:auto;">
+        <table>
+          <thead>
+            <tr><th>Asset ID</th><th>Name</th><th>System Type</th><th>Status</th><th>Last PM Date</th></tr>
+          </thead>
+          <tbody id="assets-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <button class="btn-primary" onclick="runWeekScenario()">&#9654; Run Week Scenario</button>
+  <div class="activity-log" id="activity-log">Ready.</div>
+</div>
+
+<!-- New Work Order Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h2>New Work Order</h2>
+    <div class="form-group">
+      <label>Equipment</label>
+      <select id="modal-equipment">
+        <option value="">-- Select --</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Priority</label>
+      <select id="modal-priority">
+        <option value="Low">Low</option>
+        <option value="Medium" selected>Medium</option>
+        <option value="High">High</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="modal-desc" placeholder="Describe the issue or task..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Assign To</label>
+      <select id="modal-tech">
+        <option value="">-- Select --</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="submitNewWO()">Create Work Order</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   DATA
+   ═══════════════════════════════════ */
+
+const technicians = ['M. Johnson', 'R. Patel', 'S. Kim', 'D. Williams', 'A. Garcia', 'J. Chen'];
+
+const assets = [
+  { id: 'AHU-001', name: 'Air Handler Unit 1',       system: 'HVAC',           status: 'Running',     lastPM: '2026-01-28' },
+  { id: 'AHU-002', name: 'Air Handler Unit 2',       system: 'HVAC',           status: 'Running',     lastPM: '2026-01-20' },
+  { id: 'CHL-001', name: 'Chiller Plant A',          system: 'HVAC',           status: 'Running',     lastPM: '2026-02-01' },
+  { id: 'PMP-001', name: 'Cooling Water Pump 1',     system: 'Pumping',        status: 'Running',     lastPM: '2026-01-15' },
+  { id: 'PMP-002', name: 'Condensate Return Pump',   system: 'Pumping',        status: 'Maintenance', lastPM: '2026-01-10' },
+  { id: 'CMP-001', name: 'Rotary Screw Compressor',  system: 'Compressed Air', status: 'Running',     lastPM: '2026-02-03' },
+  { id: 'CMP-002', name: 'Reciprocating Compressor', system: 'Compressed Air', status: 'Down',        lastPM: '2025-12-18' },
+  { id: 'DRY-001', name: 'Refrigerated Air Dryer',   system: 'Compressed Air', status: 'Running',     lastPM: '2026-01-22' },
+  { id: 'VAV-001', name: 'VAV Box - Zone 3',         system: 'HVAC',           status: 'Running',     lastPM: '2026-01-30' },
+  { id: 'PMP-003', name: 'Boiler Feed Pump',         system: 'Pumping',        status: 'Running',     lastPM: '2026-02-05' }
+];
+
+let nextWO = 2401;
+
+let workOrders = [
+  { id: 'WO-2389', date: '2026-02-04', equipment: 'AHU-001', priority: 'High',   desc: 'Excessive vibration detected on supply fan bearing', status: 'Open',        tech: 'M. Johnson', parts: 'Bearing kit #B-4420', estHrs: 3.5 },
+  { id: 'WO-2390', date: '2026-02-04', equipment: 'CMP-002', priority: 'High',   desc: 'Compressor failed to start — check motor contactor', status: 'In Progress', tech: 'R. Patel',   parts: 'Contactor CR-220, Fuse 60A', estHrs: 4.0 },
+  { id: 'WO-2391', date: '2026-02-05', equipment: 'PMP-001', priority: 'Medium', desc: 'Seal leak on mechanical seal — schedule replacement', status: 'Open',        tech: 'S. Kim',      parts: 'Mechanical seal MS-112', estHrs: 2.5 },
+  { id: 'WO-2392', date: '2026-02-05', equipment: 'DRY-001', priority: 'Low',    desc: 'Quarterly filter replacement on refrigerated dryer',  status: 'Completed',   tech: 'D. Williams', parts: 'Filter element FE-300', estHrs: 1.0 },
+  { id: 'WO-2393', date: '2026-02-06', equipment: 'AHU-002', priority: 'Medium', desc: 'Belt tension check and alignment on AHU-002',          status: 'Open',        tech: 'A. Garcia',   parts: 'V-belt set VB-55', estHrs: 1.5 },
+  { id: 'WO-2394', date: '2026-02-06', equipment: 'CHL-001', priority: 'High',   desc: 'Low refrigerant alarm — inspect for leaks',           status: 'In Progress', tech: 'M. Johnson', parts: 'Refrigerant R-134a, Leak detector', estHrs: 5.0 },
+  { id: 'WO-2395', date: '2026-02-07', equipment: 'PMP-002', priority: 'Medium', desc: 'Impeller inspection during scheduled downtime',        status: 'Open',        tech: 'S. Kim',      parts: 'Gasket set GS-44', estHrs: 3.0 },
+  { id: 'WO-2396', date: '2026-02-07', equipment: 'CMP-001', priority: 'Low',    desc: 'Oil sample collection and analysis',                  status: 'Completed',   tech: 'R. Patel',   parts: 'Sample kit', estHrs: 0.5 },
+  { id: 'WO-2397', date: '2026-02-08', equipment: 'VAV-001', priority: 'Low',    desc: 'Calibrate zone temperature sensor',                   status: 'Open',        tech: 'D. Williams', parts: 'Calibration tool', estHrs: 1.0 },
+  { id: 'WO-2398', date: '2026-02-09', equipment: 'PMP-003', priority: 'Medium', desc: 'Check pump alignment after motor replacement',         status: 'Open',        tech: 'A. Garcia',   parts: 'Alignment shims', estHrs: 2.0 }
+];
+
+const pmSchedule = [
+  { day: 0, asset: 'AHU-001', task: 'Filter check',   type: 'hvac' },
+  { day: 0, asset: 'PMP-001', task: 'Vibration reading', type: 'pump' },
+  { day: 1, asset: 'CMP-001', task: 'Oil level check', type: 'air' },
+  { day: 1, asset: 'AHU-002', task: 'Belt inspection', type: 'hvac' },
+  { day: 2, asset: 'PMP-002', task: 'Seal inspection', type: 'pump' },
+  { day: 2, asset: 'CMP-002', task: 'Motor test',      type: 'air' },
+  { day: 3, asset: 'CHL-001', task: 'Refrigerant check', type: 'hvac' },
+  { day: 3, asset: 'DRY-001', task: 'Drain trap test', type: 'air' },
+  { day: 4, asset: 'PMP-003', task: 'Pressure reading', type: 'pump' },
+  { day: 4, asset: 'VAV-001', task: 'Actuator test',   type: 'hvac' },
+  { day: 5, asset: 'CMP-001', task: 'Leak survey',     type: 'air' },
+  { day: 6, asset: 'PMP-001', task: 'Lubrication',     type: 'pump' }
+];
+
+const upcomingPM = [
+  { task: 'AHU-001 — Quarterly coil cleaning',          due: '2026-02-14' },
+  { task: 'CMP-001 — Annual oil & separator change',    due: '2026-02-18' },
+  { task: 'PMP-001 — Semi-annual alignment verification', due: '2026-02-21' }
+];
+
+/* ═══════ KPI STATE ═══════ */
+let kpi = { pmCompliance: 85, mtbf: 342, mttr: 4.2 };
+
+/* ═══════ TAB SWITCHING ═══════ */
+function switchTab(tab) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
+}
+
+/* ═══════ GAUGE HELPER ═══════ */
+function setGauge(pct) {
+  const circ = 2 * Math.PI * 34;                    // ~213.6
+  const offset = circ * (1 - pct / 100);
+  const fg = document.getElementById('gauge-fg');
+  fg.setAttribute('stroke-dashoffset', offset);
+  fg.setAttribute('stroke', pct >= 90 ? '#2e7d32' : pct >= 70 ? '#f9a825' : '#c62828');
+  document.getElementById('gauge-label').textContent = pct + '%';
+}
+
+/* ═══════ RENDER HELPERS ═══════ */
+function priorityDot(p) {
+  const cls = p === 'High' ? 'priority-high' : p === 'Medium' ? 'priority-medium' : 'priority-low';
+  return `<span class="priority-dot ${cls}" title="${p}"></span>`;
+}
+
+function statusBadge(s) {
+  const cls = s === 'Open' ? 'status-open' : s === 'In Progress' ? 'status-in-progress' : 'status-completed';
+  return `<span class="status-badge ${cls}">${s}</span>`;
+}
+
+function assetName(id) {
+  const a = assets.find(x => x.id === id);
+  return a ? a.name : id;
+}
+
+/* ═══════ DASHBOARD RENDER ═══════ */
+function renderDashboard() {
+  setGauge(kpi.pmCompliance);
+
+  document.getElementById('kpi-mtbf').textContent = kpi.mtbf + ' hrs';
+  document.getElementById('kpi-mttr').textContent = kpi.mttr + ' hrs';
+
+  const openCount = workOrders.filter(w => w.status !== 'Completed').length;
+  document.getElementById('kpi-open-wo').textContent = openCount;
+
+  // Recent WOs (last 5)
+  const recent = workOrders.slice(-5).reverse();
+  document.getElementById('dashboard-wo-table').innerHTML = recent.map(w => `
+    <tr>
+      <td>${w.id}</td>
+      <td>${assetName(w.equipment)}</td>
+      <td>${priorityDot(w.priority)}</td>
+      <td>${statusBadge(w.status)}</td>
+      <td>${w.tech}</td>
+    </tr>`).join('');
+
+  // Upcoming PM
+  document.getElementById('upcoming-pm-list').innerHTML = upcomingPM.map(p => `
+    <div class="pm-item"><span>${p.task}</span><span class="pm-due">Due: ${p.due}</span></div>
+  `).join('');
+}
+
+/* ═══════ WORK ORDERS RENDER ═══════ */
+let currentFilter = 'all';
+let selectedWO = null;
+
+function filterWO(f) {
+  currentFilter = f;
+  document.querySelectorAll('.wo-toolbar .filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+  renderWOTable();
+}
+
+function renderWOTable() {
+  const list = currentFilter === 'all' ? workOrders : workOrders.filter(w => w.status === currentFilter);
+  document.getElementById('wo-table-body').innerHTML = list.map(w => `
+    <tr class="wo-row ${selectedWO === w.id ? 'selected' : ''}" onclick="selectWO('${w.id}')">
+      <td>${w.id}</td>
+      <td>${w.date}</td>
+      <td>${assetName(w.equipment)}</td>
+      <td>${priorityDot(w.priority)}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${w.desc}</td>
+      <td>${statusBadge(w.status)}</td>
+      <td>${w.tech}</td>
+    </tr>`).join('');
+
+  renderDetailPanel();
+}
+
+function selectWO(id) {
+  selectedWO = selectedWO === id ? null : id;
+  renderWOTable();
+}
+
+function renderDetailPanel() {
+  const panel = document.getElementById('wo-detail-panel');
+  if (!selectedWO) { panel.classList.remove('visible'); return; }
+  const w = workOrders.find(x => x.id === selectedWO);
+  if (!w) { panel.classList.remove('visible'); return; }
+
+  const canStart = w.status === 'Open';
+  const canComplete = w.status === 'In Progress';
+
+  panel.innerHTML = `
+    <h3>${w.id} — ${assetName(w.equipment)}</h3>
+    <dl class="detail-grid">
+      <dt>Description</dt><dd>${w.desc}</dd>
+      <dt>Priority</dt><dd>${w.priority}</dd>
+      <dt>Parts Needed</dt><dd>${w.parts}</dd>
+      <dt>Estimated Hours</dt><dd>${w.estHrs}</dd>
+      <dt>Assigned To</dt><dd>${w.tech}</dd>
+      <dt>Status</dt><dd>${statusBadge(w.status)}</dd>
+    </dl>
+    <button class="action-btn start" ${canStart ? '' : 'disabled'} onclick="startWork('${w.id}')">Start Work</button>
+    <button class="action-btn complete" ${canComplete ? '' : 'disabled'} onclick="completeWork('${w.id}')">Complete</button>
+  `;
+  panel.classList.add('visible');
+}
+
+function startWork(id) {
+  const w = workOrders.find(x => x.id === id);
+  if (w && w.status === 'Open') {
+    w.status = 'In Progress';
+    addLog(`${id} started by ${w.tech}`);
+    renderAll();
+  }
+}
+
+function completeWork(id) {
+  const w = workOrders.find(x => x.id === id);
+  if (w && w.status === 'In Progress') {
+    w.status = 'Completed';
+    kpi.pmCompliance = Math.min(100, kpi.pmCompliance + 1);
+    kpi.mtbf = Math.round(kpi.mtbf + Math.random() * 10);
+    kpi.mttr = Math.round((kpi.mttr - Math.random() * 0.3) * 10) / 10;
+    if (kpi.mttr < 1) kpi.mttr = 1;
+    addLog(`${id} completed`);
+
+    // Update asset status if it was down
+    const asset = assets.find(a => a.id === w.equipment);
+    if (asset && (asset.status === 'Down' || asset.status === 'Maintenance')) {
+      asset.status = 'Running';
+      asset.lastPM = new Date().toISOString().slice(0, 10);
+    }
+
+    renderAll();
+  }
+}
+
+/* ═══════ NEW WORK ORDER MODAL ═══════ */
+function openNewWOModal() {
+  const eqSel = document.getElementById('modal-equipment');
+  eqSel.innerHTML = '<option value="">-- Select --</option>' + assets.map(a => `<option value="${a.id}">${a.name} (${a.id})</option>`).join('');
+  const techSel = document.getElementById('modal-tech');
+  techSel.innerHTML = '<option value="">-- Select --</option>' + technicians.map(t => `<option value="${t}">${t}</option>`).join('');
+  document.getElementById('modal-desc').value = '';
+  document.getElementById('modal-priority').value = 'Medium';
+  document.getElementById('modal-overlay').classList.add('visible');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+}
+
+function submitNewWO() {
+  const eq = document.getElementById('modal-equipment').value;
+  const pr = document.getElementById('modal-priority').value;
+  const desc = document.getElementById('modal-desc').value.trim();
+  const tech = document.getElementById('modal-tech').value;
+  if (!eq || !desc || !tech) { alert('Please fill in all fields.'); return; }
+
+  const id = 'WO-' + nextWO++;
+  const today = new Date().toISOString().slice(0, 10);
+  workOrders.push({ id, date: today, equipment: eq, priority: pr, desc, status: 'Open', tech, parts: 'TBD', estHrs: 2.0 });
+  addLog(`${id} created for ${assetName(eq)}`);
+  closeModal();
+  renderAll();
+}
+
+/* ═══════ PM SCHEDULE RENDER ═══════ */
+function renderSchedule() {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  let html = days.map(d => `<div class="cal-header">${d}</div>`).join('');
+  for (let d = 0; d < 7; d++) {
+    const tasks = pmSchedule.filter(t => t.day === d);
+    html += `<div class="cal-cell">${tasks.map(t => {
+      const cls = t.type === 'hvac' ? 'cal-hvac' : t.type === 'pump' ? 'cal-pump' : 'cal-air';
+      return `<div class="cal-block ${cls}">${t.asset}<br>${t.task}</div>`;
+    }).join('')}</div>`;
+  }
+  document.getElementById('pm-calendar').innerHTML = html;
+}
+
+/* ═══════ ASSETS RENDER ═══════ */
+function renderAssets() {
+  document.getElementById('assets-table-body').innerHTML = assets.map(a => {
+    const cls = a.status === 'Running' ? 'status-running' : a.status === 'Down' ? 'status-down' : 'status-maintenance';
+    return `<tr>
+      <td>${a.id}</td>
+      <td>${a.name}</td>
+      <td>${a.system}</td>
+      <td><span class="status-dot ${cls}"></span>${a.status}</td>
+      <td>${a.lastPM}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ═══════ ACTIVITY LOG ═══════ */
+function addLog(msg) {
+  const log = document.getElementById('activity-log');
+  const span = document.createElement('span');
+  span.textContent = msg;
+  span.className = 'log-entry-new';
+  log.prepend(span);
+  // Keep log manageable
+  while (log.children.length > 30) log.removeChild(log.lastChild);
+}
+
+/* ═══════ RUN WEEK SCENARIO ═══════ */
+function runWeekScenario() {
+  addLog('--- Week scenario started ---');
+
+  // Complete some open / in-progress WOs
+  const active = workOrders.filter(w => w.status === 'Open' || w.status === 'In Progress');
+  const toComplete = active.slice(0, Math.min(3, active.length));
+  toComplete.forEach(w => {
+    w.status = 'Completed';
+    const asset = assets.find(a => a.id === w.equipment);
+    if (asset && asset.status !== 'Running') {
+      asset.status = 'Running';
+      asset.lastPM = new Date().toISOString().slice(0, 10);
+    }
+    addLog(`${w.id} completed (scenario)`);
+  });
+
+  // Start some open WOs
+  const stillOpen = workOrders.filter(w => w.status === 'Open');
+  stillOpen.slice(0, 2).forEach(w => {
+    w.status = 'In Progress';
+    addLog(`${w.id} started (scenario)`);
+  });
+
+  // Add new routine WO
+  const routineAsset = assets[Math.floor(Math.random() * assets.length)];
+  const routineId = 'WO-' + nextWO++;
+  workOrders.push({
+    id: routineId,
+    date: new Date().toISOString().slice(0, 10),
+    equipment: routineAsset.id,
+    priority: 'Low',
+    desc: 'Routine weekly inspection',
+    status: 'Open',
+    tech: technicians[Math.floor(Math.random() * technicians.length)],
+    parts: 'None',
+    estHrs: 1.0
+  });
+  addLog(`${routineId} created — routine inspection on ${routineAsset.name}`);
+
+  // Add emergency WO
+  const emergAsset = assets.find(a => a.status === 'Running') || assets[0];
+  const emergId = 'WO-' + nextWO++;
+  workOrders.push({
+    id: emergId,
+    date: new Date().toISOString().slice(0, 10),
+    equipment: emergAsset.id,
+    priority: 'High',
+    desc: 'EMERGENCY — unexpected shutdown, investigate immediately',
+    status: 'Open',
+    tech: technicians[0],
+    parts: 'TBD',
+    estHrs: 6.0
+  });
+  emergAsset.status = 'Down';
+  addLog(`${emergId} EMERGENCY on ${emergAsset.name}`);
+
+  // Update KPIs
+  kpi.pmCompliance = Math.max(50, Math.min(100, kpi.pmCompliance + Math.round(Math.random() * 8 - 3)));
+  kpi.mtbf = Math.round(kpi.mtbf + (Math.random() * 30 - 10));
+  kpi.mttr = Math.round((kpi.mttr + (Math.random() * 1.2 - 0.5)) * 10) / 10;
+  if (kpi.mttr < 1) kpi.mttr = 1.0;
+
+  addLog('--- Week scenario complete ---');
+  renderAll();
+}
+
+/* ═══════ RENDER ALL ═══════ */
+function renderAll() {
+  renderDashboard();
+  renderWOTable();
+  renderSchedule();
+  renderAssets();
+}
+
+/* ═══════ INIT ═══════ */
+renderAll();
+</script>
+</body>
+</html>
