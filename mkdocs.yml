@@ -16,7 +16,7 @@ nav:
     - 2. Components and Controls: chapters/02-components-and-controls/index.md
     - 3. HVAC: chapters/03-hvac/index.md
     - 4. Vacuum: chapters/04-vacuum/index.md
-    - 5. Pneumatic Conveying: chapters/05-pneumatic-conveying/index.md
+    - 5. Blowers: chapters/05-blowers/index.md
     - 6. Compressed Air: chapters/06-compressed-air/index.md
     - 7. Cooling: chapters/07-cooling/index.md
     - 8. Steam Systems: chapters/08-steam/index.md
@@ -79,13 +79,16 @@ nav:
     - Steam AI Dashboard: sims/steam-ai-dashboard/index.md
     - Steam Energy Savings: sims/steam-energy-savings/index.md
     - Steam Safety Checklist: sims/steam-safety-checklist/index.md
-    - Pneumatic Conveying Modes: sims/pneumatic-conveying-modes/index.md
-    - Pneumatic System Configurations: sims/pneumatic-system-configs/index.md
-    - Pneumatic Pipeline Calculator: sims/pneumatic-pipeline-calculator/index.md
-    - Pneumatic Material Selector: sims/pneumatic-material-selector/index.md
-    - Pneumatic Troubleshooter: sims/pneumatic-troubleshooter/index.md
-    - Pneumatic Energy Comparison: sims/pneumatic-energy-comparison/index.md
-    - Pneumatic Maintenance Checklist: sims/pneumatic-maintenance-checklist/index.md
+    - Blower Types Comparison: sims/blower-types-comparison/index.md
+    - Blower Performance Curves: sims/blower-performance-curves/index.md
+    - Aeration Blower Calculator: sims/aeration-blower-calculator/index.md
+    - Blower Conveying Modes: sims/pneumatic-conveying-modes/index.md
+    - Blower System Configurations: sims/pneumatic-system-configs/index.md
+    - Blower Pipeline Calculator: sims/pneumatic-pipeline-calculator/index.md
+    - Blower Material Selector: sims/pneumatic-material-selector/index.md
+    - Blower Troubleshooter: sims/pneumatic-troubleshooter/index.md
+    - Blower Energy Comparison: sims/pneumatic-energy-comparison/index.md
+    - Blower Maintenance Checklist: sims/pneumatic-maintenance-checklist/index.md
     - Dust Collector Types: sims/dust-collector-types/index.md
     - Dust System Layout: sims/dust-system-layout/index.md
     - Dust Maintenance Checklist: sims/dust-maintenance-checklist/index.md
@@ -107,6 +110,7 @@ nav:
     - Safety Hazard Identifier: sims/safety-hazard-identifier/index.md
     - Compliance Standards Navigator: sims/compliance-standards-navigator/index.md
     - Sustainability Metrics Calculator: sims/sustainability-metrics-calculator/index.md
+    - Architecture Overview: sims/arch-overview/index.md
   - FAQ: faq.md
   - Glossary: glossary.md
   - How We Built This Site: how-we-built-this-site.md

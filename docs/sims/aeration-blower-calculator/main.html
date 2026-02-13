@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aeration Blower Sizing Calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 8px 12px;
+        }
+        h2 {
+            text-align: center;
+            color: #1565C0;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        .panels {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .panel {
+            flex: 1;
+            min-width: 280px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 14px 16px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        .panel h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #1565C0;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+        .input-row label {
+            font-size: 12px;
+            color: #444;
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+        .input-row input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+        }
+        .input-row .val {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1565C0;
+            min-width: 70px;
+            text-align: right;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        .result-row:last-child { border-bottom: none; }
+        .result-label { color: #555; }
+        .result-value { font-weight: 700; color: #1565C0; }
+        .result-value.savings { color: #2E7D32; }
+        .result-value.cost { color: #C62828; }
+        .comparison {
+            margin-top: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+        .comparison h4 {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .bar-container {
+            margin-bottom: 8px;
+        }
+        .bar-label {
+            font-size: 11px;
+            color: #555;
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .bar-track {
+            height: 22px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 6px;
+            font-size: 10px;
+            color: #fff;
+            font-weight: 600;
+        }
+        .bar-pd { background: linear-gradient(90deg, #e65100, #ff8f00); }
+        .bar-screw { background: linear-gradient(90deg, #1565C0, #42A5F5); }
+        .bar-turbo { background: linear-gradient(90deg, #2E7D32, #66BB6A); }
+        .step-calc {
+            background: #f0f4f8;
+            border: 1px solid #d0d8e0;
+            border-radius: 4px;
+            padding: 8px 10px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: #444;
+            line-height: 1.7;
+            display: none;
+        }
+        .step-calc code {
+            font-family: 'Courier New', monospace;
+            color: #1565C0;
+            font-weight: 600;
+        }
+        .show-calc-btn {
+            background: #e3f2fd;
+            border: 1px solid #90CAF9;
+            color: #1565C0;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .show-calc-btn:hover { background: #BBDEFB; }
+        .note {
+            font-size: 11px;
+            color: #777;
+            margin-top: 8px;
+            line-height: 1.4;
+            padding: 6px 8px;
+            background: #fffde7;
+            border-left: 3px solid #FBC02D;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Aeration Blower Sizing Calculator</h2>
+        <p class="subtitle">Wastewater Treatment Plant Blower Selection and Energy Comparison</p>
+
+        <div class="panels">
+            <!-- LEFT: Inputs -->
+            <div class="panel">
+                <h3>System Parameters</h3>
+                <div class="input-row">
+                    <label>Basin Depth (ft)</label>
+                    <input type="range" id="depth" min="8" max="25" value="16" step="1" oninput="calc()">
+                    <span class="val" id="depthVal">16 ft</span>
+                </div>
+                <div class="input-row">
+                    <label>Required Airflow (SCFM)</label>
+                    <input type="range" id="airflow" min="500" max="8000" value="3500" step="100" oninput="calc()">
+                    <span class="val" id="airflowVal">3,500</span>
+                </div>
+                <div class="input-row">
+                    <label>Piping Losses (psi)</label>
+                    <input type="range" id="piping" min="0.5" max="4" value="1.5" step="0.1" oninput="calc()">
+                    <span class="val" id="pipingVal">1.5 psi</span>
+                </div>
+                <div class="input-row">
+                    <label>Diffuser Drop (psi)</label>
+                    <input type="range" id="diffuser" min="0.5" max="4" value="1.8" step="0.1" oninput="calc()">
+                    <span class="val" id="diffuserVal">1.8 psi</span>
+                </div>
+                <div class="input-row">
+                    <label>Electricity ($/kWh)</label>
+                    <input type="range" id="elecCost" min="0.04" max="0.25" value="0.09" step="0.01" oninput="calc()">
+                    <span class="val" id="elecVal">$0.09</span>
+                </div>
+                <div class="input-row">
+                    <label>Operating Hours</label>
+                    <input type="range" id="hours" min="4000" max="8760" value="8760" step="100" oninput="calc()">
+                    <span class="val" id="hoursVal">8,760</span>
+                </div>
+                <div class="input-row">
+                    <label>Average Load Factor</label>
+                    <input type="range" id="loadFactor" min="50" max="100" value="80" step="5" oninput="calc()">
+                    <span class="val" id="loadVal">80%</span>
+                </div>
+
+                <div class="note">
+                    Submergence pressure = depth &times; 0.43 psi/ft. Total pressure = submergence + piping + diffuser. Load factor accounts for diurnal variation (typically 70-85%).
+                </div>
+            </div>
+
+            <!-- RIGHT: Results -->
+            <div class="panel">
+                <h3>Sizing Results</h3>
+                <div class="result-row">
+                    <span class="result-label">Submergence Pressure</span>
+                    <span class="result-value" id="rSubmergence">6.9 psi</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Discharge Pressure</span>
+                    <span class="result-value" id="rTotal">10.2 psi</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Pressure (in. w.g.)</span>
+                    <span class="result-value" id="rWG">282.5 in. WG</span>
+                </div>
+
+                <div style="height:8px"></div>
+
+                <div class="result-row">
+                    <span class="result-label">PD Blower HP (55% eff)</span>
+                    <span class="result-value" id="rHpPD">-- HP</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Turbo Blower HP (75% eff)</span>
+                    <span class="result-value" id="rHpTurbo">-- HP</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Recommended Motor Size</span>
+                    <span class="result-value" id="rMotor">-- HP</span>
+                </div>
+
+                <div style="height:8px"></div>
+
+                <div class="result-row">
+                    <span class="result-label">PD Annual Energy Cost</span>
+                    <span class="result-value cost" id="rCostPD">--</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Turbo Annual Energy Cost</span>
+                    <span class="result-value savings" id="rCostTurbo">--</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Annual Savings (Turbo vs PD)</span>
+                    <span class="result-value savings" id="rSavings">--</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Turbo Payback (est.)</span>
+                    <span class="result-value" id="rPayback">--</span>
+                </div>
+
+                <button class="show-calc-btn" onclick="toggleCalc()">Show Step-by-Step Calculation</button>
+
+                <div class="step-calc" id="stepCalc">
+                    <div id="calcSteps"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Energy Comparison Bars -->
+        <div class="panel" style="margin-top: 12px;">
+            <h3>Annual Energy Cost Comparison</h3>
+            <div class="comparison">
+                <div class="bar-container">
+                    <div class="bar-label">
+                        <span>PD (Roots) Blower — 55% efficiency</span>
+                        <span id="barPDval">--</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-pd" id="barPD" style="width:100%"></div>
+                    </div>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-label">
+                        <span>Rotary Screw Blower — 65% efficiency</span>
+                        <span id="barScrewval">--</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-screw" id="barScrew" style="width:80%"></div>
+                    </div>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-label">
+                        <span>High-Speed Turbo Blower — 75% efficiency</span>
+                        <span id="barTurboval">--</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill bar-turbo" id="barTurbo" style="width:60%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note" style="margin-top: 10px;">
+                <strong>Key Insight:</strong> Aeration blowers typically consume 50-70% of a wastewater treatment plant's total electricity. Even a 5% improvement in blower efficiency can save thousands of dollars per year. High-speed turbo blowers with air-foil bearings also eliminate oil, belts, and mechanical bearing maintenance — saving an additional $6,000-$10,000/yr in maintenance costs.
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function calc() {
+        // Read inputs
+        let depth = parseFloat(document.getElementById('depth').value);
+        let airflow = parseFloat(document.getElementById('airflow').value);
+        let piping = parseFloat(document.getElementById('piping').value);
+        let diffuser = parseFloat(document.getElementById('diffuser').value);
+        let elecCost = parseFloat(document.getElementById('elecCost').value);
+        let hours = parseFloat(document.getElementById('hours').value);
+        let loadFactor = parseFloat(document.getElementById('loadFactor').value) / 100;
+
+        // Update display values
+        document.getElementById('depthVal').textContent = depth + ' ft';
+        document.getElementById('airflowVal').textContent = airflow.toLocaleString();
+        document.getElementById('pipingVal').textContent = piping.toFixed(1) + ' psi';
+        document.getElementById('diffuserVal').textContent = diffuser.toFixed(1) + ' psi';
+        document.getElementById('elecVal').textContent = '$' + elecCost.toFixed(2);
+        document.getElementById('hoursVal').textContent = hours.toLocaleString();
+        document.getElementById('loadVal').textContent = Math.round(loadFactor * 100) + '%';
+
+        // Calculations
+        let submergence = depth * 0.43;
+        let totalPsi = submergence + piping + diffuser;
+        let totalWG = totalPsi * 27.7;
+
+        // HP calculations for different blower types
+        let effPD = 0.55;
+        let effScrew = 0.65;
+        let effTurbo = 0.75;
+
+        let hpPD = (airflow * totalWG) / (6356 * effPD);
+        let hpScrew = (airflow * totalWG) / (6356 * effScrew);
+        let hpTurbo = (airflow * totalWG) / (6356 * effTurbo);
+
+        // Select motor size (next standard motor size up with margin)
+        let motorSizes = [1, 1.5, 2, 3, 5, 7.5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500, 600, 700, 800];
+        let motorHP = motorSizes.find(s => s >= hpTurbo * 1.15) || Math.ceil(hpTurbo * 1.15 / 50) * 50;
+
+        // Annual energy costs (with load factor for diurnal variation)
+        let kwPD = hpPD * 0.746 * loadFactor;
+        let kwScrew = hpScrew * 0.746 * loadFactor;
+        let kwTurbo = hpTurbo * 0.746 * loadFactor;
+
+        let costPD = kwPD * hours * elecCost;
+        let costScrew = kwScrew * hours * elecCost;
+        let costTurbo = kwTurbo * hours * elecCost;
+
+        let savings = costPD - costTurbo;
+        let turboCostInstalled = Math.max(80000, hpTurbo * 800); // rough estimate
+        let payback = turboCostInstalled / (savings + 8000); // include maintenance savings
+
+        // Update results
+        document.getElementById('rSubmergence').textContent = submergence.toFixed(1) + ' psi';
+        document.getElementById('rTotal').textContent = totalPsi.toFixed(1) + ' psi';
+        document.getElementById('rWG').textContent = totalWG.toFixed(0) + ' in. WG';
+        document.getElementById('rHpPD').textContent = Math.round(hpPD) + ' HP';
+        document.getElementById('rHpTurbo').textContent = Math.round(hpTurbo) + ' HP';
+        document.getElementById('rMotor').textContent = motorHP + ' HP (turbo)';
+        document.getElementById('rCostPD').textContent = '$' + Math.round(costPD).toLocaleString() + '/yr';
+        document.getElementById('rCostTurbo').textContent = '$' + Math.round(costTurbo).toLocaleString() + '/yr';
+        document.getElementById('rSavings').textContent = '$' + Math.round(savings).toLocaleString() + '/yr';
+        document.getElementById('rPayback').textContent = payback.toFixed(1) + ' years';
+
+        // Update bars
+        let maxCost = costPD;
+        document.getElementById('barPD').style.width = '100%';
+        document.getElementById('barPDval').textContent = '$' + Math.round(costPD).toLocaleString() + '/yr';
+        document.getElementById('barScrew').style.width = (costScrew / maxCost * 100).toFixed(1) + '%';
+        document.getElementById('barScrewval').textContent = '$' + Math.round(costScrew).toLocaleString() + '/yr';
+        document.getElementById('barTurbo').style.width = (costTurbo / maxCost * 100).toFixed(1) + '%';
+        document.getElementById('barTurboval').textContent = '$' + Math.round(costTurbo).toLocaleString() + '/yr';
+
+        // Step-by-step calculation
+        let steps = `
+<strong>Step 1: Submergence Pressure</strong><br>
+P<sub>sub</sub> = ${depth} ft &times; 0.43 psi/ft = <code>${submergence.toFixed(1)} psi</code><br><br>
+<strong>Step 2: Total Discharge Pressure</strong><br>
+P<sub>total</sub> = ${submergence.toFixed(1)} + ${piping.toFixed(1)} + ${diffuser.toFixed(1)} = <code>${totalPsi.toFixed(1)} psi</code> = <code>${totalWG.toFixed(0)} in. WG</code><br><br>
+<strong>Step 3: Required HP (Turbo at 75% eff)</strong><br>
+HP = (${airflow.toLocaleString()} &times; ${totalWG.toFixed(0)}) / (6,356 &times; 0.75) = <code>${hpTurbo.toFixed(1)} HP</code><br>
+Select <code>${motorHP} HP motor</code> with VFD<br><br>
+<strong>Step 4: Annual Energy Cost (Turbo, avg load ${Math.round(loadFactor*100)}%)</strong><br>
+Avg kW = ${hpTurbo.toFixed(1)} &times; 0.746 &times; ${loadFactor.toFixed(2)} = <code>${kwTurbo.toFixed(1)} kW</code><br>
+Annual = ${kwTurbo.toFixed(1)} &times; ${hours.toLocaleString()} &times; $${elecCost.toFixed(2)} = <code>$${Math.round(costTurbo).toLocaleString()}/yr</code><br><br>
+<strong>Step 5: Savings vs PD Blower</strong><br>
+PD HP (55% eff) = <code>${hpPD.toFixed(1)} HP</code> &rarr; <code>$${Math.round(costPD).toLocaleString()}/yr</code><br>
+Annual savings = $${Math.round(costPD).toLocaleString()} - $${Math.round(costTurbo).toLocaleString()} = <code>$${Math.round(savings).toLocaleString()}/yr</code><br>
++ ~$8,000/yr maintenance savings = <code>$${Math.round(savings + 8000).toLocaleString()}/yr total</code><br>
+Payback &asymp; $${Math.round(turboCostInstalled).toLocaleString()} / $${Math.round(savings + 8000).toLocaleString()} = <code>${payback.toFixed(1)} years</code>
+`;
+        document.getElementById('calcSteps').innerHTML = steps;
+    }
+
+    function toggleCalc() {
+        let el = document.getElementById('stepCalc');
+        let btn = document.querySelector('.show-calc-btn');
+        if (el.style.display === 'none' || el.style.display === '') {
+            el.style.display = 'block';
+            btn.textContent = 'Hide Calculation';
+        } else {
+            el.style.display = 'none';
+            btn.textContent = 'Show Step-by-Step Calculation';
+        }
+    }
+
+    // Initial calculation
+    calc();
+    </script>
+</body>
+</html>

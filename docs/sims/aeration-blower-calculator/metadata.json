@@ -1,0 +1,13 @@
+{
+    "name": "Aeration Blower Sizing Calculator",
+    "chapter": 5,
+    "section": "5.4",
+    "type": "microsim",
+    "bloom_level": "Apply",
+    "bloom_number": 3,
+    "description": "Interactive calculator for sizing wastewater aeration blowers. Computes submergence pressure, total discharge pressure, required HP, and annual energy cost for PD, rotary screw, and turbo blower options. Includes step-by-step calculation display and energy cost comparison bars.",
+    "library": "HTML/CSS/JS",
+    "difficulty": "intermediate",
+    "ui_complexity": "moderate",
+    "concepts": ["aeration blower sizing", "wastewater treatment", "submergence pressure", "blower efficiency", "energy cost comparison", "turbo blower payback"]
+}
