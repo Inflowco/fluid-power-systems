@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Compressed Air Treatment Path</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+        main { display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // Compressed Air Treatment Path MicroSim
+    // Shows compressed air flowing through treatment stages with contaminant removal
+    // p5.js v2.0.0 — all drawing done on canvas (no DOM controls)
+
+    let drawHeight = 430;
+    let controlHeight = 60;
+    let canvasHeight = drawHeight + controlHeight;
+    let aspectRatio = 1.91;
+    let canvasWidth = canvasHeight * aspectRatio;
+
+    // Dryer type state
+    let isRefrigeratedDryer = true;
+
+    // Animation
+    let particles = [];
+    let maxParticles = 180;
+    let animPhase = 0;
+
+    // Drain timers
+    let drainTimers = [0, 0, 0, 0];
+    let drainActive = [false, false, false, false];
+
+    // Hover/click state
+    let hoveredComponent = -1;
+    let clickedQualityBar = -1;
+
+    // Humidity slider
+    let humidityValue = 60;
+    let draggingHumidity = false;
+    let humiditySlider = {};
+
+    // Dryer toggle button
+    let dryerBtn = {};
+
+    // Component definitions
+    const COMP_NAMES = [
+        'Compressor\nDischarge',
+        'Aftercooler',
+        'Receiver\nTank',
+        'Pre-Filter',
+        'Air Dryer',
+        'After-Filter',
+        'Distribution\nHeader'
+    ];
+
+    const COMP_SHORT = [
+        'Compressor', 'Aftercooler', 'Receiver', 'Pre-Filter',
+        'Dryer', 'After-Filter', 'Point of Use'
+    ];
+
+    const COMP_ICONS = ['C', 'AC', 'RT', 'PF', 'DR', 'AF', 'POU'];
+
+    const COMP_COLORS = [
+        [220, 75, 55],    // compressor - red
+        [55, 130, 195],   // aftercooler - blue
+        [90, 145, 175],   // receiver - steel blue
+        [175, 155, 55],   // pre-filter - amber
+        [55, 135, 175],   // dryer - teal
+        [75, 165, 95],    // after-filter - green
+        [45, 165, 75]     // distribution - bright green
+    ];
+
+    // Tooltip content (updated dynamically for dryer)
+    function getCompFunc(idx) {
+        const funcs = [
+            'Compresses ambient air to system pressure (100-125 psig). Discharge air is hot (180-350\u00B0F) and saturated with moisture, oil aerosols, and particles.',
+            'Cools compressed air to within 15-20\u00B0F of coolant temperature. Removes approximately 70% of moisture through condensation. Moisture separator with automatic drain.',
+            'Stores compressed air to dampen pressure pulsations and provide reserve capacity. Further cooling allows additional moisture to condense. Auto-drain removes collected water.',
+            'Coalescing filter element captures bulk liquid water, oil aerosols, and particles down to 1 micron. Protects downstream dryer from liquid contamination.',
+            isRefrigeratedDryer
+                ? 'Refrigerated dryer cools air to 35-39\u00B0F dew point, condensing remaining water vapor. Energy-efficient for general industrial applications.'
+                : 'Desiccant dryer uses alumina or silica gel beds to adsorb water vapor. Achieves -40\u00B0F to -100\u00B0F dew point for critical applications.',
+            'Fine particulate filter removes desiccant dust and remaining particles down to 0.01 micron. Final polishing stage before distribution.',
+            'Clean, dry compressed air distributed to pneumatic tools, actuators, instrumentation, and process equipment. Meets ISO 8573-1 quality standards.'
+        ];
+        return funcs[idx];
+    }
+
+    function getCompSpecs(idx) {
+        const specs = [
+            'Type: Rotary Screw / Reciprocating\nPressure: 100-125 psig\nTemp: 180-350\u00B0F\nOil carryover: 2-50 mg/m\u00B3',
+            'Type: Air-cooled / Water-cooled\nApproach temp: 15-20\u00B0F\nMoisture removal: ~70%\nPressure drop: 2-5 psi',
+            'Size: 1-10 gal per CFM\nPressure rating: 150-200 psig\nDrain: Timed / No-loss\nCooling: 10-15\u00B0F additional',
+            'Rating: 1 micron coalescing\nOil removal: to 0.5 mg/m\u00B3\nPressure drop: 1-3 psi (clean)\nDrain: Auto float drain',
+            isRefrigeratedDryer
+                ? 'Type: Refrigerated\nDew point: 35-39\u00B0F\nPressure drop: 3-5 psi\nEnergy: 0.8-1.2 kW/100 CFM'
+                : 'Type: Desiccant (Heatless/Heated)\nDew point: -40 to -100\u00B0F\nPurge loss: 10-15% (heatless)\nEnergy: 2-4 kW/100 CFM',
+            'Rating: 0.01 micron\nOil removal: to 0.01 mg/m\u00B3\nPressure drop: 1-2 psi (clean)\nElement life: 8000-12000 hrs',
+            'Quality Class: ISO 8573-1\nDew point: per dryer type\nOil: <0.01 mg/m\u00B3\nParticles: <0.01 mg/m\u00B3'
+        ];
+        return specs[idx];
+    }
+
+    // Base contamination levels [Water mg/m3, Oil mg/m3, Particles mg/m3]
+    const BASE_QUALITY = {
+        refrigerated: [
+            [8000, 25, 10],
+            [2400, 18, 8],
+            [1800, 15, 6],
+            [800, 0.5, 1],
+            [200, 0.3, 0.8],
+            [200, 0.01, 0.01],
+            [200, 0.01, 0.01]
+        ],
+        desiccant: [
+            [8000, 25, 10],
+            [2400, 18, 8],
+            [1800, 15, 6],
+            [800, 0.5, 1],
+            [10, 0.3, 0.8],
+            [10, 0.01, 0.01],
+            [10, 0.01, 0.01]
+        ]
+    };
+
+    function getQuality(humidityFactor) {
+        let base = isRefrigeratedDryer ? BASE_QUALITY.refrigerated : BASE_QUALITY.desiccant;
+        let result = [];
+        for (let i = 0; i < base.length; i++) {
+            result.push([
+                base[i][0] * humidityFactor,
+                base[i][1],
+                base[i][2]
+            ]);
+        }
+        return result;
+    }
+
+    // Layout computation
+    let compBoxes = []; // {x, y, w, h, cx, cy} for each component
+    let pipeY = 0;
+    let compH = 0;
+    let qualBarY = 0;
+
+    function computeLayout() {
+        let n = 7;
+        let marginX = canvasWidth * 0.035;
+        let totalW = canvasWidth - marginX * 2;
+        let compW = totalW / n * 0.62;
+        let gap = (totalW - compW * n) / (n - 1);
+        pipeY = drawHeight * 0.34;
+        compH = min(70, drawHeight * 0.16);
+        let compTop = pipeY - compH / 2;
+        qualBarY = pipeY + compH / 2 + 48;
+
+        compBoxes = [];
+        for (let i = 0; i < n; i++) {
+            let x = marginX + i * (compW + gap);
+            compBoxes.push({
+                x: x,
+                y: compTop,
+                w: compW,
+                h: compH,
+                cx: x + compW / 2,
+                cy: pipeY
+            });
+        }
+
+        // Humidity slider layout
+        let sliderX = canvasWidth * 0.52;
+        let sliderW = canvasWidth * 0.38;
+        humiditySlider = {
+            x: sliderX,
+            y: drawHeight + 22,
+            w: sliderW,
+            h: 20
+        };
+
+        // Dryer button layout
+        dryerBtn = {
+            x: canvasWidth * 0.03,
+            y: drawHeight + 14,
+            w: 170,
+            h: 32
+        };
+    }
+
+    // Particle class
+    class AirParticle {
+        constructor() {
+            this.reset(random(0, 1));
+        }
+
+        reset(progress) {
+            this.progress = progress; // 0-1 along the pipe
+            this.type = random() < 0.55 ? 'air' : (random() < 0.5 ? 'water' : 'oil');
+            this.speed = random(0.0015, 0.004);
+            this.size = this.type === 'air' ? random(3.5, 6) : random(2.5, 4.5);
+            this.yOffset = random(-4, 4);
+            this.alive = true;
+            this.settling = false;
+            this.settleVy = 0;
+            this.alpha = 255;
+        }
+
+        getX() {
+            if (compBoxes.length < 2) return 0;
+            let first = compBoxes[0];
+            let last = compBoxes[6];
+            let startX = first.cx - first.w * 0.4;
+            let endX = last.cx + last.w * 0.4;
+            return lerp(startX, endX, this.progress);
+        }
+
+        update(captureZones) {
+            if (this.settling) {
+                this.settleVy += 0.08;
+                this.yOffset += this.settleVy;
+                this.alpha -= 3.5;
+                if (this.alpha <= 0) this.alive = false;
+                return;
+            }
+
+            this.progress += this.speed;
+            if (this.progress > 1.02) {
+                if (this.type === 'air') {
+                    this.reset(0);
+                } else {
+                    this.alive = false;
+                }
+                return;
+            }
+
+            // Check capture
+            let px = this.getX();
+            for (let zone of captureZones) {
+                if (abs(px - zone.x) < zone.w / 2) {
+                    if (zone.captures.includes(this.type) && random() < zone.prob) {
+                        this.settling = true;
+                        this.settleVy = 0.5;
+                        break;
+                    }
+                }
+            }
+        }
+
+        display() {
+            let px = this.getX();
+            let py = pipeY + sin(animPhase + this.progress * 25) * 2.5 + this.yOffset;
+            if (this.settling) {
+                py = pipeY + this.yOffset;
+            }
+
+            push();
+            noStroke();
+            if (this.type === 'air') {
+                // Air gets cleaner as it progresses
+                let r = lerp(130, 80, this.progress);
+                let g = lerp(170, 190, this.progress);
+                let b = lerp(210, 240, this.progress);
+                fill(r, g, b, this.alpha);
+            } else if (this.type === 'water') {
+                fill(30, 90, 220, this.alpha);
+            } else {
+                fill(200, 155, 35, this.alpha);
+            }
+            ellipse(px, py, this.size, this.size);
+            pop();
+        }
+    }
+
+    function setup() {
+        updateCanvasSize();
+        const canvas = createCanvas(canvasWidth, canvasHeight);
+        let mainEl = document.querySelector('main');
+        canvas.parent(mainEl);
+        computeLayout();
+        initParticles();
+    }
+
+    function updateCanvasSize() {
+        let containerWidth = windowWidth;
+        if (containerWidth < 500) containerWidth = 500;
+        canvasWidth = containerWidth;
+        canvasHeight = canvasWidth / aspectRatio;
+        drawHeight = canvasHeight - controlHeight;
+        if (drawHeight < 280) {
+            drawHeight = 280;
+            canvasHeight = drawHeight + controlHeight;
+        }
+    }
+
+    function windowResized() {
+        updateCanvasSize();
+        resizeCanvas(canvasWidth, canvasHeight);
+        computeLayout();
+    }
+
+    function initParticles() {
+        particles = [];
+        for (let i = 0; i < maxParticles; i++) {
+            particles.push(new AirParticle());
+        }
+    }
+
+    function draw() {
+        background(245, 247, 250);
+
+        // Drawing area
+        noStroke();
+        fill(248, 250, 253);
+        rect(0, 0, canvasWidth, drawHeight);
+
+        // Control area
+        fill(238, 240, 244);
+        rect(0, drawHeight, canvasWidth, controlHeight);
+        stroke(210);
+        strokeWeight(1);
+        line(0, drawHeight, canvasWidth, drawHeight);
+
+        computeLayout();
+
+        let humidityFactor = humidityValue / 60.0;
+        let quality = getQuality(humidityFactor);
+
+        drawTitle();
+        drawPipe();
+        drawComponents(quality);
+        drawQualityBars(quality);
+        drawLegend();
+        updateAndDrawParticles();
+        drawDrainValves();
+
+        if (hoveredComponent >= 0) {
+            drawTooltip(hoveredComponent);
+        }
+        if (clickedQualityBar >= 0) {
+            drawQualityDetail(clickedQualityBar, quality);
+        }
+
+        drawControls();
+    }
+
+    function drawTitle() {
+        push();
+        fill(35, 40, 50);
+        noStroke();
+        textAlign(CENTER, TOP);
+        textSize(min(20, canvasWidth * 0.024));
+        textStyle(BOLD);
+        text('Compressed Air Treatment Path', canvasWidth / 2, 8);
+        textStyle(NORMAL);
+        pop();
+    }
+
+    function drawPipe() {
+        if (compBoxes.length < 7) return;
+        let startX = compBoxes[0].cx;
+        let endX = compBoxes[6].cx;
+
+        // Outer pipe
+        push();
+        stroke(155, 170, 185);
+        strokeWeight(10);
+        line(startX, pipeY, endX, pipeY);
+        // Inner pipe highlight
+        stroke(190, 200, 215);
+        strokeWeight(6);
+        line(startX, pipeY, endX, pipeY);
+        pop();
+
+        // Flow arrow at end
+        push();
+        fill(45, 165, 75);
+        noStroke();
+        let ax = endX + compBoxes[6].w / 2 + 5;
+        triangle(ax, pipeY - 9, ax, pipeY + 9, ax + 14, pipeY);
+        pop();
+
+        // Flow arrow at start
+        push();
+        fill(220, 75, 55, 180);
+        noStroke();
+        let bx = startX - compBoxes[0].w / 2 - 5;
+        triangle(bx, pipeY - 7, bx, pipeY + 7, bx - 12, pipeY);
+        pop();
+    }
+
+    function drawComponents(quality) {
+        hoveredComponent = -1;
+
+        for (let i = 0; i < 7; i++) {
+            let b = compBoxes[i];
+            let c = COMP_COLORS[i];
+
+            // Hit test
+            let isHovered = mouseX > b.x && mouseX < b.x + b.w &&
+                            mouseY > b.y && mouseY < b.y + b.h + 50;
+            if (isHovered) hoveredComponent = i;
+
+            push();
+
+            // Shadow
+            noStroke();
+            fill(0, 0, 0, 18);
+            rect(b.x + 2, b.y + 3, b.w, b.h, 7);
+
+            // Component box
+            if (isHovered) {
+                fill(c[0], c[1], c[2], 240);
+                stroke(c[0], c[1], c[2]);
+                strokeWeight(2.5);
+            } else {
+                fill(c[0], c[1], c[2], 190);
+                stroke(c[0], c[1], c[2], 160);
+                strokeWeight(1.5);
+            }
+            rect(b.x, b.y, b.w, b.h, 7);
+
+            // Icon text
+            noStroke();
+            fill(255, 255, 255, 220);
+            textAlign(CENTER, CENTER);
+            textSize(min(17, b.w * 0.26));
+            textStyle(BOLD);
+            let iconLabel = COMP_ICONS[i];
+            if (i === 4) iconLabel = isRefrigeratedDryer ? 'RD' : 'DD';
+            text(iconLabel, b.cx, b.cy - 1);
+            textStyle(NORMAL);
+
+            // Component label below box
+            fill(45, 50, 60);
+            textSize(min(10, b.w * 0.17));
+            textAlign(CENTER, TOP);
+            text(COMP_SHORT[i], b.cx, b.y + b.h + 5);
+
+            pop();
+
+            // Draw internal detail per component type
+            drawComponentDetail(i, b);
+        }
+    }
+
+    function drawComponentDetail(idx, b) {
+        push();
+        noStroke();
+
+        if (idx === 0) {
+            // Compressor: heat waves
+            stroke(255, 200, 100, 100 + sin(animPhase * 2) * 60);
+            strokeWeight(1);
+            noFill();
+            for (let w = 0; w < 3; w++) {
+                let wx = b.x + b.w * (0.2 + w * 0.3);
+                let wy = b.y - 5 - sin(animPhase + w) * 3;
+                beginShape();
+                vertex(wx - 4, wy);
+                vertex(wx - 2, wy - 4);
+                vertex(wx, wy);
+                vertex(wx + 2, wy - 4);
+                vertex(wx + 4, wy);
+                endShape();
+            }
+        }
+
+        if (idx === 1) {
+            // Aftercooler: cooling fins
+            stroke(100, 160, 210, 100);
+            strokeWeight(1);
+            for (let f = 0; f < 4; f++) {
+                let fx = b.x + b.w * (0.2 + f * 0.2);
+                line(fx, b.y + 8, fx, b.y + b.h - 8);
+            }
+        }
+
+        if (idx === 2) {
+            // Receiver: pressure gauge
+            noFill();
+            stroke(255, 255, 255, 100);
+            strokeWeight(1);
+            ellipse(b.cx + b.w * 0.22, b.y + 12, 10, 10);
+            // Gauge needle
+            let gaugeAngle = -PI * 0.25 + sin(animPhase * 0.3) * 0.1;
+            let gx = b.cx + b.w * 0.22;
+            let gy = b.y + 12;
+            line(gx, gy, gx + cos(gaugeAngle) * 4, gy + sin(gaugeAngle) * 4);
+        }
+
+        if (idx === 3 || idx === 5) {
+            // Filters: filter element lines
+            stroke(255, 255, 255, 70);
+            strokeWeight(0.7);
+            for (let f = 0; f < 5; f++) {
+                let fy = b.y + b.h * (0.2 + f * 0.15);
+                line(b.x + 6, fy, b.x + b.w - 6, fy);
+            }
+        }
+
+        if (idx === 4) {
+            // Dryer: snowflake or desiccant dots
+            if (isRefrigeratedDryer) {
+                // Snowflake/frost indicator
+                stroke(200, 230, 255, 140);
+                strokeWeight(1.2);
+                let sx = b.cx;
+                let sy = b.cy + b.h * 0.15;
+                line(sx - 6, sy, sx + 6, sy);
+                line(sx, sy - 6, sx, sy + 6);
+                line(sx - 4, sy - 4, sx + 4, sy + 4);
+                line(sx - 4, sy + 4, sx + 4, sy - 4);
+            } else {
+                // Desiccant beads
+                fill(255, 255, 255, 80);
+                noStroke();
+                for (let d = 0; d < 6; d++) {
+                    let dx = b.cx + cos(d * PI / 3) * b.w * 0.15;
+                    let dy = b.cy + sin(d * PI / 3) * b.h * 0.2;
+                    ellipse(dx, dy, 4, 4);
+                }
+            }
+        }
+
+        if (idx === 6) {
+            // Distribution: branch lines
+            stroke(255, 255, 255, 80);
+            strokeWeight(1);
+            line(b.cx, b.y + 10, b.cx, b.y + b.h - 10);
+            line(b.cx - b.w * 0.2, b.cy, b.cx + b.w * 0.2, b.cy);
+            // Arrow tips
+            fill(255, 255, 255, 80);
+            noStroke();
+            triangle(b.cx, b.y + 10, b.cx - 3, b.y + 15, b.cx + 3, b.y + 15);
+            triangle(b.cx, b.y + b.h - 10, b.cx - 3, b.y + b.h - 15, b.cx + 3, b.y + b.h - 15);
+        }
+
+        pop();
+    }
+
+    function drawQualityBars(quality) {
+        let barH = 7;
+        let barGap = 3;
+        let labels = ['Water', 'Oil', 'Particles'];
+        let barColors = [
+            [30, 90, 220],
+            [200, 155, 35],
+            [130, 130, 130]
+        ];
+        let maxVals = [quality[0][0], quality[0][1], quality[0][2]];
+
+        for (let i = 0; i < 7; i++) {
+            let b = compBoxes[i];
+            let barX = b.x + 3;
+            let barW = b.w - 6;
+
+            for (let j = 0; j < 3; j++) {
+                let by = qualBarY + j * (barH + barGap + 10);
+                let fraction = quality[i][j] / maxVals[j];
+                fraction = constrain(fraction, 0, 1);
+                let fillW = max(2, barW * fraction);
+
+                push();
+                // Background
+                noStroke();
+                fill(230, 232, 236);
+                rect(barX, by, barW, barH, 3);
+
+                // Contamination fill (red high -> green low)
+                let r = lerp(45, 220, fraction);
+                let g = lerp(175, 55, fraction);
+                fill(r, g, 50, 200);
+                rect(barX, by, fillW, barH, 3);
+
+                // Value text
+                fill(55, 60, 70);
+                textSize(min(8, b.w * 0.13));
+                textAlign(CENTER, TOP);
+                let val = quality[i][j];
+                let valStr;
+                if (val >= 100) valStr = nf(val, 0, 0);
+                else if (val >= 1) valStr = nf(val, 0, 1);
+                else valStr = nf(val, 0, 2);
+                text(valStr, b.cx, by + barH + 1);
+                pop();
+            }
+
+            // Labels on leftmost column
+            if (i === 0) {
+                push();
+                fill(80, 85, 95);
+                noStroke();
+                textAlign(RIGHT, CENTER);
+                textSize(min(9, compBoxes[0].w * 0.14));
+                for (let j = 0; j < 3; j++) {
+                    let by = qualBarY + j * (barH + barGap + 10) + barH / 2;
+                    text(labels[j], b.x - 4, by);
+                }
+                pop();
+            }
+        }
+
+        // Units label
+        push();
+        fill(110, 115, 125);
+        noStroke();
+        textAlign(CENTER, TOP);
+        textSize(min(9, canvasWidth * 0.012));
+        text('mg/m\u00B3', canvasWidth / 2, qualBarY + 3 * (barH + barGap + 10) + 2);
+        pop();
+    }
+
+    function drawDrainValves() {
+        // Components with drains: aftercooler(1), receiver(2), pre-filter(3), dryer(4)
+        for (let idx = 1; idx <= 4; idx++) {
+            let b = compBoxes[idx];
+            let drainIdx = idx - 1;
+            let dx = b.cx;
+            let dy = b.y + b.h;
+
+            push();
+            // Drain pipe
+            stroke(120, 135, 150);
+            strokeWeight(3);
+            line(dx, dy, dx, dy + 16);
+
+            // Drain valve body
+            noStroke();
+            fill(drainActive[drainIdx] ? color(30, 90, 220) : color(115, 125, 140));
+            rect(dx - 5, dy + 14, 10, 6, 2);
+
+            // Drain drops when active
+            if (drainActive[drainIdx]) {
+                fill(30, 90, 220, 200);
+                for (let d = 0; d < 3; d++) {
+                    let dropY = dy + 24 + d * 6 + (animPhase * 3 % 12);
+                    let dropAlpha = map(d, 0, 2, 220, 100);
+                    fill(30, 90, 220, dropAlpha);
+                    ellipse(dx, dropY, 3, 4.5);
+                }
+            }
+            pop();
+        }
+
+        // Update drain timers
+        for (let d = 0; d < 4; d++) {
+            drainTimers[d]++;
+            let cycleLen = 150 + d * 40;
+            let activeStart = cycleLen - 35;
+            if (drainTimers[d] > activeStart) {
+                drainActive[d] = true;
+            }
+            if (drainTimers[d] > cycleLen) {
+                drainActive[d] = false;
+                drainTimers[d] = 0;
+            }
+        }
+    }
+
+    function updateAndDrawParticles() {
+        animPhase += 0.06;
+
+        // Spawn new particles
+        if (frameCount % 3 === 0 && particles.length < maxParticles) {
+            particles.push(new AirParticle());
+            particles[particles.length - 1].progress = 0;
+        }
+
+        // Build capture zones
+        let captureZones = [];
+        if (compBoxes.length >= 7) {
+            // Aftercooler captures water
+            captureZones.push({ x: compBoxes[1].cx, w: compBoxes[1].w, captures: ['water'], prob: 0.012 });
+            // Receiver captures some water
+            captureZones.push({ x: compBoxes[2].cx, w: compBoxes[2].w, captures: ['water'], prob: 0.008 });
+            // Pre-filter captures water and oil
+            captureZones.push({ x: compBoxes[3].cx, w: compBoxes[3].w, captures: ['water', 'oil'], prob: 0.015 });
+            // Dryer captures water
+            captureZones.push({ x: compBoxes[4].cx, w: compBoxes[4].w, captures: ['water'], prob: 0.02 });
+            // After-filter captures oil and particles
+            captureZones.push({ x: compBoxes[5].cx, w: compBoxes[5].w, captures: ['oil'], prob: 0.012 });
+        }
+
+        // Update and draw
+        for (let i = particles.length - 1; i >= 0; i--) {
+            particles[i].update(captureZones);
+            if (!particles[i].alive) {
+                particles.splice(i, 1);
+                continue;
+            }
+            particles[i].display();
+        }
+    }
+
+    function drawTooltip(idx) {
+        let funcText = getCompFunc(idx);
+        let specsText = getCompSpecs(idx);
+        let c = COMP_COLORS[idx];
+
+        let tooltipW = min(300, canvasWidth * 0.38);
+        let tooltipH = 145;
+
+        // Position near component
+        let b = compBoxes[idx];
+        let tx = b.cx - tooltipW / 2;
+        tx = max(5, min(tx, canvasWidth - tooltipW - 5));
+        let ty = 32;
+
+        push();
+        // Shadow
+        noStroke();
+        fill(0, 0, 0, 25);
+        rect(tx + 3, ty + 3, tooltipW, tooltipH, 8);
+
+        // Background
+        fill(255, 255, 255, 245);
+        stroke(c[0], c[1], c[2]);
+        strokeWeight(2);
+        rect(tx, ty, tooltipW, tooltipH, 8);
+
+        // Accent bar
+        noStroke();
+        fill(c[0], c[1], c[2]);
+        rect(tx + 4, ty + 8, 3, tooltipH - 16, 2);
+
+        // Title
+        fill(c[0], c[1], c[2]);
+        textAlign(LEFT, TOP);
+        textSize(min(13, tooltipW * 0.048));
+        textStyle(BOLD);
+        text(COMP_SHORT[idx], tx + 14, ty + 10);
+        textStyle(NORMAL);
+
+        // Function description
+        fill(50, 55, 65);
+        textSize(min(10.5, tooltipW * 0.038));
+        text(funcText, tx + 14, ty + 28, tooltipW - 24, 55);
+
+        // Specs
+        fill(80, 85, 95);
+        textSize(min(9.5, tooltipW * 0.035));
+        let specLines = specsText.split('\n');
+        for (let s = 0; s < specLines.length; s++) {
+            text(specLines[s], tx + 14, ty + 88 + s * 13);
+        }
+        pop();
+    }
+
+    function drawQualityDetail(idx, quality) {
+        let labels = ['Water Vapor', 'Oil Aerosol', 'Solid Particles'];
+        let units = 'mg/m\u00B3';
+        let popW = 190;
+        let popH = 92;
+
+        let b = compBoxes[idx];
+        let px = b.cx - popW / 2;
+        px = max(5, min(px, canvasWidth - popW - 5));
+        let py = qualBarY + 65;
+        py = min(py, drawHeight - popH - 5);
+
+        push();
+        // Shadow
+        noStroke();
+        fill(0, 0, 0, 20);
+        rect(px + 2, py + 2, popW, popH, 6);
+
+        fill(255, 255, 255, 248);
+        stroke(100, 115, 135);
+        strokeWeight(1.5);
+        rect(px, py, popW, popH, 6);
+
+        noStroke();
+        fill(35, 40, 50);
+        textAlign(LEFT, TOP);
+        textSize(11);
+        textStyle(BOLD);
+        text(COMP_SHORT[idx] + ' Output', px + 10, py + 8);
+        textStyle(NORMAL);
+
+        textSize(10);
+        for (let j = 0; j < 3; j++) {
+            let val = quality[idx][j];
+            let valStr;
+            if (val >= 100) valStr = nf(val, 0, 0);
+            else if (val >= 1) valStr = nf(val, 0, 1);
+            else valStr = nf(val, 0, 3);
+
+            // Color dot
+            let dotColors = [[30, 90, 220], [200, 155, 35], [130, 130, 130]];
+            fill(dotColors[j][0], dotColors[j][1], dotColors[j][2]);
+            ellipse(px + 16, py + 32 + j * 18, 6, 6);
+
+            fill(50, 55, 65);
+            textAlign(LEFT, TOP);
+            text(labels[j] + ':  ' + valStr + ' ' + units, px + 24, py + 26 + j * 18);
+        }
+        pop();
+    }
+
+    function drawLegend() {
+        push();
+        let ly = drawHeight - 22;
+        let lx = canvasWidth * 0.035;
+        let ts = min(10, canvasWidth * 0.013);
+        textSize(ts);
+        noStroke();
+        textAlign(LEFT, CENTER);
+
+        // Air
+        fill(100, 170, 225);
+        ellipse(lx, ly, 7, 7);
+        fill(75, 80, 90);
+        text('Air', lx + 10, ly);
+
+        // Water
+        fill(30, 90, 220);
+        ellipse(lx + 45, ly, 7, 7);
+        fill(75, 80, 90);
+        text('Water', lx + 55, ly);
+
+        // Oil
+        fill(200, 155, 35);
+        ellipse(lx + 105, ly, 7, 7);
+        fill(75, 80, 90);
+        text('Oil', lx + 115, ly);
+
+        // Instructions
+        fill(120, 125, 135);
+        textSize(min(9, canvasWidth * 0.012));
+        text('Hover: component info  |  Click quality bars: detail', lx + 155, ly);
+        pop();
+    }
+
+    function drawControls() {
+        // Dryer toggle button
+        push();
+        let db = dryerBtn;
+        if (isRefrigeratedDryer) {
+            fill(55, 135, 210);
+        } else {
+            fill(210, 120, 55);
+        }
+        stroke(isRefrigeratedDryer ? color(40, 100, 175) : color(180, 90, 35));
+        strokeWeight(1.5);
+        rect(db.x, db.y, db.w, db.h, 6);
+
+        fill(255);
+        noStroke();
+        textSize(min(13, db.w * 0.08));
+        textAlign(CENTER, CENTER);
+        text(isRefrigeratedDryer ? 'Refrigerated Dryer' : 'Desiccant Dryer', db.x + db.w / 2, db.y + db.h / 2);
+        pop();
+
+        // Humidity slider
+        push();
+        let hs = humiditySlider;
+
+        // Label
+        fill(50, 55, 65);
+        noStroke();
+        textSize(min(12, canvasWidth * 0.015));
+        textAlign(RIGHT, CENTER);
+        text('Humidity: ' + humidityValue + '%', hs.x - 10, hs.y + hs.h / 2);
+
+        // Track
+        fill(205, 210, 218);
+        noStroke();
+        rect(hs.x, hs.y + hs.h / 2 - 4, hs.w, 8, 4);
+
+        // Filled portion
+        let fraction = (humidityValue - 20) / 80;
+        let filledW = hs.w * fraction;
+        // Color gradient based on humidity
+        let sr = lerp(80, 55, fraction);
+        let sg = lerp(180, 130, fraction);
+        let sb = lerp(230, 210, fraction);
+        fill(sr, sg, sb);
+        rect(hs.x, hs.y + hs.h / 2 - 4, filledW, 8, 4);
+
+        // Knob
+        let knobX = hs.x + filledW;
+        fill(255);
+        stroke(sr, sg, sb);
+        strokeWeight(2);
+        ellipse(knobX, hs.y + hs.h / 2, 18, 18);
+
+        // Range labels
+        noStroke();
+        fill(120, 125, 135);
+        textSize(min(8, canvasWidth * 0.01));
+        textAlign(LEFT, TOP);
+        text('20%', hs.x, hs.y + hs.h / 2 + 12);
+        textAlign(RIGHT, TOP);
+        text('100%', hs.x + hs.w, hs.y + hs.h / 2 + 12);
+
+        pop();
+    }
+
+    // Mouse interaction
+
+    function mousePressed() {
+        // Check dryer button
+        let db = dryerBtn;
+        if (mouseX >= db.x && mouseX <= db.x + db.w &&
+            mouseY >= db.y && mouseY <= db.y + db.h) {
+            isRefrigeratedDryer = !isRefrigeratedDryer;
+            clickedQualityBar = -1;
+            return;
+        }
+
+        // Check humidity slider
+        let hs = humiditySlider;
+        if (mouseX >= hs.x - 10 && mouseX <= hs.x + hs.w + 10 &&
+            mouseY >= hs.y - 5 && mouseY <= hs.y + hs.h + 5) {
+            draggingHumidity = true;
+            updateHumidityFromMouse();
+            return;
+        }
+
+        // Check quality bars
+        if (compBoxes.length >= 7) {
+            let barH = 7;
+            let barGap = 3;
+            let totalBarH = 3 * (barH + barGap + 10) + 5;
+            let clicked = -1;
+            for (let i = 0; i < 7; i++) {
+                let b = compBoxes[i];
+                if (mouseX > b.x && mouseX < b.x + b.w &&
+                    mouseY > qualBarY - 5 && mouseY < qualBarY + totalBarH) {
+                    clicked = i;
+                    break;
+                }
+            }
+            if (clicked >= 0) {
+                clickedQualityBar = (clickedQualityBar === clicked) ? -1 : clicked;
+            } else if (mouseY < drawHeight) {
+                clickedQualityBar = -1;
+            }
+        }
+    }
+
+    function mouseDragged() {
+        if (draggingHumidity) {
+            updateHumidityFromMouse();
+        }
+    }
+
+    function mouseReleased() {
+        draggingHumidity = false;
+    }
+
+    function updateHumidityFromMouse() {
+        let hs = humiditySlider;
+        let frac = constrain((mouseX - hs.x) / hs.w, 0, 1);
+        humidityValue = Math.round(20 + frac * 80);
+    }
+    </script>
+</body>
+</html>

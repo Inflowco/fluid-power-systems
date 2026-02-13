@@ -1,0 +1,3863 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Practical system optimization, SCADA and CMMS deployment, real-time monitoring platforms, AI-driven energy and labor optimization, lifecycle cost analysis, mixed system integration, and Industry 4.0 concepts">
+      
+      
+        <meta name="author" content="Peter Vinck, Inflow Corp.">
+      
+      
+        <link rel="canonical" href="https://dmccreary.github.io/fluid-power-systems/chapters/13-systems/">
+      
+      
+        <link rel="prev" href="../12-fan/">
+      
+      
+        <link rel="next" href="../14-safety/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Chapter 13 - System Optimization and Software Deployment - Fluid Power Systems</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-H81SZL21DT"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-H81SZL21DT",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-H81SZL21DT",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Chapter 13 - System Optimization and Software Deployment - Fluid Power Systems" />
+<meta property="og:description" content="Practical system optimization, SCADA and CMMS deployment, real-time monitoring platforms, AI-driven energy and labor optimization, lifecycle cost analysis, mixed system integration, and Industry 4.0 concepts" />
+<meta property="og:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/13-systems/index.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="https://dmccreary.github.io/fluid-power-systems/chapters/13-systems/" />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Chapter 13 - System Optimization and Software Deployment - Fluid Power Systems" />
+<meta property="twitter:description" content="Practical system optimization, SCADA and CMMS deployment, real-time monitoring platforms, AI-driven energy and labor optimization, lifecycle cost analysis, mixed system integration, and Industry 4.0 concepts" />
+<meta property="twitter:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/13-systems/index.png" />
+</head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-13-system-optimization-and-software-deployment" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fluid Power Systems" class="md-header__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fluid Power Systems
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Chapter 13 - System Optimization and Software Deployment
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fluid Power Systems" class="md-nav__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    Fluid Power Systems
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-components-and-controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Components and Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-hvac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. HVAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-vacuum/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. Vacuum
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-blowers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Blowers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-compressed-air/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Compressed Air
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-cooling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Cooling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-steam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. Steam Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-dust-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Dust Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-hydraulic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Hydraulic Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-pumping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Pumping Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-fan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Fans
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Systems and Software
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Systems and Software
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#131-system-optimization-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 System Optimization Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.1 System Optimization Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-optimization-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Optimization Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#132-practical-leak-detection-and-repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Practical Leak Detection and Repair
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.2 Practical Leak Detection and Repair">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compressed-air-leaks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compressed Air Leaks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydraulic-and-water-leaks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydraulic and Water Leaks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refrigerant-leaks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refrigerant Leaks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#133-control-system-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Control System Tuning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.3 Control System Tuning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pid-loop-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PID Loop Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setpoint-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setpoint Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#134-scada-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.4 SCADA Systems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.4 SCADA Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scada-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SCADA Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SCADA Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-scada-system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: SCADA System Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hmi-display-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HMI Display Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#135-cmms-software" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.5 CMMS Software
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.5 CMMS Software">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-cmms-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core CMMS Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-performance-indicators-kpis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Performance Indicators (KPIs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Performance Indicators (KPIs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cmms-workflow-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: CMMS Workflow Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmms-and-ai-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CMMS and AI Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#136-real-time-monitoring-and-data-historians" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.6 Real-Time Monitoring and Data Historians
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.6 Real-Time Monitoring and Data Historians">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dashboard-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dashboard Design Principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-historians" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Historians
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#137-ai-driven-energy-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.7 AI-Driven Energy Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.7 AI-Driven Energy Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Prediction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setpoint-optimization_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setpoint Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demand-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Demand Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#138-ai-driven-labor-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.8 AI-Driven Labor Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.8 AI-Driven Labor Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#task-prioritization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Prioritization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#route-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Route Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill-matching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Matching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#139-lifecycle-cost-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.9 Lifecycle Cost Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.9 Lifecycle Cost Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#total-cost-of-ownership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Total Cost of Ownership
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-pump-lifecycle-cost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Pump Lifecycle Cost
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example: Pump Lifecycle Cost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-lifecycle-cost-calculator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Lifecycle Cost Calculator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#payback-period-and-roi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payback Period and ROI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1310-energy-auditing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.10 Energy Auditing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.10 Energy Auditing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#energy-audit-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Audit Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#measurement-and-verification-mv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measurement and Verification (M&amp;V)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utility-rebates-and-incentives-for-system-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utility Rebates and Incentives for System Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1311-performance-benchmarking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.11 Performance Benchmarking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.11 Performance Benchmarking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#continuous-improvement-cycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Continuous Improvement Cycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1312-mixed-system-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.12 Mixed System Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.12 Mixed System Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cross-system-interactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-System Interactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#holistic-optimization-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Holistic Optimization Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1313-industry-40-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.13 Industry 4.0 Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.13 Industry 4.0 Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#digital-twins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Digital Twins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edge-computing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edge Computing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-analytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cybersecurity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cybersecurity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1314-software-deployment-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.14 Software Deployment Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.14 Software Deployment Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#implementation-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Change Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1315-hands-on-lab-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.15 Hands-On Lab Activity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.15 Hands-On Lab Activity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lab-optimize-a-mixed-system-using-ai-software-and-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab: Optimize a Mixed System Using AI Software and Controls
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../prompts/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-we-built-this-site/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How We Built This Site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../feedback/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feedback
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#131-system-optimization-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 System Optimization Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.1 System Optimization Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-optimization-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Optimization Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#132-practical-leak-detection-and-repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Practical Leak Detection and Repair
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.2 Practical Leak Detection and Repair">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#compressed-air-leaks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Compressed Air Leaks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydraulic-and-water-leaks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydraulic and Water Leaks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refrigerant-leaks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refrigerant Leaks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#133-control-system-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Control System Tuning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.3 Control System Tuning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pid-loop-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PID Loop Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setpoint-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setpoint Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#134-scada-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.4 SCADA Systems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.4 SCADA Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scada-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SCADA Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="SCADA Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-scada-system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: SCADA System Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hmi-display-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HMI Display Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#135-cmms-software" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.5 CMMS Software
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.5 CMMS Software">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-cmms-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core CMMS Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-performance-indicators-kpis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Performance Indicators (KPIs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Performance Indicators (KPIs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cmms-workflow-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: CMMS Workflow Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cmms-and-ai-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CMMS and AI Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#136-real-time-monitoring-and-data-historians" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.6 Real-Time Monitoring and Data Historians
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.6 Real-Time Monitoring and Data Historians">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dashboard-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dashboard Design Principles
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-historians" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Historians
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#137-ai-driven-energy-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.7 AI-Driven Energy Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.7 AI-Driven Energy Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#load-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Prediction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setpoint-optimization_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Setpoint Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#demand-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Demand Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#138-ai-driven-labor-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.8 AI-Driven Labor Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.8 AI-Driven Labor Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#task-prioritization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task Prioritization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#route-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Route Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skill-matching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skill Matching
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#139-lifecycle-cost-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.9 Lifecycle Cost Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.9 Lifecycle Cost Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#total-cost-of-ownership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Total Cost of Ownership
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-pump-lifecycle-cost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Pump Lifecycle Cost
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example: Pump Lifecycle Cost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-lifecycle-cost-calculator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Lifecycle Cost Calculator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#payback-period-and-roi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Payback Period and ROI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1310-energy-auditing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.10 Energy Auditing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.10 Energy Auditing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#energy-audit-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Audit Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#measurement-and-verification-mv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measurement and Verification (M&amp;V)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utility-rebates-and-incentives-for-system-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utility Rebates and Incentives for System Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1311-performance-benchmarking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.11 Performance Benchmarking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.11 Performance Benchmarking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#continuous-improvement-cycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Continuous Improvement Cycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1312-mixed-system-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.12 Mixed System Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.12 Mixed System Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cross-system-interactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-System Interactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#holistic-optimization-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Holistic Optimization Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1313-industry-40-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.13 Industry 4.0 Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.13 Industry 4.0 Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#digital-twins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Digital Twins
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#edge-computing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Edge Computing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-analytics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud Analytics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cybersecurity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cybersecurity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1314-software-deployment-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.14 Software Deployment Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.14 Software Deployment Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#implementation-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Steps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Change Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1315-hands-on-lab-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.15 Hands-On Lab Activity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13.15 Hands-On Lab Activity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lab-optimize-a-mixed-system-using-ai-software-and-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab: Optimize a Mixed System Using AI Software and Controls
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/dmccreary/fluid-power-systems/blob/master/docs/chapters/13-systems/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="chapter-13-system-optimization-and-software-deployment">Chapter 13: System Optimization and Software Deployment</h1>
+<h2 id="summary">Summary</h2>
+<p>This chapter brings together the individual fluid power systems covered in Chapters 3–10 and focuses on optimizing them as integrated systems using software tools, data analytics, and AI. Students will learn practical optimization techniques — finding and fixing leaks, adjusting controls for efficiency, right-sizing equipment, and eliminating energy waste across interconnected systems. The chapter covers two critical software platforms: SCADA (Supervisory Control and Data Acquisition) for real-time monitoring and control, and CMMS (Computerized Maintenance Management Systems) for organizing maintenance activities, tracking work orders, and managing spare parts. Students will explore how AI combines historical data with live sensor feeds to minimize both labor and energy consumption through predictive analytics, automated decision-making, and continuous optimization. Lifecycle cost analysis teaches students to evaluate equipment decisions based on total cost of ownership — not just purchase price — including energy, maintenance, downtime, and disposal costs over the equipment's full lifespan. The chapter culminates with mixed system optimization, where students apply software tools and AI to optimize a combined system (such as HVAC + pumping + fans) for maximum efficiency, demonstrating how improvements in one subsystem affect the performance of the whole.</p>
+<h2 id="concepts-covered">Concepts Covered</h2>
+<ol>
+<li>System optimization fundamentals — identifying waste, establishing baselines, measuring improvement</li>
+<li>Practical leak detection and repair — compressed air, hydraulic, water, and refrigerant leaks</li>
+<li>Control system tuning — PID loop optimization, setpoint adjustment, scheduling</li>
+<li>SCADA systems — architecture, HMI displays, data historians, alarm management</li>
+<li>CMMS software — work order management, PM scheduling, spare parts inventory, KPI tracking</li>
+<li>Mobile app integration — field technician tools, barcode scanning, photo documentation</li>
+<li>Real-time monitoring platforms — dashboard design, trend analysis, threshold alerts</li>
+<li>Data historians and trending — long-term data storage, pattern recognition, reporting</li>
+<li>AI-driven energy optimization — load prediction, setpoint optimization, demand response</li>
+<li>AI-driven labor optimization — task prioritization, route optimization, skill matching</li>
+<li>Lifecycle cost analysis — total cost of ownership, payback period, net present value</li>
+<li>Energy auditing — ASHRAE levels, measurement protocols, savings verification</li>
+<li>Performance benchmarking — KPIs, industry comparisons, continuous improvement</li>
+<li>Mixed system optimization — cross-system interactions, cascading effects, holistic control</li>
+<li>Industry 4.0 integration — digital twins, edge computing, cloud analytics, cybersecurity</li>
+<li>Software deployment best practices — implementation planning, training, change management</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Chapter 1: Introduction to Fluid Power Systems and AI (understanding of system types, AI concepts, and data collection)</li>
+<li>Chapter 2: System Components and Smart Controls (knowledge of PLCs, IoT sensors, and control systems)</li>
+<li>Chapters 3–10: Familiarity with individual fluid power system types, their operation, and maintenance</li>
+</ul>
+<hr />
+<h2 id="131-system-optimization-fundamentals">13.1 System Optimization Fundamentals</h2>
+<p>Throughout Chapters 3–10, students learned how to maintain and optimize individual fluid power systems — HVAC, vacuum, compressed air, cooling water, dust collection, hydraulic, pumping, and fan systems. But in a real facility, these systems don't operate in isolation. The chilled water plant feeds the HVAC air handlers, which are driven by fans, which exhaust through ductwork that also serves the dust collection system. Optimizing one system without considering its neighbors can actually make the whole facility less efficient.</p>
+<p><strong>System optimization</strong> is the practice of analyzing an entire facility's fluid power systems together to find the combination of settings, schedules, and equipment configurations that minimizes total energy use, maintenance cost, and downtime while maintaining required performance.</p>
+<h3 id="the-optimization-process">The Optimization Process</h3>
+<p>The systematic approach to optimization follows five steps:</p>
+<ol>
+<li>
+<p><strong>Establish baselines</strong> — measure current energy consumption, maintenance costs, downtime hours, and system performance for each system. You cannot improve what you don't measure.</p>
+</li>
+<li>
+<p><strong>Identify waste</strong> — look for the common sources of inefficiency:</p>
+</li>
+<li>Leaks (compressed air, hydraulic, water, refrigerant)</li>
+<li>Oversized equipment running at partial load</li>
+<li>Systems running when not needed (nights, weekends, unoccupied zones)</li>
+<li>Excessive pressure or temperature setpoints</li>
+<li>Poor maintenance causing efficiency degradation</li>
+<li>
+<p>Throttle valves or dampers that should be replaced by VFDs</p>
+</li>
+<li>
+<p><strong>Prioritize improvements</strong> — rank opportunities by savings potential, implementation cost, and payback period. Focus on quick wins first.</p>
+</li>
+<li>
+<p><strong>Implement changes</strong> — adjust controls, fix leaks, install VFDs, retune PID loops, update schedules.</p>
+</li>
+<li>
+<p><strong>Verify and sustain</strong> — measure post-implementation performance against baselines to confirm savings. Establish ongoing monitoring to prevent backsliding.</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Optimization Category</th>
+<th>Typical Savings</th>
+<th>Implementation Cost</th>
+<th>Payback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fix compressed air leaks</td>
+<td>20–30% of compressor energy</td>
+<td>Low (labor only)</td>
+<td>Immediate</td>
+</tr>
+<tr>
+<td>Optimize control setpoints</td>
+<td>5–15% system energy</td>
+<td>Low (software changes)</td>
+<td>Immediate</td>
+</tr>
+<tr>
+<td>Install VFDs on pumps/fans</td>
+<td>20–50% motor energy</td>
+<td>Medium ($3,000–$15,000 per drive)</td>
+<td>1–3 years</td>
+</tr>
+<tr>
+<td>Right-size oversized equipment</td>
+<td>15–25% system energy</td>
+<td>High (new equipment)</td>
+<td>2–5 years</td>
+</tr>
+<tr>
+<td>Upgrade to high-efficiency motors</td>
+<td>3–8% motor energy</td>
+<td>Medium</td>
+<td>2–4 years</td>
+</tr>
+<tr>
+<td>Implement heat recovery</td>
+<td>10–30% heating energy</td>
+<td>Medium–High</td>
+<td>2–5 years</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="132-practical-leak-detection-and-repair">13.2 Practical Leak Detection and Repair</h2>
+<p>Leaks are the single largest source of wasted energy in many facilities. A comprehensive leak detection and repair program is often the fastest-payback optimization available.</p>
+<h3 id="compressed-air-leaks">Compressed Air Leaks</h3>
+<p>Compressed air is one of the most expensive utilities in a facility — producing compressed air costs 7–8 times more per unit of energy than electricity delivered directly to a motor. Yet the average compressed air system loses <strong>25–30% of its output to leaks</strong>.</p>
+<p>Common leak locations:</p>
+<ul>
+<li>Pipe fittings and threaded connections</li>
+<li>Quick-disconnect couplings</li>
+<li>Hose connections and ferrules</li>
+<li>Condensate drains stuck open</li>
+<li>Worn cylinder seals and valve stems</li>
+<li>Old, unused equipment left connected</li>
+</ul>
+<p><strong>Detection method:</strong> Ultrasonic leak detectors are the standard tool. They detect the high-frequency sound produced by air escaping through a small opening. Modern detectors display the estimated leak flow rate in CFM and the annual cost of each leak.</p>
+<p><strong>Prioritization:</strong> Tag each leak with its location and estimated cost. Fix the largest leaks first. A single 1/4-inch leak at 100 psi wastes approximately <strong>100 CFM</strong> — costing over <strong>$8,000 per year</strong> in electricity.</p>
+<h3 id="hydraulic-and-water-leaks">Hydraulic and Water Leaks</h3>
+<ul>
+<li><strong>Hydraulic leaks</strong> waste expensive fluid, create safety hazards (slipping), and indicate seal or fitting failures that will worsen over time. Even small drips should be repaired promptly.</li>
+<li><strong>Water leaks</strong> in cooling, pumping, and process systems waste water, chemicals (treatment), and pump energy. Underground or concealed leaks may be detected through flow balance analysis — if more water enters a system than exits, there's a leak.</li>
+</ul>
+<h3 id="refrigerant-leaks">Refrigerant Leaks</h3>
+<p>Refrigerant leaks reduce HVAC cooling capacity, increase energy consumption (compressors run longer), and have environmental consequences (greenhouse gas emissions). EPA regulations under Section 608 of the Clean Air Act require leak tracking and repair for systems with specified refrigerant charges.</p>
+<div class="admonition warning">
+<p class="admonition-title">Refrigerant Leak Regulations</p>
+<p>Commercial refrigeration and HVAC systems must comply with EPA leak rate thresholds. Systems exceeding 125% annual leak rate (comfort cooling) or 100% (commercial refrigeration) must be repaired within 30 days. Technicians handling refrigerants must hold EPA Section 608 certification.</p>
+</div>
+<hr />
+<h2 id="133-control-system-tuning">13.3 Control System Tuning</h2>
+<p>Even well-designed control systems degrade over time as processes change, equipment wears, and operating conditions shift from original design assumptions. Periodic control system tuning restores optimal performance.</p>
+<h3 id="pid-loop-optimization">PID Loop Optimization</h3>
+<p>Most fluid power control loops use <strong>PID (Proportional-Integral-Derivative)</strong> controllers. Each term serves a specific purpose:</p>
+<ul>
+<li><strong>Proportional (P)</strong> — responds to the current error (difference between setpoint and actual value). Higher gain means faster response but risks overshoot and oscillation.</li>
+<li><strong>Integral (I)</strong> — eliminates steady-state error by accumulating past errors over time. Too much integral action causes slow oscillation (integral windup).</li>
+<li><strong>Derivative (D)</strong> — responds to the rate of change of error, providing damping. Reduces overshoot but amplifies noise. Often set to zero in noisy industrial processes.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Tuning Problem</th>
+<th>Symptom</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Too much P gain</td>
+<td>Oscillation, overshoot</td>
+<td>Reduce P gain</td>
+</tr>
+<tr>
+<td>Too little P gain</td>
+<td>Slow response, large offset</td>
+<td>Increase P gain</td>
+</tr>
+<tr>
+<td>Too much I action</td>
+<td>Slow oscillation, windup</td>
+<td>Reduce I (increase I time)</td>
+</tr>
+<tr>
+<td>Too little I action</td>
+<td>Steady-state offset remains</td>
+<td>Increase I (decrease I time)</td>
+</tr>
+<tr>
+<td>Too much D action</td>
+<td>Noisy output, erratic control</td>
+<td>Reduce D or set to zero</td>
+</tr>
+</tbody>
+</table>
+<h3 id="setpoint-optimization">Setpoint Optimization</h3>
+<p>Many systems run at unnecessarily high (or low) setpoints because they were configured for worst-case conditions that rarely occur:</p>
+<ul>
+<li><strong>Compressed air</strong> — reducing system pressure from 110 psi to 95 psi (if end-use equipment allows) saves approximately <strong>7.5% of compressor energy</strong> (roughly 1% per 2 psi reduction)</li>
+<li><strong>Chilled water</strong> — raising chilled water temperature from 42°F to 46°F can save <strong>3–5% of chiller energy</strong> per degree</li>
+<li><strong>Duct static pressure</strong> — reducing duct pressure setpoint as discussed in Chapter 10 (static pressure reset) saves fan energy</li>
+<li><strong>Hot water</strong> — lowering heating hot water temperature during mild weather reduces boiler energy and distribution losses</li>
+</ul>
+<hr />
+<h2 id="134-scada-systems">13.4 SCADA Systems</h2>
+<p><strong>SCADA (Supervisory Control and Data Acquisition)</strong> is the software platform that provides centralized monitoring and control of an entire facility's fluid power systems from a single location. SCADA connects to PLCs, VFDs, sensors, and other field devices to collect data and issue control commands.</p>
+<h3 id="scada-architecture">SCADA Architecture</h3>
+<p>A modern SCADA system consists of several layers:</p>
+<ol>
+<li><strong>Field devices</strong> — sensors, actuators, VFDs, and PLCs connected to physical equipment</li>
+<li><strong>Communication network</strong> — industrial protocols (Modbus, BACnet, OPC-UA, Ethernet/IP) connecting field devices to the SCADA server</li>
+<li><strong>SCADA server</strong> — the central computer that collects data, processes alarms, logs history, and executes control logic</li>
+<li><strong>Data historian</strong> — a specialized database that stores time-series data (sensor readings, setpoints, alarm events) for years of trending and analysis</li>
+<li><strong>HMI (Human-Machine Interface)</strong> — graphical displays showing system status, trends, alarms, and control interfaces</li>
+<li><strong>Web/mobile clients</strong> — remote access to HMI screens from any browser or mobile device</li>
+</ol>
+<h4 id="diagram-scada-system-architecture">Diagram: SCADA System Architecture</h4>
+<iframe src="../../sims/scada-architecture/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>SCADA System Architecture Interactive Diagram</summary>
+Type: diagram
+
+Bloom Level: L2 Understand
+Bloom Verb: Explain, summarize
+Learning Objective: Students will explain the layered architecture of a SCADA system and summarize how data flows from field sensors through communication networks to operator displays and AI analytics.
+
+Components to show (layered architecture, bottom to top):
+- Layer 1 (Bottom): Field Devices — icons for pressure sensor, temperature sensor, flow meter, VFD, PLC, valve actuator. Grouped by system type (HVAC, Pumping, Compressed Air).
+- Layer 2: Communication Network — lines connecting field devices to the server, labeled with protocol names (Modbus, BACnet, Ethernet/IP, OPC-UA)
+- Layer 3: SCADA Server — central server icon with data processing, alarm engine, and control logic modules
+- Layer 4: Data Historian — database icon with "Years of trend data" label
+- Layer 5: HMI / Web Clients — operator workstation, tablet, and phone icons showing dashboard screens
+- Layer 6 (Top): AI Analytics — cloud icon with "Predictive Analytics, Optimization, Anomaly Detection"
+
+Data flow arrows:
+- Upward blue arrows: sensor data flowing from field to server to displays
+- Downward green arrows: control commands flowing from HMI to server to field devices
+- Bidirectional orange arrows: AI analytics exchanging data with historian and server
+
+Interactive elements:
+- Hover over any component to see a description of its function
+- Click a layer to highlight all data connections to/from that layer
+- Animated data flow particles traveling along the arrows to show real-time communication
+
+Visual style: Clean layered diagram with consistent icon style
+Color scheme: Blue for data flow up, green for control flow down, orange for AI
+Canvas size: responsive, minimum 800x500px
+Implementation: p5.js with animated data flow particles
+</details>
+
+<h3 id="hmi-display-design">HMI Display Design</h3>
+<p>Effective HMI screens follow the <strong>ISA-101 standard</strong> for alarm management and display design. Key principles:</p>
+<ul>
+<li><strong>Overview screens</strong> show the entire facility at a glance with color-coded status indicators</li>
+<li><strong>System screens</strong> show one system (e.g., chilled water plant) with live values, equipment status, and controls</li>
+<li><strong>Detail screens</strong> show individual equipment with full parameter displays and trend charts</li>
+<li><strong>Alarm screens</strong> list active and recent alarms with priority, time, and acknowledgment status</li>
+</ul>
+<p>Good HMI design uses:</p>
+<ul>
+<li>Gray backgrounds (not black or bright colors) to reduce eye fatigue</li>
+<li>Color sparingly — reserve red for alarms, yellow for warnings, green for running status</li>
+<li>Consistent navigation with no more than 3 clicks to reach any screen</li>
+<li>Real numbers and units, not just bar graphs or abstract indicators</li>
+</ul>
+<hr />
+<h2 id="135-cmms-software">13.5 CMMS Software</h2>
+<p>A <strong>Computerized Maintenance Management System (CMMS)</strong> is software that organizes, schedules, and tracks all maintenance activities across a facility. While SCADA tells you what is happening right now, CMMS tells you what maintenance has been done, what needs to be done, and what parts and labor are required.</p>
+<h3 id="core-cmms-functions">Core CMMS Functions</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>What It Does</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Work order management</td>
+<td>Creates, assigns, tracks, and closes maintenance tasks</td>
+<td>Ensures nothing falls through cracks</td>
+</tr>
+<tr>
+<td>PM scheduling</td>
+<td>Generates preventive maintenance tasks on time-based or meter-based intervals</td>
+<td>Prevents missed maintenance</td>
+</tr>
+<tr>
+<td>Asset registry</td>
+<td>Maintains equipment records including specs, manuals, and history</td>
+<td>Quick access to equipment info</td>
+</tr>
+<tr>
+<td>Spare parts inventory</td>
+<td>Tracks parts in stock, reorder points, and vendor information</td>
+<td>Reduces downtime from missing parts</td>
+</tr>
+<tr>
+<td>Labor tracking</td>
+<td>Records who did what, when, and how long it took</td>
+<td>Supports staffing and cost analysis</td>
+</tr>
+<tr>
+<td>KPI reporting</td>
+<td>Calculates maintenance metrics (MTBF, MTTR, PM compliance, backlog)</td>
+<td>Drives continuous improvement</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-performance-indicators-kpis">Key Performance Indicators (KPIs)</h3>
+<p>CMMS software tracks metrics that help maintenance managers evaluate program effectiveness:</p>
+<ul>
+<li><strong>PM Compliance</strong> — percentage of scheduled preventive maintenance tasks completed on time. Target: &gt; 90%.</li>
+<li><strong>MTBF (Mean Time Between Failures)</strong> — average time a piece of equipment runs before failing. Higher is better.</li>
+<li><strong>MTTR (Mean Time To Repair)</strong> — average time to restore equipment after failure. Lower is better.</li>
+<li><strong>Maintenance Backlog</strong> — total labor hours of uncompleted work orders. Should be stable, not growing.</li>
+<li><strong>Planned vs. Unplanned Maintenance Ratio</strong> — target &gt; 80% planned. High unplanned percentage indicates reactive maintenance culture.</li>
+<li><strong>Maintenance Cost per Unit of Production</strong> — tracks efficiency of maintenance spending.</li>
+</ul>
+<h4 id="diagram-cmms-workflow-dashboard">Diagram: CMMS Workflow Dashboard</h4>
+<iframe src="../../sims/cmms-workflow/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>CMMS Workflow Dashboard</summary>
+Type: microsim
+
+Bloom Level: L3 Apply
+Bloom Verb: Use, implement
+Learning Objective: Students will use a simulated CMMS interface to create work orders, schedule preventive maintenance, track KPIs, and implement a maintenance workflow from request through completion.
+
+Visual elements:
+- Left panel: Navigation menu with sections: Dashboard, Work Orders, PM Schedule, Assets, Inventory, Reports
+- Main area changes based on selected section:
+  - Dashboard view: KPI gauges (PM Compliance, MTBF, MTTR, Backlog), recent work orders list, upcoming PM tasks
+  - Work Orders view: List of work orders with status (Open, In Progress, Completed), filter by priority and system type
+  - PM Schedule view: Calendar showing upcoming PM tasks color-coded by system
+  - Assets view: Equipment list with status indicators
+  - Reports view: Charts showing maintenance trends
+
+Interactive elements:
+- Click "New Work Order" button to fill out a work order form (equipment, priority, description, assigned technician)
+- Click a work order to change its status (Open → In Progress → Completed)
+- Toggle between systems (HVAC, Pumping, Compressed Air) to filter views
+- KPI gauges update as work orders are completed
+- "Run Scenario" button that simulates a week of maintenance activity, showing how KPIs change
+
+Instructional Rationale: Apply-level simulation lets students practice using CMMS software in a realistic context without risk. Creating and managing work orders builds procedural knowledge that transfers directly to workplace CMMS tools.
+
+Implementation: HTML/CSS/JavaScript with tabbed interface
+Canvas size: responsive, minimum 850x500px
+</details>
+
+<h3 id="cmms-and-ai-integration">CMMS and AI Integration</h3>
+<p>Modern CMMS platforms integrate with AI to transform maintenance from reactive to predictive:</p>
+<ul>
+<li><strong>AI-generated work orders</strong> — when IoT sensors detect an anomaly (rising vibration, increasing temperature), AI creates a CMMS work order automatically with the equipment, probable cause, recommended action, and required parts</li>
+<li><strong>Optimized scheduling</strong> — AI considers equipment criticality, technician skills, parts availability, and production schedules to optimize the maintenance sequence</li>
+<li><strong>Failure prediction</strong> — AI analyzes equipment history in the CMMS to identify patterns that precede failures, enabling parts to be ordered before they're needed</li>
+<li><strong>Cost optimization</strong> — AI recommends repair vs. replace decisions based on remaining useful life, repair cost, and replacement cost data from the CMMS</li>
+</ul>
+<hr />
+<h2 id="136-real-time-monitoring-and-data-historians">13.6 Real-Time Monitoring and Data Historians</h2>
+<h3 id="dashboard-design-principles">Dashboard Design Principles</h3>
+<p>Effective monitoring dashboards communicate the right information to the right people at the right time:</p>
+<ul>
+<li><strong>Executive dashboards</strong> — high-level KPIs: total energy cost, maintenance budget vs. actual, system uptime percentage, sustainability metrics</li>
+<li><strong>Facility manager dashboards</strong> — system status overviews, active alarms, energy trends by system, maintenance schedule compliance</li>
+<li><strong>Technician dashboards</strong> — current work orders, equipment detail views, live sensor readings, troubleshooting guides</li>
+</ul>
+<h3 id="data-historians">Data Historians</h3>
+<p>A <strong>data historian</strong> is a specialized database designed to store millions of time-stamped data points efficiently. Unlike traditional databases that store the latest value, historians store every reading from every sensor over years of operation.</p>
+<p>Why historians matter:</p>
+<ul>
+<li><strong>Trend analysis</strong> — compare this month's energy consumption to the same month last year</li>
+<li><strong>Root cause investigation</strong> — when a failure occurs, look back at the data to see what changed</li>
+<li><strong>Performance degradation</strong> — track pump efficiency or fan vibration over months to see gradual decline</li>
+<li><strong>Regulatory compliance</strong> — demonstrate that systems met environmental or safety requirements</li>
+<li><strong>AI training data</strong> — historical data is the foundation for training machine learning models</li>
+</ul>
+<hr />
+<h2 id="137-ai-driven-energy-optimization">13.7 AI-Driven Energy Optimization</h2>
+<p>AI takes system optimization beyond what human operators can achieve by processing vast amounts of data from multiple systems simultaneously and finding optimal settings that no one would think to try.</p>
+<h3 id="load-prediction">Load Prediction</h3>
+<p>AI analyzes historical patterns to predict future demand:</p>
+<ul>
+<li><strong>Weather forecasts</strong> → predict cooling and heating loads 24–72 hours ahead</li>
+<li><strong>Occupancy schedules</strong> → predict ventilation and lighting loads</li>
+<li><strong>Production schedules</strong> → predict compressed air, hydraulic, and process water demand</li>
+<li><strong>Time-of-day patterns</strong> → learn recurring daily and weekly cycles</li>
+</ul>
+<p>With accurate load predictions, AI pre-positions systems to meet demand efficiently rather than reacting after the demand arrives.</p>
+<h3 id="setpoint-optimization_1">Setpoint Optimization</h3>
+<p>AI continuously adjusts setpoints across multiple systems to minimize total energy while maintaining all process requirements:</p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Traditional Setpoint</th>
+<th>AI-Optimized Setpoint</th>
+<th>Savings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chilled water supply</td>
+<td>Fixed 42°F</td>
+<td>42–50°F based on load</td>
+<td>8–15% chiller energy</td>
+</tr>
+<tr>
+<td>Duct static pressure</td>
+<td>Fixed 1.5 in. w.g.</td>
+<td>0.5–1.5 in. w.g. based on damper positions</td>
+<td>15–30% fan energy</td>
+</tr>
+<tr>
+<td>Condenser water</td>
+<td>Fixed 85°F</td>
+<td>70–85°F based on wet bulb</td>
+<td>10–20% chiller energy</td>
+</tr>
+<tr>
+<td>Compressed air</td>
+<td>Fixed 110 psi</td>
+<td>90–110 psi based on demand</td>
+<td>5–10% compressor energy</td>
+</tr>
+<tr>
+<td>Hot water supply</td>
+<td>Fixed 180°F</td>
+<td>140–180°F based on outdoor temp</td>
+<td>10–20% boiler energy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="demand-response">Demand Response</h3>
+<p>AI enables facilities to participate in <strong>utility demand response programs</strong> — reducing electrical load during peak grid demand periods in exchange for financial incentives. AI can:</p>
+<ul>
+<li>Pre-cool or pre-heat buildings before a demand response event</li>
+<li>Shift non-critical loads (ice storage charging, water treatment) to off-peak hours</li>
+<li>Shed loads in priority order (reduce lighting, raise cooling setpoints, stage down non-critical pumps)</li>
+<li>Automatically respond to utility signals without operator intervention</li>
+</ul>
+<hr />
+<h2 id="138-ai-driven-labor-optimization">13.8 AI-Driven Labor Optimization</h2>
+<p>AI helps maintenance teams work smarter by focusing human effort where it matters most:</p>
+<h3 id="task-prioritization">Task Prioritization</h3>
+<p>AI ranks maintenance tasks by urgency and impact:</p>
+<ul>
+<li><strong>Critical</strong> — equipment showing signs of imminent failure; high production impact</li>
+<li><strong>High</strong> — deteriorating condition trend; failure likely within days to weeks</li>
+<li><strong>Medium</strong> — scheduled preventive maintenance due</li>
+<li><strong>Low</strong> — cosmetic or convenience items</li>
+</ul>
+<h3 id="route-optimization">Route Optimization</h3>
+<p>For technicians performing daily rounds or collecting manual readings, AI optimizes the walking route to minimize travel time and ensure the most critical equipment is checked first.</p>
+<h3 id="skill-matching">Skill Matching</h3>
+<p>AI assigns work orders to the technician best qualified for each job based on:</p>
+<ul>
+<li>Certifications (EPA 608, welding, electrical)</li>
+<li>Equipment-specific training history</li>
+<li>Past performance on similar tasks</li>
+<li>Current workload and location</li>
+</ul>
+<hr />
+<h2 id="139-lifecycle-cost-analysis">13.9 Lifecycle Cost Analysis</h2>
+<p>Technicians and managers often make equipment decisions based on purchase price alone — but the purchase price is typically only <strong>10–15% of the total cost of owning and operating</strong> a pump, fan, or compressor over its lifetime. <strong>Lifecycle cost analysis (LCA)</strong> captures the full picture.</p>
+<h3 id="total-cost-of-ownership">Total Cost of Ownership</h3>
+<p>[
+LCC = C_{purchase} + C_{installation} + C_{energy} + C_{maintenance} + C_{downtime} + C_{disposal}
+]</p>
+<p>Where:</p>
+<ul>
+<li>( C_{purchase} ) = equipment purchase price</li>
+<li>( C_{installation} ) = installation labor, piping, electrical, controls</li>
+<li>( C_{energy} ) = total energy cost over equipment life (often 40–60% of LCC for pumps and fans)</li>
+<li>( C_{maintenance} ) = parts, labor, consumables over equipment life</li>
+<li>( C_{downtime} ) = lost production value during unplanned outages</li>
+<li>( C_{disposal} ) = removal, environmental cleanup, recycling/disposal costs</li>
+</ul>
+<h3 id="example-pump-lifecycle-cost">Example: Pump Lifecycle Cost</h3>
+<p>Consider two pumps for the same application over a 20-year life:</p>
+<table>
+<thead>
+<tr>
+<th>Cost Component</th>
+<th>Standard Pump ($5,000)</th>
+<th>High-Efficiency Pump ($7,500)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purchase price</td>
+<td>$5,000</td>
+<td>$7,500</td>
+</tr>
+<tr>
+<td>Installation</td>
+<td>$3,000</td>
+<td>$3,000</td>
+</tr>
+<tr>
+<td>Energy (20 years)</td>
+<td>$120,000</td>
+<td>$96,000</td>
+</tr>
+<tr>
+<td>Maintenance (20 years)</td>
+<td>$15,000</td>
+<td>$12,000</td>
+</tr>
+<tr>
+<td>Downtime losses</td>
+<td>$8,000</td>
+<td>$4,000</td>
+</tr>
+<tr>
+<td>Disposal</td>
+<td>$500</td>
+<td>$500</td>
+</tr>
+<tr>
+<td><strong>Total LCC</strong></td>
+<td><strong>$151,500</strong></td>
+<td><strong>$123,000</strong></td>
+</tr>
+<tr>
+<td><strong>Savings</strong></td>
+<td>—</td>
+<td><strong>$28,500 (19%)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The high-efficiency pump costs $2,500 more to buy but saves $28,500 over its lifetime — a return of more than 10:1 on the incremental investment.</p>
+<h4 id="diagram-lifecycle-cost-calculator">Diagram: Lifecycle Cost Calculator</h4>
+<iframe src="../../sims/lifecycle-cost-calculator/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Lifecycle Cost Calculator</summary>
+Type: microsim
+
+Bloom Level: L5 Evaluate
+Bloom Verb: Judge, justify
+Learning Objective: Students will evaluate equipment purchase decisions by calculating and comparing the total lifecycle cost of two options, justifying why the higher-efficiency option typically provides better long-term value despite higher initial cost.
+
+Visual elements:
+- Top: Two side-by-side stacked bar charts (Option A and Option B) showing lifecycle cost breakdown
+  - Color-coded segments: Purchase (blue), Installation (gray), Energy (red/largest), Maintenance (yellow), Downtime (orange), Disposal (brown)
+  - Total LCC value displayed above each bar
+  - Savings arrow between bars showing the difference
+- Bottom left: Input parameters panel
+- Bottom right: Summary results with payback period and ROI
+
+Interactive controls:
+- Equipment parameters:
+  - Slider: "Option A Purchase Price" ($3,000-$20,000)
+  - Slider: "Option B Purchase Price" ($3,000-$25,000)
+  - Slider: "Option A Efficiency" (70%-85%)
+  - Slider: "Option B Efficiency" (80%-95%)
+  - Slider: "Motor HP" (5-100)
+- Operating parameters:
+  - Slider: "Operating Hours/Year" (2000-8760)
+  - Slider: "Electricity Rate" ($0.05-$0.25/kWh)
+  - Slider: "Equipment Life" (10-30 years)
+  - Slider: "Annual Maintenance %" (2%-5% of purchase price)
+
+Results display:
+- LCC for each option with breakdown
+- Payback period for the higher-cost option
+- Net Present Value of savings (using 5% discount rate)
+- Annual energy cost comparison
+
+Instructional Rationale: Evaluate-level calculator requires students to judge which equipment option provides the best total value by considering multiple cost factors over time. This directly addresses the common mistake of choosing the cheapest purchase price.
+
+Implementation: HTML/CSS/JavaScript with Canvas charts
+Canvas size: responsive, minimum 800x500px
+</details>
+
+<h3 id="payback-period-and-roi">Payback Period and ROI</h3>
+<p>Two common financial metrics help justify efficiency investments:</p>
+<p><strong>Simple payback period:</strong></p>
+<p>[
+\text{Payback (years)} = \frac{\text{Additional Investment Cost}}{\text{Annual Savings}}
+]</p>
+<p><strong>Return on Investment (ROI):</strong></p>
+<p>[
+ROI = \frac{\text{Total Savings over Life} - \text{Additional Investment}}{\text{Additional Investment}} \times 100\%
+]</p>
+<p>For the pump example above: Payback = $2,500 / ($1,200/year energy savings) = <strong>2.1 years</strong>. ROI = ($28,500 − $2,500) / $2,500 × 100% = <strong>1,040%</strong>.</p>
+<hr />
+<h2 id="1310-energy-auditing">13.10 Energy Auditing</h2>
+<p>An <strong>energy audit</strong> is a systematic evaluation of a facility's energy use that identifies opportunities for savings. The ASHRAE (American Society of Heating, Refrigerating and Air-Conditioning Engineers) standard defines three levels of energy audits:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Scope</th>
+<th>Effort</th>
+<th>Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Level 1: Walk-Through</td>
+<td>Visual inspection, utility bill analysis, identify obvious waste</td>
+<td>1–2 days</td>
+<td>± 30% savings estimates</td>
+</tr>
+<tr>
+<td>Level 2: Energy Survey</td>
+<td>Detailed analysis of major systems, sub-metering, engineering calculations</td>
+<td>1–4 weeks</td>
+<td>± 15% savings estimates</td>
+</tr>
+<tr>
+<td>Level 3: Investment-Grade</td>
+<td>Comprehensive analysis with monitoring, simulation, detailed financial analysis</td>
+<td>1–3 months</td>
+<td>± 5% savings estimates</td>
+</tr>
+</tbody>
+</table>
+<h3 id="energy-audit-process">Energy Audit Process</h3>
+<ol>
+<li><strong>Collect utility data</strong> — 12–36 months of electricity, gas, water, and other utility bills</li>
+<li><strong>Establish baselines</strong> — calculate energy use intensity (EUI) in kBtu/ft²/year or kWh/ft²/year</li>
+<li><strong>Walk the facility</strong> — inspect all major systems, note operating conditions, identify visible waste</li>
+<li><strong>Sub-meter key systems</strong> — install temporary meters on major energy consumers (chillers, compressors, large pumps/fans)</li>
+<li><strong>Analyze data</strong> — compare actual performance to design specifications and industry benchmarks</li>
+<li><strong>Identify ECMs</strong> — develop Energy Conservation Measures with estimated savings and costs</li>
+<li><strong>Calculate financials</strong> — payback period, ROI, and lifecycle cost for each ECM</li>
+<li><strong>Prioritize and recommend</strong> — rank ECMs by payback and present to management</li>
+</ol>
+<h3 id="measurement-and-verification-mv">Measurement and Verification (M&amp;V)</h3>
+<p>After implementing energy improvements, <strong>M&amp;V</strong> confirms that the predicted savings are actually being achieved. The International Performance Measurement and Verification Protocol (IPMVP) defines four options:</p>
+<ul>
+<li><strong>Option A</strong> — measure key parameters, estimate others (simplest, lowest cost)</li>
+<li><strong>Option B</strong> — measure all parameters at the equipment level (metering retrofit)</li>
+<li><strong>Option C</strong> — whole-facility utility bill analysis (best for multiple interacting ECMs)</li>
+<li><strong>Option D</strong> — calibrated simulation (for complex situations)</li>
+</ul>
+<h3 id="utility-rebates-and-incentives-for-system-optimization">Utility Rebates and Incentives for System Optimization</h3>
+<p>Energy efficiency improvements identified through auditing often qualify for <strong>utility rebate programs</strong> that significantly reduce project costs and accelerate payback periods. Understanding how to leverage these programs is an essential skill for facility managers and technicians proposing optimization projects.</p>
+<p><strong>Custom and calculated rebates.</strong> While simple equipment swaps (such as replacing a standard motor with a premium-efficiency model) qualify for prescriptive rebates, integrated whole-system optimization projects — the kind identified through Level 2 and Level 3 energy audits — typically qualify for larger <strong>custom or calculated rebate programs</strong>. These programs pay incentives based on verified energy savings (often $0.03–$0.15 per kWh saved), rewarding projects that optimize multiple interacting systems together rather than one component at a time.</p>
+<p><strong>Portfolio approach.</strong> Facilities with multiple optimization opportunities should consider <strong>bundling upgrades into a single rebate application</strong>. Combining VFD installations, compressed air leak repair, chiller optimization, and lighting upgrades into one project package often qualifies for higher incentive tiers and simplifies the application process. Many utilities offer bonus incentives for comprehensive projects that exceed minimum savings thresholds.</p>
+<p><strong>Strategic Energy Management (SEM) programs.</strong> Some utilities offer multi-year SEM programs that provide ongoing financial support, coaching, and incentives for facilities committed to continuous energy improvement. These programs go beyond one-time rebates to support the kind of sustained optimization described throughout this chapter.</p>
+<p><strong>Federal programs.</strong> The <strong>DOE 50001 Ready</strong> program helps facilities implement an energy management system aligned with ISO 50001 without requiring formal certification, while the <strong>DOE Better Plants</strong> program provides technical assistance and recognition for manufacturers committing to energy intensity reduction targets. Both programs complement utility rebates by providing structure and accountability for long-term energy management.</p>
+<p><strong>The DSIRE database</strong> (Database of State Incentives for Renewables and Efficiency, at dsireusa.org) is the most comprehensive resource for identifying available rebates, tax credits, and incentive programs by state and utility territory. Checking DSIRE should be a standard step in every energy audit report.</p>
+<p><strong>M&amp;V data supports rebate verification.</strong> The IPMVP measurement and verification methods described above serve double duty — the same M&amp;V data that confirms energy savings for facility management also satisfies utility rebate verification requirements. Facilities with robust system-level monitoring through SCADA or BAS have a significant advantage, as their data historians provide the continuous measurement data that utilities require for calculated rebate programs. Investing in good metering and monitoring infrastructure pays for itself through both operational savings and higher rebate approvals.</p>
+<hr />
+<h2 id="1311-performance-benchmarking">13.11 Performance Benchmarking</h2>
+<p><strong>Benchmarking</strong> compares a facility's performance against industry standards, similar facilities, or its own historical data to identify improvement opportunities.</p>
+<h3 id="common-benchmarks">Common Benchmarks</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>What It Measures</th>
+<th>Typical Range</th>
+<th>Data Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EUI (Energy Use Intensity)</td>
+<td>Total energy per square foot</td>
+<td>50–200 kBtu/ft²/yr</td>
+<td>ENERGY STAR</td>
+</tr>
+<tr>
+<td>Compressed air specific power</td>
+<td>kW per 100 CFM</td>
+<td>18–22 kW/100 CFM</td>
+<td>Compressed Air &amp; Gas Institute</td>
+</tr>
+<tr>
+<td>Chiller efficiency</td>
+<td>kW per ton of cooling</td>
+<td>0.5–0.8 kW/ton</td>
+<td>ASHRAE 90.1</td>
+</tr>
+<tr>
+<td>Pump wire-to-water efficiency</td>
+<td>Overall pump + motor + VFD efficiency</td>
+<td>50–75%</td>
+<td>Hydraulic Institute</td>
+</tr>
+<tr>
+<td>Cooling tower approach</td>
+<td>Difference between leaving water and wet bulb</td>
+<td>5–10°F</td>
+<td>CTI standards</td>
+</tr>
+</tbody>
+</table>
+<h3 id="continuous-improvement-cycle">Continuous Improvement Cycle</h3>
+<p>Benchmarking feeds into a continuous improvement process:</p>
+<ol>
+<li><strong>Measure</strong> — collect current performance data</li>
+<li><strong>Compare</strong> — benchmark against standards and peers</li>
+<li><strong>Analyze</strong> — identify gaps and root causes</li>
+<li><strong>Improve</strong> — implement changes</li>
+<li><strong>Re-measure</strong> — verify improvement and set new targets</li>
+</ol>
+<hr />
+<h2 id="1312-mixed-system-optimization">13.12 Mixed System Optimization</h2>
+<p>The greatest optimization gains come from looking across system boundaries. Mixed system optimization considers how changes in one system ripple through connected systems.</p>
+<h3 id="cross-system-interactions">Cross-System Interactions</h3>
+<table>
+<thead>
+<tr>
+<th>Change in One System</th>
+<th>Effect on Connected Systems</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lower chilled water temperature</td>
+<td>Chiller works harder, but AHU fans can run slower (less airflow needed)</td>
+</tr>
+<tr>
+<td>Reduce compressed air pressure</td>
+<td>Compressor saves energy, but pneumatic tools may cycle faster</td>
+</tr>
+<tr>
+<td>Increase cooling tower fan speed</td>
+<td>Better condenser water temperature, chiller runs more efficiently</td>
+</tr>
+<tr>
+<td>Fix duct leaks</td>
+<td>Fan runs slower (less static pressure needed), zones get more air</td>
+</tr>
+<tr>
+<td>Add VFD to pumps</td>
+<td>Reduces pump energy, but may affect heat exchanger performance at low flow</td>
+</tr>
+</tbody>
+</table>
+<h3 id="holistic-optimization-example">Holistic Optimization Example</h3>
+<p>Consider an HVAC system with a chiller, cooling tower, chilled water pumps, condenser water pumps, and air handling unit fans. Traditional control runs each component at fixed setpoints. AI-driven holistic optimization adjusts all setpoints simultaneously:</p>
+<ul>
+<li>On a cool day (65°F outdoor, 55°F wet bulb):</li>
+<li>AI lowers cooling tower fan speed (mild conditions provide adequate cooling)</li>
+<li>AI raises condenser water temperature slightly (tower still meets need at lower fan speed)</li>
+<li>AI raises chilled water temperature (reduced cooling load allows warmer water)</li>
+<li>AI reduces AHU fan speed (higher chilled water temp means less air volume can be delivered at warmer supply temperature — but economizer mode may handle the entire load for free)</li>
+<li>Total system power drops 40% compared to fixed-setpoint operation</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">The 1% Rule</p>
+<p>In a well-integrated HVAC system, every 1°F increase in chilled water supply temperature reduces chiller energy by approximately 1.5–2%. Every 1°F decrease in condenser water temperature reduces chiller energy by approximately 1–1.5%. AI optimizes both simultaneously for maximum savings.</p>
+</div>
+<hr />
+<h2 id="1313-industry-40-integration">13.13 Industry 4.0 Integration</h2>
+<p><strong>Industry 4.0</strong> refers to the current trend of automation and data exchange in manufacturing and building systems. For fluid power technicians, the key Industry 4.0 technologies include:</p>
+<h3 id="digital-twins">Digital Twins</h3>
+<p>A <strong>digital twin</strong> is a virtual replica of a physical system that receives real-time data from IoT sensors and mirrors the actual system's behavior. Technicians can:</p>
+<ul>
+<li>Test "what-if" scenarios without affecting the real system</li>
+<li>Train on the digital twin before working on actual equipment</li>
+<li>Use the twin to diagnose problems by comparing virtual vs. actual performance</li>
+</ul>
+<h3 id="edge-computing">Edge Computing</h3>
+<p><strong>Edge computing</strong> processes data close to where it's generated (at the sensor or local controller) rather than sending everything to the cloud. Benefits:</p>
+<ul>
+<li>Faster response times (milliseconds vs. seconds)</li>
+<li>Continues working during internet outages</li>
+<li>Reduces bandwidth costs and cloud storage requirements</li>
+<li>Enables real-time safety shutdown decisions</li>
+</ul>
+<h3 id="cloud-analytics">Cloud Analytics</h3>
+<p><strong>Cloud platforms</strong> provide the computing power for AI analytics, long-term data storage, and multi-facility benchmarking. Benefits:</p>
+<ul>
+<li>Virtually unlimited processing and storage capacity</li>
+<li>Access from anywhere via web browser</li>
+<li>Multi-facility comparison and portfolio optimization</li>
+<li>Regular software updates without local IT effort</li>
+</ul>
+<h3 id="cybersecurity">Cybersecurity</h3>
+<p>As systems become more connected, cybersecurity becomes critical. Best practices for fluid power system cybersecurity:</p>
+<ul>
+<li><strong>Network segmentation</strong> — separate operational technology (OT) networks from IT networks</li>
+<li><strong>Access control</strong> — require authentication for all system access; use role-based permissions</li>
+<li><strong>Encryption</strong> — encrypt data in transit between devices, servers, and cloud</li>
+<li><strong>Patching</strong> — keep all software (SCADA, CMMS, PLCs, VFDs) updated with security patches</li>
+<li><strong>Monitoring</strong> — watch for unusual network traffic or unauthorized access attempts</li>
+<li><strong>Backup</strong> — maintain offline backups of all configurations and data</li>
+</ul>
+<hr />
+<h2 id="1314-software-deployment-best-practices">13.14 Software Deployment Best Practices</h2>
+<p>Deploying new software (SCADA, CMMS, monitoring platforms) in a facility requires careful planning to avoid disruption and ensure adoption.</p>
+<h3 id="implementation-steps">Implementation Steps</h3>
+<ol>
+<li><strong>Define requirements</strong> — what problems does the software need to solve? What data do we need?</li>
+<li><strong>Select platform</strong> — evaluate vendors based on features, scalability, integration capability, and support</li>
+<li><strong>Plan integration</strong> — map out connections to existing PLCs, sensors, and other systems</li>
+<li><strong>Configure and customize</strong> — set up equipment databases, alarm points, HMI screens, and reports</li>
+<li><strong>Test thoroughly</strong> — run the system in parallel with existing processes before going live</li>
+<li><strong>Train users</strong> — provide hands-on training for operators, technicians, and managers</li>
+<li><strong>Go live</strong> — transition to the new system with support staff available</li>
+<li><strong>Optimize</strong> — refine configurations, add features, and address user feedback over the first 90 days</li>
+</ol>
+<h3 id="change-management">Change Management</h3>
+<p>Technology deployment is as much about people as it is about software:</p>
+<ul>
+<li>Involve end users in the selection and configuration process</li>
+<li>Explain the "why" — how the new system benefits them specifically</li>
+<li>Provide adequate training time (not just a one-hour overview)</li>
+<li>Assign "super users" who become local experts and first-line support</li>
+<li>Celebrate early wins to build momentum and acceptance</li>
+</ul>
+<hr />
+<h2 id="1315-hands-on-lab-activity">13.15 Hands-On Lab Activity</h2>
+<h3 id="lab-optimize-a-mixed-system-using-ai-software-and-controls">Lab: Optimize a Mixed System Using AI Software and Controls</h3>
+<p><strong>Objective:</strong> Students will analyze a combined HVAC + pumping + fan system, identify optimization opportunities, implement control changes, and verify energy savings using monitoring software.</p>
+<p><strong>Equipment needed:</strong></p>
+<ul>
+<li>Multi-system test stand (AHU with fan, chilled water pump, cooling coil)</li>
+<li>VFDs on fan and pump motors</li>
+<li>Temperature, pressure, flow, and power sensors with data logging</li>
+<li>SCADA or monitoring software on laptop/tablet</li>
+<li>PID controller interface (PLC or software-based)</li>
+<li>Energy meter (kWh measurement)</li>
+</ul>
+<p><strong>Lab Activities:</strong></p>
+<ol>
+<li>Record baseline energy consumption with all systems running at fixed speeds/setpoints for 30 minutes</li>
+<li>Identify three optimization opportunities by analyzing the monitoring data (e.g., pump running faster than needed, supply air temperature lower than required, fan static pressure higher than necessary)</li>
+<li>Implement optimization #1: Reduce pump speed to match actual cooling load — record new energy consumption</li>
+<li>Implement optimization #2: Raise chilled water setpoint by 2°F — observe effect on both pump and fan energy</li>
+<li>Implement optimization #3: Reduce duct static pressure setpoint — observe effect on fan energy</li>
+<li>Record final optimized energy consumption for 30 minutes</li>
+<li>Calculate total energy savings as a percentage of baseline</li>
+<li>Create a one-page optimization report showing before/after data, changes made, and savings achieved</li>
+<li>Use SCADA trend data to verify that all process requirements (temperature, pressure, flow) were maintained during optimization</li>
+<li>Discuss which optimization had the largest impact and why</li>
+</ol>
+<hr />
+<h2 id="key-takeaways">Key Takeaways</h2>
+<details class="question">
+<summary>Review: Key Concepts in System Optimization — Click to expand</summary>
+<ol>
+<li>
+<p><strong>System optimization</strong> looks across all fluid power systems together — optimizing one system in isolation can make the whole facility less efficient.</p>
+</li>
+<li>
+<p><strong>Leak repair</strong> is the fastest-payback optimization available — compressed air systems typically lose 25–30% of output to leaks.</p>
+</li>
+<li>
+<p><strong>SCADA systems</strong> provide centralized monitoring and control, collecting data from field devices and presenting it through HMI displays.</p>
+</li>
+<li>
+<p><strong>CMMS software</strong> organizes all maintenance activities through work orders, PM scheduling, parts inventory, and KPI tracking.</p>
+</li>
+<li>
+<p><strong>AI-driven optimization</strong> adjusts setpoints across multiple systems simultaneously, finding optimal combinations that human operators would never discover.</p>
+</li>
+<li>
+<p><strong>Lifecycle cost analysis</strong> shows that purchase price is only 10–15% of total equipment cost — energy is typically 40–60%.</p>
+</li>
+<li>
+<p><strong>Energy auditing</strong> follows ASHRAE levels (1-3) with increasing depth and accuracy, identifying Energy Conservation Measures with financial justification.</p>
+</li>
+<li>
+<p><strong>Performance benchmarking</strong> compares facility performance to industry standards and drives continuous improvement.</p>
+</li>
+<li>
+<p><strong>Mixed system optimization</strong> considers cross-system interactions — changes in chiller settings affect pump and fan energy, and vice versa.</p>
+</li>
+<li>
+<p><strong>Industry 4.0</strong> technologies (digital twins, edge computing, cloud analytics) are transforming how fluid power systems are monitored, controlled, and optimized.</p>
+</li>
+</ol>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../12-fan/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 12. Fans">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                12. Fans
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../14-safety/" class="md-footer__link md-footer__link--next" aria-label="Next: 14. Safety">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                14. Safety
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "toc.follow", "navigation.top", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../js/extra.js"></script>
+      
+    
+  </body>
+</html>

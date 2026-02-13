@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooling Water Maintenance Checklist</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f0f4f8;color:#333;min-height:100vh}
+  .page-wrap{padding:16px 12px}
+  h1{text-align:center;font-size:1.5rem;color:#1a3c5e;margin-bottom:6px;letter-spacing:-0.02em}
+  .subtitle{text-align:center;font-size:.82rem;color:#5a7a9a;margin-bottom:12px}
+
+  /* ---- progress bar ---- */
+  .progress-wrapper{max-width:980px;margin:0 auto 14px;display:flex;align-items:center;gap:10px}
+  .progress-bar-bg{flex:1;height:24px;background:#d4dbe4;border-radius:12px;overflow:hidden;position:relative;box-shadow:inset 0 1px 3px rgba(0,0,0,.1)}
+  .progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#27ae60,#2ecc71);border-radius:12px;transition:width .45s cubic-bezier(.4,0,.2,1);position:relative}
+  .progress-bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg,rgba(255,255,255,.25),transparent);border-radius:12px}
+  .progress-text{font-weight:700;font-size:.82rem;min-width:190px;text-align:right;color:#1a3c5e;white-space:nowrap}
+
+  /* ---- buttons ---- */
+  .btn-group{display:flex;gap:8px;flex-shrink:0}
+  .btn{border:none;border-radius:6px;padding:7px 16px;cursor:pointer;font-size:.8rem;font-weight:600;transition:background .2s,transform .1s}
+  .btn:active{transform:scale(.97)}
+  .reset-btn{background:#e74c3c;color:#fff}
+  .reset-btn:hover{background:#c0392b}
+  .print-btn{background:#2980b9;color:#fff}
+  .print-btn:hover{background:#1f6da0}
+
+  /* ---- grid ---- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:980px;margin:0 auto}
+
+  /* ---- section card ---- */
+  .card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.07);display:flex;flex-direction:column;gap:8px;position:relative;border:1px solid rgba(0,0,0,.04)}
+  .card-header{display:flex;align-items:center;gap:12px;margin-bottom:6px;padding-bottom:8px;border-bottom:2px solid #e8eef4}
+  .card-header h2{font-size:1.05rem;color:#1a3c5e;margin:0}
+  .icon-wrap{width:58px;height:58px;flex-shrink:0;cursor:pointer;position:relative}
+  .icon-wrap svg{width:100%;height:100%}
+  .tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a3c5e;color:#fff;padding:8px 12px;border-radius:6px;font-size:.73rem;line-height:1.4;white-space:normal;width:220px;text-align:center;pointer-events:none;opacity:0;transition:opacity .25s;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#1a3c5e}
+  .icon-wrap:hover .tooltip{opacity:1}
+
+  /* fifth card spans full width */
+  .card.full-width{grid-column:1 / -1}
+
+  /* ---- checklist ---- */
+  .checklist{list-style:none;display:flex;flex-direction:column;gap:4px}
+  .checklist li{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:6px 10px;border-radius:6px;transition:background .2s,border-color .2s;font-size:.84rem;line-height:1.4;user-select:none}
+  .checklist li:hover{background:#eaf6ee}
+  .checklist li.critical{border-left:3px solid #e74c3c;padding-left:7px;position:relative}
+  .checklist li.critical::after{content:'SAFETY';position:absolute;top:6px;right:8px;font-size:.58rem;font-weight:700;color:#e74c3c;background:#ffeaea;padding:1px 5px;border-radius:3px;letter-spacing:.04em}
+  .check-box{width:22px;height:22px;flex-shrink:0;margin-top:1px;border:2px solid #b0b8c4;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:border-color .3s,background .3s,transform .2s}
+  .checklist li.checked .check-box{border-color:#27ae60;background:#27ae60;transform:scale(1.1)}
+  .check-box svg{opacity:0;transform:scale(.5);transition:opacity .3s,transform .3s}
+  .checklist li.checked .check-box svg{opacity:1;transform:scale(1)}
+  .checklist li.checked .item-text{color:#888;text-decoration:line-through}
+  .item-text{flex:1;color:#333;transition:color .3s}
+
+  /* ---- section item count badge ---- */
+  .section-count{font-size:.72rem;color:#fff;background:#b0b8c4;border-radius:10px;padding:1px 8px;margin-left:auto;font-weight:600;transition:background .3s}
+  .section-count.complete{background:#27ae60}
+
+  /* ---- responsive ---- */
+  @media(max-width:768px){
+    .grid{grid-template-columns:1fr}
+    .card.full-width{grid-column:auto}
+    h1{font-size:1.2rem}
+    .progress-wrapper{flex-wrap:wrap}
+    .progress-text{min-width:auto;text-align:center;width:100%;order:3}
+    .btn-group{width:100%;justify-content:center;order:4}
+    .tooltip{width:180px}
+  }
+
+  /* ---- print styles ---- */
+  @media print{
+    body{background:#fff}
+    .page-wrap{padding:0}
+    .btn-group{display:none!important}
+    .progress-wrapper{margin-bottom:8px}
+    .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid;page-break-inside:avoid}
+    .progress-bar-bg{border:1px solid #ccc}
+    .tooltip{display:none}
+    .checklist li:hover{background:transparent}
+    .checklist li.critical::after{border:1px solid #e74c3c}
+    h1{font-size:1.3rem}
+    .subtitle{margin-bottom:6px}
+    .section-count{border:1px solid #999;background:transparent;color:#333}
+    .section-count.complete{border-color:#27ae60;color:#27ae60}
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+<h1>Cooling Water Maintenance Checklist</h1>
+<p class="subtitle">Systematic inspection for cooling towers, pumps, heat exchangers, water treatment, and piping</p>
+
+<!-- Progress Bar -->
+<div class="progress-wrapper">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+  <span class="progress-text" id="progressText">0 of 34 items completed (0%)</span>
+  <div class="btn-group">
+    <button class="btn reset-btn" id="resetBtn">Reset Checklist</button>
+    <button class="btn print-btn" id="printBtn">Print Checklist</button>
+  </div>
+</div>
+
+<!-- Grid -->
+<div class="grid">
+
+  <!-- Section 1: Cooling Tower -->
+  <div class="card" id="s-tower">
+    <div class="card-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Cooling tower — rejects heat from circulating water to the atmosphere via evaporation and convection.</span>
+        <!-- SVG: Cooling tower (hyperbolic shape with fan, fill, basin) -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- tower body (hyperbolic taper) -->
+          <path d="M14,58 L10,22 Q10,14 18,14 L46,14 Q54,14 54,22 L50,58 Z" fill="#dce6f0" stroke="#1a3c5e" stroke-width="2" stroke-linejoin="round"/>
+          <!-- fill media (horizontal lines) -->
+          <line x1="16" y1="28" x2="48" y2="28" stroke="#78909c" stroke-width="1" opacity=".7"/>
+          <line x1="15" y1="33" x2="49" y2="33" stroke="#78909c" stroke-width="1" opacity=".7"/>
+          <line x1="14" y1="38" x2="50" y2="38" stroke="#78909c" stroke-width="1" opacity=".7"/>
+          <line x1="14" y1="43" x2="50" y2="43" stroke="#78909c" stroke-width="1" opacity=".7"/>
+          <line x1="13" y1="48" x2="51" y2="48" stroke="#78909c" stroke-width="1" opacity=".7"/>
+          <!-- basin at bottom -->
+          <rect x="12" y="54" width="40" height="6" rx="2" fill="#bbdefb" stroke="#1565c0" stroke-width="1.5"/>
+          <!-- water level in basin -->
+          <rect x="14" y="56" width="36" height="3" rx="1" fill="#90caf9" opacity=".5"/>
+          <!-- fan housing at top -->
+          <circle cx="32" cy="10" r="7" fill="#e8eaf6" stroke="#3949ab" stroke-width="1.5"/>
+          <!-- fan blades (cross) -->
+          <line x1="25" y1="10" x2="39" y2="10" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+          <line x1="32" y1="3" x2="32" y2="17" stroke="#1a3c5e" stroke-width="2" stroke-linecap="round"/>
+          <!-- center hub -->
+          <circle cx="32" cy="10" r="2" fill="#1a3c5e"/>
+          <!-- water spray nozzles -->
+          <circle cx="22" cy="23" r="1.5" fill="#2196f3"/>
+          <circle cx="32" cy="23" r="1.5" fill="#2196f3"/>
+          <circle cx="42" cy="23" r="1.5" fill="#2196f3"/>
+          <!-- evaporation wisps -->
+          <path d="M26,2 Q28,-2 30,2" fill="none" stroke="#90caf9" stroke-width="1" opacity=".5"/>
+          <path d="M34,1 Q36,-2 38,2" fill="none" stroke="#90caf9" stroke-width="1" opacity=".5"/>
+        </svg>
+      </div>
+      <h2>Cooling Tower</h2>
+      <span class="section-count" data-group="tower">0/8</span>
+    </div>
+    <ul class="checklist" data-group="tower">
+      <li data-id="t1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect fill media for scale, biological growth, or damage</span></li>
+      <li data-id="t2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check water distribution nozzles or basins for even flow</span></li>
+      <li data-id="t3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect drift eliminators for damage or clogging</span></li>
+      <li data-id="t4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Clean debris screens and basin strainers</span></li>
+      <li data-id="t5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check fan blade condition and hub tightness</span></li>
+      <li data-id="t6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify fan motor current and vibration levels</span></li>
+      <li data-id="t7"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect structural members for corrosion</span></li>
+      <li data-id="t8"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify basin water level and float valve operation</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 2: Circulating Pumps -->
+  <div class="card" id="s-pumps">
+    <div class="card-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Centrifugal pump — moves cooling water through the system loop between the tower and heat exchangers.</span>
+        <!-- SVG: Centrifugal pump -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- volute casing -->
+          <path d="M14,34 A18,18 0 1,1 32,52 L14,52 Z" fill="#e3f2fd" stroke="#1565c0" stroke-width="2"/>
+          <!-- impeller -->
+          <circle cx="28" cy="38" r="11" fill="#e8eaf6" stroke="#3949ab" stroke-width="1.5"/>
+          <!-- impeller vanes -->
+          <path d="M28,27 Q35,34 28,38" fill="none" stroke="#1a3c5e" stroke-width="1.5"/>
+          <path d="M28,49 Q21,42 28,38" fill="none" stroke="#1a3c5e" stroke-width="1.5"/>
+          <path d="M17,38 Q24,31 28,38" fill="none" stroke="#1a3c5e" stroke-width="1.5"/>
+          <path d="M39,38 Q32,45 28,38" fill="none" stroke="#1a3c5e" stroke-width="1.5"/>
+          <!-- center shaft dot -->
+          <circle cx="28" cy="38" r="3" fill="#1a3c5e"/>
+          <!-- suction inlet (left pipe) -->
+          <rect x="2" y="32" width="12" height="12" rx="2" fill="#cfd8dc" stroke="#546e7a" stroke-width="1.5"/>
+          <!-- flow arrow into suction -->
+          <polygon points="4,38 10,34 10,42" fill="#1565c0" opacity=".6"/>
+          <!-- discharge (top pipe) -->
+          <rect x="38" y="12" width="12" height="12" rx="2" fill="#cfd8dc" stroke="#546e7a" stroke-width="1.5"/>
+          <!-- flow arrow out discharge -->
+          <polygon points="44,12 41,17 47,17" fill="#1565c0" opacity=".6"/>
+          <!-- motor -->
+          <rect x="42" y="32" width="18" height="14" rx="3" fill="#b0bec5" stroke="#546e7a" stroke-width="1.5"/>
+          <text x="51" y="42" font-size="6" fill="#333" text-anchor="middle" font-weight="bold">M</text>
+          <!-- coupling -->
+          <rect x="38" y="36" width="5" height="6" rx="1" fill="#90a4ae" stroke="#546e7a" stroke-width=".8"/>
+        </svg>
+      </div>
+      <h2>Circulating Pumps</h2>
+      <span class="section-count" data-group="pumps">0/7</span>
+    </div>
+    <ul class="checklist" data-group="pumps">
+      <li data-id="cp1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check pump bearing temperature and vibration</span></li>
+      <li data-id="cp2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Record motor amperage and compare to nameplate</span></li>
+      <li data-id="cp3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect mechanical seal for leaks</span></li>
+      <li data-id="cp4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify suction and discharge pressure readings</span></li>
+      <li data-id="cp5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check alignment between pump and motor</span></li>
+      <li data-id="cp6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect coupling condition</span></li>
+      <li data-id="cp7"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify VFD operation (if equipped)</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 3: Heat Exchangers -->
+  <div class="card" id="s-hx">
+    <div class="card-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Shell-and-tube heat exchanger — transfers thermal energy between the process fluid and cooling water.</span>
+        <!-- SVG: Shell and tube heat exchanger -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- shell (outer cylinder) -->
+          <rect x="6" y="14" width="52" height="36" rx="5" fill="#fff3e0" stroke="#e65100" stroke-width="2"/>
+          <!-- tube bundle (horizontal lines inside) -->
+          <line x1="14" y1="22" x2="50" y2="22" stroke="#ef6c00" stroke-width="1.2"/>
+          <line x1="14" y1="27" x2="50" y2="27" stroke="#ef6c00" stroke-width="1.2"/>
+          <line x1="14" y1="32" x2="50" y2="32" stroke="#ef6c00" stroke-width="1.2"/>
+          <line x1="14" y1="37" x2="50" y2="37" stroke="#ef6c00" stroke-width="1.2"/>
+          <line x1="14" y1="42" x2="50" y2="42" stroke="#ef6c00" stroke-width="1.2"/>
+          <!-- tube sheets (end plates) -->
+          <rect x="4" y="12" width="5" height="40" rx="1.5" fill="#ffcc80" stroke="#e65100" stroke-width="1.5"/>
+          <rect x="55" y="12" width="5" height="40" rx="1.5" fill="#ffcc80" stroke="#e65100" stroke-width="1.5"/>
+          <!-- shell side inlet (top nozzle) -->
+          <rect x="22" y="4" width="8" height="10" rx="2" fill="#bbdefb" stroke="#1565c0" stroke-width="1.2"/>
+          <polygon points="26,3 24,7 28,7" fill="#1565c0" opacity=".7"/>
+          <!-- shell side outlet (bottom nozzle) -->
+          <rect x="34" y="50" width="8" height="10" rx="2" fill="#ffcdd2" stroke="#c62828" stroke-width="1.2"/>
+          <polygon points="38,61 36,57 40,57" fill="#c62828" opacity=".7"/>
+          <!-- tube side flow arrows -->
+          <polygon points="1,32 6,29 6,35" fill="#ef6c00" opacity=".7"/>
+          <polygon points="63,32 58,29 58,35" fill="#ef6c00" opacity=".7"/>
+        </svg>
+      </div>
+      <h2>Heat Exchangers</h2>
+      <span class="section-count" data-group="hx">0/6</span>
+    </div>
+    <ul class="checklist" data-group="hx">
+      <li data-id="hx1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Record approach temperature and compare to baseline</span></li>
+      <li data-id="hx2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check for pressure drop increase across tube side</span></li>
+      <li data-id="hx3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect tube sheet for leaks (dye test if needed)</span></li>
+      <li data-id="hx4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Schedule cleaning when approach temp exceeds threshold</span></li>
+      <li data-id="hx5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify isolation valve operation</span></li>
+      <li data-id="hx6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect sacrificial anodes (if installed)</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 4: Water Treatment -->
+  <div class="card" id="s-treatment">
+    <div class="card-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Chemical dosing pump — injects treatment chemicals to prevent scale, corrosion, and biological fouling.</span>
+        <!-- SVG: Chemical dosing pump (diaphragm pump with chemical tank) -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- chemical tank (right side) -->
+          <rect x="40" y="18" width="18" height="34" rx="3" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+          <!-- liquid level in tank -->
+          <rect x="42" y="30" width="14" height="20" rx="2" fill="#81c784" opacity=".4"/>
+          <!-- tank graduation marks -->
+          <line x1="42" y1="26" x2="46" y2="26" stroke="#388e3c" stroke-width=".8"/>
+          <line x1="42" y1="32" x2="46" y2="32" stroke="#388e3c" stroke-width=".8"/>
+          <line x1="42" y1="38" x2="46" y2="38" stroke="#388e3c" stroke-width=".8"/>
+          <line x1="42" y1="44" x2="46" y2="44" stroke="#388e3c" stroke-width=".8"/>
+          <!-- tank cap -->
+          <rect x="44" y="14" width="10" height="5" rx="2" fill="#c8e6c9" stroke="#2e7d32" stroke-width="1"/>
+          <!-- pump body -->
+          <rect x="8" y="22" width="24" height="20" rx="4" fill="#bbdefb" stroke="#1565c0" stroke-width="2"/>
+          <!-- diaphragm (arc inside pump) -->
+          <path d="M14,32 Q20,26 26,32" fill="none" stroke="#1565c0" stroke-width="1.5"/>
+          <!-- pump motor on top -->
+          <rect x="12" y="10" width="16" height="12" rx="3" fill="#b0bec5" stroke="#546e7a" stroke-width="1.5"/>
+          <text x="20" y="19" font-size="5" fill="#333" text-anchor="middle" font-weight="bold">M</text>
+          <!-- suction line from tank to pump -->
+          <line x1="32" y1="36" x2="40" y2="36" stroke="#2e7d32" stroke-width="2" stroke-linecap="round"/>
+          <!-- discharge line (out bottom-left) -->
+          <line x1="14" y1="42" x2="14" y2="54" stroke="#1565c0" stroke-width="2" stroke-linecap="round"/>
+          <line x1="14" y1="54" x2="6" y2="54" stroke="#1565c0" stroke-width="2" stroke-linecap="round"/>
+          <!-- discharge arrow -->
+          <polygon points="4,54 8,51 8,57" fill="#1565c0" opacity=".7"/>
+          <!-- check valves (triangles on lines) -->
+          <polygon points="36,33 36,39 39,36" fill="#2e7d32" opacity=".6"/>
+          <!-- pulsation indicator -->
+          <path d="M4,48 L6,46 L8,50 L10,46 L12,50" fill="none" stroke="#1565c0" stroke-width="1" opacity=".5"/>
+        </svg>
+      </div>
+      <h2>Water Treatment</h2>
+      <span class="section-count" data-group="treatment">0/7</span>
+    </div>
+    <ul class="checklist" data-group="treatment">
+      <li data-id="wt1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Test pH, conductivity, calcium, alkalinity, and biocide residual</span></li>
+      <li data-id="wt2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Calculate LSI and verify within -0.5 to +0.5</span></li>
+      <li data-id="wt3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check chemical feed pump operation and calibration</span></li>
+      <li data-id="wt4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify chemical tank levels and order replacements</span></li>
+      <li data-id="wt5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect blowdown valve operation</span></li>
+      <li data-id="wt6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Review corrosion coupon data (monthly)</span></li>
+      <li data-id="wt7" class="critical"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Conduct Legionella testing per schedule</span></li>
+    </ul>
+  </div>
+
+  <!-- Section 5: Piping and Valves (full width) -->
+  <div class="card full-width" id="s-piping">
+    <div class="card-header">
+      <div class="icon-wrap">
+        <span class="tooltip">Piping and valves — distribute cooling water throughout the system and control flow to equipment.</span>
+        <!-- SVG: Pipe section with gate valve -->
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+          <!-- pipe left section -->
+          <rect x="2" y="26" width="22" height="12" rx="2" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
+          <!-- pipe inner highlight -->
+          <rect x="6" y="30" width="14" height="4" rx="1" fill="#eceff1"/>
+          <!-- pipe right section -->
+          <rect x="40" y="26" width="22" height="12" rx="2" fill="#cfd8dc" stroke="#546e7a" stroke-width="2"/>
+          <rect x="44" y="30" width="14" height="4" rx="1" fill="#eceff1"/>
+          <!-- valve body -->
+          <rect x="22" y="20" width="20" height="24" rx="3" fill="#b0bec5" stroke="#455a64" stroke-width="2"/>
+          <!-- valve gate -->
+          <rect x="28" y="22" width="8" height="20" rx="1" fill="#78909c" stroke="#37474f" stroke-width="1"/>
+          <!-- valve stem -->
+          <rect x="30" y="4" width="4" height="18" rx="1" fill="#90a4ae" stroke="#546e7a" stroke-width="1.2"/>
+          <!-- handwheel -->
+          <circle cx="32" cy="6" r="6" fill="none" stroke="#455a64" stroke-width="2.5"/>
+          <circle cx="32" cy="6" r="1.5" fill="#455a64"/>
+          <!-- flow arrow (left side) -->
+          <polygon points="8,32 14,28 14,36" fill="#546e7a" opacity=".6"/>
+          <!-- flow arrow (right side) -->
+          <polygon points="56,32 50,28 50,36" fill="#546e7a" opacity=".6"/>
+          <!-- flange bolts -->
+          <circle cx="23" cy="24" r="1.5" fill="#78909c" stroke="#455a64" stroke-width=".8"/>
+          <circle cx="23" cy="40" r="1.5" fill="#78909c" stroke="#455a64" stroke-width=".8"/>
+          <circle cx="41" cy="24" r="1.5" fill="#78909c" stroke="#455a64" stroke-width=".8"/>
+          <circle cx="41" cy="40" r="1.5" fill="#78909c" stroke="#455a64" stroke-width=".8"/>
+          <!-- pipe support (right side) -->
+          <rect x="52" y="38" width="2" height="18" fill="#90a4ae" stroke="#546e7a" stroke-width="1"/>
+          <rect x="48" y="54" width="10" height="3" rx="1" fill="#78909c" stroke="#546e7a" stroke-width="1"/>
+        </svg>
+      </div>
+      <h2>Piping and Valves</h2>
+      <span class="section-count" data-group="piping">0/6</span>
+    </div>
+    <ul class="checklist" data-group="piping">
+      <li data-id="pv1"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Walk system looking for leaks, corrosion, or insulation damage</span></li>
+      <li data-id="pv2"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check pipe supports and hangers for sagging or damage</span></li>
+      <li data-id="pv3"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Verify isolation valves operate freely (exercise annually)</span></li>
+      <li data-id="pv4"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Inspect strainer screens and clean as needed</span></li>
+      <li data-id="pv5"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Drain and inspect dead legs (quarterly)</span></li>
+      <li data-id="pv6"><span class="check-box"><svg width="14" height="14" viewBox="0 0 14 14"><polyline points="2,7 5.5,11 12,3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="item-text">Check expansion joints and flexible connectors</span></li>
+    </ul>
+  </div>
+
+</div><!-- /grid -->
+</div><!-- /page-wrap -->
+
+<script>
+(function(){
+  'use strict';
+
+  var items = document.querySelectorAll('.checklist li');
+  var total = items.length;
+  var fillBar = document.getElementById('progressFill');
+  var progressText = document.getElementById('progressText');
+  var resetBtn = document.getElementById('resetBtn');
+  var printBtn = document.getElementById('printBtn');
+  var sectionCounts = document.querySelectorAll('.section-count');
+
+  function updateProgress(){
+    var checked = document.querySelectorAll('.checklist li.checked').length;
+    var pct = Math.round((checked / total) * 100);
+    fillBar.style.width = pct + '%';
+    progressText.textContent = checked + ' of ' + total + ' items completed (' + pct + '%)';
+
+    // Update per-section counts
+    sectionCounts.forEach(function(badge){
+      var group = badge.getAttribute('data-group');
+      var groupItems = document.querySelectorAll('ul[data-group="' + group + '"] li');
+      var groupChecked = document.querySelectorAll('ul[data-group="' + group + '"] li.checked');
+      badge.textContent = groupChecked.length + '/' + groupItems.length;
+      if(groupChecked.length === groupItems.length && groupItems.length > 0){
+        badge.classList.add('complete');
+      } else {
+        badge.classList.remove('complete');
+      }
+    });
+  }
+
+  items.forEach(function(li){
+    li.addEventListener('click', function(){
+      li.classList.toggle('checked');
+      updateProgress();
+    });
+  });
+
+  resetBtn.addEventListener('click', function(){
+    if(document.querySelectorAll('.checklist li.checked').length === 0) return;
+    items.forEach(function(li){ li.classList.remove('checked'); });
+    updateProgress();
+  });
+
+  printBtn.addEventListener('click', function(){
+    window.print();
+  });
+
+  // Initialize
+  updateProgress();
+})();
+</script>
+</body>
+</html>

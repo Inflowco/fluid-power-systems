@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pump Maintenance Checklist</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f5;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  /* --- Left Panel --- */
+  .left-panel {
+    flex: 1 1 58%;
+    min-width: 300px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+
+  .left-panel-header {
+    background: #1565C0;
+    color: #fff;
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .checklist-body {
+    max-height: 370px;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+
+  .checklist-body::-webkit-scrollbar { width: 6px; }
+  .checklist-body::-webkit-scrollbar-thumb { background: #bbb; border-radius: 3px; }
+
+  /* Collapsible sections */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    cursor: pointer;
+    background: #E3F2FD;
+    border-bottom: 1px solid #BBDEFB;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .section-header:hover { background: #BBDEFB; }
+
+  .section-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1565C0;
+  }
+
+  .section-chevron {
+    font-size: 11px;
+    color: #1565C0;
+    transition: transform 0.2s;
+  }
+  .section-header.collapsed .section-chevron {
+    transform: rotate(-90deg);
+  }
+
+  .section-tasks {
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+  .section-tasks.collapsed {
+    max-height: 0 !important;
+  }
+
+  /* Task row */
+  .task-row {
+    display: flex;
+    align-items: center;
+    padding: 5px 16px 5px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.1s;
+  }
+  .task-row:hover { background: #FAFAFA; }
+
+  .task-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #1565C0;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .task-label {
+    flex: 1;
+    margin-left: 10px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .task-row.checked .task-label {
+    text-decoration: line-through;
+    color: #999;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .status-dot.green  { background: #4CAF50; }
+  .status-dot.yellow { background: #FF9800; }
+  .status-dot.red    { background: #F44336; }
+
+  /* --- Right Panel --- */
+  .right-panel {
+    flex: 1 1 38%;
+    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: #1565C0;
+    color: #fff;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .card-body { padding: 12px 14px; }
+
+  /* Condition inputs */
+  .input-group {
+    margin-bottom: 10px;
+  }
+  .input-group:last-child { margin-bottom: 0; }
+
+  .input-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 3px;
+  }
+
+  .input-group input,
+  .input-group select {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus,
+  .input-group select:focus {
+    outline: none;
+    border-color: #1565C0;
+    box-shadow: 0 0 0 2px rgba(21,101,192,0.15);
+  }
+
+  /* Health score circle */
+  .health-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 14px;
+  }
+
+  .health-circle {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+  }
+
+  .health-circle svg {
+    width: 90px;
+    height: 90px;
+    transform: rotate(-90deg);
+  }
+
+  .health-circle .bg-ring {
+    fill: none;
+    stroke: #e0e0e0;
+    stroke-width: 8;
+  }
+
+  .health-circle .fg-ring {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s ease, stroke 0.4s;
+  }
+
+  .health-value {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .health-number {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .health-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #777;
+    margin-top: 2px;
+  }
+
+  .health-text {
+    flex: 1;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  .health-text strong {
+    display: block;
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 4px;
+  }
+
+  /* --- Scenario Buttons --- */
+  .scenario-bar {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    padding: 0 12px 12px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .scenario-btn {
+    flex: 1;
+    padding: 9px 8px;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    transition: filter 0.15s, transform 0.1s;
+  }
+  .scenario-btn:hover { filter: brightness(1.1); }
+  .scenario-btn:active { transform: scale(0.97); }
+
+  .btn-healthy   { background: #4CAF50; }
+  .btn-developing { background: #FF9800; }
+  .btn-failure   { background: #F44336; }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .container { flex-direction: column; }
+    .left-panel, .right-panel { flex: 1 1 100%; }
+    .scenario-bar { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="left-panel-header">Maintenance Task Checklist</div>
+    <div class="checklist-body" id="checklistBody"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <!-- Condition Inputs -->
+    <div class="card">
+      <div class="card-header">Condition Data</div>
+      <div class="card-body">
+        <div class="input-group">
+          <label>Vibration Level (in/s)</label>
+          <input type="number" id="inputVibration" step="0.01" min="0" max="1" value="0.10">
+        </div>
+        <div class="input-group">
+          <label>Bearing Temperature (&deg;F)</label>
+          <input type="number" id="inputTemp" step="1" min="80" max="300" value="150">
+        </div>
+        <div class="input-group">
+          <label>Seal Drip Rate (drops/min)</label>
+          <input type="number" id="inputDrip" step="1" min="0" max="30" value="0">
+        </div>
+        <div class="input-group">
+          <label>Oil Condition</label>
+          <select id="inputOil">
+            <option value="Clean">Clean</option>
+            <option value="Slightly Discolored">Slightly Discolored</option>
+            <option value="Dark">Dark</option>
+            <option value="Contaminated">Contaminated</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Health Score -->
+    <div class="card">
+      <div class="card-header">Overall Pump Health</div>
+      <div class="health-section">
+        <div class="health-circle">
+          <svg viewBox="0 0 90 90">
+            <circle class="bg-ring" cx="45" cy="45" r="37"></circle>
+            <circle class="fg-ring" id="fgRing" cx="45" cy="45" r="37"
+              stroke-dasharray="232.48" stroke-dashoffset="232.48"></circle>
+          </svg>
+          <div class="health-value">
+            <span class="health-number" id="healthNumber">--</span>
+            <span class="health-label">Health</span>
+          </div>
+        </div>
+        <div class="health-text">
+          <strong>AI Recommendation</strong>
+          <span id="aiRecommendation">Enter condition data or select a scenario to see recommendations.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENARIO BUTTONS -->
+<div class="scenario-bar">
+  <button class="scenario-btn btn-healthy" onclick="loadScenario('healthy')">Healthy Pump</button>
+  <button class="scenario-btn btn-developing" onclick="loadScenario('developing')">Developing Fault</button>
+  <button class="scenario-btn btn-failure" onclick="loadScenario('failure')">Near Failure</button>
+</div>
+
+<script>
+// ─── Task Data ───
+const sections = [
+  {
+    title: "Daily Tasks",
+    tasks: [
+      { id: "d1", text: "Check noise and vibration levels", status: "yellow" },
+      { id: "d2", text: "Verify mechanical seal for leakage", status: "green" },
+      { id: "d3", text: "Check suction and discharge pressures", status: "yellow" },
+      { id: "d4", text: "Confirm motor amp draw within limits", status: "green" },
+      { id: "d5", text: "Inspect piping and fittings for leaks", status: "green" }
+    ]
+  },
+  {
+    title: "Weekly Tasks",
+    tasks: [
+      { id: "w1", text: "Inspect packing gland adjustment and drip rate", status: "yellow" },
+      { id: "w2", text: "Check coupling guard condition and alignment", status: "green" },
+      { id: "w3", text: "Verify lube oil level and clarity", status: "yellow" }
+    ]
+  },
+  {
+    title: "Monthly Tasks",
+    tasks: [
+      { id: "m1", text: "Record vibration readings at each bearing", status: "yellow" },
+      { id: "m2", text: "Measure and log motor current on all phases", status: "green" },
+      { id: "m3", text: "Inspect suction strainer and clean if needed", status: "red" }
+    ]
+  },
+  {
+    title: "Quarterly Tasks",
+    tasks: [
+      { id: "q1", text: "Take oil samples for laboratory analysis", status: "red" },
+      { id: "q2", text: "Check pump-to-motor shaft alignment", status: "yellow" },
+      { id: "q3", text: "Inspect coupling elements for wear or cracking", status: "yellow" }
+    ]
+  },
+  {
+    title: "Annual Tasks",
+    tasks: [
+      { id: "a1", text: "Perform full internal inspection of pump casing", status: "red" },
+      { id: "a2", text: "Measure wear ring clearance and replace if needed", status: "red" },
+      { id: "a3", text: "Inspect impeller for erosion or damage", status: "yellow" },
+      { id: "a4", text: "Replace mechanical seal assembly", status: "red" },
+      { id: "a5", text: "Rebuild or replace bearings", status: "yellow" }
+    ]
+  }
+];
+
+// ─── Build Checklist DOM ───
+const body = document.getElementById("checklistBody");
+
+sections.forEach((section, sIdx) => {
+  // Section header
+  const header = document.createElement("div");
+  header.className = "section-header";
+  header.innerHTML = `<span class="section-title">${section.title}</span><span class="section-chevron">&#9660;</span>`;
+
+  // Tasks container
+  const tasksDiv = document.createElement("div");
+  tasksDiv.className = "section-tasks";
+
+  section.tasks.forEach(task => {
+    const row = document.createElement("div");
+    row.className = "task-row";
+    row.setAttribute("data-id", task.id);
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = "cb-" + task.id;
+
+    const label = document.createElement("label");
+    label.className = "task-label";
+    label.setAttribute("for", "cb-" + task.id);
+    label.textContent = task.text;
+
+    const dot = document.createElement("span");
+    dot.className = "status-dot " + task.status;
+    dot.setAttribute("data-id", task.id);
+
+    cb.addEventListener("change", () => {
+      if (cb.checked) {
+        row.classList.add("checked");
+        dot.className = "status-dot green";
+      } else {
+        row.classList.remove("checked");
+        dot.className = "status-dot " + task.status;
+      }
+    });
+
+    row.appendChild(cb);
+    row.appendChild(label);
+    row.appendChild(dot);
+    tasksDiv.appendChild(row);
+  });
+
+  // Collapse / expand
+  header.addEventListener("click", () => {
+    const isCollapsed = header.classList.toggle("collapsed");
+    if (isCollapsed) {
+      tasksDiv.classList.add("collapsed");
+    } else {
+      tasksDiv.classList.remove("collapsed");
+    }
+  });
+
+  body.appendChild(header);
+  body.appendChild(tasksDiv);
+
+  // Set initial max-height so transition works
+  requestAnimationFrame(() => {
+    tasksDiv.style.maxHeight = tasksDiv.scrollHeight + "px";
+  });
+});
+
+// ─── Condition Inputs & Health Score ───
+const inputVib  = document.getElementById("inputVibration");
+const inputTemp = document.getElementById("inputTemp");
+const inputDrip = document.getElementById("inputDrip");
+const inputOil  = document.getElementById("inputOil");
+const fgRing    = document.getElementById("fgRing");
+const healthNum = document.getElementById("healthNumber");
+const aiRec     = document.getElementById("aiRecommendation");
+
+const circumference = 2 * Math.PI * 37; // ~232.48
+
+function oilScore(val) {
+  switch (val) {
+    case "Clean":               return 100;
+    case "Slightly Discolored": return 65;
+    case "Dark":                return 35;
+    case "Contaminated":        return 5;
+    default:                    return 50;
+  }
+}
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function calcHealth() {
+  const vib  = parseFloat(inputVib.value)  || 0;
+  const temp = parseFloat(inputTemp.value)  || 150;
+  const drip = parseFloat(inputDrip.value)  || 0;
+  const oil  = inputOil.value;
+
+  // Vibration score: 0.0 in/s = 100, 0.4 in/s = 0
+  const vibScore  = clamp(100 - (vib / 0.4) * 100, 0, 100);
+  // Temp score: 120F = 100, 240F = 0
+  const tempScore = clamp(100 - ((temp - 120) / 120) * 100, 0, 100);
+  // Drip score: 0 = 100, 10 = 0
+  const dripScore = clamp(100 - (drip / 10) * 100, 0, 100);
+  const oilScr    = oilScore(oil);
+
+  // Weighted average
+  const score = Math.round(vibScore * 0.35 + tempScore * 0.25 + dripScore * 0.2 + oilScr * 0.2);
+  return clamp(score, 0, 100);
+}
+
+function scoreColor(s) {
+  if (s > 80) return "#4CAF50";
+  if (s > 50) return "#FF9800";
+  return "#F44336";
+}
+
+function updateHealth() {
+  const score = calcHealth();
+  const offset = circumference - (score / 100) * circumference;
+  const color = scoreColor(score);
+
+  fgRing.style.strokeDashoffset = offset;
+  fgRing.style.stroke = color;
+  healthNum.textContent = score;
+  healthNum.style.color = color;
+
+  if (score > 80) {
+    aiRec.textContent = "Pump in good condition. Continue standard maintenance schedule.";
+  } else if (score >= 50) {
+    aiRec.textContent = "Warning signs detected. Prioritize vibration analysis and bearing inspection. Consider moving quarterly tasks to this week.";
+  } else {
+    aiRec.textContent = "Critical condition. Immediate inspection recommended. Schedule pump shutdown for seal replacement and bearing rebuild.";
+  }
+}
+
+[inputVib, inputTemp, inputDrip, inputOil].forEach(el => {
+  el.addEventListener("input", updateHealth);
+  el.addEventListener("change", updateHealth);
+});
+
+// Initial render
+updateHealth();
+
+// ─── Scenario Presets ───
+const scenarios = {
+  healthy:    { vib: 0.08, temp: 145, drip: 0, oil: "Clean" },
+  developing: { vib: 0.18, temp: 185, drip: 2, oil: "Slightly Discolored" },
+  failure:    { vib: 0.35, temp: 215, drip: 8, oil: "Contaminated" }
+};
+
+function loadScenario(name) {
+  const s = scenarios[name];
+  inputVib.value  = s.vib;
+  inputTemp.value = s.temp;
+  inputDrip.value = s.drip;
+  inputOil.value  = s.oil;
+  updateHealth();
+
+  // Update task statuses to match scenario
+  if (name === "healthy") {
+    setAllStatuses("green");
+    checkAllTasks(true);
+  } else if (name === "developing") {
+    resetTaskStatuses();
+    checkAllTasks(false);
+    // Mark daily tasks as done
+    sections[0].tasks.forEach(t => {
+      const cb = document.getElementById("cb-" + t.id);
+      const row = cb.closest(".task-row");
+      const dot = row.querySelector(".status-dot");
+      cb.checked = true;
+      row.classList.add("checked");
+      dot.className = "status-dot green";
+    });
+  } else {
+    setAllStatuses("red");
+    checkAllTasks(false);
+  }
+}
+
+function setAllStatuses(color) {
+  document.querySelectorAll(".status-dot").forEach(dot => {
+    dot.className = "status-dot " + color;
+  });
+}
+
+function resetTaskStatuses() {
+  sections.forEach(section => {
+    section.tasks.forEach(task => {
+      const dot = document.querySelector(`.status-dot[data-id="${task.id}"]`);
+      if (dot) dot.className = "status-dot " + task.status;
+    });
+  });
+}
+
+function checkAllTasks(checked) {
+  document.querySelectorAll('.task-row input[type="checkbox"]').forEach(cb => {
+    cb.checked = checked;
+    const row = cb.closest(".task-row");
+    if (checked) {
+      row.classList.add("checked");
+    } else {
+      row.classList.remove("checked");
+    }
+  });
+}
+</script>
+</body>
+</html>

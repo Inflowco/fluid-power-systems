@@ -1,0 +1,5092 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Hydraulic fundamentals, pump types, actuators, control valves, fluid management, contamination control, seals, schematics, electrohydraulic controls, AI-driven predictive maintenance, and eco-friendly fluids">
+      
+      
+        <meta name="author" content="Peter Vinck, Inflow Corp.">
+      
+      
+        <link rel="canonical" href="https://dmccreary.github.io/fluid-power-systems/chapters/10-hydraulic/">
+      
+      
+        <link rel="prev" href="../09-dust-collection/">
+      
+      
+        <link rel="next" href="../11-pumping/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Chapter 10 - Hydraulic Systems and Predictive Maintenance - Fluid Power Systems</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-H81SZL21DT"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-H81SZL21DT",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-H81SZL21DT",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Chapter 10 - Hydraulic Systems and Predictive Maintenance - Fluid Power Systems" />
+<meta property="og:description" content="Hydraulic fundamentals, pump types, actuators, control valves, fluid management, contamination control, seals, schematics, electrohydraulic controls, AI-driven predictive maintenance, and eco-friendly fluids" />
+<meta property="og:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/10-hydraulic/index.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="https://dmccreary.github.io/fluid-power-systems/chapters/10-hydraulic/" />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Chapter 10 - Hydraulic Systems and Predictive Maintenance - Fluid Power Systems" />
+<meta property="twitter:description" content="Hydraulic fundamentals, pump types, actuators, control valves, fluid management, contamination control, seals, schematics, electrohydraulic controls, AI-driven predictive maintenance, and eco-friendly fluids" />
+<meta property="twitter:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/10-hydraulic/index.png" />
+</head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-10-hydraulic-systems-and-predictive-maintenance" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fluid Power Systems" class="md-header__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fluid Power Systems
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Chapter 10 - Hydraulic Systems and Predictive Maintenance
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fluid Power Systems" class="md-nav__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    Fluid Power Systems
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-components-and-controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Components and Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-hvac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. HVAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-vacuum/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. Vacuum
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-blowers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Blowers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-compressed-air/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Compressed Air
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-cooling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Cooling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-steam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. Steam Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-dust-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Dust Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Hydraulic Systems
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Hydraulic Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#101-hydraulic-system-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Hydraulic System Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.1 Hydraulic System Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pascals-law" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pascal's Law
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pascal&#39;s Law">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1-pascals-law-force-multiplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1: Pascal's Law — Force Multiplication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagram-hydraulic-pump-types-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Hydraulic Pump Types Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#102-hydraulic-fluid-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Hydraulic Fluid Properties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.2 Hydraulic Fluid Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-fluid-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Fluid Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#103-hydraulic-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Hydraulic Pumps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.3 Hydraulic Pumps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gear-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gear Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vane-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vane Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#piston-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Piston Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydraulic-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydraulic Power
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydraulic Power">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2-hydraulic-power-and-motor-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 2: Hydraulic Power and Motor Sizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pump-volumetric-efficiency-and-case-drain-diagnosis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pump Volumetric Efficiency and Case Drain Diagnosis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pump Volumetric Efficiency and Case Drain Diagnosis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-5-pump-volumetric-efficiency-and-case-drain-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5: Pump Volumetric Efficiency and Case Drain Loss
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#104-hydraulic-actuators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Hydraulic Actuators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.4 Hydraulic Actuators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydraulic-cylinders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydraulic Cylinders
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydraulic Cylinders">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-3-cylinder-extend-and-retract-forces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 3: Cylinder Extend and Retract Forces
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cylinder-speed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cylinder Speed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydraulic-motors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydraulic Motors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#105-control-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Control Valves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.5 Control Valves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#directional-control-valves-dcvs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directional Control Valves (DCVs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pressure-control-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pressure Control Valves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-control-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow Control Valves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Flow Control Valves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-hydraulic-schematic-symbols" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Hydraulic Schematic Symbols
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#106-reservoirs-filters-and-accumulators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.6 Reservoirs, Filters, and Accumulators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.6 Reservoirs, Filters, and Accumulators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reservoirs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reservoirs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accumulators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accumulators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accumulator-pre-charge-and-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accumulator Pre-Charge and Sizing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Accumulator Pre-Charge and Sizing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-6-accumulator-sizing-for-emergency-cylinder-retract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 6: Accumulator Sizing for Emergency Cylinder Retract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#heat-generation-and-cooler-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Heat Generation and Cooler Sizing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Heat Generation and Cooler Sizing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sources-of-heat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources of Heat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reservoir-heat-dissipation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reservoir Heat Dissipation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-7-heat-load-and-cooler-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 7: Heat Load and Cooler Sizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#107-hydraulic-fluid-contamination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.7 Hydraulic Fluid Contamination
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.7 Hydraulic Fluid Contamination">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sources-of-contamination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources of Contamination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iso-cleanliness-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ISO Cleanliness Codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtration-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtration Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtration Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-4-beta-ratio-filter-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 4: Beta Ratio Filter Efficiency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#108-seal-types-and-failure-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.8 Seal Types and Failure Modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.8 Seal Types and Failure Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-seal-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Seal Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Indicators
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#109-leak-detection-and-repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.9 Leak Detection and Repair
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.9 Leak Detection and Repair">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        External Leakage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal Leakage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Internal Leakage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-hydraulic-system-diagnostic-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Hydraulic System Diagnostic Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-decision-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Decision Table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1010-hydraulic-schematics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.10 Hydraulic Schematics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.10 Hydraulic Schematics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-a-schematic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading a Schematic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#circuit-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Circuit Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#energy-efficiency-circuit-comparison-and-vfd-savings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Efficiency: Circuit Comparison and VFD Savings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Energy Efficiency: Circuit Comparison and VFD Savings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vfd-retrofit-for-hydraulic-power-units" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VFD Retrofit for Hydraulic Power Units
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-8-vfd-energy-savings-on-a-hydraulic-power-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 8: VFD Energy Savings on a Hydraulic Power Unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1011-electrohydraulic-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.11 Electrohydraulic Controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.11 Electrohydraulic Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proportional-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proportional Valves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#servo-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Servo Valves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plc-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PLC Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1012-ai-driven-predictive-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.12 AI-Driven Predictive Maintenance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.12 AI-Driven Predictive Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sensor-data-for-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sensor Data for Prediction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-ai-predicts-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How AI Predicts Failures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How AI Predicts Failures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-hydraulic-predictive-maintenance-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Hydraulic Predictive Maintenance Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1013-eco-friendly-hydraulic-fluids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.13 Eco-Friendly Hydraulic Fluids
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.13 Eco-Friendly Hydraulic Fluids">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#biodegradable-fluid-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Biodegradable Fluid Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-trade-offs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Trade-offs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disposal-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disposal Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1014-hydraulic-safety-hazards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.14 Hydraulic Safety Hazards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.14 Hydraulic Safety Hazards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#injection-injuries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Injection Injuries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stored-energy-hazards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stored Energy Hazards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#osha-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OSHA Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1015-utility-rebates-incentives-and-building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.15 Utility Rebates, Incentives, and Building the Business Case
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.15 Utility Rebates, Incentives, and Building the Business Case">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-incentive-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Incentive Programs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-find-available-rebates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Find Available Rebates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-hydraulic-system-upgrades-and-rebate-potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Hydraulic System Upgrades and Rebate Potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Business Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1016-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.16 Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hands-on-lab-hydraulic-cylinder-service-and-ai-maintenance-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hands-On Lab: Hydraulic Cylinder Service and AI Maintenance Review
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-pumping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Pumping Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-fan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Fans
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Systems and Software
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../prompts/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-we-built-this-site/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How We Built This Site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../feedback/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feedback
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#101-hydraulic-system-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Hydraulic System Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.1 Hydraulic System Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pascals-law" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pascal's Law
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pascal&#39;s Law">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-1-pascals-law-force-multiplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 1: Pascal's Law — Force Multiplication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagram-hydraulic-pump-types-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Hydraulic Pump Types Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#102-hydraulic-fluid-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Hydraulic Fluid Properties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.2 Hydraulic Fluid Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-fluid-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Fluid Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#103-hydraulic-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Hydraulic Pumps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.3 Hydraulic Pumps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gear-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gear Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vane-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vane Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#piston-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Piston Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydraulic-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydraulic Power
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydraulic Power">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-2-hydraulic-power-and-motor-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 2: Hydraulic Power and Motor Sizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pump-volumetric-efficiency-and-case-drain-diagnosis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pump Volumetric Efficiency and Case Drain Diagnosis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pump Volumetric Efficiency and Case Drain Diagnosis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-5-pump-volumetric-efficiency-and-case-drain-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 5: Pump Volumetric Efficiency and Case Drain Loss
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#104-hydraulic-actuators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Hydraulic Actuators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.4 Hydraulic Actuators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hydraulic-cylinders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydraulic Cylinders
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydraulic Cylinders">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-3-cylinder-extend-and-retract-forces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 3: Cylinder Extend and Retract Forces
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cylinder-speed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cylinder Speed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hydraulic-motors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydraulic Motors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#105-control-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 Control Valves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.5 Control Valves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#directional-control-valves-dcvs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directional Control Valves (DCVs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pressure-control-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pressure Control Valves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flow-control-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flow Control Valves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Flow Control Valves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-hydraulic-schematic-symbols" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Hydraulic Schematic Symbols
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#106-reservoirs-filters-and-accumulators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.6 Reservoirs, Filters, and Accumulators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.6 Reservoirs, Filters, and Accumulators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reservoirs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reservoirs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accumulators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accumulators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accumulator-pre-charge-and-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Accumulator Pre-Charge and Sizing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Accumulator Pre-Charge and Sizing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-6-accumulator-sizing-for-emergency-cylinder-retract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 6: Accumulator Sizing for Emergency Cylinder Retract
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#heat-generation-and-cooler-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Heat Generation and Cooler Sizing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Heat Generation and Cooler Sizing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sources-of-heat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources of Heat
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reservoir-heat-dissipation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reservoir Heat Dissipation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-7-heat-load-and-cooler-sizing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 7: Heat Load and Cooler Sizing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#107-hydraulic-fluid-contamination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.7 Hydraulic Fluid Contamination
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.7 Hydraulic Fluid Contamination">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sources-of-contamination" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources of Contamination
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iso-cleanliness-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ISO Cleanliness Codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filtration-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtration Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Filtration Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-4-beta-ratio-filter-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 4: Beta Ratio Filter Efficiency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#108-seal-types-and-failure-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.8 Seal Types and Failure Modes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.8 Seal Types and Failure Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-seal-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Seal Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Indicators
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#109-leak-detection-and-repair" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.9 Leak Detection and Repair
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.9 Leak Detection and Repair">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#external-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        External Leakage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internal-leakage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal Leakage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Internal Leakage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-hydraulic-system-diagnostic-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Hydraulic System Diagnostic Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-decision-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting Decision Table
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1010-hydraulic-schematics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.10 Hydraulic Schematics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.10 Hydraulic Schematics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-a-schematic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading a Schematic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#circuit-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Circuit Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#energy-efficiency-circuit-comparison-and-vfd-savings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Efficiency: Circuit Comparison and VFD Savings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Energy Efficiency: Circuit Comparison and VFD Savings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vfd-retrofit-for-hydraulic-power-units" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VFD Retrofit for Hydraulic Power Units
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-8-vfd-energy-savings-on-a-hydraulic-power-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example 8: VFD Energy Savings on a Hydraulic Power Unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1011-electrohydraulic-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.11 Electrohydraulic Controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.11 Electrohydraulic Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proportional-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proportional Valves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#servo-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Servo Valves
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plc-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PLC Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1012-ai-driven-predictive-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.12 AI-Driven Predictive Maintenance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.12 AI-Driven Predictive Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sensor-data-for-prediction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sensor Data for Prediction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-ai-predicts-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How AI Predicts Failures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How AI Predicts Failures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-hydraulic-predictive-maintenance-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Hydraulic Predictive Maintenance Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1013-eco-friendly-hydraulic-fluids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.13 Eco-Friendly Hydraulic Fluids
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.13 Eco-Friendly Hydraulic Fluids">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#biodegradable-fluid-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Biodegradable Fluid Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-trade-offs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Trade-offs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disposal-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disposal Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1014-hydraulic-safety-hazards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.14 Hydraulic Safety Hazards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.14 Hydraulic Safety Hazards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#injection-injuries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Injection Injuries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stored-energy-hazards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stored Energy Hazards
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#osha-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OSHA Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1015-utility-rebates-incentives-and-building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.15 Utility Rebates, Incentives, and Building the Business Case
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10.15 Utility Rebates, Incentives, and Building the Business Case">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-incentive-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Incentive Programs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-find-available-rebates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Find Available Rebates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-hydraulic-system-upgrades-and-rebate-potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Hydraulic System Upgrades and Rebate Potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Business Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1016-key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.16 Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hands-on-lab-hydraulic-cylinder-service-and-ai-maintenance-review" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hands-On Lab: Hydraulic Cylinder Service and AI Maintenance Review
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/dmccreary/fluid-power-systems/blob/master/docs/chapters/10-hydraulic/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="chapter-10-hydraulic-systems-and-predictive-maintenance">Chapter 10: Hydraulic Systems and Predictive Maintenance</h1>
+<h2 id="summary">Summary</h2>
+<p>This chapter covers hydraulic power systems used in manufacturing, construction, mobile equipment, and process industries to transmit force through pressurized fluid. Students will learn the fundamental principles of hydraulic power including Pascal's Law and how pressure, flow, and force relate in closed systems. The chapter examines hydraulic system components — pumps (gear, vane, piston), actuators (cylinders and motors), control valves (directional, pressure, flow), reservoirs, filters, and accumulators — along with their maintenance requirements. A major focus is placed on hydraulic fluid management including selection, contamination control, sampling, and the transition to eco-friendly biodegradable fluids. Students will explore seal types, failure modes, and leak repair techniques. The chapter advances to hydraulic control systems including proportional and servo valves, electrohydraulic controls, and PLC integration. AI-driven predictive maintenance using pressure, temperature, vibration, and fluid condition data enables technicians to predict seal wear and component failures before they occur. Students will use CMMS software and AI dashboards for maintenance scheduling and system optimization.</p>
+<h2 id="concepts-covered">Concepts Covered</h2>
+<ol>
+<li>Hydraulic system fundamentals — Pascal's Law, pressure-force-area relationships</li>
+<li>Hydraulic fluid properties — viscosity, viscosity index, pour point, flash point</li>
+<li>Gear pumps — external and internal gear pump operation and applications</li>
+<li>Vane pumps — fixed and variable displacement operation</li>
+<li>Piston pumps — axial and radial piston pump operation for high-pressure applications</li>
+<li>Hydraulic cylinders — single-acting, double-acting, telescoping types</li>
+<li>Hydraulic motors — gear, vane, and piston motor types</li>
+<li>Control valves — directional control valves (DCV), pressure control, flow control</li>
+<li>Reservoirs, filters, and accumulators — system support components</li>
+<li>Hydraulic fluid contamination — particle counting, ISO cleanliness codes, filtration strategies</li>
+<li>Seal types and failure modes — O-rings, lip seals, wiper seals, wear indicators</li>
+<li>Leak detection and repair — external and internal leakage diagnosis</li>
+<li>Hydraulic schematics — ISO 1219 symbols and circuit reading</li>
+<li>Electrohydraulic controls — proportional valves, servo valves, PLC integration</li>
+<li>Pump volumetric efficiency — theoretical vs. actual output, case drain diagnosis</li>
+<li>Accumulator pre-charge and sizing — Boyle's Law, pre-charge pressure, bladder selection</li>
+<li>Heat generation and cooler sizing — relief valve losses, throttling losses, reservoir dissipation</li>
+<li>Hydraulic safety hazards — injection injuries, stored energy, LOTO, OSHA requirements</li>
+<li>AI-driven predictive maintenance — pressure trending, vibration analysis, fluid condition monitoring</li>
+<li>Eco-friendly hydraulic fluids — biodegradable options, performance trade-offs, disposal requirements</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Chapter 1: Introduction to Fluid Power Systems and AI (understanding of fluid types, basic system concepts, and the role of AI)</li>
+<li>Chapter 2: System Components and Smart Controls (knowledge of pumps, fans, compressors, valves, filters, PLCs, and IoT sensors)</li>
+</ul>
+<hr />
+<h2 id="101-hydraulic-system-fundamentals">10.1 Hydraulic System Fundamentals</h2>
+<p>Hydraulic systems use pressurized liquid — usually oil — to transmit power from one location to another. Unlike compressed air systems that use a compressible gas, hydraulic systems use an incompressible liquid. This means that pushing on the fluid at one end of a line produces an almost instant, equal push at the other end. Hydraulic systems can generate enormous forces in compact packages, which is why they power everything from excavators and forklifts to injection molding machines and aircraft landing gear.</p>
+<h3 id="pascals-law">Pascal's Law</h3>
+<p>The foundation of all hydraulics is <strong>Pascal's Law</strong>, stated by the French mathematician Blaise Pascal in 1653: pressure applied to a confined fluid is transmitted equally in all directions throughout the fluid. This principle allows a small force applied over a small area to create a large force over a large area — the basis of every hydraulic press, jack, and lift.</p>
+<p>The fundamental relationship is:</p>
+<p>[
+F = P \times A
+]</p>
+<p>Where ( F ) is force in pounds (lb), ( P ) is pressure in pounds per square inch (psi), and ( A ) is the piston area in square inches (in²).</p>
+<p>For a two-cylinder system — a small input cylinder and a large output cylinder — the force multiplication works as follows:</p>
+<p>[
+\frac{F_{out}}{F_{in}} = \frac{A_{out}}{A_{in}}
+]</p>
+<p>A hydraulic press with a 1 in² input piston and a 10 in² output piston multiplies force by a factor of 10. Applying 100 lb of force to the small piston produces 1,000 lb of force at the large piston. The trade-off is distance — the small piston must travel 10 inches to move the large piston 1 inch.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Input Cylinder</th>
+<th>Output Cylinder</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Piston area</td>
+<td>1 in²</td>
+<td>10 in²</td>
+</tr>
+<tr>
+<td>Applied force</td>
+<td>100 lb</td>
+<td>1,000 lb</td>
+</tr>
+<tr>
+<td>Pressure</td>
+<td>100 psi</td>
+<td>100 psi</td>
+</tr>
+<tr>
+<td>Stroke distance</td>
+<td>10 in</td>
+<td>1 in</td>
+</tr>
+</tbody>
+</table>
+<p>This table illustrates a key principle: <strong>pressure is equal throughout the system</strong>, but force depends on the area it acts upon.</p>
+<h4 id="worked-example-1-pascals-law-force-multiplication">Worked Example 1: Pascal's Law — Force Multiplication</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Input piston diameter: 1 inch</li>
+<li>Force applied to input piston: 100 lb</li>
+<li>Output piston diameter: 6 inches</li>
+</ul>
+<p><strong>Find:</strong> Output force and mechanical advantage</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate input piston area:</li>
+</ol>
+<p>[
+A_{in} = \frac{\pi \times d_{in}^2}{4} = \frac{\pi \times 1^2}{4} = 0.785 \text{ in}^2
+]</p>
+<ol>
+<li>Calculate input pressure using ( P = F / A ):</li>
+</ol>
+<p>[
+P = \frac{F_{in}}{A_{in}} = \frac{100}{0.785} = 127.4 \text{ psi}
+]</p>
+<ol>
+<li>Calculate output piston area:</li>
+</ol>
+<p>[
+A_{out} = \frac{\pi \times d_{out}^2}{4} = \frac{\pi \times 6^2}{4} = 28.27 \text{ in}^2
+]</p>
+<ol>
+<li>Calculate output force (pressure is equal throughout the system):</li>
+</ol>
+<p>[
+F_{out} = P \times A_{out} = 127.4 \times 28.27 = 3{,}602 \text{ lb}
+]</p>
+<ol>
+<li>Calculate mechanical advantage:</li>
+</ol>
+<p>[
+MA = \frac{F_{out}}{F_{in}} = \frac{3{,}602}{100} = 36:1
+]</p>
+<p><strong>Answer:</strong> The output force is <strong>3,602 lb</strong> with a mechanical advantage of <strong>36:1</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> This 36:1 mechanical advantage is why hydraulic presses and jacks are so powerful. The trade-off is distance — the output piston moves 1/36th the distance of the input piston. Energy is conserved: what you gain in force, you lose in distance.</p>
+</blockquote>
+<h4 id="diagram-hydraulic-pump-types-comparison">Diagram: Hydraulic Pump Types Comparison</h4>
+<iframe src="../../sims/hydraulic-pump-types/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Hydraulic Pump Types Comparison</summary>
+Type: diagram
+
+Bloom Level: L2 Understand
+Bloom Verb: compare, contrast
+Learning Objective: Students will compare the three main types of hydraulic pumps (gear, vane, piston) and explain the operating principle of each, including displacement type and typical pressure ratings.
+
+Layout: Three-panel horizontal display, each showing an animated cross-section of one pump type.
+
+Panel 1 — External Gear Pump:
+- Two meshing spur gears rotating inside a close-fitting housing
+- Animated gear rotation showing fluid trapped between gear teeth and housing
+- Fluid carried from inlet (low pressure, blue) around the outside of each gear to outlet (high pressure, red)
+- Arrow showing rotation direction
+- Labels: "Drive gear", "Idler gear", "Inlet (suction)", "Outlet (pressure)", "Trapped fluid"
+
+Panel 2 — Vane Pump:
+- Eccentric rotor inside a circular cam ring
+- Sliding vanes extending from rotor slots to contact cam ring
+- Animated rotation showing expanding chambers (inlet) and compressing chambers (outlet)
+- Labels: "Rotor", "Vanes", "Cam ring", "Inlet", "Outlet", "Eccentricity"
+
+Panel 3 — Axial Piston Pump:
+- Cylinder barrel with 7-9 pistons arranged in a circle
+- Swashplate at an angle driving pistons in and out as barrel rotates
+- Animated piston reciprocation showing suction and discharge strokes
+- Labels: "Cylinder barrel", "Pistons", "Swashplate", "Valve plate", "Inlet port", "Outlet port"
+- Swashplate angle slider to show variable displacement concept
+
+Interactive Features:
+- Click any panel to expand with additional specs and applications
+- Hover over labeled components for tooltip descriptions
+- Comparison table below showing: max pressure, flow range, efficiency, noise level, cost, typical applications
+- Animation speed slider
+
+Color Scheme: Blue for low pressure/inlet, red for high pressure/outlet, gray for metal components
+Canvas: Responsive, minimum 900x400, adapts to window resize
+
+Implementation: p5.js with animated mechanical components
+</details>
+
+<h2 id="102-hydraulic-fluid-properties">10.2 Hydraulic Fluid Properties</h2>
+<p>Hydraulic fluid is the lifeblood of any hydraulic system. It serves four critical functions: transmitting power, lubricating moving parts, sealing clearances between components, and carrying heat away from high-pressure zones. Selecting the right fluid and maintaining it properly is one of the most important tasks for a hydraulic technician.</p>
+<h3 id="key-fluid-properties">Key Fluid Properties</h3>
+<ul>
+<li>
+<p><strong>Viscosity:</strong> The fluid's resistance to flow, measured in centistokes (cSt). Too thin (low viscosity) and the fluid leaks past seals and fails to lubricate. Too thick (high viscosity) and the pump struggles to draw fluid, causing cavitation and energy waste. Most hydraulic systems operate best between 16 and 40 cSt at operating temperature.</p>
+</li>
+<li>
+<p><strong>Viscosity Index (VI):</strong> A measure of how much viscosity changes with temperature. A high VI means the fluid maintains consistent viscosity across a wide temperature range — important for outdoor equipment that operates in both summer heat and winter cold. Typical hydraulic oils have VI ratings between 90 and 160.</p>
+</li>
+<li>
+<p><strong>Pour Point:</strong> The lowest temperature at which the fluid still flows. Below the pour point, the fluid gels and the pump cannot draw it from the reservoir. For cold-climate applications, fluids with pour points of -30°F or lower are specified.</p>
+</li>
+<li>
+<p><strong>Flash Point:</strong> The temperature at which fluid vapors can ignite when exposed to an open flame. Standard petroleum hydraulic fluids have flash points around 400°F (204°C). In environments near furnaces, molten metal, or welding, fire-resistant fluids with higher flash points are required.</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Typical Range</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Viscosity (40°C)</td>
+<td>32–68 cSt</td>
+<td>Lubrication, sealing, pumpability</td>
+</tr>
+<tr>
+<td>Viscosity Index</td>
+<td>90–160</td>
+<td>Temperature stability</td>
+</tr>
+<tr>
+<td>Pour Point</td>
+<td>-20°F to -40°F</td>
+<td>Cold-start capability</td>
+</tr>
+<tr>
+<td>Flash Point</td>
+<td>350–450°F</td>
+<td>Fire safety</td>
+</tr>
+<tr>
+<td>Water Content</td>
+<td>&lt;0.1% (1000 ppm)</td>
+<td>Corrosion, cavitation prevention</td>
+</tr>
+<tr>
+<td>Particle Count</td>
+<td>Per ISO 4406</td>
+<td>Component wear prevention</td>
+</tr>
+</tbody>
+</table>
+<h2 id="103-hydraulic-pumps">10.3 Hydraulic Pumps</h2>
+<p>The pump is the power source of a hydraulic system. It converts mechanical energy from an electric motor or engine into hydraulic energy by pushing fluid into the system under pressure. Pumps do not create pressure directly — they create flow. Pressure builds when that flow encounters resistance, such as a load on a cylinder.</p>
+<h3 id="gear-pumps">Gear Pumps</h3>
+<p><strong>External gear pumps</strong> use two meshing spur gears rotating inside a tight-fitting housing. Fluid is trapped between the gear teeth and the housing wall, then carried from the inlet port around the outside of each gear to the outlet port. As teeth mesh at the center, they squeeze the fluid out under pressure.</p>
+<p>Gear pumps are the simplest and least expensive hydraulic pumps. They produce fixed displacement (a constant volume per revolution) and are highly tolerant of contaminated fluid. However, they are limited to moderate pressures (up to about 3,000 psi) and are relatively noisy.</p>
+<p><strong>Internal gear pumps</strong> use a large external gear driving a smaller internal gear. They are quieter than external gear pumps and produce smoother flow, making them popular for low-noise applications.</p>
+<h3 id="vane-pumps">Vane Pumps</h3>
+<p>Vane pumps use a slotted rotor spinning inside an eccentric cam ring. Sliding vanes extend from the rotor slots and are held against the cam ring by centrifugal force and sometimes springs. As the rotor turns, the space between vanes expands on the inlet side (drawing fluid in) and contracts on the outlet side (pushing fluid out).</p>
+<p>Vane pumps are quieter and produce smoother flow than gear pumps. <strong>Variable displacement</strong> vane pumps can change output volume by adjusting the eccentricity of the cam ring — moving the ring closer to center reduces displacement toward zero. This allows the system to reduce flow when less is needed, saving energy.</p>
+<h3 id="piston-pumps">Piston Pumps</h3>
+<p><strong>Axial piston pumps</strong> are the highest-performance hydraulic pumps. Multiple pistons (typically 7 or 9) are arranged in a circle inside a rotating cylinder barrel. A tilted swashplate causes each piston to stroke in and out as the barrel rotates, drawing fluid in during the suction stroke and pushing it out during the pressure stroke.</p>
+<p>Piston pumps achieve the highest pressures (up to 6,000+ psi), highest efficiencies (up to 95%), and are available in variable displacement designs where changing the swashplate angle changes the output volume.</p>
+<table>
+<thead>
+<tr>
+<th>Pump Type</th>
+<th>Max Pressure</th>
+<th>Efficiency</th>
+<th>Displacement</th>
+<th>Noise</th>
+<th>Cost</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>External gear</td>
+<td>3,000 psi</td>
+<td>80–90%</td>
+<td>Fixed</td>
+<td>High</td>
+<td>Low</td>
+<td>General industrial, log splitters</td>
+</tr>
+<tr>
+<td>Internal gear</td>
+<td>3,000 psi</td>
+<td>85–92%</td>
+<td>Fixed</td>
+<td>Low</td>
+<td>Medium</td>
+<td>Low-noise applications</td>
+</tr>
+<tr>
+<td>Vane (fixed)</td>
+<td>2,500 psi</td>
+<td>85–92%</td>
+<td>Fixed</td>
+<td>Low</td>
+<td>Medium</td>
+<td>Machine tools</td>
+</tr>
+<tr>
+<td>Vane (variable)</td>
+<td>3,000 psi</td>
+<td>85–92%</td>
+<td>Variable</td>
+<td>Low</td>
+<td>High</td>
+<td>Energy-saving systems</td>
+</tr>
+<tr>
+<td>Axial piston</td>
+<td>6,000+ psi</td>
+<td>90–95%</td>
+<td>Variable</td>
+<td>Medium</td>
+<td>High</td>
+<td>Mobile equipment, presses</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hydraulic-power">Hydraulic Power</h3>
+<p>The power delivered by a hydraulic system is a function of pressure and flow rate. Hydraulic horsepower is calculated as:</p>
+<p>[
+HP_{hydraulic} = \frac{P \times Q}{1{,}714}
+]</p>
+<p>Where ( P ) is pressure in psi, ( Q ) is flow rate in GPM, and 1,714 is the conversion constant for psi × GPM to horsepower. To determine the input power required from the electric motor, divide by pump efficiency.</p>
+<h4 id="worked-example-2-hydraulic-power-and-motor-sizing">Worked Example 2: Hydraulic Power and Motor Sizing</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>System pressure: 2,500 psi</li>
+<li>Flow rate: 15 GPM</li>
+<li>Pump efficiency: 85%</li>
+</ul>
+<p><strong>Find:</strong> Hydraulic HP, input HP required, and motor size in kW</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate hydraulic horsepower:</li>
+</ol>
+<p>[
+HP_{hydraulic} = \frac{P \times Q}{1{,}714} = \frac{2{,}500 \times 15}{1{,}714} = 21.9 \text{ HP}
+]</p>
+<ol>
+<li>Calculate input HP required (accounting for pump inefficiency):</li>
+</ol>
+<p>[
+HP_{input} = \frac{HP_{hydraulic}}{\eta_{pump}} = \frac{21.9}{0.85} = 25.7 \text{ HP}
+]</p>
+<p>Select the next standard motor size: <strong>30 HP motor</strong>.</p>
+<ol>
+<li>Convert to kilowatts:</li>
+</ol>
+<p>[
+P_{kW} = HP_{input} \times 0.746 = 25.7 \times 0.746 = 19.2 \text{ kW}
+]</p>
+<p><strong>Answer:</strong> The hydraulic HP is <strong>21.9 HP</strong>, the required input HP is <strong>25.7 HP</strong> (select a <strong>30 HP</strong> motor), and the motor power is <strong>19.2 kW</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> The 1,714 constant converts psi × GPM to horsepower. Always size the electric motor for input HP (accounting for pump inefficiency), not hydraulic HP. The 30 HP motor provides margin for pressure spikes and viscosity changes during cold starts.</p>
+</blockquote>
+<h3 id="pump-volumetric-efficiency-and-case-drain-diagnosis">Pump Volumetric Efficiency and Case Drain Diagnosis</h3>
+<p>Every positive-displacement pump has some internal leakage — fluid that slips past clearances between the gears, vanes, or pistons instead of being pushed to the outlet. <strong>Volumetric efficiency</strong> quantifies how much of the theoretical output the pump actually delivers:</p>
+<p>[
+\eta_{vol} = \frac{Q_{actual}}{Q_{theoretical}} \times 100 = \frac{Q_{actual}}{\dfrac{D \times N}{231}} \times 100
+]</p>
+<p>Where ( Q_{actual} ) is the measured flow in GPM, ( D ) is pump displacement in in³/rev, ( N ) is shaft speed in RPM, and 231 is the conversion constant (in³ per gallon). A new pump typically runs 92–97% volumetric efficiency. Below 80%, the pump should be scheduled for rebuild or replacement.</p>
+<p><strong>Case drain flow</strong> is the single best indicator of piston pump wear. Internal leakage escapes past the pistons and exits the pump housing through a separate drain line back to the reservoir. As wear increases, case drain flow rises — carrying away both energy and lubrication.</p>
+<p>A healthy piston pump has a case drain flow of 1–3% of rated output. When case drain exceeds 5–10%, the pump is nearing end of life. The wasted flow represents direct power loss:</p>
+<p>[
+HP_{leakage} = \frac{P_{system} \times Q_{case\,drain}}{1{,}714}
+]</p>
+<p>Trending case drain flow over time is a core AI predictive maintenance strategy. A gradually rising trend indicates wear progressing toward failure, giving maintenance teams weeks or months of lead time to plan a rebuild.</p>
+<h4 id="worked-example-5-pump-volumetric-efficiency-and-case-drain-loss">Worked Example 5: Pump Volumetric Efficiency and Case Drain Loss</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Axial piston pump displacement: 2.5 in³/rev</li>
+<li>Shaft speed: 1,750 RPM</li>
+<li>Measured pump output: 16.2 GPM</li>
+<li>System pressure: 2,500 psi</li>
+<li>Case drain flow — new pump baseline: 0.3 GPM</li>
+<li>Case drain flow — current reading: 1.8 GPM</li>
+</ul>
+<p><strong>Find:</strong> Theoretical output, current volumetric efficiency, efficiency drop from new, and horsepower lost to internal leakage</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate theoretical pump output:</li>
+</ol>
+<p>[
+Q_{theoretical} = \frac{D \times N}{231} = \frac{2.5 \times 1{,}750}{231} = 18.94 \text{ GPM}
+]</p>
+<ol>
+<li>Calculate current volumetric efficiency:</li>
+</ol>
+<p>[
+\eta_{vol} = \frac{Q_{actual}}{Q_{theoretical}} \times 100 = \frac{16.2}{18.94} \times 100 = 85.5\%
+]</p>
+<ol>
+<li>Calculate new-pump volumetric efficiency for comparison:</li>
+</ol>
+<p>[
+\eta_{vol,new} = \frac{18.94 - 0.3}{18.94} \times 100 = \frac{18.64}{18.94} \times 100 = 98.4\%
+]</p>
+<p>The pump has dropped from 98.4% to 85.5% — a loss of 12.9 percentage points.</p>
+<ol>
+<li>Calculate horsepower lost to internal leakage (case drain flow at system pressure):</li>
+</ol>
+<p>[
+HP_{leakage} = \frac{P \times Q_{case\,drain}}{1{,}714} = \frac{2{,}500 \times 1.8}{1{,}714} = 2.63 \text{ HP}
+]</p>
+<p><strong>Answer:</strong> Theoretical output is <strong>18.94 GPM</strong>, current volumetric efficiency is <strong>85.5%</strong> (down from 98.4% when new), and internal leakage wastes <strong>2.63 HP</strong> as heat. At $0.11/kWh running 4,000 hr/yr, that leakage costs approximately <strong>$860/yr</strong> in wasted electricity and adds to the cooling load.</p>
+<blockquote>
+<p><strong>Practical note:</strong> When case drain flow exceeds 5% of rated output (here, 0.95 GPM), begin planning for a pump rebuild. At 10% (1.89 GPM), the pump is at end of life. This pump at 1.8 GPM is critically close to the 10% threshold. Connect a flow meter to the case drain line during routine checks — it takes less than five minutes and is the most reliable pump health indicator available.</p>
+</blockquote>
+<h2 id="104-hydraulic-actuators">10.4 Hydraulic Actuators</h2>
+<p>Actuators convert hydraulic energy back into mechanical work. The two main types are <strong>cylinders</strong> (linear actuators) and <strong>motors</strong> (rotary actuators).</p>
+<h3 id="hydraulic-cylinders">Hydraulic Cylinders</h3>
+<p>Cylinders produce linear (straight-line) force and motion. They consist of a cylindrical barrel, a piston with seals, and a piston rod that extends through one end of the barrel.</p>
+<ul>
+<li><strong>Single-acting cylinders:</strong> Hydraulic pressure extends the piston in one direction. A spring, gravity, or an external load retracts it. Used for simple lifting applications like hydraulic jacks.</li>
+<li><strong>Double-acting cylinders:</strong> Hydraulic pressure is applied to both sides of the piston, providing powered motion in both directions. This is the most common industrial type.</li>
+<li><strong>Telescoping cylinders:</strong> Multiple nested stages extend like a telescope, providing a very long stroke from a compact retracted length. Used on dump trucks, aerial platforms, and cranes.</li>
+</ul>
+<p>The force a cylinder produces is calculated from Pascal's Law:</p>
+<p>[
+F_{extend} = P \times A_{bore}
+]</p>
+<p>[
+F_{retract} = P \times (A_{bore} - A_{rod})
+]</p>
+<p>Where ( A_{bore} ) is the full bore area and ( A_{rod} ) is the cross-sectional area of the piston rod. Because the rod occupies part of the piston area on the retract side, retract force is always less than extend force at the same pressure.</p>
+<h4 id="worked-example-3-cylinder-extend-and-retract-forces">Worked Example 3: Cylinder Extend and Retract Forces</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Bore diameter: 4 inches</li>
+<li>Rod diameter: 2 inches</li>
+<li>System pressure: 2,000 psi</li>
+</ul>
+<p><strong>Find:</strong> Extension force and retraction force</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate bore area (full piston area):</li>
+</ol>
+<p>[
+A_{bore} = \frac{\pi \times 4^2}{4} = 12.57 \text{ in}^2
+]</p>
+<ol>
+<li>Calculate rod area:</li>
+</ol>
+<p>[
+A_{rod} = \frac{\pi \times 2^2}{4} = 3.14 \text{ in}^2
+]</p>
+<ol>
+<li>Calculate annular area (bore area minus rod area):</li>
+</ol>
+<p>[
+A_{annular} = A_{bore} - A_{rod} = 12.57 - 3.14 = 9.43 \text{ in}^2
+]</p>
+<ol>
+<li>Calculate extension force (pressure acts on full bore area):</li>
+</ol>
+<p>[
+F_{extend} = P \times A_{bore} = 2{,}000 \times 12.57 = 25{,}133 \text{ lb}
+]</p>
+<ol>
+<li>Calculate retraction force (pressure acts on annular area):</li>
+</ol>
+<p>[
+F_{retract} = P \times A_{annular} = 2{,}000 \times 9.43 = 18{,}850 \text{ lb}
+]</p>
+<p><strong>Answer:</strong> The extension force is <strong>25,133 lb</strong> and the retraction force is <strong>18,850 lb</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> Retraction force is 25% less than extension because the rod takes up area on the retract side. This is why cylinder applications that need equal force in both directions use double-rod cylinders or a larger bore for the retract stroke.</p>
+</blockquote>
+<h3 id="cylinder-speed">Cylinder Speed</h3>
+<p>Cylinder speed depends on flow rate and piston area. Since the rod reduces the effective area on the retract side, a cylinder retracts faster than it extends at the same flow rate:</p>
+<p>[
+v_{extend} = \frac{Q \times 231}{A_{bore}} \quad \text{(inches per minute)}
+]</p>
+<p>[
+v_{retract} = \frac{Q \times 231}{A_{bore} - A_{rod}} \quad \text{(inches per minute)}
+]</p>
+<p>Where ( Q ) is flow in GPM, 231 converts gallons to cubic inches, and areas are in square inches. The factor 231/area gives the linear velocity of the piston for a given volumetric flow rate.</p>
+<p>Using the cylinder from Worked Example 3 (4" bore, 2" rod) with a 10 GPM flow rate:</p>
+<ul>
+<li>Extension speed: ( \frac{10 \times 231}{12.57} = 183.8 \text{ in/min} = 15.3 \text{ ft/min} )</li>
+<li>Retraction speed: ( \frac{10 \times 231}{9.43} = 244.9 \text{ in/min} = 20.4 \text{ ft/min} )</li>
+</ul>
+<p>The retraction speed is 33% faster than extension — an important consideration when timing machine cycles. To equalize speeds, use a flow control valve on the cylinder port or select a rod diameter that gives the desired speed ratio.</p>
+<h3 id="hydraulic-motors">Hydraulic Motors</h3>
+<p>Hydraulic motors are essentially pumps running in reverse — pressurized fluid flows into the motor and causes a shaft to rotate. The three main types mirror pump designs:</p>
+<ul>
+<li><strong>Gear motors:</strong> Simple, rugged, and inexpensive. Used for conveyors, augers, and mixing equipment.</li>
+<li><strong>Vane motors:</strong> Smooth, quiet operation. Used for machine tool spindles and material handling.</li>
+<li><strong>Piston motors:</strong> Highest torque and efficiency. Used for wheel drives on mobile equipment, winches, and heavy-duty applications.</li>
+</ul>
+<h2 id="105-control-valves">10.5 Control Valves</h2>
+<p>Control valves manage the direction, pressure, and flow rate of hydraulic fluid in the system. Without valves, there would be no way to control when, where, and how fast actuators move.</p>
+<h3 id="directional-control-valves-dcvs">Directional Control Valves (DCVs)</h3>
+<p>DCVs route fluid to different ports to control actuator direction. They are described by the number of ports (ways) and positions:</p>
+<ul>
+<li><strong>2/2 valve:</strong> 2 ports, 2 positions — acts as an on/off switch</li>
+<li><strong>3/2 valve:</strong> 3 ports, 2 positions — controls single-acting cylinders</li>
+<li><strong>4/2 valve:</strong> 4 ports, 2 positions — controls double-acting cylinders (extend or retract)</li>
+<li><strong>4/3 valve:</strong> 4 ports, 3 positions — controls double-acting cylinders with a center (neutral) position</li>
+</ul>
+<p>The center position of a 4/3 valve determines what happens when the valve is not actuated:</p>
+<ul>
+<li><strong>Open center:</strong> All ports connected — fluid circulates freely, no pressure buildup</li>
+<li><strong>Closed center:</strong> All ports blocked — actuator holds position under load</li>
+<li><strong>Tandem center:</strong> Pump port to tank, work ports blocked — pump unloads, actuator holds</li>
+</ul>
+<h3 id="pressure-control-valves">Pressure Control Valves</h3>
+<ul>
+<li><strong>Relief valve:</strong> Limits maximum system pressure by opening a path to the tank when pressure exceeds the setpoint. Every hydraulic system must have at least one relief valve for safety.</li>
+<li><strong>Pressure reducing valve:</strong> Reduces pressure in a branch circuit below main system pressure. Used when different actuators require different operating pressures.</li>
+<li><strong>Sequence valve:</strong> Opens at a set pressure to allow flow to a second actuator only after the first reaches full pressure (e.g., clamp then drill).</li>
+</ul>
+<h3 id="flow-control-valves">Flow Control Valves</h3>
+<p>Flow control valves regulate the speed of actuators by restricting the flow rate:</p>
+<ul>
+<li><strong>Needle valve:</strong> Simple adjustable orifice. Flow rate changes with pressure variations.</li>
+<li><strong>Pressure-compensated flow control:</strong> Maintains a constant flow rate regardless of load pressure changes. This provides consistent actuator speed under varying loads.</li>
+</ul>
+<h4 id="diagram-hydraulic-schematic-symbols">Diagram: Hydraulic Schematic Symbols</h4>
+<iframe src="../../sims/hydraulic-schematic-symbols/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Hydraulic Schematic Symbols Guide</summary>
+Type: infographic
+
+Bloom Level: L1 Remember
+Bloom Verb: identify, recognize
+Learning Objective: Students will identify and recognize ISO 1219 hydraulic schematic symbols for common components including pumps, cylinders, motors, valves, filters, reservoirs, and accumulators.
+
+Layout: Interactive symbol reference guide organized by component category, with a quiz mode.
+
+Categories and Symbols (ISO 1219):
+
+Category 1 — Pumps (4 symbols):
+- Fixed displacement pump (circle with filled triangle)
+- Variable displacement pump (circle with filled triangle + arrow through)
+- Bidirectional pump (circle with two filled triangles)
+- Pump with case drain (circle with triangle + small drain line)
+
+Category 2 — Actuators (5 symbols):
+- Single-acting cylinder (rectangle with one inlet)
+- Double-acting cylinder (rectangle with two inlets)
+- Double-acting with cushions (rectangle with two inlets + cushion symbols)
+- Hydraulic motor (circle with open triangle)
+- Bidirectional motor (circle with two open triangles)
+
+Category 3 — Directional Control Valves (4 symbols):
+- 2/2 valve (2 squares with flow paths)
+- 4/2 valve (2 squares with crossed/parallel flow paths)
+- 4/3 valve (3 squares with flow paths, center position shown)
+- Actuator types: solenoid, manual lever, pilot, spring return
+
+Category 4 — Pressure Valves (3 symbols):
+- Relief valve (arrow, spring, drain to tank)
+- Pressure reducing valve (arrow, spring, drain)
+- Sequence valve (arrow, spring, pilot line)
+
+Category 5 — Flow Controls and Accessories (4 symbols):
+- Flow control valve (adjustable orifice)
+- Check valve (ball and seat)
+- Filter (diamond)
+- Accumulator (oval/gas-charged)
+- Reservoir (open rectangle)
+
+Interactive Features:
+- Hover over any symbol to see its name, function, and typical applications
+- Click a symbol to see a detailed view with dimensional proportions
+- Quiz Mode toggle: shows a symbol and 4 multiple-choice options for the student to identify
+- Score tracking in quiz mode (correct/total)
+- Search/filter by component category
+
+Color Scheme: Black symbols on white background, blue highlights on hover, green for correct answers, red for incorrect
+Canvas: Responsive, minimum 800x600, adapts to window resize
+
+Implementation: p5.js with SVG-style symbol rendering
+</details>
+
+<h2 id="106-reservoirs-filters-and-accumulators">10.6 Reservoirs, Filters, and Accumulators</h2>
+<p>These support components keep the hydraulic system operating reliably.</p>
+<h3 id="reservoirs">Reservoirs</h3>
+<p>The reservoir (tank) stores the fluid supply and performs several additional functions:</p>
+<ul>
+<li>Allows air bubbles to rise to the surface and escape</li>
+<li>Lets heat dissipate through the tank walls</li>
+<li>Allows contaminants to settle to the bottom</li>
+<li>Provides space for fluid displaced when cylinders retract</li>
+</ul>
+<p>A properly sized reservoir holds 2–3 times the pump output per minute. For a 10 GPM system, the reservoir should hold 20–30 gallons. Key reservoir features include baffles (to separate return flow from suction), a sight glass (to check fluid level), a breather cap with filter (to allow air exchange while blocking contaminants), and drain and clean-out ports.</p>
+<h3 id="filters">Filters</h3>
+<p>Hydraulic filters remove particles from the fluid to protect close-tolerance components like pumps, valves, and cylinders. Filter locations include:</p>
+<ul>
+<li><strong>Suction filter/strainer:</strong> Coarse screen at the pump inlet (100–150 mesh) preventing large debris from entering the pump</li>
+<li><strong>Pressure line filter:</strong> High-pressure filter downstream of the pump, catching fine particles (3–10 μm) before they reach valves and actuators</li>
+<li><strong>Return line filter:</strong> Filters fluid returning to the reservoir, capturing wear particles generated by system components</li>
+<li><strong>Off-line (kidney loop) filter:</strong> Separate pump and filter circuit that continuously cleans the reservoir fluid</li>
+</ul>
+<h3 id="accumulators">Accumulators</h3>
+<p>Accumulators store hydraulic energy under pressure for later use. A <strong>bladder accumulator</strong> contains a gas-charged bladder (typically nitrogen) inside a steel shell. When system pressure rises, fluid enters the accumulator and compresses the gas bladder, storing energy. When pressure drops, the compressed gas pushes fluid back into the system.</p>
+<p>Accumulators serve four main purposes:</p>
+<ul>
+<li><strong>Emergency power:</strong> Provide enough stored energy to complete a critical operation (like retracting a clamp) during a power failure</li>
+<li><strong>Shock absorption:</strong> Absorb pressure spikes caused by sudden valve closures or load impacts</li>
+<li><strong>Pulsation dampening:</strong> Smooth out flow pulsations from piston pumps</li>
+<li><strong>Volume compensation:</strong> Supply extra flow during peak demand that exceeds pump capacity</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Accumulator Safety</p>
+<p>Accumulators store significant energy under high pressure. Before performing any maintenance on a hydraulic system with accumulators, you MUST verify that the accumulators have been fully discharged. Follow lockout/tagout procedures and use the accumulator dump valve to safely release stored energy. A charged accumulator can drive a cylinder or spray fluid with lethal force even when the pump is off.</p>
+</div>
+<h3 id="accumulator-pre-charge-and-sizing">Accumulator Pre-Charge and Sizing</h3>
+<p>Proper accumulator sizing ensures the accumulator delivers the required fluid volume within the operating pressure range. Two key principles govern accumulator design:</p>
+<ol>
+<li><strong>Pre-charge pressure</strong> — The nitrogen gas pressure set with the pump off. Pre-charge should be 90% of the minimum working pressure to prevent the bladder from being crushed against the poppet valve at low pressure:</li>
+</ol>
+<p>[
+P_0 = 0.9 \times P_{min}
+]</p>
+<ol>
+<li><strong>Fluid volume calculation</strong> — For slow processes (cycle times over 1 minute), gas compression is approximately isothermal (constant temperature), and Boyle's Law applies:</li>
+</ol>
+<p>[
+V_{fluid} = V_0 \times \left(\frac{P_0}{P_{min}} - \frac{P_0}{P_{max}}\right)
+]</p>
+<p>Where ( V_0 ) is the total accumulator volume, ( P_0 ) is pre-charge pressure, ( P_{min} ) is minimum working pressure, and ( P_{max} ) is maximum working pressure. All pressures must be absolute (gauge + 14.7 psi).</p>
+<p>For fast processes (cycle times under 1 minute), compression is closer to adiabatic and requires the gas constant ( n = 1.4 ) for nitrogen. Isothermal sizing is conservative and acceptable for most industrial applications.</p>
+<div class="admonition warning">
+<p class="admonition-title">Pre-Charge Gas</p>
+<p>ALWAYS use dry nitrogen for accumulator pre-charge. NEVER use compressed air or oxygen — oil and oxygen under pressure create an explosion hazard. Nitrogen is inert and non-flammable.</p>
+</div>
+<h4 id="worked-example-6-accumulator-sizing-for-emergency-cylinder-retract">Worked Example 6: Accumulator Sizing for Emergency Cylinder Retract</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Cylinder: 3" bore, 1.5" rod, 6" retract stroke</li>
+<li>Operating pressure range: 800 psi (minimum) to 2,000 psi (maximum)</li>
+<li>Application: Emergency retract of a clamp cylinder during power failure</li>
+</ul>
+<p><strong>Find:</strong> Pre-charge pressure, required fluid volume, and accumulator size</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate the annular area of the cylinder (retract side):</li>
+</ol>
+<p>[
+A_{annular} = \frac{\pi \times 3^2}{4} - \frac{\pi \times 1.5^2}{4} = 7.07 - 1.77 = 5.30 \text{ in}^2
+]</p>
+<ol>
+<li>Calculate the fluid volume needed to retract the cylinder 6 inches:</li>
+</ol>
+<p>[
+V_{cylinder} = A_{annular} \times stroke = 5.30 \times 6 = 31.8 \text{ in}^3 = 0.138 \text{ gal}
+]</p>
+<ol>
+<li>Calculate pre-charge pressure (90% of minimum working pressure):</li>
+</ol>
+<p>[
+P_0 = 0.9 \times 800 = 720 \text{ psig}
+]</p>
+<ol>
+<li>Convert to absolute pressures:</li>
+</ol>
+<p>[
+P_0 = 720 + 14.7 = 734.7 \text{ psia}
+]
+[
+P_{min} = 800 + 14.7 = 814.7 \text{ psia}
+]
+[
+P_{max} = 2{,}000 + 14.7 = 2{,}014.7 \text{ psia}
+]</p>
+<ol>
+<li>Rearrange Boyle's Law to solve for accumulator volume ( V_0 ):</li>
+</ol>
+<p>[
+V_0 = \frac{V_{fluid}}{\dfrac{P_0}{P_{min}} - \dfrac{P_0}{P_{max}}} = \frac{0.138}{\dfrac{734.7}{814.7} - \dfrac{734.7}{2{,}014.7}} = \frac{0.138}{0.9018 - 0.3647} = \frac{0.138}{0.5371} = 0.257 \text{ gal}
+]</p>
+<ol>
+<li>Select the next standard size: <strong>1-gallon bladder accumulator</strong> (provides ample margin for line losses and safety factor).</li>
+</ol>
+<p><strong>Answer:</strong> Pre-charge to <strong>720 psig</strong> with dry nitrogen. The minimum accumulator volume is <strong>0.257 gallons</strong>. Select a <strong>1-gallon bladder accumulator</strong> to provide safety margin and accommodate fluid for the connecting lines.</p>
+<blockquote>
+<p><strong>Practical note:</strong> The 1-gallon accumulator provides nearly 4× the minimum calculated volume. This margin accounts for gas temperature changes, line volume between the accumulator and cylinder, and the fact that the last 10% of gas expansion delivers very little usable pressure. In emergency applications, always oversize — the consequence of an undersized accumulator is a clamp that fails to release during a power failure.</p>
+</blockquote>
+<h3 id="heat-generation-and-cooler-sizing">Heat Generation and Cooler Sizing</h3>
+<p>Every hydraulic system generates heat. Any time fluid passes through a restriction — a relief valve, a flow control valve, or internal clearances of a worn pump — pressure energy is converted to heat. If the system generates more heat than it can dissipate, fluid temperature rises until seals degrade, viscosity drops below safe limits, and components fail.</p>
+<h4 id="sources-of-heat">Sources of Heat</h4>
+<p>The three primary heat sources in a typical hydraulic system are:</p>
+<ul>
+<li><strong>Relief valve bypass:</strong> When the pump delivers more flow than the system needs, excess flow crosses the relief valve at full system pressure. This is the largest heat source in many systems.</li>
+<li><strong>Throttling losses:</strong> Flow control valves and proportional valves create intentional pressure drops to regulate speed. The energy removed appears as heat.</li>
+<li><strong>Pump inefficiency:</strong> Internal leakage and mechanical friction in the pump generate heat proportional to the pump's inefficiency.</li>
+</ul>
+<p>The heat generated by any pressure drop is:</p>
+<p>[
+HP_{heat} = \frac{\Delta P \times Q}{1{,}714}
+]</p>
+<p>Where ( \Delta P ) is the pressure drop in psi and ( Q ) is the flow through the restriction in GPM. To convert to BTU/hr for cooler sizing:</p>
+<p>[
+\text{Cooler capacity (BTU/hr)} = HP_{heat} \times 2{,}545
+]</p>
+<h4 id="reservoir-heat-dissipation">Reservoir Heat Dissipation</h4>
+<p>Before sizing a cooler, account for the heat the reservoir naturally dissipates. A rule of thumb is <strong>1 HP per 7 ft² of reservoir surface area</strong> for a steel tank in still air at a 50°F temperature differential between oil and ambient. For a typical 50-gallon reservoir (approximately 12 ft² surface area), the reservoir dissipates about 1.7 HP (4,325 BTU/hr) without any cooler.</p>
+<h4 id="worked-example-7-heat-load-and-cooler-sizing">Worked Example 7: Heat Load and Cooler Sizing</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>30 HP hydraulic power unit</li>
+<li>Relief valve bypasses 5 GPM at 2,500 psi during idle periods</li>
+<li>Flow control valve throttles 10 GPM with a 300 psi pressure drop</li>
+<li>Pump overall efficiency: 85% (at 15 GPM, 2,500 psi output)</li>
+<li>Reservoir: 60-gallon steel tank, approximately 14 ft² surface area</li>
+<li>Maximum allowable oil temperature: 140°F</li>
+<li>Ambient temperature: 90°F</li>
+</ul>
+<p><strong>Find:</strong> Total heat load and required cooler capacity</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate heat from relief valve bypass:</li>
+</ol>
+<p>[
+HP_{relief} = \frac{2{,}500 \times 5}{1{,}714} = 7.29 \text{ HP}
+]</p>
+<ol>
+<li>Calculate heat from flow control valve throttling:</li>
+</ol>
+<p>[
+HP_{throttle} = \frac{300 \times 10}{1{,}714} = 1.75 \text{ HP}
+]</p>
+<ol>
+<li>Calculate heat from pump inefficiency. The hydraulic output power is 21.9 HP (from Worked Example 2). The input power is 25.7 HP. The difference is lost as heat:</li>
+</ol>
+<p>[
+HP_{pump\,loss} = HP_{input} - HP_{hydraulic} = 25.7 - 21.9 = 3.8 \text{ HP}
+]</p>
+<ol>
+<li>Total heat generated:</li>
+</ol>
+<p>[
+HP_{total} = 7.29 + 1.75 + 3.8 = 12.84 \text{ HP}
+]</p>
+<ol>
+<li>Convert to BTU/hr:</li>
+</ol>
+<p>[
+Q_{total} = 12.84 \times 2{,}545 = 32{,}678 \text{ BTU/hr}
+]</p>
+<ol>
+<li>Subtract reservoir natural dissipation (1 HP per 7 ft²):</li>
+</ol>
+<p>[
+HP_{reservoir} = \frac{14}{7} = 2.0 \text{ HP} = 5{,}090 \text{ BTU/hr}
+]</p>
+<ol>
+<li>Required cooler capacity:</li>
+</ol>
+<p>[
+Q_{cooler} = 32{,}678 - 5{,}090 = 27{,}588 \text{ BTU/hr}
+]</p>
+<p>Select a <strong>30,000 BTU/hr air-to-oil cooler</strong> (next standard size above the calculated requirement).</p>
+<p><strong>Answer:</strong> The system generates <strong>12.84 HP</strong> (32,678 BTU/hr) of heat. After the reservoir dissipates 5,090 BTU/hr, the cooler must handle <strong>27,588 BTU/hr</strong>. Select a <strong>30,000 BTU/hr air-to-oil cooler</strong> with a thermostatically controlled fan.</p>
+<blockquote>
+<p><strong>Practical note:</strong> The relief valve alone accounts for 57% of the total heat load. Replacing the fixed-displacement pump with a variable-displacement (load-sensing) pump would nearly eliminate this heat source, reducing the cooling requirement by more than half and potentially allowing a smaller, less expensive cooler. Always address heat at the source before sizing a bigger cooler.</p>
+</blockquote>
+<h2 id="107-hydraulic-fluid-contamination">10.7 Hydraulic Fluid Contamination</h2>
+<p>Contamination is the number one cause of hydraulic component failure. Studies consistently show that 70–80% of hydraulic system failures are caused by fluid contamination. Particles as small as 5 μm (invisible to the naked eye) can damage servo valves, and silt-sized particles (below 10 μm) cause the most cumulative wear because they fit into critical clearances.</p>
+<h3 id="sources-of-contamination">Sources of Contamination</h3>
+<ul>
+<li><strong>Built-in:</strong> Metal chips, sealant residue, and debris left from manufacturing and assembly</li>
+<li><strong>Ingested:</strong> Dirt and moisture entering through breather caps, worn seals, and open ports during maintenance</li>
+<li><strong>Generated internally:</strong> Wear particles from pumps, motors, valves, and cylinders during normal operation</li>
+</ul>
+<h3 id="iso-cleanliness-codes">ISO Cleanliness Codes</h3>
+<p>The <strong>ISO 4406</strong> standard provides a uniform way to measure and communicate fluid cleanliness. The code uses three numbers representing particle counts at 4 μm, 6 μm, and 14 μm sizes:</p>
+<table>
+<thead>
+<tr>
+<th>ISO Code</th>
+<th>Particles per mL (at size)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>13</td>
+<td>40–80</td>
+</tr>
+<tr>
+<td>16</td>
+<td>320–640</td>
+</tr>
+<tr>
+<td>18</td>
+<td>1,300–2,500</td>
+</tr>
+<tr>
+<td>20</td>
+<td>5,000–10,000</td>
+</tr>
+<tr>
+<td>22</td>
+<td>20,000–40,000</td>
+</tr>
+</tbody>
+</table>
+<p>A typical target cleanliness for a system with servo valves is <strong>ISO 16/14/11</strong> — very clean. A standard industrial system with gear pumps might tolerate <strong>ISO 20/18/15</strong>. The cleanliness target depends on the most sensitive component in the system.</p>
+<p>An example ISO code of <strong>18/16/13</strong> means:</p>
+<ul>
+<li>1,300–2,500 particles ≥ 4 μm per mL</li>
+<li>320–640 particles ≥ 6 μm per mL</li>
+<li>40–80 particles ≥ 14 μm per mL</li>
+</ul>
+<h3 id="filtration-strategies">Filtration Strategies</h3>
+<p>Achieving and maintaining target cleanliness requires a multi-point filtration approach. The <strong>beta ratio</strong> (β) indicates filter efficiency at a specific particle size:</p>
+<p>[
+\beta_x = \frac{\text{particles upstream} \geq x \mu m}{\text{particles downstream} \geq x \mu m}
+]</p>
+<p>A filter rated β₁₀ = 200 means that for every 200 particles of 10 μm or larger entering the filter, only 1 passes through — giving 99.5% efficiency at that size. Modern high-efficiency filters achieve β ratios of 1,000 or more (99.9% efficiency).</p>
+<h4 id="worked-example-4-beta-ratio-filter-efficiency">Worked Example 4: Beta Ratio Filter Efficiency</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Filter rated at ( \beta_{10} = 200 )</li>
+</ul>
+<p><strong>Find:</strong> Capture efficiency for 10-micron and larger particles</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Apply the efficiency formula:</li>
+</ol>
+<p>[
+\text{Efficiency} = \left(1 - \frac{1}{\beta}\right) \times 100
+]</p>
+<ol>
+<li>Substitute ( \beta_{10} = 200 ):</li>
+</ol>
+<p>[
+\text{Efficiency} = \left(1 - \frac{1}{200}\right) \times 100 = (1 - 0.005) \times 100 = 99.5\%
+]</p>
+<ol>
+<li>Interpret the result: Of every 1,000,000 particles ( \geq 10 ) microns entering the filter, only 5,000 pass through. The filter captures 995,000 particles.</li>
+</ol>
+<p><strong>Answer:</strong> The filter capture efficiency is <strong>99.5%</strong> for particles 10 microns and larger.</p>
+<blockquote>
+<p><strong>Practical note:</strong> For servo valves, specify ( \beta_3 \geq 1000 ) (99.9% at 3 microns). For proportional valves, ( \beta_6 \geq 200 ). For gear pumps and directional valves, ( \beta_{10} \geq 75 ). Under-filtration is the #1 cause of hydraulic component failure — 80% of hydraulic failures are contamination-related.</p>
+</blockquote>
+<h2 id="108-seal-types-and-failure-modes">10.8 Seal Types and Failure Modes</h2>
+<p>Seals prevent fluid from leaking past moving components and keep contaminants out. Understanding seal types and recognizing early signs of wear helps technicians prevent costly failures.</p>
+<h3 id="common-seal-types">Common Seal Types</h3>
+<ul>
+<li>
+<p><strong>O-rings:</strong> The most common hydraulic seal — a simple circular cross-section ring that sits in a groove. Used for static seals (between non-moving parts) and low-speed dynamic seals. Made from nitrile (Buna-N), Viton, or polyurethane depending on the fluid type and temperature.</p>
+</li>
+<li>
+<p><strong>Lip seals (U-cups):</strong> A U-shaped cross-section with flexible lips that press against the rod or bore. The fluid pressure pushes the lips tighter against the sealing surface — the higher the pressure, the better the seal. Used for dynamic sealing in cylinders.</p>
+</li>
+<li>
+<p><strong>Wiper seals (scraper seals):</strong> Installed at the rod end of cylinders to scrape dirt, moisture, and chips off the rod as it retracts. Without wipers, contaminants ride the rod into the cylinder and destroy the inner seals.</p>
+</li>
+<li>
+<p><strong>Wear rings (guide rings):</strong> Not true seals — they prevent metal-to-metal contact between the piston and bore. Made from filled PTFE or bronze. They carry side loads and keep the piston centered.</p>
+</li>
+</ul>
+<h3 id="failure-indicators">Failure Indicators</h3>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely Cause</th>
+<th>Action Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fluid leaking at rod</td>
+<td>Rod seal worn or damaged</td>
+<td>Replace rod seal kit</td>
+</tr>
+<tr>
+<td>Cylinder drifts under load</td>
+<td>Piston seal bypassing internally</td>
+<td>Replace piston seal kit</td>
+</tr>
+<tr>
+<td>Rod scoring or grooves</td>
+<td>Wiper seal failed, contamination</td>
+<td>Replace wiper + rod seal, check fluid</td>
+</tr>
+<tr>
+<td>Fluid milky or cloudy</td>
+<td>Water contamination</td>
+<td>Identify water source, filter or replace fluid</td>
+</tr>
+<tr>
+<td>Seal extruded from groove</td>
+<td>Pressure exceeded seal rating or excessive clearance</td>
+<td>Check pressure settings, replace with correct seal</td>
+</tr>
+<tr>
+<td>Rapid seal wear</td>
+<td>Fluid temperature too high or wrong fluid type</td>
+<td>Check cooler operation, verify fluid spec</td>
+</tr>
+</tbody>
+</table>
+<h2 id="109-leak-detection-and-repair">10.9 Leak Detection and Repair</h2>
+<p>Hydraulic leaks fall into two categories, and each requires a different diagnostic approach.</p>
+<h3 id="external-leakage">External Leakage</h3>
+<p>External leaks are visible — fluid dripping, puddles, or wet surfaces on the outside of components. Common locations include:</p>
+<ul>
+<li>Cylinder rod seals and end caps</li>
+<li>Hose fittings and adapters</li>
+<li>Pump shaft seals</li>
+<li>Valve body joints and manifold connections</li>
+<li>Reservoir drain plugs and sight glasses</li>
+</ul>
+<p>External leaks are usually straightforward to find and repair by replacing seals, tightening fittings, or replacing damaged hoses. However, never simply tighten a fitting as a first response — over-tightening can damage threads and make the leak worse.</p>
+<h3 id="internal-leakage">Internal Leakage</h3>
+<p>Internal leaks are invisible because the fluid bypasses inside the component without leaving the system. Symptoms include:</p>
+<ul>
+<li>Cylinder drifts or creeps under load (piston seal bypass)</li>
+<li>System runs hot (bypassed fluid converts pressure energy to heat)</li>
+<li>Actuators slow down even though pump RPM is correct</li>
+<li>System fails to reach full pressure</li>
+</ul>
+<p>Diagnosing internal leaks requires flow testing. By measuring flow at specific points and comparing to specifications, technicians can identify which component is bypassing. A common test is the <strong>cylinder bypass test</strong>: block the cylinder from moving, apply pressure, and measure leakage past the piston by timing how fast the cylinder drifts.</p>
+<h4 id="diagram-hydraulic-system-diagnostic-dashboard">Diagram: Hydraulic System Diagnostic Dashboard</h4>
+<iframe src="../../sims/hydraulic-diagnostics/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Hydraulic System Diagnostic Dashboard</summary>
+Type: microsim
+
+Bloom Level: L4 Analyze
+Bloom Verb: differentiate, examine
+Learning Objective: Students will analyze sensor data from a hydraulic system to differentiate between normal operation and fault conditions (pump wear, relief valve malfunction, internal cylinder leak, contaminated fluid) and identify the root cause.
+
+Layout: Dashboard with hydraulic system schematic at top and sensor panels below.
+
+System Schematic (top 55%):
+- Simplified hydraulic circuit showing: reservoir, pump, relief valve, directional control valve, double-acting cylinder, return filter
+- Animated fluid flow (colored lines showing pressure/return flow)
+- Color-coded components: Green=normal, Yellow=warning, Red=fault
+- Pressure indicators at key points (pump outlet, cylinder ports)
+
+Sensor Panels (bottom 45% — 5 panels):
+- Panel 1: System Pressure — gauge 0–5000 psi, green 1500–3000, yellow 3000–3500, red >3500 or <500
+- Panel 2: Pump Flow — gauge 0–30 GPM, green 18–22, yellow 14–18, red <14
+- Panel 3: Fluid Temperature — thermometer 80–200°F, green 100–140, yellow 140–160, red >160
+- Panel 4: Particle Count — ISO code display with color coding
+- Panel 5: Cylinder Position — bar showing extend/retract with drift indicator
+
+Interactive Controls:
+- Scenario selector dropdown:
+  1. "Normal Operation" — all readings in normal range
+  2. "Pump Wear" — flow decreased 25%, pressure drops under load, temperature elevated
+  3. "Relief Valve Stuck Open" — pressure limited, flow to tank, system overheating
+  4. "Internal Cylinder Leak" — cylinder drifts under load, temperature elevated, flow normal at pump
+  5. "Contaminated Fluid" — particle count elevated, temperature rising, gradual flow loss
+- Quiz mode: hides scenario label, shows 4 multiple-choice diagnosis options
+- "Diagnose" button reveals explanation linking sensor patterns to root cause
+- Score tracker
+
+Data Visibility Requirements:
+- Stage 1: Show all sensor readings for scenario
+- Stage 2: Highlight abnormal readings
+- Stage 3: Student selects diagnosis
+- Stage 4: Reveal correct answer with detailed explanation
+
+Instructional Rationale: Analyzing multiple sensor readings simultaneously to identify fault patterns mirrors real-world diagnostic practice and builds the differentiation skills needed for Bloom's L4.
+
+Color Scheme: Dark background (#1a1a2e), green/amber/red status colors, blue for hydraulic fluid flow
+Canvas: Responsive, minimum 900x600, adapts to window resize
+
+Implementation: p5.js with scenario-driven data model
+</details>
+
+<h3 id="troubleshooting-decision-table">Troubleshooting Decision Table</h3>
+<p>Effective hydraulic troubleshooting follows a systematic approach: identify the symptom, check the most likely causes first, and work toward less common causes. The following decision table provides a structured framework for the most common hydraulic system problems.</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Check 1st</th>
+<th>Check 2nd</th>
+<th>Check 3rd</th>
+<th>Likely Root Cause</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No pressure buildup</td>
+<td>Fluid level in reservoir</td>
+<td>Relief valve setting/condition</td>
+<td>Pump coupling and rotation</td>
+<td>Relief valve stuck open or pump failure</td>
+</tr>
+<tr>
+<td>Slow actuator movement</td>
+<td>Flow control valve setting</td>
+<td>Pump output flow rate</td>
+<td>Internal leakage (cylinder bypass test)</td>
+<td>Worn pump or internal cylinder leak</td>
+</tr>
+<tr>
+<td>System overheating (&gt;160°F)</td>
+<td>Oil level and cooler airflow</td>
+<td>Relief valve — is it bypassing?</td>
+<td>Pump case drain flow</td>
+<td>Excess flow across relief valve or worn pump</td>
+</tr>
+<tr>
+<td>Cavitation noise (high-pitched whine)</td>
+<td>Suction strainer — clogged?</td>
+<td>Fluid level — low?</td>
+<td>Suction line — restricted or air leak?</td>
+<td>Starved pump inlet</td>
+</tr>
+<tr>
+<td>Mechanical noise (knocking/banging)</td>
+<td>Coupling alignment</td>
+<td>Pump mounting bolts</td>
+<td>Bearing condition (vibration check)</td>
+<td>Worn bearings or coupling misalignment</td>
+</tr>
+<tr>
+<td>Cylinder drifts under load</td>
+<td>Directional valve spool centering</td>
+<td>Cylinder piston seals (bypass test)</td>
+<td>Counterbalance/pilot-operated check valve</td>
+<td>Worn piston seals or valve spool leakage</td>
+</tr>
+<tr>
+<td>Erratic actuator movement</td>
+<td>Air in system (foamy fluid?)</td>
+<td>Pump inlet condition</td>
+<td>Proportional/servo valve response</td>
+<td>Aeration or failing control valve</td>
+</tr>
+<tr>
+<td>External fluid leak</td>
+<td>Hose fittings and connections</td>
+<td>Cylinder rod seals</td>
+<td>Pump shaft seal</td>
+<td>Worn seal or loose/damaged fitting</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Troubleshooting Best Practice</p>
+<p>Always start with the simplest, most accessible check. Verify fluid level, filter condition, and relief valve setting before tearing into pumps or cylinders. Over 60% of hydraulic service calls are resolved by addressing fluid level, contamination, or a misadjusted valve — not by replacing major components.</p>
+</div>
+<h2 id="1010-hydraulic-schematics">10.10 Hydraulic Schematics</h2>
+<p>Hydraulic schematics are standardized drawings that show how components are connected in a circuit. Unlike piping diagrams that show physical layout, schematics show the functional relationships between components using <strong>ISO 1219</strong> symbols. Every technician must be able to read hydraulic schematics to troubleshoot systems, order replacement parts, and understand how a circuit operates.</p>
+<h3 id="reading-a-schematic">Reading a Schematic</h3>
+<p>Key conventions in ISO 1219 schematics:</p>
+<ul>
+<li><strong>Lines</strong> represent fluid paths: solid lines for working lines, dashed lines for pilot lines, dotted lines for drain lines</li>
+<li><strong>Pumps</strong> are circles with filled triangles pointing in the flow direction</li>
+<li><strong>Motors</strong> are circles with open (unfilled) triangles</li>
+<li><strong>Cylinders</strong> are rectangles with piston and rod shown</li>
+<li><strong>Valves</strong> are represented by squares (one square per position), with internal lines showing flow paths</li>
+<li><strong>The reservoir (tank)</strong> is an open rectangle at the bottom of the schematic</li>
+<li><strong>Flow direction</strong> is indicated by arrows on the connecting lines</li>
+</ul>
+<p>A basic hydraulic circuit reads from bottom to top: reservoir → pump → directional valve → actuator → return to reservoir. Pressure control valves connect from the main pressure line to the tank line. Flow control valves are placed in the line feeding the actuator.</p>
+<h3 id="circuit-types">Circuit Types</h3>
+<ul>
+<li><strong>Open-center circuit:</strong> The directional valve in neutral allows pump flow to return to the tank at low pressure. Simple and inexpensive but wastes energy when the actuator is not moving because the pump runs continuously.</li>
+<li><strong>Closed-center circuit:</strong> The directional valve in neutral blocks all ports. The pump builds pressure until the relief valve opens. Wastes more energy than open-center in standby.</li>
+<li><strong>Load-sensing circuit:</strong> A variable displacement pump adjusts output to match demand. When the valve is in neutral, the pump destrokes to near-zero output, consuming minimal energy. This is the most efficient circuit type.</li>
+</ul>
+<h3 id="energy-efficiency-circuit-comparison-and-vfd-savings">Energy Efficiency: Circuit Comparison and VFD Savings</h3>
+<p>The circuit type has a dramatic impact on energy consumption. A fixed-displacement pump in an open-center circuit runs at full speed and flow continuously, wasting energy as heat whenever the actuator is idle or running at partial demand. The following table compares power consumption for a 50 HP hydraulic power unit across three circuit types:</p>
+<table>
+<thead>
+<tr>
+<th>Operating Condition</th>
+<th>Open-Center Fixed Pump</th>
+<th>Closed-Center Fixed Pump</th>
+<th>Load-Sensing Variable Pump</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full load (100% demand)</td>
+<td>50 HP (100%)</td>
+<td>50 HP (100%)</td>
+<td>50 HP (100%)</td>
+</tr>
+<tr>
+<td>50% demand</td>
+<td>45 HP (90%)</td>
+<td>48 HP (96%)</td>
+<td>27 HP (54%)</td>
+</tr>
+<tr>
+<td>Idle (no demand)</td>
+<td>15 HP (30%)</td>
+<td>50 HP (100%)</td>
+<td>5 HP (10%)</td>
+</tr>
+</tbody>
+</table>
+<p>In the open-center circuit at idle, the pump still moves fluid through the system at low pressure, consuming about 30% of rated power. The closed-center circuit is even worse at idle — the pump deadheads against the relief valve, converting 100% of input power to heat. The load-sensing variable pump destrokes to near-zero displacement at idle, consuming only enough power to overcome internal friction.</p>
+<h4 id="vfd-retrofit-for-hydraulic-power-units">VFD Retrofit for Hydraulic Power Units</h4>
+<p>Adding a <strong>Variable Frequency Drive (VFD)</strong> to an existing fixed-displacement pump motor is one of the most cost-effective hydraulic efficiency upgrades. The VFD reduces motor speed during low-demand and idle periods, taking advantage of the affinity law: power varies with the cube of speed. Cutting motor speed by 50% reduces power consumption by approximately 87%.</p>
+<p>The annual energy savings from a VFD retrofit can be estimated using weighted duty-cycle analysis:</p>
+<p>[
+\text{Annual savings (\$)} = HP \times 0.746 \times (LF_{old} - LF_{new}) \times hours \times rate
+]</p>
+<p>Where ( HP ) is rated motor horsepower, 0.746 converts HP to kW, ( LF_{old} ) and ( LF_{new} ) are the weighted average load factors (0–1) before and after the VFD, ( hours ) is annual operating hours, and ( rate ) is the electricity cost per kWh.</p>
+<h4 id="worked-example-8-vfd-energy-savings-on-a-hydraulic-power-unit">Worked Example 8: VFD Energy Savings on a Hydraulic Power Unit</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>50 HP hydraulic power unit with fixed-displacement pump</li>
+<li>Duty cycle: 40% active (full load), 30% partial load (50% demand), 30% idle</li>
+<li>Annual operating hours: 4,000</li>
+<li>Electricity rate: $0.11/kWh</li>
+<li>Without VFD: motor runs at full speed continuously</li>
+<li>With VFD: motor speed reduced to 60% at partial load, 30% at idle</li>
+</ul>
+<p><strong>Find:</strong> Annual energy consumption before and after VFD, energy savings, cost savings, and payback period</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate weighted load factor without VFD. The fixed-displacement pump motor runs at full speed in all conditions. Using the open-center power values from the table above:</li>
+</ol>
+<p>[
+LF_{old} = (0.40 \times 1.00) + (0.30 \times 0.90) + (0.30 \times 0.30) = 0.40 + 0.27 + 0.09 = 0.76
+]</p>
+<ol>
+<li>Calculate annual energy consumption without VFD:</li>
+</ol>
+<p>[
+kWh_{old} = 50 \times 0.746 \times 0.76 \times 4{,}000 = 113{,}456 \text{ kWh}
+]</p>
+<ol>
+<li>Calculate weighted load factor with VFD. At partial load, the VFD reduces speed to 60% and power drops by approximately the cube of the speed ratio. At idle, speed drops to 30%:</li>
+</ol>
+<p>[
+LF_{new} = (0.40 \times 1.00) + (0.30 \times 0.60^3) + (0.30 \times 0.30^3)
+]
+[
+LF_{new} = 0.40 + (0.30 \times 0.216) + (0.30 \times 0.027) = 0.40 + 0.065 + 0.008 = 0.473
+]</p>
+<ol>
+<li>Calculate annual energy consumption with VFD:</li>
+</ol>
+<p>[
+kWh_{new} = 50 \times 0.746 \times 0.473 \times 4{,}000 = 70{,}594 \text{ kWh}
+]</p>
+<ol>
+<li>Calculate energy and cost savings:</li>
+</ol>
+<p>[
+\Delta kWh = 113{,}456 - 70{,}594 = 42{,}862 \text{ kWh saved}
+]
+[
+\text{Annual savings} = 42{,}862 \times \$0.11 = \$4{,}715 \text{ per year}
+]</p>
+<ol>
+<li>Estimate payback period (VFD installed cost: $10,000–$16,000, typical utility rebate: $4,000–$8,000):</li>
+</ol>
+<p>[
+\text{Payback} = \frac{\$10{,}000 - \$6{,}000}{\$4{,}715} = 0.85 \text{ years (with rebate)}
+]</p>
+<p><strong>Answer:</strong> The VFD reduces annual energy consumption from <strong>113,456 kWh to 70,594 kWh</strong> — a savings of <strong>42,862 kWh (37.8%)</strong> and <strong>$4,715/yr</strong>. With a typical utility rebate, the net payback period is under <strong>1 year</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> VFDs provide benefits beyond energy savings. Reduced motor speed during idle periods lowers noise by 5–10 dB, reduces heat generation (shrinking the cooling load), and eliminates high-inrush startup current that stresses motor windings and bearings. For systems with duty cycles that include significant idle or partial-load time, VFDs consistently deliver the best return on investment of any hydraulic efficiency upgrade.</p>
+</blockquote>
+<h2 id="1011-electrohydraulic-controls">10.11 Electrohydraulic Controls</h2>
+<p>Traditional hydraulic valves are operated by hand levers, mechanical linkages, or simple solenoids. Modern systems use <strong>electrohydraulic controls</strong> that combine electronic signals with hydraulic valve actuation for precise, repeatable, and remotely controlled motion.</p>
+<h3 id="proportional-valves">Proportional Valves</h3>
+<p>Unlike standard solenoid valves that are either fully open or fully closed, <strong>proportional valves</strong> open progressively in proportion to the electrical signal they receive. A 50% command signal opens the valve to 50% flow. This allows smooth acceleration, deceleration, and precise speed control of actuators without the abrupt starts and stops of on/off valves.</p>
+<h3 id="servo-valves">Servo Valves</h3>
+<p><strong>Servo valves</strong> are the highest-performance electrohydraulic control elements. They respond to very small electrical signals with extremely fast and precise spool movements. Servo valves are used in applications requiring position accuracy within thousandths of an inch, such as:</p>
+<ul>
+<li>CNC machine tool positioning</li>
+<li>Injection molding clamp control</li>
+<li>Aerospace flight control surfaces</li>
+<li>Industrial robot joint control</li>
+</ul>
+<p>Servo valves require very clean fluid (ISO 16/14/11 or better) because their internal clearances are measured in micrometers. Contamination is the leading cause of servo valve failure.</p>
+<h3 id="plc-integration">PLC Integration</h3>
+<p>Modern hydraulic systems connect proportional and servo valves to <strong>Programmable Logic Controllers (PLCs)</strong> that coordinate complex motion sequences. The PLC reads position sensors (linear encoders, LVDTs) and pressure transducers, then adjusts valve commands in a closed-loop control system. This allows automated, repeatable hydraulic operations like:</p>
+<ul>
+<li>Multi-axis press forming with coordinated ram movements</li>
+<li>Automatic cylinder sequencing (clamp → advance → drill → retract → unclamp)</li>
+<li>Pressure profiling during injection molding cycles</li>
+<li>Load-adaptive speed control on mobile equipment</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Proportional vs. Servo Valves</p>
+<p>Proportional valves cost 1/3 to 1/2 the price of servo valves and are more tolerant of contamination. Use proportional valves when position accuracy within ±0.5 mm is acceptable. Reserve servo valves for applications requiring accuracy within ±0.05 mm or response times below 10 milliseconds.</p>
+</div>
+<h2 id="1012-ai-driven-predictive-maintenance">10.12 AI-Driven Predictive Maintenance</h2>
+<p>Traditional hydraulic maintenance follows a time-based schedule — change the fluid every 2,000 hours, replace seals every 5,000 hours, regardless of actual condition. AI-driven predictive maintenance replaces this approach with data-driven decisions that reduce both costs and unexpected failures.</p>
+<h3 id="sensor-data-for-prediction">Sensor Data for Prediction</h3>
+<p>AI systems collect data from multiple sensors to build a comprehensive picture of system health:</p>
+<table>
+<thead>
+<tr>
+<th>Sensor Type</th>
+<th>What It Measures</th>
+<th>What It Predicts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pressure transducer</td>
+<td>System and component pressures</td>
+<td>Pump wear, relief valve drift, internal leaks</td>
+</tr>
+<tr>
+<td>Temperature sensor</td>
+<td>Fluid and component temperatures</td>
+<td>Cooler performance, seal degradation, fluid breakdown</td>
+</tr>
+<tr>
+<td>Flow meter</td>
+<td>Pump output, actuator flow</td>
+<td>Volumetric efficiency loss, internal bypass</td>
+</tr>
+<tr>
+<td>Vibration sensor</td>
+<td>Pump and motor vibration</td>
+<td>Bearing wear, cavitation, coupling misalignment</td>
+</tr>
+<tr>
+<td>Particle counter</td>
+<td>Fluid contamination level</td>
+<td>Filter condition, component wear rate</td>
+</tr>
+<tr>
+<td>Moisture sensor</td>
+<td>Water content in fluid</td>
+<td>Seal failure risk, corrosion potential</td>
+</tr>
+</tbody>
+</table>
+<h3 id="how-ai-predicts-failures">How AI Predicts Failures</h3>
+<p>The AI system establishes baseline values for each sensor during normal operation. It then continuously compares current readings to baselines and watches for patterns that indicate developing problems:</p>
+<ul>
+<li><strong>Trend analysis:</strong> Gradual increase in pump case drain flow indicates internal wear progressing toward failure</li>
+<li><strong>Correlation detection:</strong> Rising temperature combined with falling flow rate points to internal leakage converting hydraulic energy to heat</li>
+<li><strong>Pattern matching:</strong> Vibration signature changes that match known bearing failure patterns trigger maintenance alerts weeks before catastrophic failure</li>
+<li><strong>Remaining useful life (RUL):</strong> Based on wear trends, the AI estimates how many operating hours remain before a component reaches its failure threshold</li>
+</ul>
+<h4 id="diagram-hydraulic-predictive-maintenance-dashboard">Diagram: Hydraulic Predictive Maintenance Dashboard</h4>
+<iframe src="../../sims/hydraulic-predictive-maintenance/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Hydraulic Predictive Maintenance Dashboard</summary>
+Type: microsim
+
+Bloom Level: L5 Evaluate
+Bloom Verb: assess, prioritize
+Learning Objective: Students will evaluate AI-generated maintenance recommendations for a hydraulic system, assess component health indicators, and prioritize maintenance actions based on severity, remaining useful life, and production impact.
+
+Layout: Two-column dashboard — component health overview (left) and maintenance priority queue (right).
+
+Left Column — Component Health Cards (6 cards stacked):
+Each card shows:
+- Component name and icon
+- Health score (0–100%, shown as colored bar: green >80, yellow 60–80, red <60)
+- Key metric (e.g., pump efficiency %, fluid particle count, seal leak rate)
+- Trend arrow (improving ↑, stable →, declining ↓)
+- Estimated remaining useful life (RUL) in hours/days
+
+Components:
+1. Main Pump — Health: 72%, Efficiency: 88% (was 95% new), RUL: 1,200 hrs
+2. Relief Valve — Health: 95%, Cracking pressure: 2,980 psi (set: 3,000), RUL: 5,000+ hrs
+3. Main Cylinder — Health: 58%, Drift rate: 0.5 in/min under load, RUL: 400 hrs
+4. Hydraulic Fluid — Health: 65%, ISO Code: 19/17/14 (target: 18/16/13), RUL: 300 hrs
+5. Return Filter — Health: 40%, ΔP: 28 psi (max: 35), RUL: 100 hrs
+6. Servo Valve — Health: 82%, Response time: 12ms (spec: 10ms), RUL: 2,000 hrs
+
+Right Column — AI Maintenance Priority Queue:
+Ranked list of recommended actions:
+1. URGENT: Replace return filter (RUL: 100 hrs, impact: system contamination)
+2. HIGH: Schedule fluid change (RUL: 300 hrs, impact: accelerated wear)
+3. HIGH: Plan cylinder reseal (RUL: 400 hrs, impact: production quality)
+4. MEDIUM: Monitor pump efficiency trend (RUL: 1,200 hrs, plan for overhaul)
+5. LOW: Servo valve — within spec, continue monitoring
+
+Interactive Features:
+- Click any health card to expand with trend chart (last 30 days of data)
+- Drag and drop maintenance items to reorder priority (student exercises judgment)
+- "Submit Priority" button compares student ranking to AI recommendation
+- Slider: "Operating hours per day" (8, 16, 24) — updates RUL from hours to calendar days
+- Toggle between "hours" and "calendar days" for RUL display
+
+Color Scheme: White background, green/yellow/red health indicators, blue accent for interactive elements
+Canvas: Responsive, minimum 900x600, adapts to window resize
+
+Implementation: p5.js with interactive card components and drag-drop
+</details>
+
+<h2 id="1013-eco-friendly-hydraulic-fluids">10.13 Eco-Friendly Hydraulic Fluids</h2>
+<p>Traditional hydraulic fluids are petroleum-based mineral oils derived from crude oil. While effective, these fluids pose environmental risks when they leak or are disposed of improperly. The industry is transitioning toward <strong>eco-friendly hydraulic fluids</strong> that reduce environmental impact.</p>
+<h3 id="biodegradable-fluid-types">Biodegradable Fluid Types</h3>
+<table>
+<thead>
+<tr>
+<th>Fluid Type</th>
+<th>Base Material</th>
+<th>Biodegradability</th>
+<th>Temperature Range</th>
+<th>Cost vs. Mineral Oil</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HETG (triglyceride)</td>
+<td>Vegetable oils (rapeseed, soy)</td>
+<td>&gt;90% in 21 days</td>
+<td>-20°C to 70°C</td>
+<td>2–3×</td>
+</tr>
+<tr>
+<td>HEES (synthetic ester)</td>
+<td>Synthetic esters</td>
+<td>&gt;60% in 28 days</td>
+<td>-30°C to 90°C</td>
+<td>3–5×</td>
+</tr>
+<tr>
+<td>HEPG (polyglycol)</td>
+<td>Polyalkylene glycols</td>
+<td>&gt;80% in 28 days</td>
+<td>-35°C to 90°C</td>
+<td>4–6×</td>
+</tr>
+<tr>
+<td>HEPR (polyolefin)</td>
+<td>Poly-alpha-olefins</td>
+<td>Variable</td>
+<td>-40°C to 100°C</td>
+<td>5–8×</td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-trade-offs">Performance Trade-offs</h3>
+<p>Eco-friendly fluids offer environmental benefits but require careful consideration:</p>
+<ul>
+<li><strong>Seal compatibility:</strong> Some biodegradable fluids attack certain seal materials. Verify that all seals in the system are compatible before switching fluids. Viton seals work with most biodegradable fluids; nitrile (Buna-N) seals may swell or degrade with some synthetic esters.</li>
+<li><strong>Oxidation stability:</strong> Vegetable-based fluids (HETG) oxidize faster than mineral oils, requiring more frequent fluid changes or antioxidant additives.</li>
+<li><strong>Water tolerance:</strong> Some biodegradable fluids absorb moisture more readily than mineral oil, increasing the risk of corrosion and microbial growth.</li>
+<li><strong>Mixing prohibition:</strong> Biodegradable fluids must never be mixed with mineral oils. Switching requires a complete system flush — a costly and time-consuming process.</li>
+</ul>
+<h3 id="disposal-requirements">Disposal Requirements</h3>
+<p>Even biodegradable fluids must be disposed of properly. Used hydraulic fluid — whether mineral or biodegradable — must be collected and sent to a licensed recycler or disposal facility. Pouring fluid on the ground or into drains is illegal and subject to heavy EPA fines.</p>
+<div class="admonition warning">
+<p class="admonition-title">Fluid Disposal</p>
+<p>Never mix different types of used hydraulic fluid in the same collection container. Mineral oil, biodegradable ester, and fire-resistant fluids must be collected separately because mixing makes recycling impossible. Label all collection containers clearly with the fluid type.</p>
+</div>
+<h2 id="1014-hydraulic-safety-hazards">10.14 Hydraulic Safety Hazards</h2>
+<p>Hydraulic systems operate at extremely high pressures — 2,000 to 6,000 psi is routine in industrial applications — and store enormous energy in accumulators, pressurized hoses, and suspended loads. Unique hazards exist that do not occur in other fluid power systems.</p>
+<h3 id="injection-injuries">Injection Injuries</h3>
+<p>A <strong>hydraulic injection injury</strong> occurs when a pinhole leak in a hose or fitting creates a high-velocity fluid jet that penetrates the skin. At 2,000+ psi, hydraulic fluid can penetrate skin, muscle, and bone from a distance of several inches.</p>
+<p>Injection injuries are deceptively dangerous:</p>
+<ul>
+<li>The entry wound is often small — a tiny puncture that looks minor</li>
+<li>The victim may feel only a sting and assume the injury is insignificant</li>
+<li>Internally, hydraulic fluid spreads through tissue planes, causing massive inflammation, tissue necrosis, and potential gangrene</li>
+<li><strong>Without surgical debridement within 6–10 hours, the amputation rate exceeds 40%</strong></li>
+<li>Even with prompt surgery, permanent disability is common</li>
+</ul>
+<div class="admonition danger">
+<p class="admonition-title">NEVER Feel for Leaks with Bare Hands</p>
+<p>NEVER run your hand along a hydraulic hose or fitting to check for leaks. A pinhole leak invisible to the eye can inject fluid through a leather glove. Use a piece of cardboard or a commercial leak detector to locate pressurized leaks. If anyone sustains a fluid injection injury, treat it as a medical emergency — go immediately to a hospital emergency room and inform the surgeon it is a high-pressure injection injury.</p>
+</div>
+<h3 id="stored-energy-hazards">Stored Energy Hazards</h3>
+<p>Hydraulic systems retain stored energy even after the pump is shut off:</p>
+<ul>
+<li><strong>Accumulators</strong> remain charged at full working pressure until manually dumped through the discharge valve</li>
+<li><strong>Pressurized hoses and cylinders</strong> may hold trapped pressure if valves are in a blocked-port position</li>
+<li><strong>Suspended loads</strong> on vertical cylinders create pressure from gravity — a cylinder supporting a 10,000 lb load at 2,000 psi will maintain that pressure indefinitely</li>
+</ul>
+<p><strong>Lockout/tagout (LOTO) for hydraulic systems must include:</strong></p>
+<ol>
+<li>De-energize and lock out the electric motor</li>
+<li>Cycle the directional valves to release trapped pressure in lines and actuators</li>
+<li>Open the accumulator dump valve and verify pressure gauge reads zero</li>
+<li>Block or lower any suspended loads to a safe resting position</li>
+<li>Verify zero energy at each work point with a calibrated pressure gauge</li>
+</ol>
+<h3 id="osha-requirements">OSHA Requirements</h3>
+<p>Federal regulations that apply to hydraulic system maintenance include:</p>
+<ul>
+<li><strong>29 CFR 1910.147</strong> — Control of Hazardous Energy (LOTO): Requires written LOTO procedures for each hydraulic machine, employee training, and periodic inspections. Hydraulic accumulators and suspended loads are explicitly identified as stored energy sources that must be addressed.</li>
+<li><strong>29 CFR 1910.132–138</strong> — Personal Protective Equipment: Requires hazard assessment and appropriate PPE including safety glasses, face shields during pressure testing, chemical-resistant gloves for fluid handling, and hearing protection near high-noise pumps.</li>
+<li><strong>Hose management:</strong> Although not covered by a single OSHA standard, industry best practice (and many facility insurance policies) requires periodic hose inspection, replacement of hoses beyond their service life (typically 6–10 years depending on application), and installation of <strong>burst-containment sleeves</strong> (whip restraints) on hoses in areas where personnel work.</li>
+</ul>
+<h2 id="1015-utility-rebates-incentives-and-building-the-business-case">10.15 Utility Rebates, Incentives, and Building the Business Case</h2>
+<p>Many of the energy efficiency upgrades discussed in this chapter qualify for <strong>utility rebate programs</strong> and <strong>government incentives</strong> that can dramatically reduce upfront costs and shorten payback periods. Hydraulic power units are significant energy consumers — a 50 HP hydraulic pump running two shifts can consume over $20,000 in electricity per year — making them high-value targets for efficiency programs.</p>
+<h3 id="available-incentive-programs">Available Incentive Programs</h3>
+<table>
+<thead>
+<tr>
+<th>Program Type</th>
+<th>Examples</th>
+<th>Typical Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Utility prescriptive rebates</td>
+<td>VFD on hydraulic power unit motor, premium-efficiency motors, servo-driven hydraulic pumps</td>
+<td>$50–$150 per HP for VFDs; $10–$25 per HP for premium motors</td>
+</tr>
+<tr>
+<td>Utility custom/calculated rebates</td>
+<td>Variable displacement pump conversion, servo-hydraulic systems, accumulator-assisted circuits</td>
+<td>$0.03–$0.12 per kWh saved annually</td>
+</tr>
+<tr>
+<td>Federal tax credits (IRA §179D)</td>
+<td>Energy-efficient commercial building deduction for qualifying manufacturing process upgrades</td>
+<td>Up to $5.00/sq ft for whole-building projects</td>
+</tr>
+<tr>
+<td>State/local programs</td>
+<td>Manufacturing modernization grants, industrial energy efficiency programs</td>
+<td>Varies by state — $1,000 to $100,000+ per project</td>
+</tr>
+<tr>
+<td>DOE programs</td>
+<td>Better Plants, Industrial Assessment Centers (IACs), Combined Heat and Power Technical Assistance</td>
+<td>Free energy assessments, technical guidance, recognition programs</td>
+</tr>
+</tbody>
+</table>
+<h3 id="how-to-find-available-rebates">How to Find Available Rebates</h3>
+<ol>
+<li><strong>Check your utility's website</strong> — Search for "[utility name] industrial rebates" or "manufacturing energy incentives." Hydraulic system VFD rebates fall under the same motor/drive incentive programs that cover fans and pumps. Many utilities also offer custom incentives for more sophisticated upgrades like servo-hydraulic conversions or load-sensing pump systems, where energy savings must be calculated from engineering analysis rather than a prescriptive formula.</li>
+<li><strong>Use the DSIRE database</strong> — The Database of State Incentives for Renewables and Efficiency (<a href="https://www.dsireusa.org">dsireusa.org</a>) catalogs federal, state, and local incentive programs. Search for "industrial process efficiency," "motor systems," or "manufacturing equipment" to find applicable programs in your state.</li>
+<li><strong>Request an Industrial Assessment Center (IAC) audit</strong> — The DOE funds university-based IACs that provide free energy assessments to small and mid-sized manufacturers (generally under 500 employees and $100M revenue). IAC engineers will analyze your hydraulic systems, measure actual power consumption under various operating conditions, and provide a detailed report with specific upgrade recommendations, calculated energy savings, and estimated payback periods. This documentation is invaluable for both rebate applications and internal capital approval.</li>
+<li><strong>Get pre-approval before starting work</strong> — Most rebate programs require pre-approval and baseline energy measurement before equipment is purchased or installed. For hydraulic system upgrades, this typically means logging motor power consumption over a representative production period (at least two weeks) to establish the baseline against which savings will be verified.</li>
+</ol>
+<h3 id="common-hydraulic-system-upgrades-and-rebate-potential">Common Hydraulic System Upgrades and Rebate Potential</h3>
+<table>
+<thead>
+<tr>
+<th>Upgrade</th>
+<th>Typical Cost</th>
+<th>Annual Savings</th>
+<th>Typical Rebate</th>
+<th>Net Payback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VFD on hydraulic power unit (50 HP)</td>
+<td>$10,000–$16,000</td>
+<td>$6,000–$12,000/yr</td>
+<td>$4,000–$8,000</td>
+<td>0.5–1.5 years</td>
+</tr>
+<tr>
+<td>Servo-hydraulic conversion</td>
+<td>$25,000–$50,000</td>
+<td>$10,000–$20,000/yr</td>
+<td>$6,000–$15,000</td>
+<td>1.5–3.0 years</td>
+</tr>
+<tr>
+<td>Premium-efficiency motor upgrade (50 HP)</td>
+<td>$3,500–$6,000</td>
+<td>$800–$1,500/yr</td>
+<td>$500–$1,200</td>
+<td>2.0–4.0 years</td>
+</tr>
+<tr>
+<td>Variable displacement pump upgrade</td>
+<td>$8,000–$15,000</td>
+<td>$4,000–$8,000/yr</td>
+<td>$2,500–$6,000</td>
+<td>0.8–2.0 years</td>
+</tr>
+<tr>
+<td>Hydraulic accumulator addition</td>
+<td>$5,000–$12,000</td>
+<td>$2,000–$5,000/yr</td>
+<td>$1,500–$4,000</td>
+<td>1.0–2.5 years</td>
+</tr>
+</tbody>
+</table>
+<h3 id="building-the-business-case">Building the Business Case</h3>
+<p>When presenting a hydraulic efficiency project to management, emphasize that most industrial hydraulic systems waste 50–70% of their input energy. A conventional fixed-displacement pump running against a relief valve during idle and low-demand periods converts all that excess flow into heat — energy that was purchased as electricity and then must be removed by a cooler (consuming even more energy). A VFD or variable displacement pump eliminates this waste by matching pump output to actual demand. For a 50 HP power unit operating 4,000 hours per year, the transition from a fixed-displacement pump with relief valve unloading to a VFD-controlled system can save $8,000–$12,000 annually, with a utility rebate reducing the net project cost by 30–50%.</p>
+<p>Present efficiency upgrades as <strong>multi-benefit investments</strong> that go beyond energy savings. A VFD-equipped hydraulic power unit runs quieter (reducing workplace noise levels by 5–10 dB), generates less heat (reducing cooling requirements and extending fluid life), and subjects components to lower stress during startup (extending pump and motor bearing life). Quantify these secondary savings where possible — for example, extending hydraulic fluid change intervals from 2,000 hours to 4,000 hours saves $1,500–$3,000 per year in fluid and disposal costs for a 100-gallon system. Reduced heat generation may allow downsizing or eliminating the oil cooler, saving both capital and the energy to run it.</p>
+<p>Finally, connect the project to broader organizational goals. Many manufacturers face pressure to reduce their carbon footprint, meet customer sustainability requirements, or comply with state energy benchmarking laws. A hydraulic system optimization project that reduces electricity consumption by 40–60% generates a proportional reduction in Scope 2 greenhouse gas emissions. Document the avoided CO₂ emissions using EPA eGRID factors — a 50 HP hydraulic system saving 50,000 kWh per year avoids approximately 20–25 metric tons of CO₂ annually, depending on regional grid mix. This quantified environmental benefit strengthens both rebate applications and internal business cases, particularly when sustainability budgets can co-fund efficiency projects.</p>
+<h2 id="1016-key-takeaways">10.16 Key Takeaways</h2>
+<p>This chapter covered the essential knowledge and skills for maintaining and optimizing hydraulic systems with modern AI and predictive maintenance tools:</p>
+<ul>
+<li>Pascal's Law — pressure applied to a confined fluid transmits equally in all directions — is the foundation of all hydraulic systems</li>
+<li>Hydraulic fluid properties (viscosity, VI, pour point, flash point) determine system performance across operating conditions</li>
+<li>Three pump types serve different needs: gear pumps (simple, low-cost), vane pumps (quiet, variable displacement), piston pumps (high pressure, high efficiency)</li>
+<li>Cylinders produce linear force; motors produce rotary torque — both use the same pressure-force-area relationships</li>
+<li>Directional, pressure, and flow control valves manage every aspect of actuator operation</li>
+<li>Reservoirs, filters, and accumulators are critical support components — never neglect their maintenance</li>
+<li>Fluid contamination causes 70–80% of hydraulic failures; ISO 4406 cleanliness codes and beta-rated filters are essential</li>
+<li>Seal types (O-rings, lip seals, wipers, wear rings) each serve a specific function; recognizing failure symptoms enables proactive replacement</li>
+<li>External leaks are visible; internal leaks require flow testing and sensor data to diagnose</li>
+<li>ISO 1219 schematic symbols are the universal language of hydraulic circuits</li>
+<li>Electrohydraulic controls (proportional and servo valves) with PLC integration enable precise automated motion</li>
+<li>AI-driven predictive maintenance uses pressure, temperature, vibration, flow, and particle data to predict failures and optimize maintenance schedules</li>
+<li>Eco-friendly hydraulic fluids reduce environmental impact but require attention to seal compatibility, oxidation stability, and proper disposal</li>
+<li>Accumulator sizing uses Boyle's Law with pre-charge set to 90% of minimum working pressure; always oversize for emergency applications</li>
+<li>Heat management is critical — identify and reduce heat sources (relief valve bypass, throttling) before sizing a cooler</li>
+<li>Hydraulic injection injuries from pinhole leaks are medical emergencies with &gt;40% amputation risk; NEVER feel for leaks with bare hands</li>
+<li>VFD retrofits on fixed-displacement pump motors can reduce energy consumption by 30–40%, with payback periods under 2 years</li>
+</ul>
+<hr />
+<details class="question">
+<summary>Review Question: A technician observes that a hydraulic cylinder slowly drifts downward under load even when the directional control valve is in the closed-center (neutral) position. The system pressure gauge reads normal (2,500 psi), the pump flow rate is within specification, and there are no visible external leaks. What is the most likely cause, and how would the technician confirm the diagnosis?</summary>
+<p><strong>Answer:</strong></p>
+<p>The most likely cause is <strong>internal leakage past the cylinder piston seals</strong>. When the piston seals wear or are damaged, pressurized fluid bypasses from the high-pressure side of the piston to the low-pressure side inside the cylinder. This allows the load to push the piston down (or the rod to retract) even though the directional valve is blocking flow.</p>
+<p>To confirm the diagnosis, the technician should perform a <strong>cylinder bypass test</strong>:</p>
+<ol>
+<li>Extend the cylinder fully against a solid stop or load</li>
+<li>Set the directional valve to hold position (closed center)</li>
+<li>Disconnect or cap the return line from the cylinder</li>
+<li>Observe the rod — if it continues to drift, fluid is bypassing internally</li>
+<li>Collect and measure any fluid that leaks from the disconnected return port</li>
+<li>Compare the bypass flow rate to the manufacturer's maximum allowable internal leakage specification</li>
+</ol>
+<p>If bypass exceeds specifications, the cylinder must be removed and rebuilt with new piston seals, wear rings, and possibly a re-honed bore if scoring is found.</p>
+<p>An AI monitoring system would have detected this problem earlier by tracking the cylinder position sensor. Gradual increase in drift rate over weeks would trigger a predictive maintenance alert recommending seal replacement before the drift became a production problem.</p>
+</details>
+<hr />
+<h2 id="hands-on-lab-hydraulic-cylinder-service-and-ai-maintenance-review">Hands-On Lab: Hydraulic Cylinder Service and AI Maintenance Review</h2>
+<p><strong>Objective:</strong> Service a hydraulic cylinder and review AI-generated maintenance logs to understand predictive maintenance in practice.</p>
+<p><strong>Safety Requirements:</strong></p>
+<ul>
+<li>Lock out/tag out (LOTO) all energy sources before disassembly</li>
+<li>Verify accumulators are fully discharged — check pressure gauge reads zero after opening dump valve</li>
+<li>Wear appropriate PPE: safety glasses, gloves, face shield during pressure testing</li>
+<li>Use proper lifting equipment for heavy cylinders</li>
+<li>Contain and properly dispose of all hydraulic fluid</li>
+<li><strong>NEVER feel for leaks with bare hands</strong> — use cardboard or a leak detector to locate pressurized leaks</li>
+<li>Inspect all hoses for cracking, bulging, abrasion, or age before pressurizing the system</li>
+<li>Block or lower any suspended loads before working beneath hydraulic cylinders</li>
+</ul>
+<p><strong>Activities:</strong></p>
+<ol>
+<li>Inspect the hydraulic system for external leaks — document locations and severity</li>
+<li>Record system pressure at the pump outlet and compare to design specifications</li>
+<li>Perform a cylinder bypass (drift) test and measure internal leakage rate</li>
+<li>Disassemble a hydraulic cylinder — inspect seals, wear rings, rod surface, and bore condition</li>
+<li>Identify each seal type (O-ring, lip seal, wiper, wear ring) and note its function</li>
+<li>Replace the complete seal kit and reassemble the cylinder to manufacturer torque specifications</li>
+<li>Take a fluid sample for particle count analysis — determine the ISO cleanliness code</li>
+<li>Review the AI predictive maintenance dashboard (if equipped) — identify which components are flagged for attention and explain the sensor data supporting each recommendation</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Lab Report</p>
+<p>Document all measurements, seal conditions, and fluid analysis results. Compare your findings to the AI system's predictions (if available). Note whether the AI correctly identified the issues you found during manual inspection, and discuss any discrepancies.</p>
+</div>
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../09-dust-collection/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 9. Dust Collection">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                9. Dust Collection
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../11-pumping/" class="md-footer__link md-footer__link--next" aria-label="Next: 11. Pumping Systems">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                11. Pumping Systems
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "toc.follow", "navigation.top", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../js/extra.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PLC Control Loop MicroSim</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8f9fa;
+  }
+  #sim-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Tooltip */
+  #tooltip {
+    position: absolute;
+    display: none;
+    background: #1a1a2e;
+    color: #eee;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 280px;
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    border: 1px solid #333;
+  }
+  #tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #1a1a2e transparent transparent transparent;
+  }
+
+  /* Ladder logic overlay */
+  #ladder-overlay {
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 2px solid #2563eb;
+    border-radius: 10px;
+    padding: 24px;
+    width: 420px;
+    max-width: 90%;
+    z-index: 200;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+  #ladder-overlay h3 {
+    margin: 0 0 14px 0;
+    font-size: 16px;
+    color: #2563eb;
+  }
+  #ladder-overlay .close-btn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #666;
+    background: none;
+    border: none;
+    font-weight: bold;
+  }
+  #ladder-overlay .close-btn:hover { color: #333; }
+  .rung {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .rung:last-child { border-bottom: none; }
+  .rung-number {
+    font-weight: 700;
+    color: #2563eb;
+    margin-right: 12px;
+    min-width: 50px;
+    font-size: 13px;
+  }
+  .rung-diagram {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #333;
+    flex: 1;
+  }
+  .rung-desc {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  }
+  #ladder-backdrop {
+    position: absolute;
+    display: none;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 150;
+  }
+
+  /* Hover interactivity cue */
+  .stage-group { cursor: pointer; }
+  .stage-group:hover .stage-bg { opacity: 0.15; }
+  #ladder-click-area { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="sim-container">
+  <svg id="plc-svg" viewBox="0 0 900 620" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <!-- Arrow marker -->
+      <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#16a34a"/>
+      </marker>
+      <marker id="arrowBlue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+      </marker>
+      <marker id="arrowOrange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#ea580c"/>
+      </marker>
+      <marker id="arrowGray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#6b7280"/>
+      </marker>
+
+      <!-- Glow filters -->
+      <filter id="glowGreen"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#16a34a" flood-opacity="0.5"/></filter>
+      <filter id="glowBlue"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#2563eb" flood-opacity="0.5"/></filter>
+      <filter id="glowOrange"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#ea580c" flood-opacity="0.5"/></filter>
+      <filter id="shadowSm"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.15"/></filter>
+    </defs>
+
+    <!-- ============================================= -->
+    <!-- TITLE -->
+    <!-- ============================================= -->
+    <text x="450" y="28" text-anchor="middle" font-size="20" font-weight="700" fill="#1a1a2e">PLC Closed-Loop Control: Cooling Water System</text>
+
+    <!-- ============================================= -->
+    <!-- CONNECTION PATHS (drawn first, behind everything) -->
+    <!-- ============================================= -->
+
+    <!-- Input → PLC (top to center) -->
+    <path id="pathInputToPLC" d="M 450 165 L 450 240" stroke="#16a34a" stroke-width="3" fill="none" marker-end="url(#arrowGreen)"/>
+    <text x="460" y="200" font-size="10" fill="#16a34a" font-weight="600">Analog Input (4-20 mA)</text>
+
+    <!-- PLC → Process (center to right) -->
+    <path id="pathPLCtoProcess" d="M 560 310 L 660 310" stroke="#2563eb" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"/>
+
+    <!-- Process → Output (right down to bottom) -->
+    <path id="pathProcessToOutput" d="M 720 395 L 720 430 L 450 430 L 450 445" stroke="#ea580c" stroke-width="3" fill="none" marker-end="url(#arrowOrange)"/>
+    <text x="590" y="422" font-size="10" fill="#ea580c" font-weight="600">Digital Output (24V DC)</text>
+
+    <!-- Output → Feedback (bottom to left) -->
+    <path id="pathOutputToFeedback" d="M 340 510 L 180 510 L 180 395" stroke="#6b7280" stroke-width="3" fill="none" marker-end="url(#arrowGray)"/>
+
+    <!-- Feedback → Input (left up to top) -->
+    <path id="pathFeedbackToInput" d="M 180 260 L 180 130 L 320 130" stroke="#6b7280" stroke-width="3" fill="none" marker-end="url(#arrowGray)"/>
+
+    <!-- ============================================= -->
+    <!-- ANIMATED PULSES -->
+    <!-- ============================================= -->
+    <circle r="5" fill="#16a34a" opacity="0.9" filter="url(#glowGreen)">
+      <animateMotion dur="2s" repeatCount="indefinite" path="M 450 165 L 450 240"/>
+    </circle>
+    <circle r="5" fill="#2563eb" opacity="0.9" filter="url(#glowBlue)">
+      <animateMotion dur="2s" repeatCount="indefinite" path="M 560 310 L 660 310"/>
+    </circle>
+    <circle r="5" fill="#ea580c" opacity="0.9" filter="url(#glowOrange)">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 720 395 L 720 430 L 450 430 L 450 445"/>
+    </circle>
+    <circle r="5" fill="#6b7280" opacity="0.7">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 340 510 L 180 510 L 180 395"/>
+    </circle>
+    <circle r="5" fill="#6b7280" opacity="0.7">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 180 260 L 180 130 L 320 130"/>
+    </circle>
+
+    <!-- Second set of pulses (offset) -->
+    <circle r="4" fill="#16a34a" opacity="0.6">
+      <animateMotion dur="2s" repeatCount="indefinite" begin="1s" path="M 450 165 L 450 240"/>
+    </circle>
+    <circle r="4" fill="#2563eb" opacity="0.6">
+      <animateMotion dur="2s" repeatCount="indefinite" begin="1s" path="M 560 310 L 660 310"/>
+    </circle>
+    <circle r="4" fill="#ea580c" opacity="0.6">
+      <animateMotion dur="3s" repeatCount="indefinite" begin="1.5s" path="M 720 395 L 720 430 L 450 445"/>
+    </circle>
+
+    <!-- ============================================= -->
+    <!-- 1. INPUT STAGE (top) -->
+    <!-- ============================================= -->
+    <g class="stage-group" data-stage="input">
+      <!-- Background highlight on hover -->
+      <rect class="stage-bg" x="300" y="50" width="300" height="120" rx="12" fill="#16a34a" opacity="0" />
+
+      <!-- Stage label -->
+      <text x="450" y="68" text-anchor="middle" font-size="14" font-weight="700" fill="#16a34a">INPUT STAGE</text>
+
+      <!-- Temperature sensor -->
+      <g transform="translate(330, 80)">
+        <rect x="0" y="0" width="70" height="50" rx="6" fill="#fff" stroke="#16a34a" stroke-width="2" filter="url(#shadowSm)"/>
+        <!-- Thermometer icon -->
+        <rect x="20" y="8" width="8" height="24" rx="4" fill="#ef4444"/>
+        <circle cx="24" cy="36" r="6" fill="#ef4444"/>
+        <rect x="22" y="14" width="4" height="14" fill="#fca5a5"/>
+        <text x="35" y="22" font-size="8" fill="#333" font-weight="600">TEMP</text>
+        <text x="35" y="32" font-size="7" fill="#666">90&#176;F</text>
+        <text x="35" y="44" font-size="7" fill="#16a34a">AI-01</text>
+      </g>
+
+      <!-- Pressure sensor -->
+      <g transform="translate(415, 80)">
+        <rect x="0" y="0" width="70" height="50" rx="6" fill="#fff" stroke="#16a34a" stroke-width="2" filter="url(#shadowSm)"/>
+        <!-- Pressure gauge icon -->
+        <circle cx="22" cy="24" r="14" fill="none" stroke="#2563eb" stroke-width="2"/>
+        <line x1="22" y1="24" x2="30" y2="16" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="22" cy="24" r="2" fill="#2563eb"/>
+        <text x="42" y="20" font-size="8" fill="#333" font-weight="600">PSI</text>
+        <text x="42" y="30" font-size="7" fill="#666">45 psi</text>
+        <text x="42" y="42" font-size="7" fill="#16a34a">AI-02</text>
+      </g>
+
+      <!-- Flow switch -->
+      <g transform="translate(500, 80)">
+        <rect x="0" y="0" width="70" height="50" rx="6" fill="#fff" stroke="#16a34a" stroke-width="2" filter="url(#shadowSm)"/>
+        <!-- Flow icon -->
+        <path d="M 10 24 Q 18 14 26 24 Q 34 34 42 24" fill="none" stroke="#0ea5e9" stroke-width="2"/>
+        <polygon points="40,20 46,24 40,28" fill="#0ea5e9"/>
+        <text x="10" y="44" font-size="8" fill="#333" font-weight="600">FLOW</text>
+        <text x="42" y="44" font-size="7" fill="#16a34a">DI-01</text>
+      </g>
+    </g>
+
+    <!-- ============================================= -->
+    <!-- 2. CENTER PLC UNIT -->
+    <!-- ============================================= -->
+    <g filter="url(#shadowSm)">
+      <!-- PLC Housing -->
+      <rect x="370" y="245" width="180" height="130" rx="8" fill="#e8edf5" stroke="#374151" stroke-width="2.5"/>
+      <rect x="370" y="245" width="180" height="28" rx="8" fill="#374151"/>
+      <rect x="370" y="265" width="180" height="8" fill="#374151"/>
+
+      <!-- PLC label -->
+      <text x="460" y="262" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">PLC</text>
+
+      <!-- Indicator lights row -->
+      <circle cx="395" cy="254" r="4" fill="#22c55e">
+        <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="408" cy="254" r="4" fill="#22c55e">
+        <animate attributeName="opacity" values="1;0.4;1" dur="1.8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="421" cy="254" r="4" fill="#eab308">
+        <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="530" cy="254" r="4" fill="#22c55e">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Labels -->
+      <text x="395" y="264" font-size="5" fill="#9ca3af">RUN</text>
+      <text x="408" y="264" font-size="5" fill="#9ca3af">COM</text>
+      <text x="421" y="264" font-size="5" fill="#9ca3af">ERR</text>
+
+      <!-- Input module -->
+      <rect x="380" y="282" width="55" height="40" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+      <text x="408" y="296" text-anchor="middle" font-size="8" font-weight="600" fill="#16a34a">INPUT</text>
+      <text x="408" y="306" text-anchor="middle" font-size="7" fill="#16a34a">MODULE</text>
+      <!-- Input terminal dots -->
+      <circle cx="390" cy="316" r="2" fill="#16a34a"/>
+      <circle cx="398" cy="316" r="2" fill="#16a34a"/>
+      <circle cx="406" cy="316" r="2" fill="#16a34a"/>
+      <circle cx="414" cy="316" r="2" fill="#16a34a"/>
+      <circle cx="422" cy="316" r="2" fill="#16a34a"/>
+
+      <!-- CPU -->
+      <rect x="440" y="282" width="40" height="40" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+      <text x="460" y="300" text-anchor="middle" font-size="9" font-weight="700" fill="#2563eb">CPU</text>
+      <text x="460" y="312" text-anchor="middle" font-size="7" fill="#2563eb">Logic</text>
+
+      <!-- Output module -->
+      <rect x="485" y="282" width="55" height="40" rx="4" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+      <text x="512" y="296" text-anchor="middle" font-size="8" font-weight="600" fill="#ea580c">OUTPUT</text>
+      <text x="512" y="306" text-anchor="middle" font-size="7" fill="#ea580c">MODULE</text>
+      <!-- Output terminal dots -->
+      <circle cx="495" cy="316" r="2" fill="#ea580c"/>
+      <circle cx="503" cy="316" r="2" fill="#ea580c"/>
+      <circle cx="511" cy="316" r="2" fill="#ea580c"/>
+      <circle cx="519" cy="316" r="2" fill="#ea580c"/>
+      <circle cx="527" cy="316" r="2" fill="#ea580c"/>
+
+      <!-- Scan cycle annotation -->
+      <text x="460" y="350" text-anchor="middle" font-size="9" fill="#374151" font-weight="600">Scan Cycle: 10-50 ms</text>
+      <text x="460" y="365" text-anchor="middle" font-size="8" fill="#6b7280">Read  &rarr;  Execute  &rarr;  Write</text>
+    </g>
+
+    <!-- ============================================= -->
+    <!-- 3. PROCESS STAGE (right) - Ladder Logic -->
+    <!-- ============================================= -->
+    <g class="stage-group" data-stage="process">
+      <rect class="stage-bg" x="660" y="230" width="220" height="170" rx="12" fill="#2563eb" opacity="0"/>
+
+      <text x="770" y="252" text-anchor="middle" font-size="14" font-weight="700" fill="#2563eb">PROCESS STAGE</text>
+
+      <!-- Ladder logic box -->
+      <g id="ladder-click-area">
+        <rect x="670" y="260" width="200" height="130" rx="8" fill="#fff" stroke="#2563eb" stroke-width="2" filter="url(#shadowSm)"/>
+        <text x="770" y="282" text-anchor="middle" font-size="11" font-weight="600" fill="#2563eb">Ladder Logic</text>
+
+        <!-- Power rails -->
+        <line x1="685" y1="292" x2="685" y2="370" stroke="#333" stroke-width="2"/>
+        <line x1="855" y1="292" x2="855" y2="370" stroke="#333" stroke-width="2"/>
+
+        <!-- Rung 1 -->
+        <line x1="685" y1="310" x2="710" y2="310" stroke="#333" stroke-width="1.5"/>
+        <!-- NO contact (temperature comparison) -->
+        <line x1="710" y1="300" x2="710" y2="320" stroke="#16a34a" stroke-width="2"/>
+        <line x1="726" y1="300" x2="726" y2="320" stroke="#16a34a" stroke-width="2"/>
+        <line x1="726" y1="310" x2="780" y2="310" stroke="#333" stroke-width="1.5"/>
+        <text x="718" y="296" text-anchor="middle" font-size="7" fill="#16a34a">T>85&#176;F</text>
+        <!-- Coil -->
+        <ellipse cx="810" cy="310" rx="12" ry="10" fill="none" stroke="#ea580c" stroke-width="2"/>
+        <text x="810" y="314" text-anchor="middle" font-size="7" fill="#ea580c" font-weight="600">M1</text>
+        <line x1="780" y1="310" x2="798" y2="310" stroke="#333" stroke-width="1.5"/>
+        <line x1="822" y1="310" x2="855" y2="310" stroke="#333" stroke-width="1.5"/>
+
+        <!-- Rung 2 -->
+        <line x1="685" y1="345" x2="710" y2="345" stroke="#333" stroke-width="1.5"/>
+        <!-- NO contact (M1) -->
+        <line x1="710" y1="335" x2="710" y2="355" stroke="#ea580c" stroke-width="2"/>
+        <line x1="726" y1="335" x2="726" y2="355" stroke="#ea580c" stroke-width="2"/>
+        <line x1="726" y1="345" x2="780" y2="345" stroke="#333" stroke-width="1.5"/>
+        <text x="718" y="332" text-anchor="middle" font-size="7" fill="#ea580c">M1</text>
+        <!-- Coil for pump -->
+        <ellipse cx="810" cy="345" rx="12" ry="10" fill="none" stroke="#ea580c" stroke-width="2"/>
+        <text x="810" y="349" text-anchor="middle" font-size="7" fill="#ea580c" font-weight="600">P1</text>
+        <line x1="780" y1="345" x2="798" y2="345" stroke="#333" stroke-width="1.5"/>
+        <line x1="822" y1="345" x2="855" y2="345" stroke="#333" stroke-width="1.5"/>
+
+        <!-- Setpoint annotation -->
+        <text x="770" y="386" text-anchor="middle" font-size="9" fill="#6b7280" font-style="italic">Setpoint: 85&#176;F</text>
+
+        <!-- Click hint -->
+        <text x="770" y="400" text-anchor="middle" font-size="8" fill="#93a3be">(click to expand)</text>
+      </g>
+    </g>
+
+    <!-- ============================================= -->
+    <!-- 4. OUTPUT STAGE (bottom) -->
+    <!-- ============================================= -->
+    <g class="stage-group" data-stage="output">
+      <rect class="stage-bg" x="300" y="445" width="300" height="120" rx="12" fill="#ea580c" opacity="0"/>
+
+      <text x="450" y="465" text-anchor="middle" font-size="14" font-weight="700" fill="#ea580c">OUTPUT STAGE</text>
+
+      <!-- Motor starter -->
+      <g transform="translate(320, 475)">
+        <rect x="0" y="0" width="80" height="55" rx="6" fill="#fff" stroke="#ea580c" stroke-width="2" filter="url(#shadowSm)"/>
+        <!-- Motor icon -->
+        <circle cx="28" cy="26" r="16" fill="none" stroke="#ea580c" stroke-width="2"/>
+        <text x="28" y="30" text-anchor="middle" font-size="12" font-weight="700" fill="#ea580c">M</text>
+        <text x="56" y="18" font-size="7" fill="#333" font-weight="600">MOTOR</text>
+        <text x="56" y="28" font-size="7" fill="#333">START</text>
+        <text x="56" y="40" font-size="7" fill="#ea580c">DO-01</text>
+        <!-- Status light -->
+        <circle cx="68" cy="46" r="4" fill="#22c55e">
+          <animate attributeName="fill" values="#22c55e;#166534;#22c55e" dur="1s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- Solenoid valve -->
+      <g transform="translate(415, 475)">
+        <rect x="0" y="0" width="80" height="55" rx="6" fill="#fff" stroke="#ea580c" stroke-width="2" filter="url(#shadowSm)"/>
+        <!-- Valve icon -->
+        <polygon points="12,14 32,8 32,38 12,32" fill="none" stroke="#ea580c" stroke-width="2"/>
+        <polygon points="32,8 52,14 52,32 32,38" fill="none" stroke="#ea580c" stroke-width="2"/>
+        <line x1="32" y1="4" x2="32" y2="8" stroke="#ea580c" stroke-width="2"/>
+        <rect x="28" y="2" width="8" height="6" rx="1" fill="#ea580c" opacity="0.3"/>
+        <text x="56" y="18" font-size="7" fill="#333" font-weight="600">SOL</text>
+        <text x="56" y="28" font-size="7" fill="#333">VALVE</text>
+        <text x="56" y="40" font-size="7" fill="#ea580c">DO-02</text>
+      </g>
+
+      <!-- Indicator light -->
+      <g transform="translate(510, 475)">
+        <rect x="0" y="0" width="70" height="55" rx="6" fill="#fff" stroke="#ea580c" stroke-width="2" filter="url(#shadowSm)"/>
+        <!-- Light bulb icon -->
+        <circle cx="24" cy="22" r="12" fill="#fbbf24" stroke="#ea580c" stroke-width="1.5" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;1;0.8" dur="1.2s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="19" y="33" width="10" height="6" rx="2" fill="#ea580c" opacity="0.5"/>
+        <text x="24" y="26" text-anchor="middle" font-size="9" font-weight="700" fill="#92400e">!</text>
+        <text x="48" y="18" font-size="7" fill="#333" font-weight="600">IND</text>
+        <text x="48" y="28" font-size="7" fill="#333">LIGHT</text>
+        <text x="48" y="40" font-size="7" fill="#ea580c">DO-03</text>
+      </g>
+    </g>
+
+    <!-- ============================================= -->
+    <!-- 5. FEEDBACK STAGE (left) -->
+    <!-- ============================================= -->
+    <g class="stage-group" data-stage="feedback">
+      <rect class="stage-bg" x="80" y="260" width="200" height="140" rx="12" fill="#6b7280" opacity="0"/>
+
+      <text x="180" y="280" text-anchor="middle" font-size="14" font-weight="700" fill="#6b7280">FEEDBACK</text>
+
+      <!-- Cooling water loop -->
+      <g transform="translate(100, 290)">
+        <rect x="0" y="0" width="160" height="90" rx="8" fill="#fff" stroke="#6b7280" stroke-width="2" filter="url(#shadowSm)"/>
+
+        <!-- Pipe representation -->
+        <text x="80" y="18" text-anchor="middle" font-size="9" font-weight="600" fill="#374151">Cooling Water Loop</text>
+
+        <!-- Animated water flow -->
+        <rect x="15" y="30" width="130" height="14" rx="7" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="1"/>
+        <rect x="15" y="30" width="40" height="14" rx="7" fill="#0ea5e9" opacity="0.3">
+          <animate attributeName="x" values="15;105;15" dur="3s" repeatCount="indefinite"/>
+        </rect>
+
+        <!-- Pipe arrows -->
+        <polygon points="150,37 155,30 155,44" fill="#0ea5e9"/>
+
+        <!-- Temperature drop annotation -->
+        <text x="80" y="62" text-anchor="middle" font-size="9" fill="#ef4444">90&#176;F &rarr; cooling &rarr; 82&#176;F</text>
+        <text x="80" y="76" text-anchor="middle" font-size="8" fill="#6b7280">Pump circulates water</text>
+        <text x="80" y="88" text-anchor="middle" font-size="8" fill="#6b7280">Temperature drops</text>
+      </g>
+    </g>
+
+    <!-- ============================================= -->
+    <!-- STEP LABELS around the loop -->
+    <!-- ============================================= -->
+    <!-- Step 1 -->
+    <g transform="translate(352, 180)">
+      <circle cx="0" cy="0" r="10" fill="#16a34a"/>
+      <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">1</text>
+      <text x="16" y="4" font-size="9" fill="#16a34a" font-weight="600">Sensors read process</text>
+    </g>
+
+    <!-- Step 2 -->
+    <g transform="translate(620, 290)">
+      <circle cx="0" cy="0" r="10" fill="#2563eb"/>
+      <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">2</text>
+      <text x="16" y="4" font-size="9" fill="#2563eb" font-weight="600">CPU executes logic</text>
+    </g>
+
+    <!-- Step 3 -->
+    <g transform="translate(570, 450)">
+      <circle cx="0" cy="0" r="10" fill="#ea580c"/>
+      <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">3</text>
+      <text x="16" y="4" font-size="9" fill="#ea580c" font-weight="600">Outputs energized</text>
+    </g>
+
+    <!-- Step 4 -->
+    <g transform="translate(114, 242)">
+      <circle cx="0" cy="0" r="10" fill="#6b7280"/>
+      <text x="0" y="4" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">4</text>
+      <text x="16" y="4" font-size="9" fill="#6b7280" font-weight="600">Process responds</text>
+    </g>
+
+    <!-- Continuous cycle label -->
+    <g transform="translate(110, 150)">
+      <text x="0" y="0" font-size="9" fill="#6b7280" font-style="italic">Cycle repeats</text>
+      <text x="0" y="14" font-size="9" fill="#6b7280" font-style="italic">continuously</text>
+      <!-- Circular arrow -->
+      <path d="M 45 30 A 12 12 0 1 1 50 35" fill="none" stroke="#6b7280" stroke-width="1.5"/>
+      <polygon points="50,35 55,30 47,30" fill="#6b7280"/>
+    </g>
+
+    <!-- Example description bottom-right -->
+    <g transform="translate(655, 425)">
+      <rect x="0" y="0" width="220" height="85" rx="8" fill="#fefce8" stroke="#ca8a04" stroke-width="1.5" filter="url(#shadowSm)"/>
+      <text x="110" y="18" text-anchor="middle" font-size="10" font-weight="700" fill="#92400e">Concrete Example</text>
+      <text x="10" y="34" font-size="8.5" fill="#713f12">1. Sensor reads 90&#176;F</text>
+      <text x="10" y="47" font-size="8.5" fill="#713f12">2. PLC compares to setpoint 85&#176;F</text>
+      <text x="10" y="60" font-size="8.5" fill="#713f12">3. Temp &gt; setpoint &#8594; energize pump relay</text>
+      <text x="10" y="73" font-size="8.5" fill="#713f12">4. Pump runs &#8594; water cools &#8594; repeat</text>
+    </g>
+
+  </svg>
+
+  <!-- Tooltip -->
+  <div id="tooltip"></div>
+
+  <!-- Ladder logic overlay backdrop -->
+  <div id="ladder-backdrop"></div>
+
+  <!-- Ladder logic detail overlay -->
+  <div id="ladder-overlay">
+    <button class="close-btn" id="ladder-close">&times;</button>
+    <h3>Ladder Logic Detail - Cooling Water Control</h3>
+
+    <div class="rung">
+      <div class="rung-number">Rung 1</div>
+      <div>
+        <div class="rung-diagram">--|T>85&#176;F|--( M1 )--</div>
+        <div class="rung-desc">Compare analog input AI-01 (temperature) to setpoint 85&#176;F. If temperature exceeds setpoint, energize internal relay M1.</div>
+      </div>
+    </div>
+
+    <div class="rung">
+      <div class="rung-number">Rung 2</div>
+      <div>
+        <div class="rung-diagram">--|  M1  |--( P1 )--</div>
+        <div class="rung-desc">When relay M1 is energized, activate pump output P1 (DO-01). The cooling water pump starts running.</div>
+      </div>
+    </div>
+
+    <div class="rung">
+      <div class="rung-number">Rung 3</div>
+      <div>
+        <div class="rung-diagram">--|  M1  |--( SOL1 )--</div>
+        <div class="rung-desc">When relay M1 is energized, open solenoid valve SOL1 (DO-02) to direct cooling water through the heat exchanger.</div>
+      </div>
+    </div>
+
+    <div class="rung">
+      <div class="rung-number">Rung 4</div>
+      <div>
+        <div class="rung-diagram">--|  M1  |--( IND1 )--</div>
+        <div class="rung-desc">When relay M1 is energized, illuminate indicator light IND1 (DO-03) to signal that the cooling system is active.</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 12px; padding: 8px; background: #eff6ff; border-radius: 6px; font-size: 12px; color: #1d4ed8;">
+      <strong>Scan sequence:</strong> The PLC reads ALL inputs, executes ALL rungs top-to-bottom, then updates ALL outputs in each scan cycle (10-50 ms).
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Tooltip data
+  const tooltips = {
+    input: '<strong>Input Stage</strong><br>Sensors convert physical measurements (temperature, pressure, flow) into electrical signals.<br><br><strong>Temperature sensor (AI-01):</strong> Sends 4-20 mA signal proportional to 32-200&#176;F range.<br><strong>Pressure sensor (AI-02):</strong> Monitors system pressure.<br><strong>Flow switch (DI-01):</strong> Confirms water is flowing (ON/OFF).',
+    process: '<strong>Process Stage</strong><br>The PLC CPU executes the ladder logic program during each scan cycle.<br><br>It compares the analog temperature reading to the 85&#176;F setpoint and determines whether to energize or de-energize the output relays.<br><br>Click the ladder logic diagram for a detailed breakdown.',
+    output: '<strong>Output Stage</strong><br>The PLC output module converts logic decisions into electrical signals that drive field devices.<br><br><strong>Motor Starter (DO-01):</strong> 24V DC signal energizes the pump motor contactor.<br><strong>Solenoid Valve (DO-02):</strong> Opens/closes the cooling water valve.<br><strong>Indicator Light (DO-03):</strong> Visual confirmation that the cooling system is active.',
+    feedback: '<strong>Feedback Stage</strong><br>The controlled process (cooling water circulation) changes the physical conditions that the sensors are measuring.<br><br>As the pump runs, the cooling water absorbs heat and the process temperature drops. The sensors detect this change on the next scan cycle, closing the control loop.'
+  };
+
+  const tooltip = document.getElementById('tooltip');
+  const container = document.getElementById('sim-container');
+
+  // Stage hover tooltips
+  document.querySelectorAll('.stage-group').forEach(function(group) {
+    group.addEventListener('mouseenter', function(e) {
+      var stage = this.getAttribute('data-stage');
+      tooltip.innerHTML = tooltips[stage];
+      tooltip.style.display = 'block';
+      positionTooltip(e);
+    });
+
+    group.addEventListener('mousemove', function(e) {
+      positionTooltip(e);
+    });
+
+    group.addEventListener('mouseleave', function() {
+      tooltip.style.display = 'none';
+    });
+  });
+
+  function positionTooltip(e) {
+    var rect = container.getBoundingClientRect();
+    var x = e.clientX - rect.left + 12;
+    var y = e.clientY - rect.top - 10;
+
+    // Keep tooltip within bounds
+    var tw = 280;
+    if (x + tw > rect.width) {
+      x = e.clientX - rect.left - tw - 12;
+    }
+    if (y < 10) {
+      y = 10;
+    }
+    if (y + 150 > rect.height) {
+      y = rect.height - 160;
+    }
+
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+  }
+
+  // Ladder logic overlay
+  var ladderArea = document.getElementById('ladder-click-area');
+  var ladderOverlay = document.getElementById('ladder-overlay');
+  var ladderBackdrop = document.getElementById('ladder-backdrop');
+  var ladderClose = document.getElementById('ladder-close');
+
+  function openLadder() {
+    ladderOverlay.style.display = 'block';
+    ladderBackdrop.style.display = 'block';
+  }
+
+  function closeLadder() {
+    ladderOverlay.style.display = 'none';
+    ladderBackdrop.style.display = 'none';
+  }
+
+  ladderArea.addEventListener('click', openLadder);
+  ladderClose.addEventListener('click', closeLadder);
+  ladderBackdrop.addEventListener('click', closeLadder);
+
+  // ESC key to close
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLadder();
+  });
+
+  // Responsive: SVG viewBox handles scaling automatically.
+  // Adjust container on resize for tooltip positioning.
+  window.addEventListener('resize', function() {
+    tooltip.style.display = 'none';
+    closeLadder();
+  });
+})();
+</script>
+</body>
+</html>

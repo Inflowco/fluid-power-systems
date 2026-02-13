@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cooling Tower Types</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+        main { display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ══════════════════════════════════════════════════════════════════
+    //  COOLING TOWER TYPES — Interactive MicroSim
+    // ══════════════════════════════════════════════════════════════════
+
+    let canvasW, canvasH;
+    let cols = 2;
+
+    // Toggle states for air and water flow display
+    let showAirFlow = true;
+    let showWaterFlow = true;
+
+    // Animation phase counter
+    let animPhase = 0;
+
+    // Pause state per tower (click to toggle)
+    let paused = [false, false, false, false];
+
+    // Tooltip state
+    let tooltipText = '';
+    let tooltipX = 0;
+    let tooltipY = 0;
+    let showTooltip = false;
+
+    // Label hitboxes for hover detection
+    let labelHitboxes = [];
+
+    // Tower cell bounding boxes for click detection
+    let towerCells = [];
+
+    // Toggle button bounds
+    let airBtn = { x: 0, y: 0, w: 0, h: 0 };
+    let waterBtn = { x: 0, y: 0, w: 0, h: 0 };
+
+    // Particle systems for each tower
+    let airParticles = [[], [], [], []];
+    let waterParticles = [[], [], [], []];
+
+    // Title bar height
+    let titleH = 44;
+
+    // Spec card data matching spec exactly
+    let specs = [
+        {
+            name: 'Natural Draft Tower',
+            draft: 'Natural',
+            flow: 'Counterflow',
+            fanEnergy: 'None',
+            efficiency: 'Good',
+            bestFor: 'Large power plants, refineries'
+        },
+        {
+            name: 'Induced Draft (Counterflow)',
+            draft: 'Induced',
+            flow: 'Counterflow',
+            fanEnergy: 'Medium',
+            efficiency: 'Best',
+            bestFor: 'HVAC systems, process cooling'
+        },
+        {
+            name: 'Forced Draft (Crossflow)',
+            draft: 'Forced',
+            flow: 'Crossflow',
+            fanEnergy: 'Low',
+            efficiency: 'Good',
+            bestFor: 'Industrial processes, cold climates'
+        },
+        {
+            name: 'Induced Draft (Crossflow)',
+            draft: 'Induced',
+            flow: 'Crossflow',
+            fanEnergy: 'Medium',
+            efficiency: 'Better',
+            bestFor: 'Commercial HVAC, hospitals'
+        }
+    ];
+
+    // Label tooltip explanations
+    let labelExplanations = {
+        'Concrete Shell': 'Hyperboloid-shaped reinforced concrete structure that creates natural draft through the chimney effect. The shape provides structural strength and promotes smooth airflow.',
+        'Fill Media': 'Structured or splash-type packing material that increases the water-to-air contact surface area, enhancing heat transfer and evaporative cooling efficiency.',
+        'Water Distribution': 'System of pipes and spray nozzles that evenly distribute warm water over the fill media for maximum air contact.',
+        'Air Inlet': 'Opening at the base of the tower where ambient air enters. The large opening area ensures low air-side pressure drop.',
+        'Warm Air Discharge': 'Warm, moisture-laden air exits from the top of the tower, carrying away heat absorbed from the water.',
+        'Basin': 'Collection basin at the base of the tower that collects the cooled water for return to the process or chiller system.',
+        'Fan': 'Axial or centrifugal fan that provides mechanical draft to move air through the tower, ensuring consistent airflow regardless of ambient conditions.',
+        'Motor': 'Electric motor that drives the fan. Variable frequency drives (VFDs) can be used to modulate fan speed for energy savings.',
+        'Drift Eliminators': 'Baffled passages that capture water droplets entrained in the air stream, reducing water loss and preventing mineral deposits on nearby surfaces.',
+        'Spray Nozzles': 'Pressurized nozzles that break water into fine droplets for even distribution across the fill media surface.',
+        'Cold Water Basin': 'Collection basin at the tower base where cooled water gathers before being pumped back to the process. Includes makeup water connection.',
+        'Distribution Basin': 'Open-top basin at the top of a crossflow tower that uses gravity to distribute hot water over the fill media through calibrated orifices.',
+        'Hot Water Basin': 'Elevated basin that receives warm return water from the process and distributes it to the fill media sections on both sides.',
+        'Louvers': 'Angled slats on the air inlet face that direct incoming air into the fill while preventing water splash-out and sunlight penetration that could promote algae.'
+    };
+
+    function setup() {
+        computeLayout();
+        let canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+        initAllParticles();
+    }
+
+    function computeLayout() {
+        let maxW = min(windowWidth, 1060);
+        cols = (maxW < 620) ? 1 : 2;
+        canvasW = maxW;
+        let rows = (cols === 1) ? 4 : 2;
+        let cellH = (cols === 1) ? 400 : 420;
+        let controlBarH = 52;
+        canvasH = titleH + rows * cellH + controlBarH;
+    }
+
+    function windowResized() {
+        computeLayout();
+        resizeCanvas(canvasW, canvasH);
+        initAllParticles();
+    }
+
+    function initAllParticles() {
+        for (let i = 0; i < 4; i++) {
+            airParticles[i] = [];
+            waterParticles[i] = [];
+            for (let j = 0; j < 18; j++) {
+                airParticles[i].push({ t: random(1), speed: random(0.002, 0.005), lane: random(-1, 1) });
+            }
+            for (let j = 0; j < 14; j++) {
+                waterParticles[i].push({ t: random(1), speed: random(0.002, 0.004), lane: random(-1, 1) });
+            }
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  MAIN DRAW
+    // ══════════════════════════════════════════════════════════════════
+
+    function draw() {
+        background(245, 247, 250);
+        showTooltip = false;
+        labelHitboxes = [];
+        towerCells = [];
+
+        // ── Title bar ──────────────────────────────────────────────
+        noStroke();
+        fill(45, 70, 110);
+        rectMode(CORNER);
+        rect(0, 0, canvasW, titleH);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(20);
+        textStyle(BOLD);
+        text('Cooling Tower Types', canvasW / 2, titleH / 2);
+        textStyle(NORMAL);
+
+        let rows = (cols === 1) ? 4 : 2;
+        let cellW = canvasW / cols;
+        let cellH = (cols === 1) ? 400 : 420;
+        let controlBarH = 52;
+        let sf = cellW / 530;
+
+        let towerDrawFuncs = [drawNaturalDraft, drawInducedCounterflow, drawForcedCrossflow, drawInducedCrossflow];
+        let towerNames = ['Natural Draft Tower', 'Induced Draft (Counterflow)', 'Forced Draft (Crossflow)', 'Induced Draft (Crossflow)'];
+
+        for (let i = 0; i < 4; i++) {
+            let col = (cols === 1) ? 0 : (i % 2);
+            let row = (cols === 1) ? i : floor(i / 2);
+            let cx = col * cellW;
+            let cy = titleH + row * cellH;
+
+            towerCells.push({ x: cx, y: cy, w: cellW, h: cellH });
+
+            // Cell background
+            noStroke();
+            fill(255, 255, 255);
+            rectMode(CORNER);
+            rect(cx + 3, cy + 3, cellW - 6, cellH - 6, 8);
+
+            // Cell border
+            stroke(200, 208, 218);
+            strokeWeight(1.5);
+            noFill();
+            rect(cx + 3, cy + 3, cellW - 6, cellH - 6, 8);
+
+            // Tower name header
+            noStroke();
+            fill(45, 70, 110);
+            textAlign(CENTER, TOP);
+            textSize(max(13, 15 * sf));
+            textStyle(BOLD);
+            text(towerNames[i], cx + cellW / 2, cy + 8);
+            textStyle(NORMAL);
+
+            // Paused indicator
+            if (paused[i]) {
+                fill(180, 50, 50, 200);
+                textSize(max(9, 10 * sf));
+                text('PAUSED — click to resume', cx + cellW / 2, cy + 26 * sf);
+            }
+
+            // Tower animation area
+            let animY = cy + 34 * sf;
+            let animH = cellH * 0.50;
+            push();
+            translate(cx + cellW / 2, animY + animH / 2);
+            towerDrawFuncs[i](cellW * 0.92, animH, sf, i);
+            pop();
+
+            // Update particles when not paused
+            if (!paused[i]) {
+                for (let p of airParticles[i]) {
+                    p.t += p.speed;
+                    if (p.t > 1) p.t -= 1;
+                }
+                for (let p of waterParticles[i]) {
+                    p.t += p.speed;
+                    if (p.t > 1) p.t -= 1;
+                }
+            }
+
+            // Spec card
+            let cardY = animY + animH + 8 * sf;
+            let cardH = cellH - (cardY - cy) - 10;
+            drawSpecCard(cx + 10, cardY, cellW - 20, cardH, specs[i], sf);
+        }
+
+        // Global animation phase
+        animPhase += 0.03;
+
+        // ── Control bar ──────────────────────────────────────────────
+        let controlY = titleH + rows * cellH;
+        fill(235, 238, 243);
+        noStroke();
+        rectMode(CORNER);
+        rect(0, controlY, canvasW, controlBarH);
+        // Subtle top border
+        stroke(210, 215, 220);
+        strokeWeight(1);
+        line(0, controlY, canvasW, controlY);
+
+        // "Show Air Flow" toggle button
+        let btnH = 32;
+        let btnGap = 14;
+        let aBtnW = max(130, 150 * sf);
+        let wBtnW = max(140, 162 * sf);
+        let totalBtns = aBtnW + btnGap + wBtnW;
+        let startBtnX = canvasW / 2 - totalBtns / 2;
+        let btnY = controlY + (controlBarH - btnH) / 2;
+
+        // Air flow toggle
+        let abx = startBtnX;
+        airBtn = { x: abx, y: btnY, w: aBtnW, h: btnH };
+        let hovA = mouseX > abx && mouseX < abx + aBtnW && mouseY > btnY && mouseY < btnY + btnH;
+        if (showAirFlow) {
+            fill(hovA ? color(50, 115, 195) : color(60, 130, 210));
+        } else {
+            fill(hovA ? color(165, 175, 185) : color(180, 188, 198));
+        }
+        stroke(showAirFlow ? color(40, 95, 165) : color(150, 158, 168));
+        strokeWeight(1.5);
+        rect(abx, btnY, aBtnW, btnH, 6);
+
+        noStroke();
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(max(11, 12.5 * sf));
+        textStyle(BOLD);
+        let airIcon = showAirFlow ? '\u2714 ' : '';
+        text(airIcon + 'Show Air Flow', abx + aBtnW / 2, btnY + btnH / 2);
+        textStyle(NORMAL);
+
+        // Water flow toggle
+        let wbx = abx + aBtnW + btnGap;
+        waterBtn = { x: wbx, y: btnY, w: wBtnW, h: btnH };
+        let hovW = mouseX > wbx && mouseX < wbx + wBtnW && mouseY > btnY && mouseY < btnY + btnH;
+        if (showWaterFlow) {
+            fill(hovW ? color(20, 140, 140) : color(30, 155, 155));
+        } else {
+            fill(hovW ? color(165, 175, 185) : color(180, 188, 198));
+        }
+        stroke(showWaterFlow ? color(15, 115, 115) : color(150, 158, 168));
+        strokeWeight(1.5);
+        rect(wbx, btnY, wBtnW, btnH, 6);
+
+        noStroke();
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(max(11, 12.5 * sf));
+        textStyle(BOLD);
+        let waterIcon = showWaterFlow ? '\u2714 ' : '';
+        text(waterIcon + 'Show Water Flow', wbx + wBtnW / 2, btnY + btnH / 2);
+        textStyle(NORMAL);
+
+        // Hint text
+        fill(120);
+        textSize(max(9, 10 * sf));
+        textAlign(LEFT, CENTER);
+        text('Click tower to pause/play', 12, controlY + controlBarH / 2);
+        textAlign(RIGHT, CENTER);
+        text('Hover labels for details', canvasW - 12, controlY + controlBarH / 2);
+
+        // Cursor handling
+        if (hovA || hovW) {
+            cursor(HAND);
+        } else {
+            let overTower = false;
+            for (let tc of towerCells) {
+                if (mouseX > tc.x && mouseX < tc.x + tc.w && mouseY > tc.y && mouseY < tc.y + tc.h) {
+                    overTower = true;
+                    break;
+                }
+            }
+            cursor(overTower ? HAND : ARROW);
+        }
+
+        // ── Tooltip ──────────────────────────────────────────────────
+        if (showTooltip && tooltipText.length > 0) {
+            drawTooltip(tooltipX, tooltipY, tooltipText, sf);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  HELPER: Draw flow arrows along a path
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawFlowArrow(x1, y1, x2, y2, col, sz, sf) {
+        let angle = atan2(y2 - y1, x2 - x1);
+        push();
+        translate(x2, y2);
+        rotate(angle);
+        fill(col);
+        noStroke();
+        let s = max(4, sz * sf);
+        triangle(0, 0, -s * 1.4, -s * 0.5, -s * 1.4, s * 0.5);
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  NATURAL DRAFT TOWER
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawNaturalDraft(w, h, sf, idx) {
+        let towerW = w * 0.42;
+        let towerH = h * 0.88;
+        let baseW = towerW * 1.15;
+        let topW = towerW * 0.78;
+        let neckW = towerW * 0.62;
+        let neckY = -towerH * 0.12;
+        let baseY = towerH * 0.40;
+        let topY = -towerH * 0.48;
+
+        // Helper to compute shell half-width at a given normalized position
+        function shellHalfW(normT) {
+            if (normT < 0.38) {
+                let f = normT / 0.38;
+                return lerp(topW / 2, neckW / 2, f);
+            } else {
+                let f = (normT - 0.38) / 0.62;
+                return lerp(neckW / 2, baseW / 2, pow(f, 0.7));
+            }
+        }
+
+        // Draw hyperboloid concrete shell
+        fill(195, 190, 182);
+        stroke(145, 140, 132);
+        strokeWeight(2.2 * sf);
+        beginShape();
+        let steps = 36;
+        for (let i = 0; i <= steps; i++) {
+            let t = i / steps;
+            let y = lerp(topY, baseY, t);
+            vertex(-shellHalfW(t), y);
+        }
+        for (let i = steps; i >= 0; i--) {
+            let t = i / steps;
+            let y = lerp(topY, baseY, t);
+            vertex(shellHalfW(t), y);
+        }
+        endShape(CLOSE);
+
+        // Concrete texture — horizontal ring lines
+        stroke(172, 168, 160, 110);
+        strokeWeight(0.7 * sf);
+        for (let i = 1; i < 10; i++) {
+            let t = i / 10;
+            let y = lerp(topY + 4, baseY - 4, t);
+            let hw = shellHalfW(t) - 3 * sf;
+            line(-hw, y, hw, y);
+        }
+
+        // Fill media zone
+        let fillTop = baseY - towerH * 0.24;
+        let fillBot = baseY - towerH * 0.10;
+        noStroke();
+        fill(95, 145, 100, 110);
+        rectMode(CORNER);
+        rect(-baseW * 0.40, fillTop, baseW * 0.80, fillBot - fillTop, 3 * sf);
+
+        // Fill cross-hatch pattern
+        stroke(75, 125, 80, 110);
+        strokeWeight(0.8 * sf);
+        for (let r = 0; r < 5; r++) {
+            let fy = fillTop + (fillBot - fillTop) * (r + 0.5) / 5;
+            for (let c = -3; c <= 3; c++) {
+                let fx = c * baseW * 0.10;
+                line(fx - 4 * sf, fy - 3 * sf, fx + 4 * sf, fy + 3 * sf);
+                line(fx + 4 * sf, fy - 3 * sf, fx - 4 * sf, fy + 3 * sf);
+            }
+        }
+
+        // Water distribution pipes & spray nozzles
+        let distY = fillTop - 7 * sf;
+        stroke(65, 125, 185);
+        strokeWeight(2.2 * sf);
+        line(-baseW * 0.35, distY, baseW * 0.35, distY);
+        for (let i = -2; i <= 2; i++) {
+            let nx = i * baseW * 0.145;
+            strokeWeight(2 * sf);
+            stroke(65, 125, 185);
+            line(nx, distY, nx, distY + 5 * sf);
+            // Spray fan
+            strokeWeight(0.9 * sf);
+            stroke(65, 125, 185, 160);
+            line(nx - 5 * sf, distY + 10 * sf, nx, distY + 4 * sf);
+            line(nx + 5 * sf, distY + 10 * sf, nx, distY + 4 * sf);
+            line(nx, distY + 11 * sf, nx, distY + 4 * sf);
+        }
+
+        // Support columns at base (air inlet openings)
+        stroke(145, 140, 132);
+        strokeWeight(2.5 * sf);
+        let supportTop = baseY - towerH * 0.06;
+        for (let i = -2; i <= 2; i++) {
+            let sx = i * baseW * 0.19;
+            line(sx, baseY, sx, supportTop);
+        }
+
+        // Basin
+        fill(155, 178, 200);
+        stroke(120, 142, 165);
+        strokeWeight(1.8 * sf);
+        rectMode(CENTER);
+        rect(0, baseY + 10 * sf, baseW * 0.95, 14 * sf, 3 * sf);
+        // Water surface in basin
+        noStroke();
+        fill(100, 170, 220, 80);
+        rectMode(CENTER);
+        rect(0, baseY + 8 * sf, baseW * 0.85, 6 * sf, 2 * sf);
+
+        // ── Animated air particles ───────────────────────────────
+        if (showAirFlow) {
+            for (let p of airParticles[idx]) {
+                let t = p.t;
+                let px, py, col;
+                if (t < 0.15) {
+                    // Enter from sides at base through louver openings
+                    let frac = t / 0.15;
+                    let side = (p.lane > 0) ? 1 : -1;
+                    px = side * lerp(baseW * 0.58, baseW * 0.28, frac);
+                    py = baseY - towerH * 0.03 + p.lane * 4 * sf;
+                    col = lerpColor(color(100, 155, 225, 195), color(140, 170, 220, 190), frac);
+                } else if (t < 0.45) {
+                    // Rise through fill zone
+                    let frac = (t - 0.15) / 0.30;
+                    px = p.lane * baseW * 0.18 + sin(animPhase + p.lane * 5) * 6 * sf;
+                    py = lerp(fillBot, fillTop - 8 * sf, frac);
+                    col = lerpColor(color(100, 155, 225, 190), color(225, 145, 80, 180), frac);
+                } else {
+                    // Rise through shell to top and exit
+                    let frac = (t - 0.45) / 0.55;
+                    let yPos = lerp(neckY + towerH * 0.22, topY + 2, frac);
+                    let normT = map(yPos, topY, baseY, 0, 1);
+                    let hw = shellHalfW(constrain(normT, 0, 1)) * 0.55;
+                    px = sin(animPhase * 0.6 + p.lane * 8) * hw;
+                    py = yPos;
+                    col = color(225, 145, 80, map(frac, 0, 1, 180, 100));
+                }
+                noStroke();
+                fill(col);
+                circle(px, py, max(4, 6 * sf));
+            }
+            // Arrow indicators: air entering at base
+            let arrowCol = color(100, 155, 225, 160);
+            stroke(arrowCol);
+            strokeWeight(1.5 * sf);
+            let arY = baseY - towerH * 0.03;
+            line(-baseW * 0.6, arY, -baseW * 0.42, arY);
+            drawFlowArrow(-baseW * 0.6, arY, -baseW * 0.42, arY, arrowCol, 6, sf);
+            line(baseW * 0.6, arY, baseW * 0.42, arY);
+            drawFlowArrow(baseW * 0.6, arY, baseW * 0.42, arY, arrowCol, 6, sf);
+            // Arrow: warm air rising out top
+            let warmCol = color(225, 145, 80, 160);
+            stroke(warmCol);
+            line(0, topY + 6, 0, topY - 8 * sf);
+            drawFlowArrow(0, topY + 6, 0, topY - 8 * sf, warmCol, 6, sf);
+        }
+
+        // ── Animated water particles ─────────────────────────────
+        if (showWaterFlow) {
+            for (let p of waterParticles[idx]) {
+                let t = p.t;
+                let px, py, col;
+                if (t < 0.45) {
+                    // Fall from spray nozzles through fill
+                    let frac = t / 0.45;
+                    px = p.lane * baseW * 0.16 + sin(p.lane * 3) * 5 * sf;
+                    py = lerp(distY + 8 * sf, fillBot + 6 * sf, frac);
+                    col = lerpColor(color(225, 150, 85, 210), color(85, 170, 225, 210), frac);
+                } else {
+                    // Drip into basin
+                    let frac = (t - 0.45) / 0.55;
+                    px = p.lane * baseW * 0.14;
+                    py = lerp(fillBot + 6 * sf, baseY + 6 * sf, min(frac * 1.8, 1));
+                    col = color(85, 170, 225, 210);
+                }
+                noStroke();
+                fill(col);
+                circle(px, py, max(3, 5 * sf));
+            }
+            // Arrow: water falling
+            let wCol = color(85, 170, 225, 150);
+            stroke(wCol);
+            strokeWeight(1.5 * sf);
+            line(0, distY + 2 * sf, 0, fillBot);
+            drawFlowArrow(0, distY + 2 * sf, 0, fillBot, wCol, 5, sf);
+        }
+
+        // Labels
+        addLabel('Concrete Shell', -baseW * 0.55 - 6 * sf, neckY, sf);
+        addLabel('Fill Media', baseW * 0.55 + 4 * sf, (fillTop + fillBot) / 2, sf);
+        addLabel('Water Distribution', 0, distY - 14 * sf, sf);
+        addLabel('Air Inlet', -baseW * 0.48, baseY + 2 * sf, sf);
+        addLabel('Warm Air Discharge', 0, topY - 16 * sf, sf);
+        addLabel('Basin', 0, baseY + 24 * sf, sf);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  INDUCED DRAFT COUNTERFLOW TOWER
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawInducedCounterflow(w, h, sf, idx) {
+        let towerW = w * 0.40;
+        let towerH = h * 0.84;
+        let topY = -towerH * 0.44;
+        let baseY = towerH * 0.40;
+
+        // Main tower body
+        fill(185, 192, 198);
+        stroke(135, 140, 148);
+        strokeWeight(2 * sf);
+        rectMode(CENTER);
+        rect(0, (topY + baseY) / 2, towerW, baseY - topY, 5 * sf);
+
+        // Fan stack / shroud at top
+        let fanY = topY + 8 * sf;
+        fill(165, 170, 178);
+        stroke(125, 130, 138);
+        strokeWeight(2 * sf);
+        rectMode(CENTER);
+        rect(0, fanY - 16 * sf, towerW * 0.68, 18 * sf, 4 * sf);
+        // Cylindrical shroud
+        ellipse(0, fanY, towerW * 0.82, 20 * sf);
+
+        // Animated fan blades
+        push();
+        translate(0, fanY);
+        let fanAngle = paused[idx] ? 0 : animPhase * 3.5;
+        for (let i = 0; i < 5; i++) {
+            let a = fanAngle + (TWO_PI / 5) * i;
+            let bladeLen = towerW * 0.34;
+            let bx = cos(a) * bladeLen;
+            let by = sin(a) * bladeLen * 0.38;
+            // Blade body
+            stroke(105, 115, 128);
+            strokeWeight(max(2.5, 3.5 * sf));
+            line(0, 0, bx, by);
+            // Blade tip
+            noStroke();
+            fill(125, 135, 148);
+            ellipse(bx, by, 6 * sf, 4 * sf);
+        }
+        // Hub
+        fill(90, 95, 105);
+        stroke(70, 75, 85);
+        strokeWeight(1.2 * sf);
+        ellipse(0, 0, 12 * sf, 12 * sf);
+        pop();
+
+        // Motor housing below fan
+        fill(78, 82, 92);
+        stroke(58, 62, 72);
+        strokeWeight(1.5 * sf);
+        rectMode(CENTER);
+        rect(0, fanY + 16 * sf, 16 * sf, 12 * sf, 3 * sf);
+
+        // Drift eliminators
+        let driftY = fanY + 32 * sf;
+        fill(175, 185, 178);
+        stroke(135, 145, 138);
+        strokeWeight(1.2 * sf);
+        rectMode(CENTER);
+        rect(0, driftY, towerW * 0.88, 12 * sf, 2 * sf);
+        // Zigzag baffles
+        stroke(148, 158, 148);
+        strokeWeight(0.9 * sf);
+        for (let i = -4; i <= 4; i++) {
+            let zx = i * towerW * 0.09;
+            line(zx - 3 * sf, driftY - 5 * sf, zx + 1 * sf, driftY);
+            line(zx + 1 * sf, driftY, zx - 3 * sf, driftY + 5 * sf);
+        }
+
+        // Spray nozzle distribution pipe
+        let sprayY = driftY + 20 * sf;
+        stroke(65, 125, 185);
+        strokeWeight(2.2 * sf);
+        line(-towerW * 0.38, sprayY, towerW * 0.38, sprayY);
+        for (let i = -2; i <= 2; i++) {
+            let nx = i * towerW * 0.16;
+            strokeWeight(2 * sf);
+            stroke(65, 125, 185);
+            line(nx, sprayY, nx, sprayY + 5 * sf);
+            strokeWeight(0.8 * sf);
+            stroke(65, 125, 185, 150);
+            line(nx - 4 * sf, sprayY + 9 * sf, nx, sprayY + 4 * sf);
+            line(nx + 4 * sf, sprayY + 9 * sf, nx, sprayY + 4 * sf);
+        }
+
+        // Fill media
+        let fillTop = sprayY + 14 * sf;
+        let fillBot = baseY - towerH * 0.15;
+        noStroke();
+        fill(95, 145, 100, 110);
+        rectMode(CORNER);
+        rect(-towerW * 0.44, fillTop, towerW * 0.88, fillBot - fillTop, 3 * sf);
+        // Cross-hatch
+        stroke(75, 125, 80, 110);
+        strokeWeight(0.8 * sf);
+        for (let r = 0; r < 6; r++) {
+            let fy = fillTop + (fillBot - fillTop) * (r + 0.5) / 6;
+            for (let c = -3; c <= 3; c++) {
+                let fx = c * towerW * 0.12;
+                line(fx - 4 * sf, fy - 2 * sf, fx + 4 * sf, fy + 2 * sf);
+                line(fx + 4 * sf, fy - 2 * sf, fx - 4 * sf, fy + 2 * sf);
+            }
+        }
+
+        // Open air inlet at sides below fill
+        stroke(145, 140, 132);
+        strokeWeight(1.5 * sf);
+        let inletTop = fillBot + 4 * sf;
+        line(-towerW / 2, inletTop, -towerW / 2, baseY - 3 * sf);
+        line(towerW / 2, inletTop, towerW / 2, baseY - 3 * sf);
+
+        // Cold water basin
+        fill(155, 178, 200);
+        stroke(120, 142, 165);
+        strokeWeight(1.8 * sf);
+        rectMode(CENTER);
+        rect(0, baseY + 4 * sf, towerW * 1.08, 14 * sf, 3 * sf);
+        noStroke();
+        fill(100, 170, 220, 80);
+        rect(0, baseY + 2 * sf, towerW * 0.96, 6 * sf, 2 * sf);
+
+        // ── Air particles ─────────────────────────────────────────
+        if (showAirFlow) {
+            for (let p of airParticles[idx]) {
+                let t = p.t;
+                let px, py, col;
+                if (t < 0.12) {
+                    // Enter from sides below fill
+                    let frac = t / 0.12;
+                    let side = (p.lane > 0) ? 1 : -1;
+                    px = side * lerp(towerW * 0.62, towerW * 0.28, frac);
+                    py = lerp(baseY - 2 * sf, inletTop, frac);
+                    col = color(100, 155, 225, 195);
+                } else if (t < 0.55) {
+                    // Rise counter to water through fill
+                    let frac = (t - 0.12) / 0.43;
+                    px = p.lane * towerW * 0.22 + sin(animPhase + p.lane * 6) * 5 * sf;
+                    py = lerp(fillBot, fillTop, frac);
+                    col = lerpColor(color(100, 155, 225, 190), color(225, 145, 80, 180), frac);
+                } else if (t < 0.78) {
+                    // Pass through drift eliminators & approach fan
+                    let frac = (t - 0.55) / 0.23;
+                    px = sin(animPhase * 0.9 + p.lane * 7) * towerW * 0.22;
+                    py = lerp(driftY + 6 * sf, fanY - 18 * sf, frac);
+                    col = color(225, 150, 85, 170);
+                } else {
+                    // Discharge above fan
+                    let frac = (t - 0.78) / 0.22;
+                    px = sin(animPhase * 0.4 + p.lane * 4) * towerW * 0.18 * (1 + frac * 0.3);
+                    py = lerp(fanY - 20 * sf, topY - 18 * sf, frac);
+                    col = color(225, 145, 80, map(frac, 0, 1, 170, 80));
+                }
+                noStroke();
+                fill(col);
+                circle(px, py, max(4, 5.5 * sf));
+            }
+            // Direction arrows
+            let coolCol = color(100, 155, 225, 150);
+            stroke(coolCol);
+            strokeWeight(1.5 * sf);
+            let arY2 = (inletTop + baseY) / 2;
+            line(-towerW * 0.65, arY2, -towerW * 0.52, arY2);
+            drawFlowArrow(-towerW * 0.65, arY2, -towerW * 0.52, arY2, coolCol, 5, sf);
+            line(towerW * 0.65, arY2, towerW * 0.52, arY2);
+            drawFlowArrow(towerW * 0.65, arY2, towerW * 0.52, arY2, coolCol, 5, sf);
+            let warmCol = color(225, 145, 80, 150);
+            stroke(warmCol);
+            line(0, fanY - 22 * sf, 0, topY - 14 * sf);
+            drawFlowArrow(0, fanY - 22 * sf, 0, topY - 14 * sf, warmCol, 5, sf);
+        }
+
+        // ── Water particles ───────────────────────────────────────
+        if (showWaterFlow) {
+            for (let p of waterParticles[idx]) {
+                let t = p.t;
+                let px, py, col;
+                if (t < 0.5) {
+                    // Fall from spray through fill (counterflow)
+                    let frac = t / 0.5;
+                    px = p.lane * towerW * 0.18 + sin(p.lane * 4) * 4 * sf;
+                    py = lerp(sprayY + 8 * sf, fillBot + 6 * sf, frac);
+                    col = lerpColor(color(225, 150, 85, 215), color(85, 170, 225, 215), frac);
+                } else {
+                    // Drip to basin
+                    let frac = (t - 0.5) / 0.5;
+                    px = p.lane * towerW * 0.14;
+                    py = lerp(fillBot + 6 * sf, baseY + 2 * sf, min(frac * 1.8, 1));
+                    col = color(85, 170, 225, 215);
+                }
+                noStroke();
+                fill(col);
+                circle(px, py, max(3, 5 * sf));
+            }
+            let wCol = color(85, 170, 225, 140);
+            stroke(wCol);
+            strokeWeight(1.5 * sf);
+            line(0, sprayY + 4 * sf, 0, fillBot + 2 * sf);
+            drawFlowArrow(0, sprayY + 4 * sf, 0, fillBot + 2 * sf, wCol, 5, sf);
+        }
+
+        // Labels
+        addLabel('Fan', 0, fanY - 32 * sf, sf);
+        addLabel('Motor', towerW * 0.38, fanY + 16 * sf, sf);
+        addLabel('Drift Eliminators', -towerW * 0.58, driftY, sf);
+        addLabel('Spray Nozzles', towerW * 0.58, sprayY, sf);
+        addLabel('Fill Media', -towerW * 0.58, (fillTop + fillBot) / 2, sf);
+        addLabel('Cold Water Basin', 0, baseY + 18 * sf, sf);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  FORCED DRAFT CROSSFLOW TOWER
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawForcedCrossflow(w, h, sf, idx) {
+        let towerW = w * 0.44;
+        let towerH = h * 0.82;
+        let topY = -towerH * 0.42;
+        let baseY = towerH * 0.40;
+        let bodyX = towerW * 0.08; // offset center of tower body to the right
+
+        // Main tower body
+        fill(185, 192, 198);
+        stroke(135, 140, 148);
+        strokeWeight(2 * sf);
+        rectMode(CENTER);
+        rect(bodyX, (topY + baseY) / 2, towerW * 0.72, baseY - topY, 5 * sf);
+
+        // Fill bank on right side (water falls through vertically, air passes horizontally)
+        let fillLeft = bodyX + towerW * 0.72 / 2 - towerW * 0.22;
+        let fillRight = bodyX + towerW * 0.72 / 2 - 2 * sf;
+        let fillTop = topY + towerH * 0.12;
+        let fillBot = baseY - towerH * 0.10;
+
+        noStroke();
+        fill(95, 145, 100, 110);
+        rectMode(CORNER);
+        rect(fillLeft, fillTop, fillRight - fillLeft, fillBot - fillTop, 3 * sf);
+        // Cross-hatch pattern
+        stroke(75, 125, 80, 110);
+        strokeWeight(0.8 * sf);
+        for (let r = 0; r < 7; r++) {
+            let fy = fillTop + (fillBot - fillTop) * (r + 0.5) / 7;
+            for (let c = 0; c < 2; c++) {
+                let fx = fillLeft + (fillRight - fillLeft) * (c + 0.5) / 2;
+                line(fx - 3 * sf, fy - 2 * sf, fx + 3 * sf, fy + 2 * sf);
+                line(fx + 3 * sf, fy - 2 * sf, fx - 3 * sf, fy + 2 * sf);
+            }
+        }
+
+        // Distribution basin on top of fill
+        fill(155, 178, 200);
+        stroke(120, 142, 165);
+        strokeWeight(1.5 * sf);
+        rectMode(CORNER);
+        rect(fillLeft - 3 * sf, fillTop - 12 * sf, fillRight - fillLeft + 6 * sf, 12 * sf, 3 * sf);
+        // Water tint
+        noStroke();
+        fill(220, 150, 85, 80);
+        rect(fillLeft, fillTop - 10 * sf, fillRight - fillLeft, 6 * sf, 2 * sf);
+
+        // Fan on left side (forced draft pushes air in)
+        let fanX = bodyX - towerW * 0.55;
+        let fanCenterY = (fillTop + fillBot) / 2;
+        let fanR = towerH * 0.16;
+
+        // Fan shroud circle
+        fill(165, 170, 178);
+        stroke(125, 130, 138);
+        strokeWeight(2 * sf);
+        ellipse(fanX, fanCenterY, fanR * 2, fanR * 2);
+
+        // Animated fan blades
+        push();
+        translate(fanX, fanCenterY);
+        let fanAngle = paused[idx] ? 0 : animPhase * 3.2;
+        for (let i = 0; i < 5; i++) {
+            let a = fanAngle + (TWO_PI / 5) * i;
+            stroke(105, 115, 128);
+            strokeWeight(max(2.5, 3.5 * sf));
+            let bladeLen = fanR * 0.85;
+            line(0, 0, cos(a) * bladeLen, sin(a) * bladeLen);
+            noStroke();
+            fill(125, 135, 148);
+            ellipse(cos(a) * bladeLen, sin(a) * bladeLen, 5.5 * sf, 5.5 * sf);
+        }
+        fill(80, 85, 95);
+        stroke(60, 65, 75);
+        strokeWeight(1.2 * sf);
+        ellipse(0, 0, 13 * sf, 13 * sf);
+        pop();
+
+        // Connecting duct from fan to tower body
+        noFill();
+        stroke(145, 150, 158);
+        strokeWeight(1.5 * sf);
+        let ductLeft = fanX + fanR + 2 * sf;
+        let ductRight = bodyX - towerW * 0.36;
+        line(ductLeft, fanCenterY - fanR * 0.7, ductRight, fillTop + 4 * sf);
+        line(ductLeft, fanCenterY + fanR * 0.7, ductRight, fillBot - 4 * sf);
+
+        // Cold water basin
+        fill(155, 178, 200);
+        stroke(120, 142, 165);
+        strokeWeight(1.8 * sf);
+        rectMode(CENTER);
+        rect(bodyX, baseY + 4 * sf, towerW * 0.85, 14 * sf, 3 * sf);
+        noStroke();
+        fill(100, 170, 220, 80);
+        rect(bodyX, baseY + 2 * sf, towerW * 0.75, 6 * sf, 2 * sf);
+
+        // ── Air particles ──────────────────────────────────────────
+        if (showAirFlow) {
+            for (let p of airParticles[idx]) {
+                let t = p.t;
+                let px, py, col;
+                let yOff = p.lane * (fillBot - fillTop) * 0.35;
+                if (t < 0.2) {
+                    // Approach fan from left
+                    let frac = t / 0.2;
+                    px = lerp(fanX - fanR - 18 * sf, fanX - fanR, frac);
+                    py = fanCenterY + yOff;
+                    col = color(100, 155, 225, 195);
+                } else if (t < 0.45) {
+                    // Cross through duct into tower body
+                    let frac = (t - 0.2) / 0.25;
+                    px = lerp(fanX + fanR, fillLeft - 2 * sf, frac);
+                    py = fanCenterY + yOff + sin(animPhase + p.lane * 5) * 3 * sf;
+                    col = lerpColor(color(100, 155, 225, 190), color(180, 165, 125, 175), frac);
+                } else if (t < 0.75) {
+                    // Pass through fill horizontally (crossflow)
+                    let frac = (t - 0.45) / 0.30;
+                    px = lerp(fillLeft, fillRight, frac);
+                    py = fanCenterY + yOff + sin(animPhase * 0.8 + p.lane * 4) * 2 * sf;
+                    col = lerpColor(color(180, 165, 125, 175), color(225, 145, 80, 165), frac);
+                } else {
+                    // Exit past fill
+                    let frac = (t - 0.75) / 0.25;
+                    px = lerp(fillRight + 2 * sf, fillRight + 28 * sf, frac);
+                    py = fanCenterY + yOff + sin(animPhase * 0.5 + p.lane * 3) * 4 * sf;
+                    col = color(225, 145, 80, map(frac, 0, 1, 165, 70));
+                }
+                noStroke();
+                fill(col);
+                circle(px, py, max(4, 5.5 * sf));
+            }
+            // Direction arrows
+            let coolCol = color(100, 155, 225, 150);
+            stroke(coolCol);
+            strokeWeight(1.5 * sf);
+            line(fanX - fanR - 20 * sf, fanCenterY, fanX - fanR - 6 * sf, fanCenterY);
+            drawFlowArrow(fanX - fanR - 20 * sf, fanCenterY, fanX - fanR - 6 * sf, fanCenterY, coolCol, 5, sf);
+            let warmCol = color(225, 145, 80, 150);
+            stroke(warmCol);
+            line(fillRight + 4 * sf, fanCenterY, fillRight + 22 * sf, fanCenterY);
+            drawFlowArrow(fillRight + 4 * sf, fanCenterY, fillRight + 22 * sf, fanCenterY, warmCol, 5, sf);
+        }
+
+        // ── Water particles ──────────────────────────────────────
+        if (showWaterFlow) {
+            for (let p of waterParticles[idx]) {
+                let t = p.t;
+                let px, py, col;
+                let midX = (fillLeft + fillRight) / 2;
+                if (t < 0.55) {
+                    // Fall through fill vertically
+                    let frac = t / 0.55;
+                    px = midX + p.lane * (fillRight - fillLeft) * 0.25;
+                    py = lerp(fillTop, fillBot, frac);
+                    col = lerpColor(color(225, 150, 85, 215), color(85, 170, 225, 215), frac);
+                } else {
+                    // Drip into basin
+                    let frac = (t - 0.55) / 0.45;
+                    px = midX + p.lane * (fillRight - fillLeft) * 0.2;
+                    py = lerp(fillBot, baseY + 2 * sf, min(frac * 1.8, 1));
+                    col = color(85, 170, 225, 215);
+                }
+                noStroke();
+                fill(col);
+                circle(px, py, max(3, 5 * sf));
+            }
+            let wCol = color(85, 170, 225, 140);
+            stroke(wCol);
+            strokeWeight(1.5 * sf);
+            let mx = (fillLeft + fillRight) / 2;
+            line(mx, fillTop + 2 * sf, mx, fillBot - 2 * sf);
+            drawFlowArrow(mx, fillTop + 2 * sf, mx, fillBot - 2 * sf, wCol, 5, sf);
+        }
+
+        // Labels
+        addLabel('Fan', fanX, fanCenterY - fanR - 12 * sf, sf);
+        addLabel('Fill Media', (fillLeft + fillRight) / 2, fillBot + 12 * sf, sf);
+        addLabel('Distribution Basin', (fillLeft + fillRight) / 2, fillTop - 22 * sf, sf);
+        addLabel('Air Inlet', fanX - fanR - 8 * sf, fanCenterY + fanR + 12 * sf, sf);
+        addLabel('Cold Water Basin', bodyX, baseY + 18 * sf, sf);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  INDUCED DRAFT CROSSFLOW TOWER
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawInducedCrossflow(w, h, sf, idx) {
+        let towerW = w * 0.54;
+        let towerH = h * 0.84;
+        let topY = -towerH * 0.44;
+        let baseY = towerH * 0.40;
+
+        // Main tower body (wide with fill on both sides)
+        fill(185, 192, 198);
+        stroke(135, 140, 148);
+        strokeWeight(2 * sf);
+        rectMode(CENTER);
+        rect(0, (topY + baseY) / 2, towerW, baseY - topY, 5 * sf);
+
+        // Fan housing at top center
+        let fanY = topY + 10 * sf;
+        fill(165, 170, 178);
+        stroke(125, 130, 138);
+        strokeWeight(2 * sf);
+        rectMode(CENTER);
+        rect(0, fanY - 16 * sf, towerW * 0.44, 18 * sf, 4 * sf);
+        ellipse(0, fanY, towerW * 0.52, 20 * sf);
+
+        // Animated fan blades
+        push();
+        translate(0, fanY);
+        let fanAngle = paused[idx] ? 0 : animPhase * 3.5;
+        for (let i = 0; i < 5; i++) {
+            let a = fanAngle + (TWO_PI / 5) * i;
+            let bladeLen = towerW * 0.21;
+            stroke(105, 115, 128);
+            strokeWeight(max(2.5, 3.5 * sf));
+            let bx = cos(a) * bladeLen;
+            let by = sin(a) * bladeLen * 0.38;
+            line(0, 0, bx, by);
+            noStroke();
+            fill(125, 135, 148);
+            ellipse(bx, by, 5.5 * sf, 3.8 * sf);
+        }
+        fill(90, 95, 105);
+        stroke(70, 75, 85);
+        strokeWeight(1.2 * sf);
+        ellipse(0, 0, 11 * sf, 11 * sf);
+        pop();
+
+        // Left fill bank
+        let leftFillL = -towerW / 2 + 3 * sf;
+        let leftFillR = leftFillL + towerW * 0.24;
+        let fillTop = topY + towerH * 0.14;
+        let fillBot = baseY - towerH * 0.10;
+
+        noStroke();
+        fill(95, 145, 100, 110);
+        rectMode(CORNER);
+        rect(leftFillL, fillTop, leftFillR - leftFillL, fillBot - fillTop, 3 * sf);
+        stroke(75, 125, 80, 110);
+        strokeWeight(0.8 * sf);
+        for (let r = 0; r < 7; r++) {
+            let fy = fillTop + (fillBot - fillTop) * (r + 0.5) / 7;
+            let fx = (leftFillL + leftFillR) / 2;
+            line(fx - 4 * sf, fy - 2 * sf, fx + 4 * sf, fy + 2 * sf);
+            line(fx + 4 * sf, fy - 2 * sf, fx - 4 * sf, fy + 2 * sf);
+        }
+
+        // Right fill bank
+        let rightFillR = towerW / 2 - 3 * sf;
+        let rightFillL = rightFillR - towerW * 0.24;
+
+        noStroke();
+        fill(95, 145, 100, 110);
+        rectMode(CORNER);
+        rect(rightFillL, fillTop, rightFillR - rightFillL, fillBot - fillTop, 3 * sf);
+        stroke(75, 125, 80, 110);
+        strokeWeight(0.8 * sf);
+        for (let r = 0; r < 7; r++) {
+            let fy = fillTop + (fillBot - fillTop) * (r + 0.5) / 7;
+            let fx = (rightFillL + rightFillR) / 2;
+            line(fx - 4 * sf, fy - 2 * sf, fx + 4 * sf, fy + 2 * sf);
+            line(fx + 4 * sf, fy - 2 * sf, fx - 4 * sf, fy + 2 * sf);
+        }
+
+        // Hot water basins on top of each fill bank
+        fill(155, 178, 200);
+        stroke(120, 142, 165);
+        strokeWeight(1.5 * sf);
+        rectMode(CORNER);
+        rect(leftFillL - 3 * sf, fillTop - 12 * sf, leftFillR - leftFillL + 6 * sf, 12 * sf, 3 * sf);
+        rect(rightFillL - 3 * sf, fillTop - 12 * sf, rightFillR - rightFillL + 6 * sf, 12 * sf, 3 * sf);
+        // Warm water tint
+        noStroke();
+        fill(220, 150, 85, 80);
+        rect(leftFillL, fillTop - 10 * sf, leftFillR - leftFillL, 6 * sf, 2 * sf);
+        rect(rightFillL, fillTop - 10 * sf, rightFillR - rightFillL, 6 * sf, 2 * sf);
+
+        // Louvers on both sides (angled slats)
+        stroke(155, 162, 168);
+        strokeWeight(1.4 * sf);
+        for (let r = 0; r < 9; r++) {
+            let ly = fillTop + (fillBot - fillTop) * r / 9;
+            let slh = (fillBot - fillTop) / 9 * 0.7;
+            // Left louvers
+            line(leftFillL - 8 * sf, ly, leftFillL - 1 * sf, ly + slh);
+            // Right louvers
+            line(rightFillR + 1 * sf, ly, rightFillR + 8 * sf, ly + slh);
+        }
+
+        // Central plenum (open space between fill banks)
+        noStroke();
+        fill(232, 238, 245, 70);
+        rectMode(CORNER);
+        rect(leftFillR, fillTop, rightFillL - leftFillR, fillBot - fillTop);
+
+        // Cold water basin
+        fill(155, 178, 200);
+        stroke(120, 142, 165);
+        strokeWeight(1.8 * sf);
+        rectMode(CENTER);
+        rect(0, baseY + 4 * sf, towerW * 1.08, 14 * sf, 3 * sf);
+        noStroke();
+        fill(100, 170, 220, 80);
+        rect(0, baseY + 2 * sf, towerW * 0.96, 6 * sf, 2 * sf);
+
+        // ── Air particles ──────────────────────────────────────────
+        if (showAirFlow) {
+            for (let p of airParticles[idx]) {
+                let t = p.t;
+                let px, py, col;
+                let side = (p.lane > 0) ? 1 : -1;
+                let yLane = fillTop + (fillBot - fillTop) * (0.15 + abs(p.lane) * 0.7);
+                if (t < 0.15) {
+                    // Enter from sides through louvers
+                    let frac = t / 0.15;
+                    if (side === -1) {
+                        px = lerp(leftFillL - 18 * sf, leftFillL, frac);
+                    } else {
+                        px = lerp(rightFillR + 18 * sf, rightFillR, frac);
+                    }
+                    py = yLane;
+                    col = color(100, 155, 225, 195);
+                } else if (t < 0.40) {
+                    // Pass through fill bank horizontally
+                    let frac = (t - 0.15) / 0.25;
+                    if (side === -1) {
+                        px = lerp(leftFillL, leftFillR, frac);
+                    } else {
+                        px = lerp(rightFillR, rightFillL, frac);
+                    }
+                    py = yLane + sin(animPhase + p.lane * 5) * 3 * sf;
+                    col = lerpColor(color(100, 155, 225, 190), color(185, 165, 125, 175), frac);
+                } else if (t < 0.70) {
+                    // Rise through central plenum
+                    let frac = (t - 0.40) / 0.30;
+                    px = sin(animPhase * 0.7 + p.lane * 6) * (rightFillL - leftFillR) * 0.28;
+                    py = lerp(yLane, fanY + 22 * sf, frac);
+                    col = lerpColor(color(185, 165, 125, 175), color(225, 145, 80, 165), frac);
+                } else {
+                    // Exit through fan at top
+                    let frac = (t - 0.70) / 0.30;
+                    px = sin(animPhase * 0.4 + p.lane * 3) * towerW * 0.16 * (1 + frac * 0.3);
+                    py = lerp(fanY + 12 * sf, topY - 18 * sf, frac);
+                    col = color(225, 145, 80, map(frac, 0, 1, 165, 65));
+                }
+                noStroke();
+                fill(col);
+                circle(px, py, max(4, 5.5 * sf));
+            }
+            // Direction arrows: in from sides
+            let coolCol = color(100, 155, 225, 150);
+            stroke(coolCol);
+            strokeWeight(1.5 * sf);
+            let midFillY = (fillTop + fillBot) / 2;
+            line(leftFillL - 20 * sf, midFillY, leftFillL - 4 * sf, midFillY);
+            drawFlowArrow(leftFillL - 20 * sf, midFillY, leftFillL - 4 * sf, midFillY, coolCol, 5, sf);
+            line(rightFillR + 20 * sf, midFillY, rightFillR + 4 * sf, midFillY);
+            drawFlowArrow(rightFillR + 20 * sf, midFillY, rightFillR + 4 * sf, midFillY, coolCol, 5, sf);
+            // Up and out
+            let warmCol = color(225, 145, 80, 150);
+            stroke(warmCol);
+            line(0, fanY - 22 * sf, 0, topY - 14 * sf);
+            drawFlowArrow(0, fanY - 22 * sf, 0, topY - 14 * sf, warmCol, 5, sf);
+        }
+
+        // ── Water particles ──────────────────────────────────────
+        if (showWaterFlow) {
+            for (let p of waterParticles[idx]) {
+                let t = p.t;
+                let px, py, col;
+                let side = (p.lane > 0) ? 1 : -1;
+                let bankCx, bankL, bankR;
+                if (side === -1) {
+                    bankCx = (leftFillL + leftFillR) / 2;
+                    bankL = leftFillL;
+                    bankR = leftFillR;
+                } else {
+                    bankCx = (rightFillL + rightFillR) / 2;
+                    bankL = rightFillL;
+                    bankR = rightFillR;
+                }
+                if (t < 0.55) {
+                    // Fall through fill vertically
+                    let frac = t / 0.55;
+                    px = bankCx + sin(p.lane * 3) * (bankR - bankL) * 0.2;
+                    py = lerp(fillTop, fillBot, frac);
+                    col = lerpColor(color(225, 150, 85, 215), color(85, 170, 225, 215), frac);
+                } else {
+                    // Drip into basin
+                    let frac = (t - 0.55) / 0.45;
+                    px = bankCx;
+                    py = lerp(fillBot, baseY + 2 * sf, min(frac * 1.8, 1));
+                    col = color(85, 170, 225, 215);
+                }
+                noStroke();
+                fill(col);
+                circle(px, py, max(3, 5 * sf));
+            }
+            let wCol = color(85, 170, 225, 140);
+            stroke(wCol);
+            strokeWeight(1.5 * sf);
+            let lmx = (leftFillL + leftFillR) / 2;
+            let rmx = (rightFillL + rightFillR) / 2;
+            line(lmx, fillTop + 2 * sf, lmx, fillBot - 2 * sf);
+            drawFlowArrow(lmx, fillTop + 2 * sf, lmx, fillBot - 2 * sf, wCol, 5, sf);
+            line(rmx, fillTop + 2 * sf, rmx, fillBot - 2 * sf);
+            drawFlowArrow(rmx, fillTop + 2 * sf, rmx, fillBot - 2 * sf, wCol, 5, sf);
+        }
+
+        // Labels
+        addLabel('Fan', 0, topY - 14 * sf, sf);
+        addLabel('Fill Media', (leftFillL + leftFillR) / 2, fillBot + 12 * sf, sf);
+        addLabel('Hot Water Basin', (rightFillL + rightFillR) / 2, fillTop - 22 * sf, sf);
+        addLabel('Louvers', -towerW / 2 - 16 * sf, (fillTop + fillBot) / 2, sf);
+        addLabel('Cold Water Basin', 0, baseY + 18 * sf, sf);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  SPEC CARD
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawSpecCard(x, y, w, cardH, spec, sf) {
+        // Card background with shadow
+        noStroke();
+        fill(0, 0, 0, 12);
+        rectMode(CORNER);
+        rect(x + 2, y + 2, w, cardH, 6);
+
+        fill(253, 254, 255);
+        stroke(195, 202, 212);
+        strokeWeight(1);
+        rect(x, y, w, cardH, 6);
+
+        // Header bar
+        noStroke();
+        fill(45, 70, 110);
+        rect(x, y, w, 22 * sf, 6, 6, 0, 0);
+        // Fill rectangle below rounded corners so header meets card edge
+        rect(x, y + 12 * sf, w, 10 * sf);
+
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(max(10, 11.5 * sf));
+        textStyle(BOLD);
+        text(spec.name, x + w / 2, y + 11 * sf);
+        textStyle(NORMAL);
+
+        // Spec rows
+        let rowH = max(14, 15.5 * sf);
+        let startY = y + 27 * sf;
+        let labelX = x + 10 * sf;
+        let valueX = x + w * 0.50;
+
+        textAlign(LEFT, TOP);
+        textSize(max(9, 10.5 * sf));
+
+        let rows = [
+            ['Draft Type:', spec.draft],
+            ['Flow Pattern:', spec.flow],
+            ['Fan Energy:', spec.fanEnergy],
+            ['Thermal Efficiency:', spec.efficiency],
+            ['Best For:', spec.bestFor]
+        ];
+
+        for (let i = 0; i < rows.length; i++) {
+            let ry = startY + i * rowH;
+            if (i % 2 === 0) {
+                noStroke();
+                fill(238, 243, 250);
+                rectMode(CORNER);
+                rect(x + 4, ry - 1, w - 8, rowH, 2);
+            }
+            // Label
+            fill(85, 90, 100);
+            textStyle(BOLD);
+            text(rows[i][0], labelX, ry + 1);
+            textStyle(NORMAL);
+            // Value
+            fill(45, 50, 60);
+            text(rows[i][1], valueX, ry + 1);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  LABEL HELPER (with hitbox for hover tooltip)
+    // ══════════════════════════════════════════════════════════════════
+
+    function addLabel(name, lx, ly, sf) {
+        noStroke();
+        fill(35, 80, 155);
+        textAlign(CENTER, CENTER);
+        textSize(max(8, 9.8 * sf));
+        textStyle(BOLD);
+        text(name, lx, ly);
+        textStyle(NORMAL);
+
+        let sw = textWidth(name) + 10 * sf;
+        let sh = max(12, 14 * sf);
+
+        let sx = screenX(lx, ly);
+        let sy = screenY(lx, ly);
+
+        labelHitboxes.push({
+            x: sx - sw / 2,
+            y: sy - sh / 2,
+            w: sw,
+            h: sh,
+            name: name
+        });
+
+        if (mouseX > sx - sw / 2 && mouseX < sx + sw / 2 &&
+            mouseY > sy - sh / 2 && mouseY < sy + sh / 2) {
+            // Underline highlight
+            stroke(35, 80, 155, 180);
+            strokeWeight(1.4 * sf);
+            line(lx - sw / 2 + 5 * sf, ly + sh / 2 - 2 * sf,
+                 lx + sw / 2 - 5 * sf, ly + sh / 2 - 2 * sf);
+
+            if (labelExplanations[name]) {
+                showTooltip = true;
+                tooltipText = name + ': ' + labelExplanations[name];
+                tooltipX = mouseX;
+                tooltipY = mouseY;
+            }
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  TOOLTIP
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawTooltip(tx, ty, msg, sf) {
+        push();
+        resetMatrix();
+        textSize(max(10.5, 11.5 * sf));
+        let maxTipW = canvasW * 0.40;
+        let lines = [];
+        let words = msg.split(' ');
+        let currentLine = '';
+        for (let w2 of words) {
+            let test = currentLine + (currentLine.length > 0 ? ' ' : '') + w2;
+            if (textWidth(test) > maxTipW && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = w2;
+            } else {
+                currentLine = test;
+            }
+        }
+        if (currentLine.length > 0) lines.push(currentLine);
+
+        let lineH = max(15, 17 * sf);
+        let tipH = lines.length * lineH + 14 * sf;
+        let tipW = maxTipW + 24 * sf;
+
+        let tipX = tx + 16 * sf;
+        let tipY2 = ty - tipH - 12 * sf;
+        if (tipX + tipW > canvasW - 4) tipX = canvasW - tipW - 8;
+        if (tipX < 4) tipX = 4;
+        if (tipY2 < 4) tipY2 = ty + 24 * sf;
+
+        // Shadow
+        noStroke();
+        fill(0, 0, 0, 32);
+        rectMode(CORNER);
+        rect(tipX + 3, tipY2 + 3, tipW, tipH, 7);
+
+        // Background
+        fill(32, 38, 48, 240);
+        rect(tipX, tipY2, tipW, tipH, 7);
+
+        // Border accent
+        fill(60, 130, 210, 200);
+        rect(tipX, tipY2, 4 * sf, tipH, 7, 0, 0, 7);
+
+        // Text
+        fill(250);
+        textAlign(LEFT, TOP);
+        for (let i = 0; i < lines.length; i++) {
+            if (i === 0) {
+                // First line (label name) slightly bolder look
+                textStyle(BOLD);
+                let colonIdx = lines[0].indexOf(':');
+                if (colonIdx > 0) {
+                    let boldPart = lines[0].substring(0, colonIdx + 1);
+                    let rest = lines[0].substring(colonIdx + 1);
+                    text(boldPart, tipX + 12 * sf, tipY2 + 7 * sf);
+                    textStyle(NORMAL);
+                    text(rest, tipX + 12 * sf + textWidth(boldPart), tipY2 + 7 * sf);
+                } else {
+                    text(lines[0], tipX + 12 * sf, tipY2 + 7 * sf);
+                }
+                textStyle(NORMAL);
+            } else {
+                text(lines[i], tipX + 12 * sf, tipY2 + 7 * sf + i * lineH);
+            }
+        }
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  MOUSE INTERACTION
+    // ══════════════════════════════════════════════════════════════════
+
+    function mousePressed() {
+        // Check air toggle button
+        if (mouseX > airBtn.x && mouseX < airBtn.x + airBtn.w &&
+            mouseY > airBtn.y && mouseY < airBtn.y + airBtn.h) {
+            showAirFlow = !showAirFlow;
+            return;
+        }
+
+        // Check water toggle button
+        if (mouseX > waterBtn.x && mouseX < waterBtn.x + waterBtn.w &&
+            mouseY > waterBtn.y && mouseY < waterBtn.y + waterBtn.h) {
+            showWaterFlow = !showWaterFlow;
+            return;
+        }
+
+        // Check tower cells for pause/play
+        for (let i = 0; i < towerCells.length; i++) {
+            let c = towerCells[i];
+            if (mouseX > c.x && mouseX < c.x + c.w &&
+                mouseY > c.y && mouseY < c.y + c.h) {
+                paused[i] = !paused[i];
+                return;
+            }
+        }
+    }
+    </script>
+</body>
+</html>

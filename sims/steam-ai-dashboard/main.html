@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Steam Plant Dashboard</title>
+    <style>
+        body { margin: 0; padding: 16px; font-family: Arial, Helvetica, sans-serif; background: #1a1a2e; color: #e0e0e0; }
+        .container { max-width: 920px; margin: 0 auto; }
+        h1 { color: #64b5f6; font-size: 1.3em; text-align: center; margin-bottom: 16px; }
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .panel { background: #16213e; border-radius: 8px; padding: 16px; border: 1px solid #0f3460; }
+        .panel h2 { font-size: 0.95em; color: #64b5f6; margin: 0 0 12px 0; }
+        .gauges { display: flex; gap: 16px; justify-content: center; }
+        .gauge { text-align: center; }
+        .gauge-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2em; font-weight: bold; margin: 0 auto 6px; }
+        .gauge-label { font-size: 0.75em; color: #aaa; }
+        .good { background: conic-gradient(#4caf50 0% 83%, #333 83% 100%); }
+        .warn { background: conic-gradient(#ff9800 0% 79%, #333 79% 100%); }
+        .kpi-row { display: flex; gap: 12px; margin-bottom: 8px; }
+        .kpi { flex: 1; background: #0f3460; border-radius: 6px; padding: 10px; text-align: center; }
+        .kpi .value { font-size: 1.4em; font-weight: bold; color: #64b5f6; }
+        .kpi .label { font-size: 0.7em; color: #999; margin-top: 2px; }
+        .trap-map { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+        .trap-dot { width: 20px; height: 20px; border-radius: 50%; margin: 0 auto; cursor: pointer; transition: transform 0.2s; }
+        .trap-dot:hover { transform: scale(1.3); }
+        .trap-ok { background: #4caf50; }
+        .trap-fail-open { background: #f44336; }
+        .trap-fail-closed { background: #2196f3; }
+        .trap-untested { background: #616161; }
+        .trap-legend { display: flex; gap: 12px; margin-top: 8px; font-size: 0.7em; justify-content: center; }
+        .trap-legend span { display: flex; align-items: center; gap: 4px; }
+        .trap-legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .recommendations { list-style: none; padding: 0; margin: 0; }
+        .recommendations li { padding: 8px 10px; background: #0f3460; border-radius: 4px; margin-bottom: 6px; font-size: 0.8em; border-left: 3px solid #ff9800; }
+        .recommendations li strong { color: #ff9800; }
+        .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 100px; margin-top: 8px; }
+        .bar { flex: 1; border-radius: 3px 3px 0 0; position: relative; min-width: 20px; }
+        .bar-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 0.6em; color: #aaa; white-space: nowrap; }
+        .cost-info { text-align: center; margin-top: 24px; font-size: 0.75em; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Steam Plant Dashboard</h1>
+        <div class="kpi-row">
+            <div class="kpi"><div class="value">$6.82</div><div class="label">Cost per 1,000 lb Steam</div></div>
+            <div class="kpi"><div class="value">82.4%</div><div class="label">Avg Boiler Efficiency</div></div>
+            <div class="kpi"><div class="value">78%</div><div class="label">Condensate Return</div></div>
+            <div class="kpi"><div class="value">14</div><div class="label">Failed Traps</div></div>
+        </div>
+        <div class="dashboard">
+            <div class="panel">
+                <h2>Boiler Efficiency</h2>
+                <div class="gauges">
+                    <div class="gauge">
+                        <div class="gauge-circle good"><span style="background:#16213e;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;">83.1%</span></div>
+                        <div class="gauge-label">Boiler #1 (500 HP)</div>
+                    </div>
+                    <div class="gauge">
+                        <div class="gauge-circle warn"><span style="background:#16213e;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;">79.2%</span></div>
+                        <div class="gauge-label">Boiler #2 (500 HP)</div>
+                    </div>
+                </div>
+                <div class="cost-info">Boiler #2 efficiency drop: schedule combustion tuning</div>
+            </div>
+            <div class="panel">
+                <h2>Steam Trap Status (48 traps)</h2>
+                <div class="trap-map">
+                    <div class="trap-dot trap-ok" title="Trap A1: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap A2: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap A3: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap A4: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap A5: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap A6: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap A7: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap A8: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap B1: Working"></div>
+                    <div class="trap-dot trap-fail-closed" title="Trap B2: Failed Closed"></div>
+                    <div class="trap-dot trap-ok" title="Trap B3: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap B4: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap B5: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap B6: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap B7: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap B8: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap C1: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap C2: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap C3: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap C4: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap C5: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap C6: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap C7: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap C8: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap D1: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap D2: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap D3: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap D4: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap D5: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap D6: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap D7: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap D8: Failed Open"></div>
+                    <div class="trap-dot trap-fail-closed" title="Trap E1: Failed Closed"></div>
+                    <div class="trap-dot trap-ok" title="Trap E2: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap E3: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap E4: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap E5: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap E6: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap E7: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap E8: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap F1: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap F2: Failed Open"></div>
+                    <div class="trap-dot trap-ok" title="Trap F3: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap F4: Working"></div>
+                    <div class="trap-dot trap-ok" title="Trap F5: Working"></div>
+                    <div class="trap-dot trap-fail-open" title="Trap F6: Failed Open"></div>
+                    <div class="trap-dot trap-fail-closed" title="Trap F7: Failed Closed"></div>
+                    <div class="trap-dot trap-ok" title="Trap F8: Working"></div>
+                </div>
+                <div class="trap-legend">
+                    <span><div class="dot" style="background:#4caf50"></div> Working (34)</span>
+                    <span><div class="dot" style="background:#f44336"></div> Failed Open (11)</span>
+                    <span><div class="dot" style="background:#2196f3"></div> Failed Closed (3)</span>
+                </div>
+            </div>
+            <div class="panel">
+                <h2>Monthly Energy Cost Trend</h2>
+                <div class="bar-chart">
+                    <div class="bar" style="height:85%;background:#64b5f6;"><span class="bar-label">Sep</span></div>
+                    <div class="bar" style="height:78%;background:#64b5f6;"><span class="bar-label">Oct</span></div>
+                    <div class="bar" style="height:92%;background:#64b5f6;"><span class="bar-label">Nov</span></div>
+                    <div class="bar" style="height:100%;background:#64b5f6;"><span class="bar-label">Dec</span></div>
+                    <div class="bar" style="height:96%;background:#64b5f6;"><span class="bar-label">Jan</span></div>
+                    <div class="bar" style="height:82%;background:#42a5f5;"><span class="bar-label">Feb</span></div>
+                </div>
+                <div class="cost-info">Feb projected: $128,400 (−5.2% vs Jan)</div>
+            </div>
+            <div class="panel">
+                <h2>AI Recommendations</h2>
+                <ul class="recommendations">
+                    <li><strong>Priority 1:</strong> Repair 11 failed-open traps — estimated savings $49,500/yr</li>
+                    <li><strong>Priority 2:</strong> Tune Boiler #2 combustion — estimated savings $18,200/yr</li>
+                    <li><strong>Priority 3:</strong> Insulate 120 ft bare pipe in Building C — estimated savings $6,800/yr</li>
+                    <li><strong>Priority 4:</strong> Increase condensate return from 78% to 90% — estimated savings $42,000/yr</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

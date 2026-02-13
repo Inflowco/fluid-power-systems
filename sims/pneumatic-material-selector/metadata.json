@@ -1,0 +1,9 @@
+{
+  "title": "Material Properties and Conveying Mode Selector",
+  "chapter": 13,
+  "type": "microsim",
+  "bloom_level": "L4 Analyze",
+  "bloom_verbs": ["differentiate", "examine"],
+  "technology": "p5.js",
+  "learning_objective": "Students will be able to examine material properties and differentiate between materials requiring dilute-phase versus dense-phase conveying."
+}

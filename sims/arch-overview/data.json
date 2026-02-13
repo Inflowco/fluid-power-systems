@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "title": "Intelligent Textbook Architecture",
+    "description": "How the tools work together to build and publish an intelligent textbook",
+    "lastUpdated": "2026-02-12"
+  },
+  "nodes": [
+    {
+      "id": 1,
+      "label": "You\n(the Author)",
+      "x": 0,
+      "y": -220,
+      "description": "You are the author and subject matter expert. You write content, review output, and guide the AI assistant.",
+      "category": "person"
+    },
+    {
+      "id": 2,
+      "label": "VS Code\n(Your Desk)",
+      "x": -180,
+      "y": -60,
+      "description": "VS Code is your workspace where you see all files, edit Markdown chapters, and organize the project. It has a file explorer, editor, and integrated terminal.",
+      "category": "tool"
+    },
+    {
+      "id": 3,
+      "label": "Claude Code\n(AI Helper)",
+      "x": 180,
+      "y": -60,
+      "description": "Claude Code is your AI writing assistant. It reads, writes, and organizes files, runs commands, searches the project, and remembers context between conversations.",
+      "category": "ai"
+    },
+    {
+      "id": 4,
+      "label": "MkDocs\n(Book Maker)",
+      "x": 0,
+      "y": 100,
+      "description": "MkDocs takes your Markdown files and bakes them into a beautiful website with navigation, search, and formatting. Commands: mkdocs serve, mkdocs build, mkdocs gh-deploy.",
+      "category": "build"
+    },
+    {
+      "id": 5,
+      "label": "GitHub\n(Cloud Locker)",
+      "x": 0,
+      "y": 240,
+      "description": "GitHub stores your project safely in the cloud, keeps a history of every change, and hosts the finished website for free via GitHub Pages.",
+      "category": "infra"
+    },
+    {
+      "id": 6,
+      "label": "Readers\n(The World)",
+      "x": 0,
+      "y": 380,
+      "description": "Anyone in the world can read the published textbook at dmccreary.github.io/fluid-power-systems. The site is free and always available.",
+      "category": "output"
+    }
+  ],
+  "edges": [
+    { "from": 1, "to": 2, "label": "writes in" },
+    { "from": 1, "to": 3, "label": "talks to" },
+    { "from": 2, "to": 3, "label": "", "arrows": "to;from" },
+    { "from": 2, "to": 4, "label": ".md files" },
+    { "from": 3, "to": 4, "label": ".md files" },
+    { "from": 2, "to": 5, "label": "git push" },
+    { "from": 4, "to": 5, "label": "deploys" },
+    { "from": 5, "to": 6, "label": "publishes" }
+  ]
+}

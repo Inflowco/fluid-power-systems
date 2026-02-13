@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pneumatic Conveying Troubleshooting Diagnostic</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .controls-section {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .scenario-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+
+        select {
+            padding: 10px 15px;
+            font-size: 14px;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            min-width: 250px;
+        }
+
+        select:hover {
+            border-color: #764ba2;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: #f0f4ff;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .score-value {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .diagram-section {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #p5-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .diagnostic-section {
+            background: #f5f7fa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .question-text {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-left: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .option input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .option-label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .feedback-icon {
+            margin-left: auto;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .reset-button {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .reset-button:hover {
+            background: #764ba2;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .controls-section {
+                flex-direction: column;
+            }
+
+            select {
+                min-width: 100%;
+            }
+
+            .diagram-section {
+                min-height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pneumatic Conveying Troubleshooting Diagnostic</h1>
+
+        <div class="instructions">
+            <strong>Instructions:</strong> Select a problem scenario below, analyze the system diagrams and pressure readings, then answer the diagnostic questions to identify the root cause and solution.
+        </div>
+
+        <div class="controls-section">
+            <div class="scenario-selector">
+                <label for="scenario-select">Select Problem Scenario:</label>
+                <select id="scenario-select">
+                    <option value="">-- Choose a scenario --</option>
+                    <option value="blockage">Pipeline blockage at bend</option>
+                    <option value="velocity">Excessive velocity / degradation</option>
+                    <option value="air-leak">Rotary valve air leak</option>
+                    <option value="filter-plugged">Plugged filter</option>
+                    <option value="bridging">Wet material bridging</option>
+                    <option value="elbow-leak">Worn elbow leak</option>
+                </select>
+            </div>
+
+            <div class="score-display">
+                <span>Score:</span>
+                <span class="score-value"><span id="correct-count">0</span>/<span id="total-count">0</span></span>
+            </div>
+        </div>
+
+        <div class="diagram-section">
+            <div id="p5-container"></div>
+        </div>
+
+        <div class="diagnostic-section" id="diagnostic-content">
+            <!-- Dynamically populated with diagnostic questions -->
+        </div>
+
+        <button class="reset-button" onclick="resetDiagnostic()">Reset Diagnostic</button>
+    </div>
+
+    <script>
+        const scenarios = {
+            blockage: {
+                title: "Pipeline Blockage at Bend",
+                pressures: {
+                    blower: 8.5,
+                    midpoint1: 6.2,
+                    midpoint2: 0.1,
+                    filter: 0.0
+                },
+                flowRate: 0.2,
+                abnormalGauges: [1, 2, 3], // indices that should be red
+                questions: [
+                    {
+                        question: "What is the primary symptom?",
+                        options: [
+                            "Sudden pressure drop after first bend with zero flow downstream",
+                            "Gradually rising pressure throughout the system",
+                            "Intermittent flow surges and pressure oscillations",
+                            "High velocity throughout with material degradation"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What should you check first?",
+                        options: [
+                            "Clean or replace the filter receiver",
+                            "Inspect the pipeline bend for blockage or material accumulation",
+                            "Check the rotary valve for proper operation",
+                            "Verify the blower is running at full speed"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the root cause?",
+                        options: [
+                            "Filter is completely plugged",
+                            "Rotary valve is leaking air",
+                            "Solid material has accumulated in a pipeline bend",
+                            "The blower is failing"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "What is the recommended fix?",
+                        options: [
+                            "Clean the filter cartridge",
+                            "Remove blockage and inspect bend for wear; consider installing a sweeping elbow",
+                            "Increase the system pressure",
+                            "Replace the rotary valve seals"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            velocity: {
+                title: "Excessive Velocity / Degradation",
+                pressures: {
+                    blower: 7.8,
+                    midpoint1: 7.3,
+                    midpoint2: 6.9,
+                    filter: 5.2
+                },
+                flowRate: 12.5,
+                abnormalGauges: [],
+                questions: [
+                    {
+                        question: "What is the primary symptom?",
+                        options: [
+                            "Complete blockage with zero flow",
+                            "High velocity readings throughout system with material degradation",
+                            "Plugged filter with rising DP",
+                            "Intermittent flow surges"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What should you check first?",
+                        options: [
+                            "Inspect for material moisture content",
+                            "Check system velocity and measure material condition",
+                            "Clean the rotary valve",
+                            "Verify the blower discharge pressure"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the root cause?",
+                        options: [
+                            "Filter plugging",
+                            "System is operating at excessively high velocity",
+                            "Pipeline blockage",
+                            "Bearing wear in the blower"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the recommended fix?",
+                        options: [
+                            "Reduce blower speed or increase pipeline diameter",
+                            "Add more filter area",
+                            "Install a relief valve",
+                            "Replace the rotary valve"
+                        ],
+                        correct: 0
+                    }
+                ]
+            },
+            airLeak: {
+                title: "Rotary Valve Air Leak",
+                pressures: {
+                    blower: 7.5,
+                    midpoint1: 3.2,
+                    midpoint2: 2.1,
+                    filter: 1.8
+                },
+                flowRate: 2.1,
+                abnormalGauges: [1, 2, 3],
+                questions: [
+                    {
+                        question: "What is the primary symptom?",
+                        options: [
+                            "Low pipeline velocity despite blower output pressure",
+                            "High pressure throughout with zero flow",
+                            "Intermittent flow patterns",
+                            "Excessive velocity causing degradation"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What should you check first?",
+                        options: [
+                            "Inspect the filter for plugging",
+                            "Listen for air leaking from rotary valve seals",
+                            "Check pipeline for blockages",
+                            "Verify blower speed"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the root cause?",
+                        options: [
+                            "Plugged filter receiver",
+                            "Pipeline blockage at a bend",
+                            "Air is leaking from rotary valve seals instead of conveying material",
+                            "Worn pump impeller"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "What is the recommended fix?",
+                        options: [
+                            "Clean the filter",
+                            "Inspect and replace rotary valve seals or rebuild the valve",
+                            "Install a downstream relief valve",
+                            "Increase blower speed"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            filterPlugged: {
+                title: "Plugged Filter",
+                pressures: {
+                    blower: 8.2,
+                    midpoint1: 7.8,
+                    midpoint2: 7.5,
+                    filter: 9.8
+                },
+                flowRate: 1.2,
+                abnormalGauges: [3], // filter pressure is abnormally high
+                questions: [
+                    {
+                        question: "What is the primary symptom?",
+                        options: [
+                            "Blockage at a pipeline bend",
+                            "Rising pressure throughout system with high filter differential pressure",
+                            "Low velocity with air leaking from rotary valve",
+                            "Intermittent flow with pressure surges"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What should you check first?",
+                        options: [
+                            "Visually inspect the pipeline for blockages",
+                            "Check the filter's pressure differential and visual condition",
+                            "Test the rotary valve seals",
+                            "Verify blower operation"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the root cause?",
+                        options: [
+                            "Material accumulation in a pipeline bend",
+                            "Rotary valve seal failure",
+                            "Filter cartridge is clogged with dust/fines",
+                            "Excessive system velocity"
+                        ],
+                        correct: 2
+                    },
+                    {
+                        question: "What is the recommended fix?",
+                        options: [
+                            "Install sweeping elbows",
+                            "Replace or clean filter cartridge; consider upgrading filter size",
+                            "Reduce system velocity",
+                            "Rebuild the rotary valve"
+                        ],
+                        correct: 1
+                    }
+                ]
+            },
+            bridging: {
+                title: "Wet Material Bridging",
+                pressures: {
+                    blower: 6.5,
+                    midpoint1: 2.1,
+                    midpoint2: 1.8,
+                    filter: 1.2
+                },
+                flowRate: 0.5,
+                abnormalGauges: [1, 2], // variable/surge
+                questions: [
+                    {
+                        question: "What is the primary symptom?",
+                        options: [
+                            "Steady low flow with stable pressures",
+                            "Intermittent flow with pressure surging and bridging in hopper",
+                            "Gradual pressure rise with blockage",
+                            "High velocity degradation throughout"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What should you check first?",
+                        options: [
+                            "Clean the filter cartridge",
+                            "Inspect the source material for moisture and hopper for bridging",
+                            "Check the rotary valve discharge",
+                            "Verify pipeline integrity"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the root cause?",
+                        options: [
+                            "Filter is plugged",
+                            "Moisture in material is causing bridging in hopper/feeder",
+                            "Pipeline has a leak",
+                            "Blower is losing pressure"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the recommended fix?",
+                        options: [
+                            "Dry the material; improve storage conditions; install anti-bridge device",
+                            "Replace the filter",
+                            "Install a bypass vent",
+                            "Increase blower power"
+                        ],
+                        correct: 0
+                    }
+                ]
+            },
+            elbowLeak: {
+                title: "Worn Elbow Leak",
+                pressures: {
+                    blower: 8.0,
+                    midpoint1: 7.5,
+                    midpoint2: 4.2,
+                    filter: 3.8
+                },
+                flowRate: 4.5,
+                abnormalGauges: [2], // pressure drops at second bend area
+                questions: [
+                    {
+                        question: "What is the primary symptom?",
+                        options: [
+                            "Sudden sharp pressure drop at a specific location with visible air leak",
+                            "Gradual pressure drop throughout system",
+                            "Intermittent blockage patterns",
+                            "Complete system failure"
+                        ],
+                        correct: 0
+                    },
+                    {
+                        question: "What should you check first?",
+                        options: [
+                            "Clean all filters",
+                            "Visually inspect elbows for cracks, holes, and material exit points",
+                            "Test the rotary valve",
+                            "Measure blower discharge"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the root cause?",
+                        options: [
+                            "Filter plugging",
+                            "Elbow has worn through causing air and material loss",
+                            "Rotary valve malfunction",
+                            "System blockage"
+                        ],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the recommended fix?",
+                        options: [
+                            "Reduce system pressure",
+                            "Patch the leak temporarily",
+                            "Replace the worn elbow with new pipe; consider wear-resistant materials",
+                            "Install a manual isolation valve"
+                        ],
+                        correct: 2
+                    }
+                ]
+            }
+        };
+
+        let currentScenario = null;
+        let userAnswers = {};
+        let correctCount = 0;
+        let totalCount = 0;
+
+        function drawSystemDiagram(scenario) {
+            if (!scenario) return;
+
+            // Clear previous sketch
+            if (window.sketchInstance) {
+                window.sketchInstance.remove();
+            }
+
+            const pressureData = scenario.pressures;
+            const flowRate = scenario.flowRate;
+            const abnormalGauges = scenario.abnormalGauges;
+
+            window.sketchInstance = new p5((p) => {
+                p.setup = function() {
+                    const container = document.getElementById('p5-container');
+                    const width = container.offsetWidth - 40;
+                    const height = 300;
+                    p.createCanvas(width, height);
+                };
+
+                p.draw = function() {
+                    p.background(245);
+                    p.noFill();
+                    p.stroke(0);
+                    p.strokeWeight(2);
+
+                    const startX = 40;
+                    const startY = p.height / 2;
+                    const spacing = (p.width - 80) / 5;
+
+                    // Blower circle
+                    p.fill(255);
+                    p.circle(startX, startY, 40);
+                    p.fill(0);
+                    p.textSize(12);
+                    p.textAlign(p.CENTER, p.CENTER);
+                    p.text('Blower', startX, startY);
+
+                    // Rotary Valve
+                    const valveX = startX + spacing;
+                    p.rect(valveX - 15, startY - 20, 30, 40);
+                    p.fill(0);
+                    p.text('Rotary', valveX, startY - 8);
+                    p.text('Valve', valveX, startY + 8);
+
+                    // Pipeline with bends
+                    p.noFill();
+                    p.stroke(0);
+                    p.strokeWeight(3);
+
+                    const pathY = startY - 30;
+                    const bend1X = valveX + spacing;
+                    const bend2X = bend1X + spacing;
+                    const filterX = bend2X + spacing;
+
+                    // Pipeline segments
+                    p.line(valveX + 15, startY, bend1X - 15, startY);
+                    p.arc(bend1X, startY, 30, 30, 0, -p.PI/2, p.CHORD);
+                    p.line(bend1X, startY - 15, bend1X, pathY);
+
+                    p.arc(bend1X, pathY - 20, 40, 40, 0, p.PI/2, p.CHORD);
+                    p.line(bend1X + 20, pathY - 20, bend2X - 20, pathY - 20);
+
+                    p.arc(bend2X, pathY - 20, 40, 40, p.PI/2, p.PI, p.CHORD);
+                    p.line(bend2X, pathY - 40, bend2X, pathY - 80);
+
+                    p.arc(bend2X, pathY - 100, 40, 40, p.PI, 3*p.PI/2, p.CHORD);
+                    p.line(bend2X + 20, pathY - 100, filterX - 30, pathY - 100);
+
+                    // Filter Receiver
+                    p.fill(200, 200, 255);
+                    p.rect(filterX - 20, pathY - 120, 40, 50);
+                    p.fill(0);
+                    p.textSize(11);
+                    p.text('Filter', filterX, pathY - 95);
+
+                    // Pressure gauges
+                    const gaugePositions = [
+                        { x: startX, y: startY + 50, label: 'Blower', value: pressureData.blower },
+                        { x: bend1X, y: pathY + 20, label: 'Point 1', value: pressureData.midpoint1 },
+                        { x: bend2X, y: pathY - 120, label: 'Point 2', value: pressureData.midpoint2 },
+                        { x: filterX, y: pathY - 50, label: 'Filter', value: pressureData.filter }
+                    ];
+
+                    gaugePositions.forEach((gauge, idx) => {
+                        const isAbnormal = abnormalGauges.includes(idx);
+                        p.fill(isAbnormal ? [255, 100, 100] : [100, 200, 100]);
+                        p.stroke(isAbnormal ? [200, 0, 0] : [0, 100, 0]);
+                        p.strokeWeight(2);
+                        p.circle(gauge.x, gauge.y, 25);
+
+                        p.fill(0);
+                        p.textSize(10);
+                        p.textAlign(p.CENTER, p.CENTER);
+                        p.text(gauge.value.toFixed(1), gauge.x, gauge.y - 5);
+                        p.text('bar', gauge.x, gauge.y + 7);
+
+                        p.textSize(9);
+                        p.text(gauge.label, gauge.x, gauge.y + 30);
+                    });
+
+                    // Flow indicator
+                    p.fill(0);
+                    p.textSize(12);
+                    p.textAlign(p.LEFT);
+                    p.text(`Flow Rate: ${flowRate} m³/min`, 10, 20);
+                };
+
+                p.windowResized = function() {
+                    const container = document.getElementById('p5-container');
+                    if (container) {
+                        const width = container.offsetWidth - 40;
+                        p.resizeCanvas(width, 300);
+                    }
+                };
+            }, 'p5-container');
+        }
+
+        function populateDiagnosticQuestions() {
+            if (!currentScenario) return;
+
+            const diagnostic = document.getElementById('diagnostic-content');
+            diagnostic.innerHTML = '';
+
+            userAnswers = {};
+            correctCount = 0;
+            totalCount = currentScenario.questions.length;
+
+            currentScenario.questions.forEach((q, questionIdx) => {
+                const block = document.createElement('div');
+                block.className = 'question-block';
+
+                const qText = document.createElement('div');
+                qText.className = 'question-text';
+                qText.textContent = `Q${questionIdx + 1}: ${q.question}`;
+                block.appendChild(qText);
+
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+
+                q.options.forEach((option, optIdx) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.id = `q${questionIdx}-opt${optIdx}`;
+
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `question${questionIdx}`;
+                    input.value = optIdx;
+                    input.onchange = () => selectAnswer(questionIdx, optIdx);
+
+                    const label = document.createElement('label');
+                    label.className = 'option-label';
+                    label.textContent = option;
+                    label.style.cursor = 'pointer';
+
+                    optionDiv.appendChild(input);
+                    optionDiv.appendChild(label);
+                    optionsDiv.appendChild(optionDiv);
+                });
+
+                block.appendChild(optionsDiv);
+                diagnostic.appendChild(block);
+            });
+        }
+
+        function selectAnswer(questionIdx, optionIdx) {
+            const isCorrect = optionIdx === currentScenario.questions[questionIdx].correct;
+            userAnswers[questionIdx] = { selected: optionIdx, correct: isCorrect };
+
+            // Update visual feedback
+            for (let i = 0; i < currentScenario.questions[questionIdx].options.length; i++) {
+                const optDiv = document.getElementById(`q${questionIdx}-opt${i}`);
+                optDiv.classList.remove('correct', 'incorrect');
+                optDiv.querySelector('input').disabled = true;
+
+                if (i === optionIdx) {
+                    optDiv.classList.add(isCorrect ? 'correct' : 'incorrect');
+                    const feedback = document.createElement('span');
+                    feedback.className = 'feedback-icon';
+                    feedback.textContent = isCorrect ? '✓' : '✗';
+                    optDiv.appendChild(feedback);
+                }
+            }
+
+            // Update score
+            correctCount = Object.values(userAnswers).filter(a => a.correct).length;
+            updateScore();
+        }
+
+        function updateScore() {
+            document.getElementById('correct-count').textContent = correctCount;
+            document.getElementById('total-count').textContent = totalCount;
+        }
+
+        function resetDiagnostic() {
+            userAnswers = {};
+            correctCount = 0;
+            updateScore();
+            populateDiagnosticQuestions();
+        }
+
+        document.getElementById('scenario-select').addEventListener('change', function() {
+            const scenarioKey = this.value;
+            if (scenarioKey && scenarios[scenarioKey]) {
+                currentScenario = scenarios[scenarioKey];
+                drawSystemDiagram(currentScenario);
+                populateDiagnosticQuestions();
+            }
+        });
+    </script>
+</body>
+</html>

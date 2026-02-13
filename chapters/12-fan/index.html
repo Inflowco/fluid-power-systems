@@ -1,0 +1,3951 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Fan types, aerodynamics, belt and blade maintenance, vibration analysis, dynamic balancing, noise reduction, VFD control, AI-driven monitoring, and energy-efficient fan operation">
+      
+      
+        <meta name="author" content="Peter Vinck, Inflow Corp.">
+      
+      
+        <link rel="canonical" href="https://dmccreary.github.io/fluid-power-systems/chapters/12-fan/">
+      
+      
+        <link rel="prev" href="../11-pumping/">
+      
+      
+        <link rel="next" href="../13-systems/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Chapter 12 - Fan Systems and Smart Integration - Fluid Power Systems</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-H81SZL21DT"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-H81SZL21DT",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-H81SZL21DT",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Chapter 12 - Fan Systems and Smart Integration - Fluid Power Systems" />
+<meta property="og:description" content="Fan types, aerodynamics, belt and blade maintenance, vibration analysis, dynamic balancing, noise reduction, VFD control, AI-driven monitoring, and energy-efficient fan operation" />
+<meta property="og:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/12-fan/index.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="https://dmccreary.github.io/fluid-power-systems/chapters/12-fan/" />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Chapter 12 - Fan Systems and Smart Integration - Fluid Power Systems" />
+<meta property="twitter:description" content="Fan types, aerodynamics, belt and blade maintenance, vibration analysis, dynamic balancing, noise reduction, VFD control, AI-driven monitoring, and energy-efficient fan operation" />
+<meta property="twitter:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/12-fan/index.png" />
+</head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-12-fan-systems-and-smart-integration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fluid Power Systems" class="md-header__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fluid Power Systems
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Chapter 12 - Fan Systems and Smart Integration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fluid Power Systems" class="md-nav__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    Fluid Power Systems
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-components-and-controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Components and Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-hvac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. HVAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-vacuum/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. Vacuum
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-blowers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Blowers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-compressed-air/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Compressed Air
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-cooling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Cooling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-steam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. Steam Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-dust-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Dust Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-hydraulic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Hydraulic Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-pumping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Pumping Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Fans
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Fans
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#121-fan-system-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Fan System Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.1 Fan System Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#centrifugal-fans-radial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centrifugal Fans (Radial)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#axial-fans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Axial Fans
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Axial Fans">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-fan-types-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Fan Types Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#122-fan-performance-curves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Fan Performance Curves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.2 Fan Performance Curves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-a-fan-curve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading a Fan Curve
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-effect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Effect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fan-brake-horsepower-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fan Brake Horsepower Formula
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fan Brake Horsepower Formula">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-fan-brake-horsepower-and-motor-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Fan Brake Horsepower and Motor Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#123-fan-laws-affinity-laws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Fan Laws (Affinity Laws)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.3 Fan Laws (Affinity Laws)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-fan-affinity-laws-speed-reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Fan Affinity Laws — Speed Reduction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#124-belt-drive-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.4 Belt Drive Systems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.4 Belt Drive Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v-belt-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        V-Belt Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#belt-tensioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Belt Tensioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#belt-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Belt Alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#belt-replacement-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Belt Replacement Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#125-blade-inspection-and-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.5 Blade Inspection and Maintenance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.5 Blade Inspection and Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-blade-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Blade Problems
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blade-inspection-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blade Inspection Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#126-vibration-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.6 Vibration Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.6 Vibration Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-vibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Vibration?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vibration-severity-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vibration Severity Standards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Vibration Severity Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-vibration-analysis-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Vibration Analysis Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#127-dynamic-balancing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.7 Dynamic Balancing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.7 Dynamic Balancing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#causes-of-imbalance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Causes of Imbalance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-plane-balancing-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-Plane Balancing Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#128-noise-reduction-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.8 Noise Reduction Techniques
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.8 Noise Reduction Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#noise-reduction-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Noise Reduction Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sound-power-and-sound-pressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sound Power and Sound Pressure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#129-vfd-control-for-fans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.9 VFD Control for Fans
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.9 VFD Control for Fans">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fan-vfd-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fan VFD Applications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#energy-savings-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Savings Example
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Energy Savings Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-vfd-vs-inlet-vane-energy-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: VFD vs. Inlet Vane Energy Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1210-ai-driven-vibration-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.10 AI-Driven Vibration Monitoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.10 AI-Driven Vibration Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ai-monitoring-vs-traditional-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Monitoring vs. Traditional Routes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AI Monitoring vs. Traditional Routes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-fan-energy-savings-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Fan Energy Savings Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1211-automated-fan-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.11 Automated Fan Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.11 Automated Fan Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smart-control-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smart Control Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1212-energy-efficient-fan-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.12 Energy-Efficient Fan Operation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.12 Energy-Efficient Fan Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-design-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Design Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-for-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance for Efficiency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1213-utility-rebates-incentives-and-building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.13 Utility Rebates, Incentives, and Building the Business Case
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.13 Utility Rebates, Incentives, and Building the Business Case">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-incentive-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Incentive Programs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-find-available-rebates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Find Available Rebates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-fan-system-upgrades-and-rebate-potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Fan System Upgrades and Rebate Potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Business Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1214-hands-on-lab-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.14 Hands-On Lab Activity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.14 Hands-On Lab Activity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lab-balance-a-fan-and-use-software-to-monitor-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab: Balance a Fan and Use Software to Monitor Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Systems and Software
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../prompts/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-we-built-this-site/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How We Built This Site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../feedback/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feedback
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#121-fan-system-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Fan System Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.1 Fan System Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#centrifugal-fans-radial" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centrifugal Fans (Radial)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#axial-fans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Axial Fans
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Axial Fans">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-fan-types-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Fan Types Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#122-fan-performance-curves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Fan Performance Curves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.2 Fan Performance Curves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-a-fan-curve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading a Fan Curve
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-effect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Effect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fan-brake-horsepower-formula" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fan Brake Horsepower Formula
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fan Brake Horsepower Formula">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-fan-brake-horsepower-and-motor-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Fan Brake Horsepower and Motor Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#123-fan-laws-affinity-laws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Fan Laws (Affinity Laws)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.3 Fan Laws (Affinity Laws)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-fan-affinity-laws-speed-reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Fan Affinity Laws — Speed Reduction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#124-belt-drive-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.4 Belt Drive Systems
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.4 Belt Drive Systems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v-belt-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        V-Belt Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#belt-tensioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Belt Tensioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#belt-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Belt Alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#belt-replacement-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Belt Replacement Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#125-blade-inspection-and-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.5 Blade Inspection and Maintenance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.5 Blade Inspection and Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-blade-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Blade Problems
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#blade-inspection-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Blade Inspection Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#126-vibration-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.6 Vibration Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.6 Vibration Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-is-vibration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Is Vibration?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vibration-severity-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Vibration Severity Standards
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Vibration Severity Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-vibration-analysis-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Vibration Analysis Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#127-dynamic-balancing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.7 Dynamic Balancing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.7 Dynamic Balancing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#causes-of-imbalance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Causes of Imbalance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#single-plane-balancing-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-Plane Balancing Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#128-noise-reduction-techniques" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.8 Noise Reduction Techniques
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.8 Noise Reduction Techniques">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#noise-reduction-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Noise Reduction Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sound-power-and-sound-pressure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sound Power and Sound Pressure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#129-vfd-control-for-fans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.9 VFD Control for Fans
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.9 VFD Control for Fans">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fan-vfd-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fan VFD Applications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#energy-savings-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Savings Example
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Energy Savings Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-vfd-vs-inlet-vane-energy-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: VFD vs. Inlet Vane Energy Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1210-ai-driven-vibration-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.10 AI-Driven Vibration Monitoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.10 AI-Driven Vibration Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ai-monitoring-vs-traditional-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Monitoring vs. Traditional Routes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="AI Monitoring vs. Traditional Routes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-fan-energy-savings-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Fan Energy Savings Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1211-automated-fan-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.11 Automated Fan Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.11 Automated Fan Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smart-control-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smart Control Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1212-energy-efficient-fan-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.12 Energy-Efficient Fan Operation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.12 Energy-Efficient Fan Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-design-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Design Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-for-efficiency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maintenance for Efficiency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1213-utility-rebates-incentives-and-building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.13 Utility Rebates, Incentives, and Building the Business Case
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.13 Utility Rebates, Incentives, and Building the Business Case">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-incentive-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Incentive Programs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-find-available-rebates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Find Available Rebates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-fan-system-upgrades-and-rebate-potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Fan System Upgrades and Rebate Potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Business Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1214-hands-on-lab-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.14 Hands-On Lab Activity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12.14 Hands-On Lab Activity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lab-balance-a-fan-and-use-software-to-monitor-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab: Balance a Fan and Use Software to Monitor Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/dmccreary/fluid-power-systems/blob/master/docs/chapters/12-fan/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="chapter-12-fan-systems-and-smart-integration">Chapter 12: Fan Systems and Smart Integration</h1>
+<h2 id="summary">Summary</h2>
+<p>This chapter covers industrial and commercial fan systems used to move air and gases through HVAC ducts, ventilation systems, process equipment, cooling towers, and exhaust systems. Students will learn the fundamental differences between centrifugal (radial) and axial fan types, including how blade design affects performance characteristics. The chapter examines fan performance curves and how they relate to the pump curves covered in Chapter 9, since fans follow the same affinity laws. Belt drive systems — the most common power transmission method for fans — are covered in detail including belt types, tensioning, alignment, and replacement procedures. Blade inspection techniques for erosion, buildup, and damage are addressed alongside the critical topic of vibration analysis, which is the primary diagnostic tool for fan health. Students will learn to perform dynamic balancing using vibration data to correct imbalance — the most common cause of fan problems. Noise reduction techniques including vibration isolation, acoustic enclosures, and blade design optimization are explored. The chapter advances to Variable Frequency Drive (VFD) control for fans, AI-driven vibration monitoring and predictive maintenance, automated fan balancing via smart controls, and strategies for reducing fan power consumption through system optimization.</p>
+<h2 id="concepts-covered">Concepts Covered</h2>
+<ol>
+<li>Fan system fundamentals — how fans convert rotational energy to airflow</li>
+<li>Centrifugal fan types — forward-curved, backward-curved, radial blade designs</li>
+<li>Axial fan types — propeller, tubeaxial, vaneaxial designs</li>
+<li>Fan performance curves — static pressure, total pressure, efficiency, and power vs. airflow</li>
+<li>Fan laws (affinity laws) — speed-airflow-pressure-power relationships</li>
+<li>Belt drive systems — V-belt types, tensioning, alignment, and sheave selection</li>
+<li>Belt maintenance procedures — inspection, tension adjustment, replacement</li>
+<li>Blade inspection and maintenance — erosion, buildup, cracks, and balance weights</li>
+<li>Vibration fundamentals — frequency, amplitude, displacement, velocity, acceleration</li>
+<li>Vibration analysis for fan diagnostics — imbalance, misalignment, looseness, bearing defects</li>
+<li>Dynamic balancing — single-plane and two-plane balancing procedures</li>
+<li>Noise reduction techniques — vibration isolation, acoustic treatment, blade design</li>
+<li>VFD control for fans — speed adjustment, energy savings, soft start benefits</li>
+<li>AI-driven vibration monitoring — continuous analysis, trend detection, anomaly alerts</li>
+<li>Automated fan optimization — AI-controlled speed, staging, and scheduling</li>
+<li>Energy-efficient fan operation — system effect, duct design, right-sizing, VFD savings</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Chapter 1: Introduction to Fluid Power Systems and AI (understanding of fluid types, basic system concepts, and the role of AI)</li>
+<li>Chapter 2: System Components and Smart Controls (knowledge of pumps, fans, compressors, valves, filters, PLCs, and IoT sensors)</li>
+<li>Chapter 9: Pumping Systems and Real-Time Controls (understanding of performance curves, affinity laws, and VFD technology)</li>
+</ul>
+<hr />
+<h2 id="121-fan-system-fundamentals">12.1 Fan System Fundamentals</h2>
+<p>Fans are essential components in nearly every building and industrial facility. They move air for heating and cooling, exhaust fumes and contaminants, supply fresh air for combustion, cool equipment, and transport materials through ductwork. While fans may seem simpler than pumps or compressors, they consume a significant portion of industrial energy — fans account for approximately <strong>15% of all electricity used in commercial buildings</strong> and a similar share in many manufacturing facilities.</p>
+<p>A fan works by adding energy to an air stream. A motor spins the fan's impeller (also called a wheel or rotor), and the rotating blades push air from the inlet to the outlet. The energy added appears as a combination of <strong>velocity pressure</strong> (air speed) and <strong>static pressure</strong> (resistance-overcoming force). Understanding this energy conversion is the key to selecting, operating, and maintaining fans effectively.</p>
+<h3 id="centrifugal-fans-radial">Centrifugal Fans (Radial)</h3>
+<p>Centrifugal fans draw air into the center of a spinning wheel and discharge it at 90 degrees to the inlet — similar to how a centrifugal pump works. Air enters through the inlet (eye), the rotating blades fling it outward, and a scroll-shaped housing collects and directs the air to the outlet. Centrifugal fans are the workhorse of HVAC duct systems and industrial ventilation.</p>
+<p>The three main blade designs produce very different performance characteristics:</p>
+<table>
+<thead>
+<tr>
+<th>Blade Design</th>
+<th>Efficiency</th>
+<th>Pressure</th>
+<th>Self-Cleaning</th>
+<th>Noise</th>
+<th>Best Application</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Forward-curved</td>
+<td>60–70%</td>
+<td>Low–medium</td>
+<td>Poor</td>
+<td>Quiet</td>
+<td>HVAC, clean air applications</td>
+</tr>
+<tr>
+<td>Backward-curved/inclined</td>
+<td>75–85%</td>
+<td>Medium–high</td>
+<td>Good</td>
+<td>Moderate</td>
+<td>General industrial, high efficiency</td>
+</tr>
+<tr>
+<td>Radial (straight)</td>
+<td>55–65%</td>
+<td>High</td>
+<td>Excellent</td>
+<td>Loud</td>
+<td>Material handling, dirty/dusty air</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p><strong>Forward-curved blades</strong> have many small blades that scoop air forward. They produce high airflow at low pressure and run at low speeds, making them quiet. However, they clog easily with dust and have a power curve that rises steeply past the design point — meaning an oversized forward-curved fan can overload its motor.</p>
+</li>
+<li>
+<p><strong>Backward-curved (or backward-inclined) blades</strong> are the most efficient design. They have fewer blades angled away from the direction of rotation. The power curve is "non-overloading" — power peaks and then decreases at high flows, protecting the motor from overload. These fans are the preferred choice for most industrial applications.</p>
+</li>
+<li>
+<p><strong>Radial (straight) blades</strong> are the simplest and most rugged design. Material slides off the flat blades easily, making them ideal for dust collection, material handling, and corrosive environments. However, they are the least efficient and noisiest option.</p>
+</li>
+</ul>
+<h3 id="axial-fans">Axial Fans</h3>
+<p>Axial fans move air parallel to the shaft — air enters and exits along the same axis. They are simpler than centrifugal fans and are used where high airflow is needed at relatively low pressure.</p>
+<ul>
+<li><strong>Propeller fans</strong> — open blades without a housing, like a box fan or ceiling fan. Used for general ventilation where no ductwork is needed. Very low pressure capability.</li>
+<li><strong>Tubeaxial fans</strong> — propeller fan mounted inside a cylindrical tube. Provides moderate pressure for short duct runs. Common in exhaust ventilation.</li>
+<li><strong>Vaneaxial fans</strong> — tubeaxial fan with guide vanes behind the impeller that straighten the swirling airflow and recover velocity pressure as static pressure. Most efficient axial type, capable of moderate-to-high pressure. Used in clean room ventilation, tunnel ventilation, and large HVAC systems.</li>
+</ul>
+<h4 id="diagram-fan-types-comparison">Diagram: Fan Types Comparison</h4>
+<iframe src="../../sims/fan-types-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Fan Types Comparison Interactive Diagram</summary>
+Type: diagram
+
+Bloom Level: L2 Understand
+Bloom Verb: Compare, classify
+Learning Objective: Students will compare centrifugal and axial fan types, classify them by blade design, and explain which type is best suited for different applications.
+
+Components to show:
+- Six fan type panels arranged in a 2x3 grid:
+  - Top row (Centrifugal): Forward-curved, Backward-curved, Radial
+  - Bottom row (Axial): Propeller, Tubeaxial, Vaneaxial
+- Each panel contains:
+  - Simplified cross-section or front view showing blade shape and airflow direction
+  - Animated airflow arrows showing inlet and outlet direction
+  - Key stats: Efficiency range, pressure range, noise level, best application
+  - Color-coded efficiency indicator (green=high, yellow=medium, red=low)
+
+Interactive elements:
+- Hover over any fan panel to enlarge it and show a detailed description
+- Click a fan type to highlight it and show a comparison sidebar with all specs
+- Toggle button: "Show All Specs" displays a comparison table below the grid
+- Airflow arrows animate to show the direction of air movement through each fan type
+
+Visual style: Clean technical illustrations with consistent scale
+Color scheme: Blue for centrifugal fans, green for axial fans
+Canvas size: responsive, minimum 800x500px
+Implementation: p5.js with animated airflow visualization
+</details>
+
+<hr />
+<h2 id="122-fan-performance-curves">12.2 Fan Performance Curves</h2>
+<p>Fan performance curves work exactly like pump performance curves — and for good reason. Fans and pumps follow the same fluid mechanics principles. The main difference is that fan curves use different units: airflow in cubic feet per minute (CFM) instead of GPM, and pressure in inches of water gauge (in. w.g.) instead of feet of head.</p>
+<h3 id="reading-a-fan-curve">Reading a Fan Curve</h3>
+<p>A fan performance curve plots these parameters against airflow (CFM):</p>
+<ol>
+<li>
+<p><strong>Static pressure (SP)</strong> — the pressure a fan produces to overcome duct resistance, measured in inches of water gauge. The curve slopes downward as airflow increases.</p>
+</li>
+<li>
+<p><strong>Total pressure (TP)</strong> — static pressure plus velocity pressure. Always higher than SP.</p>
+</li>
+<li>
+<p><strong>Brake horsepower (BHP)</strong> — the power required to drive the fan. The shape depends on blade type:</p>
+</li>
+<li>Forward-curved: BHP rises steeply at high flows (overloading risk)</li>
+<li>
+<p>Backward-curved: BHP peaks and decreases at high flows (non-overloading)</p>
+</li>
+<li>
+<p><strong>Mechanical efficiency (ME)</strong> — peaks at the best efficiency point (BEP), similar to pumps.</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Units</th>
+<th>Typical Range (commercial HVAC)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Airflow</td>
+<td>CFM</td>
+<td>1,000 – 50,000</td>
+</tr>
+<tr>
+<td>Static pressure</td>
+<td>in. w.g.</td>
+<td>0.5 – 6.0</td>
+</tr>
+<tr>
+<td>Brake horsepower</td>
+<td>HP</td>
+<td>1 – 50</td>
+</tr>
+<tr>
+<td>Mechanical efficiency</td>
+<td>%</td>
+<td>60 – 85%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="system-effect">System Effect</h3>
+<p>One critical concept unique to fan systems is the <strong>system effect</strong> — the loss of performance caused by poor inlet or outlet conditions. Unlike ideal test conditions where fans have long, straight duct connections, real installations often have:</p>
+<ul>
+<li><strong>Elbows close to the fan inlet</strong> — create uneven airflow entering the fan wheel, reducing capacity by 5–25%</li>
+<li><strong>No duct on the fan outlet</strong> — air blasts into an open plenum, wasting velocity pressure</li>
+<li><strong>Short outlet ducts with immediate turns</strong> — prevent the air from developing a uniform velocity profile</li>
+</ul>
+<p>The system effect acts like additional resistance that doesn't appear on the system curve, causing the fan to deliver less airflow than expected. Avoiding system effect through proper duct design is one of the easiest ways to improve fan performance.</p>
+<div class="admonition tip">
+<p class="admonition-title">The System Effect Rule of Thumb</p>
+<p>Allow at least 2.5 duct diameters of straight duct at the fan inlet and 5 duct diameters at the fan outlet before any turns or transitions. This minimizes system effect losses and allows the fan to perform as its curve predicts.</p>
+</div>
+<h3 id="fan-brake-horsepower-formula">Fan Brake Horsepower Formula</h3>
+<p>The brake horsepower required to drive a fan can be calculated from the airflow, static pressure, and fan efficiency:</p>
+<p>[
+BHP = \frac{CFM \times SP}{6{,}356 \times \eta}
+]</p>
+<p>Where ( CFM ) is the airflow in cubic feet per minute, ( SP ) is the static pressure in inches of water gauge, and ( \eta ) is the fan mechanical efficiency (expressed as a decimal).</p>
+<h4 id="worked-example-fan-brake-horsepower-and-motor-selection">Worked Example: Fan Brake Horsepower and Motor Selection</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Required airflow: 20,000 CFM</li>
+<li>System static pressure: 4 in. w.g.</li>
+<li>Fan mechanical efficiency: 65%</li>
+</ul>
+<p><strong>Find:</strong> Brake horsepower and appropriate motor selection</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Apply the brake horsepower formula:</li>
+</ol>
+<p>[
+BHP = \frac{20{,}000 \times 4}{6{,}356 \times 0.65}
+]</p>
+<ol>
+<li>Calculate the numerator and denominator:</li>
+</ol>
+<p>[
+BHP = \frac{80{,}000}{4{,}131} = 19.4 \text{ BHP}
+]</p>
+<ol>
+<li>Select the motor — choose a <strong>25 HP</strong> motor. The margin covers:<ul>
+<li>Belt drive losses (3–5%)</li>
+<li>Dirty filter operation (higher SP)</li>
+<li>Density variations with temperature</li>
+</ul>
+</li>
+</ol>
+<p><strong>Answer:</strong> The required brake horsepower is <strong>19.4 BHP</strong>. Select a <strong>25 HP motor</strong> to provide adequate margin.</p>
+<blockquote>
+<p><strong>Practical note:</strong> The 6,356 constant converts CFM × in. w.g. to horsepower. Fan efficiency of 65% is typical for backward-curved centrifugal fans. Forward-curved fans may be only 50–55% efficient, requiring more power for the same duty. Always select fans operating near their peak efficiency point on the fan curve.</p>
+</blockquote>
+<hr />
+<h2 id="123-fan-laws-affinity-laws">12.3 Fan Laws (Affinity Laws)</h2>
+<p>Fans follow the same affinity laws as pumps. These laws predict how airflow, pressure, and power change when fan speed changes:</p>
+<p>[
+\frac{CFM_2}{CFM_1} = \frac{RPM_2}{RPM_1}
+]</p>
+<p>[
+\frac{SP_2}{SP_1} = \left(\frac{RPM_2}{RPM_1}\right)^2
+]</p>
+<p>[
+\frac{BHP_2}{BHP_1} = \left(\frac{RPM_2}{RPM_1}\right)^3
+]</p>
+<p>The <strong>cube law for power</strong> is just as dramatic for fans as it is for pumps: reducing fan speed by 20% reduces power consumption by nearly 50%. This makes VFDs extremely valuable for fan applications where airflow demand varies throughout the day or year.</p>
+<table>
+<thead>
+<tr>
+<th>Speed</th>
+<th>Airflow</th>
+<th>Static Pressure</th>
+<th>Power</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>90%</td>
+<td>90%</td>
+<td>81%</td>
+<td>73%</td>
+</tr>
+<tr>
+<td>80%</td>
+<td>80%</td>
+<td>64%</td>
+<td>51%</td>
+</tr>
+<tr>
+<td>70%</td>
+<td>70%</td>
+<td>49%</td>
+<td>34%</td>
+</tr>
+<tr>
+<td>60%</td>
+<td>60%</td>
+<td>36%</td>
+<td>22%</td>
+</tr>
+<tr>
+<td>50%</td>
+<td>50%</td>
+<td>25%</td>
+<td>13%</td>
+</tr>
+</tbody>
+</table>
+<p>For fans controlled by changing sheave (pulley) sizes rather than VFDs, the affinity laws still apply — changing the drive sheave diameter changes the fan RPM proportionally.</p>
+<h4 id="worked-example-fan-affinity-laws-speed-reduction">Worked Example: Fan Affinity Laws — Speed Reduction</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Fan currently operating at design speed: 10,000 CFM, 3 in. w.g. SP, 15 BHP</li>
+<li>Speed reduced by 20% (to 80% of original)</li>
+</ul>
+<p><strong>Find:</strong> New CFM, static pressure, and brake horsepower</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Determine the speed ratio:</li>
+</ol>
+<p>[
+\text{Speed ratio} = \frac{RPM_2}{RPM_1} = 0.80
+]</p>
+<ol>
+<li>Apply the first fan law — airflow is proportional to speed:</li>
+</ol>
+<p>[
+CFM_2 = 10{,}000 \times 0.80 = 8{,}000 \text{ CFM}
+]</p>
+<ol>
+<li>Apply the second fan law — pressure is proportional to speed squared:</li>
+</ol>
+<p>[
+SP_2 = 3 \times (0.80)^2 = 3 \times 0.64 = 1.92 \text{ in. w.g.}
+]</p>
+<ol>
+<li>Apply the third fan law — power is proportional to speed cubed:</li>
+</ol>
+<p>[
+BHP_2 = 15 \times (0.80)^3 = 15 \times 0.512 = 7.68 \text{ BHP}
+]</p>
+<p><strong>Answer:</strong> At 80% speed, the fan delivers <strong>8,000 CFM</strong> at <strong>1.92 in. w.g.</strong> static pressure, requiring only <strong>7.68 BHP</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> A 20% speed reduction cuts power by nearly half (48.8%). This is the cubic law in action — small speed reductions yield dramatic energy savings. This is why VFDs on fans are among the best energy conservation measures in building HVAC.</p>
+</blockquote>
+<hr />
+<h2 id="124-belt-drive-systems">12.4 Belt Drive Systems</h2>
+<p>Most centrifugal fans use <strong>belt drives</strong> to transmit power from the motor to the fan shaft. Belt drives are preferred over direct drives because they allow the fan speed to be adjusted by changing sheave (pulley) sizes, and they provide vibration isolation between the motor and fan.</p>
+<h3 id="v-belt-types">V-Belt Types</h3>
+<ul>
+<li><strong>Classical V-belts (A, B, C, D, E)</strong> — the traditional standard, designated by cross-section size. B and C sections are most common for fan drives. Reliable but less efficient than newer designs.</li>
+<li><strong>Narrow (wedge) V-belts (3V, 5V, 8V)</strong> — narrower cross-section with the same power capacity, transmitting power through a wider contact angle. More efficient and compact than classical belts.</li>
+<li><strong>Cogged (notched) V-belts</strong> — V-belts with notches on the inner surface that increase flexibility and reduce bending losses. They run 2–3°F cooler and last longer, especially on small-diameter sheaves.</li>
+<li><strong>Synchronous (timing) belts</strong> — toothed belts that mesh with grooved sprockets. No slippage, 98% efficient (vs. 93–95% for V-belts). Increasingly used for energy-critical fan applications.</li>
+</ul>
+<h3 id="belt-tensioning">Belt Tensioning</h3>
+<p>Proper belt tension is critical — too loose and belts slip, squeal, and wear rapidly; too tight and bearings, shafts, and belts wear prematurely.</p>
+<p>The standard method for checking V-belt tension is the <strong>deflection test</strong>:</p>
+<ol>
+<li>Measure the span length between sheave centers</li>
+<li>Apply a perpendicular force to the belt at the midpoint of the span</li>
+<li>Measure the deflection — it should be <strong>1/64 inch per inch of span length</strong></li>
+<li>The force required to achieve this deflection should match the belt manufacturer's specification</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Belt Section</th>
+<th>Deflection Force (new belt)</th>
+<th>Deflection Force (run-in)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>3.0 – 4.5 lb</td>
+<td>2.0 – 3.0 lb</td>
+</tr>
+<tr>
+<td>B</td>
+<td>4.5 – 7.0 lb</td>
+<td>3.0 – 5.0 lb</td>
+</tr>
+<tr>
+<td>C</td>
+<td>8.0 – 12.0 lb</td>
+<td>5.0 – 8.0 lb</td>
+</tr>
+<tr>
+<td>5V</td>
+<td>8.0 – 14.0 lb</td>
+<td>5.5 – 10.0 lb</td>
+</tr>
+</tbody>
+</table>
+<h3 id="belt-alignment">Belt Alignment</h3>
+<p>Misaligned sheaves cause belts to wear on one side, run hot, and fail prematurely. The two types of belt misalignment mirror shaft misalignment:</p>
+<ul>
+<li><strong>Angular misalignment</strong> — sheave faces are not parallel (one sheave is tilted)</li>
+<li><strong>Parallel (offset) misalignment</strong> — sheave faces are parallel but not in the same plane</li>
+</ul>
+<p>Check alignment by placing a straight edge or string across the faces of both sheaves. Both edges should contact evenly. Laser belt alignment tools are available for higher precision.</p>
+<h3 id="belt-replacement-procedure">Belt Replacement Procedure</h3>
+<ol>
+<li>Lock out and tag out the motor</li>
+<li>Release belt tension by adjusting the motor mount or tensioner</li>
+<li>Remove old belts — <strong>never pry belts off sheaves</strong> as this damages belt cords</li>
+<li>Inspect sheave grooves for wear (shiny groove walls indicate wear)</li>
+<li>Install new belts — <strong>always replace all belts in a matched set</strong>, never just one</li>
+<li>Tension new belts to the manufacturer's "new belt" specification</li>
+<li>Run the fan for 24 hours, then re-tension to the "run-in" specification (belts stretch initially)</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Always Replace Belts as a Matched Set</p>
+<p>If one belt in a multi-belt drive fails, replace ALL belts together. New belts are slightly shorter than worn belts, so mixing old and new causes the new belt to carry the entire load — leading to rapid failure of the new belt.</p>
+</div>
+<hr />
+<h2 id="125-blade-inspection-and-maintenance">12.5 Blade Inspection and Maintenance</h2>
+<p>Fan blades (also called vanes or impeller blades) are subject to erosion, material buildup, corrosion, and fatigue cracking. Regular inspection prevents catastrophic blade failure — which can send metal fragments through ductwork and cause serious injury or equipment damage.</p>
+<h3 id="common-blade-problems">Common Blade Problems</h3>
+<ul>
+<li><strong>Erosion</strong> — material wearing away from dust, particulate, or chemical exposure. Most common on radial-blade fans in dust collection systems. Look for thinning, pitting, and rough surfaces.</li>
+<li><strong>Material buildup</strong> — dust, grease, or chemical deposits accumulating on blades. Even small amounts of buildup can cause severe imbalance. Common in kitchen exhaust fans, paint booth exhaust, and process ventilation.</li>
+<li><strong>Corrosion</strong> — chemical attack from acids, moisture, or reactive gases. Leads to surface pitting and structural weakening. Use appropriate blade materials (stainless steel, fiberglass, coated carbon steel) for corrosive environments.</li>
+<li><strong>Fatigue cracks</strong> — stress cracks developing at high-stress points, typically at the blade-to-hub junction or along weld lines. Caused by cyclic loading, vibration, or operating near resonance. Inspect with dye penetrant testing.</li>
+<li><strong>Loose or missing balance weights</strong> — factory balance weights (clips or weld-on) can shift or fall off, causing immediate imbalance.</li>
+</ul>
+<h3 id="blade-inspection-procedure">Blade Inspection Procedure</h3>
+<ol>
+<li>Lock out and tag out the fan motor</li>
+<li>Open the fan access door or remove the housing panel</li>
+<li>Rotate the wheel by hand and inspect each blade for:</li>
+<li>Erosion or thinning (measure blade thickness with a micrometer)</li>
+<li>Cracks (visual inspection + dye penetrant for critical fans)</li>
+<li>Buildup (scrape or wash to restore original blade profile)</li>
+<li>Corrosion (note severity and location)</li>
+<li>Loose or missing hardware (set screws, rivets, balance weights)</li>
+<li>Check for contact marks between blades and housing (indicates bearing failure or shaft deflection)</li>
+<li>Spin the wheel to check for free rotation (no binding or rubbing)</li>
+<li>Document findings and photograph any defects</li>
+</ol>
+<hr />
+<h2 id="126-vibration-fundamentals">12.6 Vibration Fundamentals</h2>
+<p>Vibration analysis is the single most important diagnostic tool for fan systems. Every rotating machine vibrates to some degree, but excessive vibration indicates a problem. Learning to measure and interpret vibration data allows technicians to detect developing faults weeks or months before failure.</p>
+<h3 id="what-is-vibration">What Is Vibration?</h3>
+<p>Vibration is the back-and-forth motion of a machine component around its resting position. It is characterized by three parameters:</p>
+<ul>
+<li>
+<p><strong>Frequency</strong> — how many cycles per second (measured in Hz) or cycles per minute (CPM). Frequency tells you <strong>what</strong> is vibrating. A fan running at 1,750 RPM has a fundamental frequency of 1,750 CPM (29.2 Hz). Bearing defects, misalignment, and looseness each produce vibration at characteristic frequencies.</p>
+</li>
+<li>
+<p><strong>Amplitude</strong> — how much the component moves. Measured as:</p>
+</li>
+<li><strong>Displacement</strong> (mils peak-to-peak) — total distance of movement, useful for low-speed machines</li>
+<li><strong>Velocity</strong> (inches/second peak) — most commonly used for general machine monitoring</li>
+<li>
+<p><strong>Acceleration</strong> (g's peak) — sensitive to high-frequency problems like bearing defects</p>
+</li>
+<li>
+<p><strong>Phase</strong> — the timing relationship between the vibration and a reference point on the shaft. Phase is essential for balancing — it tells you <strong>where</strong> the heavy spot is on the wheel.</p>
+</li>
+</ul>
+<h3 id="vibration-severity-standards">Vibration Severity Standards</h3>
+<p>The industry standard for evaluating vibration severity is <strong>ISO 10816</strong>, which classifies machines by size and mounting type:</p>
+<table>
+<thead>
+<tr>
+<th>Vibration Velocity (in/s peak)</th>
+<th>Condition</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt; 0.10</td>
+<td>Good</td>
+<td>Continue monitoring</td>
+</tr>
+<tr>
+<td>0.10 – 0.18</td>
+<td>Acceptable</td>
+<td>Plan maintenance</td>
+</tr>
+<tr>
+<td>0.18 – 0.30</td>
+<td>Alert</td>
+<td>Schedule correction</td>
+</tr>
+<tr>
+<td>0.30 – 0.45</td>
+<td>Alarm</td>
+<td>Correct soon</td>
+</tr>
+<tr>
+<td>&gt; 0.45</td>
+<td>Danger</td>
+<td>Stop machine immediately</td>
+</tr>
+</tbody>
+</table>
+<h4 id="diagram-vibration-analysis-dashboard">Diagram: Vibration Analysis Dashboard</h4>
+<iframe src="../../sims/fan-vibration-analyzer/main.html" width="100%" height="550px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Fan Vibration Analysis Dashboard</summary>
+Type: microsim
+
+Bloom Level: L4 Analyze
+Bloom Verb: Differentiate, examine
+Learning Objective: Students will analyze vibration data from a fan system to differentiate between common fault conditions (imbalance, misalignment, looseness, bearing defects) based on frequency spectrum patterns.
+
+Visual elements:
+- Top section: Vibration frequency spectrum chart (x-axis: 0 to 10x RPM in CPM, y-axis: amplitude in in/s)
+  - Shows spectral peaks at characteristic frequencies for the selected fault condition
+  - 1x RPM peak always present (fundamental running speed)
+  - Additional peaks appear depending on fault type
+  - Color-coded zones: green (acceptable), yellow (alert), red (alarm)
+- Middle section: Time waveform display showing raw vibration signal
+- Bottom left: Machine diagram showing sensor locations on fan bearings (inboard and outboard)
+- Bottom right: Diagnosis panel showing:
+  - Current vibration level (overall velocity)
+  - Dominant frequency and its likely cause
+  - AI recommendation for corrective action
+
+Interactive controls:
+- Dropdown: "Fault Condition" selector:
+  1. Normal — small 1x peak only, all values in green
+  2. Imbalance — dominant 1x RPM peak, proportional to speed²
+  3. Misalignment — elevated 1x and 2x RPM peaks (angular) or strong 2x peak (parallel)
+  4. Mechanical Looseness — multiple harmonics (1x, 2x, 3x, 4x, 5x) with sub-harmonics (0.5x)
+  5. Bearing Defect — high-frequency peaks at bearing defect frequencies (BPFO, BPFI) plus noise floor rise
+  6. Belt Problems — peaks at belt frequency (below 1x RPM) with harmonics
+- Slider: "Fan Speed" (600-1800 RPM) — shifts spectral peaks proportionally
+- Toggle: Switch between inboard and outboard bearing readings
+- "Advance Fault" button: Shows progressive deterioration
+
+Data Visibility Requirements:
+- Show labeled frequency peaks with their CPM/Hz values
+- Show overall vibration level compared to ISO severity chart
+- For each fault, display a text explanation of why that spectral pattern indicates that specific fault
+
+Instructional Rationale: Spectrum-based fault analysis supports Analyze-level objectives by requiring students to examine frequency patterns and differentiate between fault types based on the relationship between spectral peaks and machine running speed. Each fault condition produces a distinctive "signature" that students learn to recognize.
+
+Implementation: p5.js with FFT-style spectrum rendering
+Canvas size: responsive, minimum 850x550px
+</details>
+
+<hr />
+<h2 id="127-dynamic-balancing">12.7 Dynamic Balancing</h2>
+<p><strong>Imbalance</strong> is the most common cause of excessive fan vibration. It occurs when the center of mass of the fan wheel does not coincide with its center of rotation. Even a small amount of imbalance creates centrifugal forces that increase with the square of speed — doubling the speed quadruples the vibration force.</p>
+<h3 id="causes-of-imbalance">Causes of Imbalance</h3>
+<ul>
+<li>Material buildup on blades (dust, grease, product)</li>
+<li>Material loss from blades (erosion, corrosion, broken pieces)</li>
+<li>Manufacturing imperfections</li>
+<li>Lost or shifted balance weights</li>
+<li>Repaired or replaced blades without rebalancing</li>
+<li>Uneven coating or paint</li>
+</ul>
+<h3 id="single-plane-balancing-procedure">Single-Plane Balancing Procedure</h3>
+<p>For most fans with a width-to-diameter ratio less than 0.2 (which includes most HVAC and process fans), single-plane balancing is sufficient. The process uses vibration measurements to find the heavy spot and determine the correct weight and location for a correction weight.</p>
+<p>The <strong>trial weight method</strong> follows these steps:</p>
+<ol>
+<li><strong>Baseline reading</strong> — measure vibration amplitude and phase angle at the bearing closest to the fan wheel. Record as the "original" (O) vector.</li>
+<li><strong>Attach trial weight</strong> — place a known trial weight at a marked position on the fan wheel (any convenient location at the outer radius).</li>
+<li><strong>Trial reading</strong> — run the fan and measure vibration amplitude and phase. Record as the "trial + original" (T+O) vector.</li>
+<li><strong>Calculate</strong> — use vector math (or a balancing calculator) to determine:</li>
+<li>The <strong>effect</strong> of the trial weight (T+O minus O)</li>
+<li>The correct <strong>correction weight</strong> and its <strong>angular position</strong></li>
+<li><strong>Apply correction</strong> — attach the calculated correction weight at the calculated angle on the fan wheel.</li>
+<li><strong>Verify</strong> — run the fan and confirm vibration has decreased to an acceptable level.</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Balance Quality Grade</th>
+<th>Residual Imbalance</th>
+<th>Typical Application</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G 6.3</td>
+<td>Standard</td>
+<td>General industrial fans</td>
+</tr>
+<tr>
+<td>G 2.5</td>
+<td>Precision</td>
+<td>HVAC fans, critical process fans</td>
+</tr>
+<tr>
+<td>G 1.0</td>
+<td>High precision</td>
+<td>Clean room fans, vibration-sensitive areas</td>
+</tr>
+</tbody>
+</table>
+<p>Modern vibration analyzers and portable balancing instruments automate the vector calculations and guide the technician step-by-step through the process, often achieving a good balance in one or two correction runs.</p>
+<hr />
+<h2 id="128-noise-reduction-techniques">12.8 Noise Reduction Techniques</h2>
+<p>Fan noise is a significant concern in commercial buildings, hospitals, schools, and residential areas near industrial facilities. Fan noise has two primary sources:</p>
+<ul>
+<li><strong>Aerodynamic noise</strong> — caused by turbulence as air interacts with fan blades, inlet cones, and ductwork. This is the dominant noise source and increases with approximately the fifth power of tip speed.</li>
+<li><strong>Mechanical noise</strong> — caused by bearing vibration, belt slap, motor hum, and structural resonance. Typically lower in level than aerodynamic noise in well-maintained fans.</li>
+</ul>
+<h3 id="noise-reduction-strategies">Noise Reduction Strategies</h3>
+<p>Noise reduction approaches follow a hierarchy — it is always more effective to reduce noise at the source than to treat it after it's generated:</p>
+<ol>
+<li>
+<p><strong>Reduce fan speed</strong> — the most effective single strategy. Noise decreases approximately 15 dB for every halving of speed. Using a VFD to slow a fan from 1,200 RPM to 900 RPM can reduce noise by 5-7 dB (perceived as roughly half as loud).</p>
+</li>
+<li>
+<p><strong>Select a quieter fan type</strong> — forward-curved centrifugal fans and vaneaxial fans are quieter than radial-blade or propeller fans at the same airflow.</p>
+</li>
+<li>
+<p><strong>Optimize duct connections</strong> — eliminate system effect (discussed in Section 12.2) which creates turbulence and noise at the fan inlet and outlet.</p>
+</li>
+<li>
+<p><strong>Install vibration isolators</strong> — spring or rubber mounts between the fan and its foundation prevent structural vibration from transmitting to the building. Use flexible duct connectors at the fan inlet and outlet to break the vibration path through ductwork.</p>
+</li>
+<li>
+<p><strong>Add sound attenuators (silencers)</strong> — duct-mounted devices with sound-absorbing material that reduce noise traveling through the duct system. Place on both the supply and return sides of the fan.</p>
+</li>
+<li>
+<p><strong>Use acoustic enclosures</strong> — wrap the fan and motor in a sound-insulated enclosure for applications where noise must be very low. Ensure adequate ventilation for motor cooling.</p>
+</li>
+<li>
+<p><strong>Maintain the fan</strong> — worn bearings, loose belts, imbalanced wheels, and misalignment all increase noise. Regular maintenance is a noise reduction strategy.</p>
+</li>
+</ol>
+<h3 id="sound-power-and-sound-pressure">Sound Power and Sound Pressure</h3>
+<p>Understanding the difference between sound power and sound pressure is important for fan noise specifications:</p>
+<ul>
+<li>
+<p><strong>Sound power level (Lw)</strong> — the total acoustic energy emitted by the fan, measured in decibels (dB). This is an inherent property of the fan and does not change with distance or room conditions. Fan manufacturers publish sound power data.</p>
+</li>
+<li>
+<p><strong>Sound pressure level (Lp)</strong> — what you actually hear at a specific location, measured in dBA. Sound pressure depends on distance from the source, room absorption, and reflective surfaces.</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Sound Pressure Level</th>
+<th>Comparable Sound</th>
+<th>Perception</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30 dBA</td>
+<td>Quiet library</td>
+<td>Very quiet</td>
+</tr>
+<tr>
+<td>45 dBA</td>
+<td>Quiet office</td>
+<td>Comfortable</td>
+</tr>
+<tr>
+<td>55 dBA</td>
+<td>Normal conversation</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>65 dBA</td>
+<td>Busy restaurant</td>
+<td>Noticeable</td>
+</tr>
+<tr>
+<td>75 dBA</td>
+<td>Vacuum cleaner</td>
+<td>Loud</td>
+</tr>
+<tr>
+<td>85 dBA</td>
+<td>Heavy traffic</td>
+<td>Hearing protection required</td>
+</tr>
+<tr>
+<td>95 dBA</td>
+<td>Power tools</td>
+<td>Limit exposure time</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="129-vfd-control-for-fans">12.9 VFD Control for Fans</h2>
+<p>Variable Frequency Drives offer the same dramatic energy savings for fans as they do for pumps — and in many cases, the savings are even greater because HVAC fan loads vary widely throughout the day and across seasons.</p>
+<h3 id="fan-vfd-applications">Fan VFD Applications</h3>
+<ul>
+<li>
+<p><strong>Air handling units (AHUs)</strong> — VFDs on supply and return fans adjust airflow to match the number of occupied zones, time of day, and outdoor temperature. Savings of 30–60% are common compared to constant-speed operation with damper control.</p>
+</li>
+<li>
+<p><strong>Cooling tower fans</strong> — VFDs adjust fan speed based on the condenser water temperature leaving the tower. On mild days, fans run at 40–60% speed, saving 70–85% of power compared to full speed.</p>
+</li>
+<li>
+<p><strong>Exhaust fans</strong> — VFDs on kitchen, laboratory, or process exhaust fans can reduce speed during unoccupied hours or when contaminant levels are low.</p>
+</li>
+<li>
+<p><strong>Dust collection</strong> — VFDs on dust collection fans adjust airflow as branch lines open and close when machines start and stop, maintaining minimum transport velocity without excess airflow.</p>
+</li>
+</ul>
+<h3 id="energy-savings-example">Energy Savings Example</h3>
+<p>Consider a 25 HP supply fan in an office building that currently runs at full speed 12 hours per day with outlet dampers controlling airflow:</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Speed</th>
+<th>Power (Damper Control)</th>
+<th>Power (VFD Control)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Full cooling load (25% of hours)</td>
+<td>100%</td>
+<td>25 HP</td>
+<td>25 HP</td>
+</tr>
+<tr>
+<td>Medium load (50% of hours)</td>
+<td>80%</td>
+<td>22 HP (damper loss)</td>
+<td>12.8 HP</td>
+</tr>
+<tr>
+<td>Low load (25% of hours)</td>
+<td>60%</td>
+<td>19 HP (damper loss)</td>
+<td>5.4 HP</td>
+</tr>
+<tr>
+<td><strong>Weighted average</strong></td>
+<td></td>
+<td><strong>21.5 HP</strong></td>
+<td><strong>14.1 HP</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Annual savings: (21.5 − 14.1) HP × 0.746 kW/HP × 4,380 hrs × $0.12/kWh = <strong>$2,900/year</strong></p>
+<p>With a VFD cost of approximately $3,000–$5,000 for a 25 HP unit, the payback period is typically <strong>1–2 years</strong>.</p>
+<h4 id="worked-example-vfd-vs-inlet-vane-energy-comparison">Worked Example: VFD vs. Inlet Vane Energy Comparison</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Design condition: 20,000 CFM at 20 BHP (100% speed)</li>
+<li>Operating at 60% flow (12,000 CFM)</li>
+<li>Compare VFD vs. inlet vane damper control</li>
+<li>Electricity cost: $0.10/kWh, operating 8,760 hr/yr</li>
+</ul>
+<p><strong>Find:</strong> Power consumption for each method and annual savings with VFD</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate VFD power using the cube law — speed ratio equals flow ratio:</li>
+</ol>
+<p>[
+\text{Speed ratio} = 0.60
+]</p>
+<p>[
+BHP_{\text{VFD}} = 20 \times (0.60)^3 = 20 \times 0.216 = 4.32 \text{ BHP} = 3.22 \text{ kW}
+]</p>
+<ol>
+<li>Estimate inlet vane power — at 60% flow, inlet vanes typically require approximately 55% of full-load power:</li>
+</ol>
+<p>[
+BHP_{\text{vane}} = 20 \times 0.55 = 11.0 \text{ BHP} = 8.20 \text{ kW}
+]</p>
+<ol>
+<li>Calculate annual energy cost for each method:</li>
+</ol>
+<p>[
+\text{VFD annual energy} = 3.22 \text{ kW} \times 8{,}760 \text{ hr} = 28{,}207 \text{ kWh} = \$2{,}821/\text{yr}
+]</p>
+<p>[
+\text{Inlet vane annual energy} = 8.20 \text{ kW} \times 8{,}760 \text{ hr} = 71{,}832 \text{ kWh} = \$7{,}183/\text{yr}
+]</p>
+<ol>
+<li>Calculate annual savings:</li>
+</ol>
+<p>[
+\text{Annual savings} = \$7{,}183 - \$2{,}821 = \$4{,}362/\text{yr}
+]</p>
+<p><strong>Answer:</strong> At 60% flow, the VFD consumes <strong>3.22 kW</strong> vs. <strong>8.20 kW</strong> for inlet vanes, saving <strong>$4,362 per year</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> At 60% flow, the VFD uses 61% less energy than inlet vanes. The gap widens at lower flow rates and narrows as flow approaches 100%. For fans operating below 80% flow for significant hours, VFD retrofits typically pay back in 1–2 years.</p>
+</blockquote>
+<hr />
+<h2 id="1210-ai-driven-vibration-monitoring">12.10 AI-Driven Vibration Monitoring</h2>
+<p>Traditional vibration monitoring requires a technician to walk around with a portable analyzer, collect readings at each bearing location, and manually compare the data to historical trends. This approach typically happens once per month — meaning problems that develop between routes may go undetected until they cause failure.</p>
+<p><strong>AI-driven continuous monitoring</strong> changes this completely. Permanently mounted wireless vibration sensors collect data every hour (or more frequently) and transmit it to an AI analytics platform that:</p>
+<ul>
+<li><strong>Detects anomalies</strong> — identifies when vibration patterns change from the established baseline, even if the absolute level hasn't reached an alarm threshold yet</li>
+<li><strong>Classifies faults</strong> — uses pattern recognition to identify the specific fault type (imbalance, misalignment, bearing defect, belt wear) based on spectral signatures</li>
+<li><strong>Predicts remaining life</strong> — tracks the rate of degradation and estimates when the component will reach failure threshold</li>
+<li><strong>Recommends actions</strong> — provides specific maintenance recommendations (balance the fan, align the drive, replace the bearings) with urgency levels</li>
+<li><strong>Optimizes maintenance timing</strong> — coordinates bearing replacement with planned shutdowns to minimize production impact</li>
+</ul>
+<h3 id="ai-monitoring-vs-traditional-routes">AI Monitoring vs. Traditional Routes</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Monthly Route</th>
+<th>AI Continuous</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data collection frequency</td>
+<td>Monthly</td>
+<td>Hourly or better</td>
+</tr>
+<tr>
+<td>Fault detection speed</td>
+<td>Weeks to months</td>
+<td>Hours to days</td>
+</tr>
+<tr>
+<td>Fault classification</td>
+<td>Requires analyst expertise</td>
+<td>Automated</td>
+</tr>
+<tr>
+<td>Remaining life prediction</td>
+<td>Limited</td>
+<td>Data-driven</td>
+</tr>
+<tr>
+<td>Coverage</td>
+<td>Only monitored points</td>
+<td>All equipped machines</td>
+</tr>
+<tr>
+<td>Labor required</td>
+<td>High (walking routes)</td>
+<td>Low (review alerts)</td>
+</tr>
+<tr>
+<td>Cost per point</td>
+<td>Low hardware, high labor</td>
+<td>Higher hardware, low labor</td>
+</tr>
+</tbody>
+</table>
+<h4 id="diagram-fan-energy-savings-comparison">Diagram: Fan Energy Savings Comparison</h4>
+<iframe src="../../sims/fan-energy-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Fan Energy Savings Comparison Calculator</summary>
+Type: microsim
+
+Bloom Level: L5 Evaluate
+Bloom Verb: Judge, assess
+Learning Objective: Students will evaluate different fan control strategies (constant speed + damper, inlet vane, VFD) by assessing their energy consumption across varying load conditions and judging which approach provides the best return on investment.
+
+Visual elements:
+- Left panel: Stacked bar chart showing annual energy consumption for three control methods:
+  1. Constant speed with outlet dampers (baseline, red/orange)
+  2. Inlet vane control (medium, yellow)
+  3. VFD speed control (most efficient, green)
+  - Each bar broken into segments: full load, 75% load, 50% load, 25% load hours
+- Right panel: Summary results
+  - Annual kWh for each method
+  - Annual cost for each method
+  - Savings vs. baseline ($ and %)
+  - Simple payback period for VFD installation
+  - CO₂ reduction
+
+Interactive controls:
+- Slider: "Fan Motor HP" (5-100 HP)
+- Slider: "Operating Hours/Year" (2000-8760)
+- Slider: "Electricity Rate" ($0.05-$0.25/kWh)
+- Slider: "Average Load Factor" (50%-100%) — adjusts the distribution of time at each load level
+- Input: "VFD Installation Cost" (auto-estimated based on HP, user can override)
+
+Data Visibility Requirements:
+- Show power calculations at each load level for all three methods
+- Show the fan laws equations driving the VFD power calculations
+- Highlight the savings amount prominently with dollar sign
+- Show ROI calculation step-by-step
+
+Instructional Rationale: Evaluate-level comparison requires students to assess multiple control strategies against economic and energy criteria, judge which provides the best value for specific conditions, and defend their recommendation. The ROI calculation adds a practical business dimension beyond pure engineering.
+
+Implementation: p5.js or Chart.js with interactive calculation display
+Canvas size: responsive, minimum 800x500px
+</details>
+
+<hr />
+<h2 id="1211-automated-fan-optimization">12.11 Automated Fan Optimization</h2>
+<p>AI-controlled fan systems go beyond simple VFD speed control to optimize the entire air handling system:</p>
+<h3 id="smart-control-strategies">Smart Control Strategies</h3>
+<p><strong>Demand-controlled ventilation (DCV):</strong> CO₂ sensors in occupied zones tell the AI system how many people are present. The AI adjusts supply fan speed to deliver exactly enough fresh air to maintain indoor air quality — no more, no less. In a large office building, DCV can reduce fan energy by 20–40% during partial occupancy.</p>
+<p><strong>Static pressure reset:</strong> Instead of maintaining a fixed duct static pressure setpoint, AI monitors the position of all VAV (Variable Air Volume) box dampers. If most dampers are less than 80% open, the AI reduces the duct pressure setpoint — which allows the fan to slow down and save energy. Savings of 15–30% are typical.</p>
+<p><strong>Optimized start/stop:</strong> AI learns how long it takes to bring a building to comfortable conditions and starts the HVAC system just in time — avoiding the energy waste of running fans during unoccupied hours "just in case."</p>
+<p><strong>Predictive scheduling:</strong> AI uses weather forecasts, occupancy schedules, and historical patterns to pre-position the system. On a morning when the forecast is mild, the AI may run the economizer (free cooling) instead of mechanical cooling, saving both fan and compressor energy.</p>
+<hr />
+<h2 id="1212-energy-efficient-fan-operation">12.12 Energy-Efficient Fan Operation</h2>
+<p>Beyond VFDs and AI controls, several system-level strategies reduce fan energy consumption:</p>
+<h3 id="system-design-optimization">System Design Optimization</h3>
+<ul>
+<li><strong>Minimize duct resistance</strong> — use larger ducts, long-radius elbows, gradual transitions, and turning vanes in square elbows. Every 0.1 in. w.g. of static pressure reduced at a 10,000 CFM fan saves approximately 0.25 HP.</li>
+<li><strong>Eliminate unnecessary resistance</strong> — remove abandoned dampers, clean dirty coils and filters on schedule, and straighten crushed flex duct.</li>
+<li><strong>Right-size fans</strong> — oversized fans waste energy by throttling or running at inefficient operating points. Size fans for the actual load, not worst-case design conditions with excessive safety factors.</li>
+<li><strong>Select high-efficiency fans</strong> — backward-curved centrifugal fans (75–85% efficiency) vs. forward-curved (60–70%) can save 10–15% of fan power for the same airflow.</li>
+<li><strong>Use direct-drive where possible</strong> — eliminates belt losses (3–5% of transmitted power) and belt maintenance costs.</li>
+</ul>
+<h3 id="maintenance-for-efficiency">Maintenance for Efficiency</h3>
+<ul>
+<li><strong>Keep filters clean</strong> — a dirty filter can add 0.5–2.0 in. w.g. of resistance, increasing fan power by 20–50%</li>
+<li><strong>Keep coils clean</strong> — dirty coils increase air-side resistance and reduce heat transfer</li>
+<li><strong>Maintain proper belt tension</strong> — slipping belts waste 5–10% of transmitted power as heat</li>
+<li><strong>Keep fan wheels clean</strong> — buildup on blades reduces efficiency and causes imbalance</li>
+<li><strong>Maintain proper clearances</strong> — worn inlet cone clearances in centrifugal fans allow air to recirculate, reducing efficiency</li>
+</ul>
+<hr />
+<h2 id="1213-utility-rebates-incentives-and-building-the-business-case">12.13 Utility Rebates, Incentives, and Building the Business Case</h2>
+<p>Many of the energy efficiency upgrades discussed in this chapter qualify for <strong>utility rebate programs</strong> and <strong>government incentives</strong> that can significantly offset upfront costs and accelerate project payback. Fan systems are among the top targets for utility incentive programs because they represent a large share of commercial building electricity consumption and the savings from VFD retrofits are well established and easy to verify.</p>
+<h3 id="available-incentive-programs">Available Incentive Programs</h3>
+<table>
+<thead>
+<tr>
+<th>Program Type</th>
+<th>Examples</th>
+<th>Typical Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Utility prescriptive rebates</td>
+<td>VFD on AHU fans, ECM motor retrofits, fan replacement with high-efficiency models</td>
+<td>$50–$175 per HP for VFDs; $15–$40 per HP for ECM motors</td>
+</tr>
+<tr>
+<td>Utility custom/calculated rebates</td>
+<td>Duct redesign to reduce pressure drop, inlet vane to VFD conversion, fan system optimization</td>
+<td>$0.04–$0.15 per kWh saved annually</td>
+</tr>
+<tr>
+<td>Federal tax credits (IRA §179D)</td>
+<td>Energy-efficient HVAC systems including fan upgrades</td>
+<td>Up to $1.00/sq ft or 30% of project cost</td>
+</tr>
+<tr>
+<td>State/local programs</td>
+<td>State energy office grants, commercial building retrofit funds</td>
+<td>Varies by state — often 15–35% of project cost</td>
+</tr>
+<tr>
+<td>DOE programs</td>
+<td>Better Buildings Challenge, Advanced Energy Retrofit Guides</td>
+<td>Technical assistance, case studies, and recognition</td>
+</tr>
+</tbody>
+</table>
+<p>Fan VFD rebates are among the most commonly claimed utility incentives in the commercial HVAC sector. Because the cube law relationship between fan speed and power is so dramatic, even modest speed reductions deliver large, easily measurable energy savings — making fan VFDs an attractive and low-risk investment for both the building owner and the utility. Most utilities offer <strong>prescriptive rebates</strong> of $50–$175 per horsepower for VFDs installed on supply fans, return fans, and exhaust fans. Some utilities also offer prescriptive rebates for replacing standard induction motors with <strong>Electronically Commutated Motors (ECMs)</strong>, which are 15–25% more efficient at part-load conditions common in fan applications.</p>
+<p>For more complex projects — such as redesigning a duct system to reduce static pressure, converting from inlet vane control to VFD control, or replacing an oversized fan with a properly sized high-efficiency model — utilities typically offer <strong>custom or calculated rebates</strong> based on verified energy savings. These projects require pre- and post-installation energy measurements but often yield larger total rebates because the savings are substantial.</p>
+<p>The <strong>Inflation Reduction Act (IRA)</strong> expanded the §179D Energy Efficient Commercial Buildings Deduction to cover HVAC system upgrades including fan and air handling improvements. Buildings that demonstrate a 25% or greater reduction in energy use intensity through qualified upgrades may claim deductions of up to $1.00 per square foot, with bonus amounts available for projects meeting prevailing wage requirements.</p>
+<h3 id="how-to-find-available-rebates">How to Find Available Rebates</h3>
+<ol>
+<li><strong>Check your utility's website</strong> — Search for "[utility name] commercial HVAC rebates" or "business energy incentives." Fan VFD rebates are often listed under HVAC or motor categories.</li>
+<li><strong>Use the DSIRE database</strong> — The Database of State Incentives for Renewables and Efficiency (<a href="https://www.dsireusa.org">dsireusa.org</a>) catalogs federal, state, and local incentive programs searchable by zip code and technology type.</li>
+<li><strong>Contact your utility account representative</strong> — Large commercial customers often have dedicated account managers who can identify all applicable programs. Ask specifically about custom rebate tracks for fan system optimization projects, which may offer higher incentives than prescriptive programs.</li>
+<li><strong>Get pre-approval before starting work</strong> — Many programs require pre-installation applications, baseline energy data, and program approval before equipment is purchased or installed. Failing to get pre-approval is the most common reason projects miss out on available rebates.</li>
+</ol>
+<h3 id="common-fan-system-upgrades-and-rebate-potential">Common Fan System Upgrades and Rebate Potential</h3>
+<table>
+<thead>
+<tr>
+<th>Upgrade</th>
+<th>Typical Cost</th>
+<th>Annual Savings</th>
+<th>Typical Rebate</th>
+<th>Net Payback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VFD on 25 HP supply/return fan</td>
+<td>$3,500–$5,500</td>
+<td>$2,500–$4,500/yr</td>
+<td>$1,250–$3,000</td>
+<td>0.5–1.2 years</td>
+</tr>
+<tr>
+<td>ECM motor retrofit (10 HP fan)</td>
+<td>$2,000–$3,500</td>
+<td>$600–$1,200/yr</td>
+<td>$400–$900</td>
+<td>1.2–2.5 years</td>
+</tr>
+<tr>
+<td>Fan replacement with high-efficiency model (25 HP)</td>
+<td>$6,000–$10,000</td>
+<td>$1,500–$3,000/yr</td>
+<td>$2,000–$4,000</td>
+<td>1.5–3.0 years</td>
+</tr>
+<tr>
+<td>Duct system redesign for lower pressure drop</td>
+<td>$8,000–$15,000</td>
+<td>$2,000–$4,500/yr</td>
+<td>$3,000–$6,000</td>
+<td>1.5–2.5 years</td>
+</tr>
+<tr>
+<td>Inlet vane to VFD conversion (30 HP)</td>
+<td>$4,500–$7,000</td>
+<td>$3,000–$5,500/yr</td>
+<td>$1,500–$3,500</td>
+<td>0.5–1.0 years</td>
+</tr>
+</tbody>
+</table>
+<h3 id="building-the-business-case">Building the Business Case</h3>
+<p>When presenting a fan efficiency project to management, lead with the <strong>total cost of ownership</strong> over the equipment's expected life — not just the installation cost. A 25 HP fan running 4,000 hours per year at $0.12/kWh costs approximately $9,000 per year in electricity. Over a 20-year equipment life, energy costs will total $180,000 or more — dwarfing the initial equipment cost. Even a 30% reduction in fan energy saves $54,000 over the system lifetime, making a $5,000 VFD investment trivially easy to justify.</p>
+<p>Include the <strong>rebate value</strong> in your financial analysis to show the true net cost. A $5,000 VFD that receives a $2,500 utility rebate has an effective cost of only $2,500, cutting the simple payback from 1.5 years to under 9 months. Many finance teams use internal rate of return (IRR) as their primary metric — fan VFD projects commonly deliver IRR values of 80–200%, far exceeding the 15–20% hurdle rate most organizations require.</p>
+<p>Beyond energy dollars, quantify the <strong>ancillary benefits</strong>: reduced belt wear and replacement frequency (VFD soft starts eliminate belt slippage at startup), lower noise levels for building occupants, extended bearing life from reduced vibration at lower speeds, and measurable carbon emission reductions that support ESG reporting goals. With utility energy rates historically increasing 2–4% annually, the savings from today's investment compound over time. Present the project as a hedge against rising energy costs, and emphasize that utility rebate budgets are finite — applying early ensures the incentive is available when you need it.</p>
+<hr />
+<h2 id="1214-hands-on-lab-activity">12.14 Hands-On Lab Activity</h2>
+<h3 id="lab-balance-a-fan-and-use-software-to-monitor-performance">Lab: Balance a Fan and Use Software to Monitor Performance</h3>
+<p><strong>Objective:</strong> Students will perform vibration measurements on a fan, complete a single-plane dynamic balance procedure, and use monitoring software to verify the results and track fan performance.</p>
+<p><strong>Equipment needed:</strong></p>
+<ul>
+<li>Belt-driven centrifugal fan on test stand (3–5 HP)</li>
+<li>Portable vibration analyzer with accelerometer and magnetic mount</li>
+<li>Balancing weights (clip-on or adhesive)</li>
+<li>Protractor or angle reference marked on fan wheel</li>
+<li>Laptop with vibration monitoring software</li>
+<li>Tachometer (or use the vibration analyzer's built-in tach)</li>
+<li>Belt tension gauge</li>
+<li>Basic hand tools</li>
+</ul>
+<p><strong>Lab Activities:</strong></p>
+<ol>
+<li>Inspect the fan: check belts for wear and tension, inspect blades for buildup or damage, verify bearing condition by hand rotation</li>
+<li>Start the fan and record the running speed (RPM) with the tachometer</li>
+<li>Collect baseline vibration readings at both bearings (horizontal, vertical, and axial directions)</li>
+<li>Identify the bearing with the highest vibration level — this will be the measurement point for balancing</li>
+<li>Record the baseline amplitude and phase angle at the selected bearing</li>
+<li>Stop the fan, attach a trial weight at the 0° reference mark on the fan wheel</li>
+<li>Run the fan and record the new amplitude and phase angle with the trial weight installed</li>
+<li>Enter the data into the balancing software or calculator to determine the correction weight and angle</li>
+<li>Stop the fan, remove the trial weight, and attach the correction weight at the calculated angle</li>
+<li>Run the fan and record the final vibration level — compare to baseline</li>
+<li>Record all data in the monitoring software for trending</li>
+<li>Calculate the balance quality grade achieved and compare to ISO standards</li>
+</ol>
+<hr />
+<h2 id="key-takeaways">Key Takeaways</h2>
+<details class="question">
+<summary>Review: Key Concepts in Fan Systems — Click to expand</summary>
+<ol>
+<li>
+<p><strong>Centrifugal fans</strong> draw air in at the center and discharge at 90° — forward-curved, backward-curved, and radial blade designs serve different applications.</p>
+</li>
+<li>
+<p><strong>Axial fans</strong> move air parallel to the shaft — propeller, tubeaxial, and vaneaxial designs range from simple ventilation to high-pressure duct applications.</p>
+</li>
+<li>
+<p><strong>Fan laws (affinity laws)</strong> are identical to pump laws — power varies with the cube of speed, making VFDs extremely effective for energy savings.</p>
+</li>
+<li>
+<p><strong>System effect</strong> reduces fan performance when inlet or outlet duct connections create turbulence — allow straight duct runs at fan connections.</p>
+</li>
+<li>
+<p><strong>Belt drives</strong> require regular maintenance — proper tension, alignment, and matched set replacement are essential for reliability.</p>
+</li>
+<li>
+<p><strong>Vibration analysis</strong> is the primary diagnostic tool for fans — frequency spectrum analysis identifies imbalance, misalignment, bearing defects, and looseness.</p>
+</li>
+<li>
+<p><strong>Dynamic balancing</strong> corrects imbalance using trial weight measurements and vector calculations — the most common fan maintenance activity after belt replacement.</p>
+</li>
+<li>
+<p><strong>Noise reduction</strong> is most effective at the source — reduce fan speed, select quieter fan types, and eliminate system effect before adding silencers or enclosures.</p>
+</li>
+<li>
+<p><strong>AI-driven continuous monitoring</strong> detects developing faults hours after they begin, compared to monthly manual routes that may miss rapidly developing problems.</p>
+</li>
+<li>
+<p><strong>Energy-efficient fan operation</strong> combines VFD control, proper system design, right-sizing, and regular maintenance to reduce fan energy consumption by 20–50%.</p>
+</li>
+</ol>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../11-pumping/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 11. Pumping Systems">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                11. Pumping Systems
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../13-systems/" class="md-footer__link md-footer__link--next" aria-label="Next: 13. Systems and Software">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                13. Systems and Software
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "toc.follow", "navigation.top", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../js/extra.js"></script>
+      
+    
+  </body>
+</html>

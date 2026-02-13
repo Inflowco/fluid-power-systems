@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCADA System Architecture</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    overflow-x: hidden;
+  }
+  main { display: flex; justify-content: center; width: 100%; }
+  canvas { display: block; }
+  #tooltip {
+    position: absolute;
+    display: none;
+    background: rgba(30, 30, 50, 0.93);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    max-width: 260px;
+    pointer-events: none;
+    z-index: 100;
+    line-height: 1.4;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+</style>
+</head>
+<body>
+<main><div id="canvas-container"></div></main>
+<div id="tooltip"></div>
+<script>
+// ============================================================
+// SCADA System Architecture - Interactive p5.js MicroSim
+// ============================================================
+
+// --- Layout constants ---
+const LAYER_COUNT = 6;
+const MARGIN_X = 20;
+const MARGIN_TOP = 14;
+const MARGIN_BOTTOM = 10;
+const LAYER_GAP = 6;
+const CORNER_R = 10;
+
+// --- State ---
+let cW, cH, layerH;
+let highlightedLayer = -1; // -1 = none
+let particles = [];
+let components = []; // clickable/hoverable regions
+let tooltip = null;
+
+// --- Layer definitions (bottom index 0 = Field Devices) ---
+const layerDefs = [
+  { name: "Field Devices",        bg: [210, 232, 250], idx: 0 },
+  { name: "Communication Network", bg: [230, 230, 235], idx: 1 },
+  { name: "SCADA Server",          bg: [210, 240, 215], idx: 2 },
+  { name: "Data Historian",        bg: [250, 245, 210], idx: 3 },
+  { name: "HMI / Web Clients",     bg: [230, 218, 245], idx: 4 },
+  { name: "AI Analytics",          bg: [255, 228, 200], idx: 5 }
+];
+
+// --- Component tooltip descriptions ---
+const tooltips = {
+  // Layer 0 - Field Devices
+  "Temperature Sensor": "Measures fluid or air temperature. Outputs 4-20 mA analog signal to PLC/RTU.",
+  "Pressure Sensor (HVAC)": "Monitors duct or refrigerant pressure in HVAC systems for safe operation.",
+  "VFD": "Variable Frequency Drive: adjusts motor speed to match load, saving 20-50% energy.",
+  "Flow Meter": "Measures volumetric or mass flow rate of liquids in pumping systems.",
+  "Pressure Sensor (Pump)": "Monitors discharge/suction pressure to detect cavitation or blockages.",
+  "PLC": "Programmable Logic Controller: executes real-time control logic for the pumping subsystem.",
+  "Pressure Sensor (Air)": "Monitors compressed air system pressure to maintain target PSI.",
+  "Leak Detector": "Ultrasonic sensor that detects compressed air leaks, reducing energy waste.",
+  "Valve Actuator": "Electrically or pneumatically operated valve for flow/pressure control.",
+  // Layer 1 - Protocols
+  "Modbus": "Serial protocol (RS-485/TCP). Simple, widely used for PLCs and sensors.",
+  "BACnet": "Building Automation and Control Networks protocol, common in HVAC systems.",
+  "Ethernet/IP": "Industrial Ethernet protocol using CIP for real-time I/O and configuration.",
+  "OPC-UA": "Open Platform Communications Unified Architecture: secure, cross-platform data exchange.",
+  // Layer 2 - Server modules
+  "Data Processing": "Aggregates, scales, and validates incoming sensor data in real time.",
+  "Alarm Engine": "Evaluates data against thresholds and generates prioritized alarms.",
+  "Control Logic": "Executes supervisory control strategies and sends setpoints to PLCs.",
+  // Layer 3 - Historian
+  "Time-Series Database": "Stores years of process data at high resolution for trend analysis and compliance.",
+  // Layer 4 - HMI
+  "Operator Workstation": "Desktop HMI with full system overview, alarm management, and control capabilities.",
+  "Tablet Client": "Mobile HMI for field operators performing rounds and acknowledging alarms.",
+  "Mobile Phone": "Smartphone alerts and read-only dashboards for managers and on-call engineers.",
+  // Layer 5 - AI
+  "Predictive Analytics": "Machine learning models that forecast equipment failures before they occur.",
+  "Optimization": "AI-driven setpoint optimization to minimize energy use while meeting demand.",
+  "Anomaly Detection": "Statistical and ML-based detection of unusual patterns indicating faults."
+};
+
+// ---- p5 setup ----
+function setup() {
+  cW = min(windowWidth, 900);
+  cH = max(520, min(windowHeight, 700));
+  let canvas = createCanvas(cW, cH);
+  canvas.parent('canvas-container');
+  textFont('Segoe UI, Arial, sans-serif');
+  layerH = (cH - MARGIN_TOP - MARGIN_BOTTOM - (LAYER_COUNT - 1) * LAYER_GAP) / LAYER_COUNT;
+  tooltip = select('#tooltip');
+  // seed some initial particles
+  for (let i = 0; i < 18; i++) spawnParticle();
+}
+
+function windowResized() {
+  cW = min(windowWidth, 900);
+  cH = max(520, min(windowHeight, 700));
+  resizeCanvas(cW, cH);
+  layerH = (cH - MARGIN_TOP - MARGIN_BOTTOM - (LAYER_COUNT - 1) * LAYER_GAP) / LAYER_COUNT;
+}
+
+// ---- helpers ----
+function layerY(idx) {
+  // idx 0 = bottom layer (Field Devices)
+  return cH - MARGIN_BOTTOM - (idx + 1) * layerH - idx * LAYER_GAP;
+}
+function layerRect(idx) {
+  let y = layerY(idx);
+  return { x: MARGIN_X, y: y, w: cW - 2 * MARGIN_X, h: layerH };
+}
+
+// ---- particle system ----
+function spawnParticle() {
+  let kind = random() < 0.4 ? 'up' : (random() < 0.6 ? 'down' : 'ai');
+  let lw = cW - 2 * MARGIN_X;
+  let xBase = MARGIN_X + lw * 0.1 + random() * lw * 0.8;
+  let p;
+  if (kind === 'up') {
+    p = { x: xBase, y: layerY(0) + layerH / 2, vy: -random(0.4, 1.0), vx: random(-0.2, 0.2), col: [70, 140, 255, 200], r: random(3, 5), kind: kind };
+  } else if (kind === 'down') {
+    p = { x: xBase, y: layerY(4) + layerH / 2, vy: random(0.4, 1.0), vx: random(-0.2, 0.2), col: [60, 200, 100, 200], r: random(3, 5), kind: kind };
+  } else {
+    let goingUp = random() < 0.5;
+    let startLayer = goingUp ? 2 : 5;
+    p = { x: xBase, y: layerY(startLayer) + layerH / 2, vy: goingUp ? -random(0.3, 0.7) : random(0.3, 0.7), vx: random(-0.15, 0.15), col: [240, 150, 40, 200], r: random(3, 4.5), kind: kind };
+  }
+  particles.push(p);
+}
+
+function updateParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    let p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    // remove if out of visible area
+    if (p.y < MARGIN_TOP - 20 || p.y > cH + 20) {
+      particles.splice(i, 1);
+    }
+  }
+  // maintain particle count
+  while (particles.length < 24) spawnParticle();
+}
+
+function drawParticles() {
+  noStroke();
+  for (let p of particles) {
+    let a = p.col[3];
+    if (highlightedLayer >= 0) a *= 0.3;
+    fill(p.col[0], p.col[1], p.col[2], a);
+    ellipse(p.x, p.y, p.r * 2);
+  }
+}
+
+// ---- draw icons ----
+function drawTemperatureSensor(cx, cy, s) {
+  // thermometer
+  stroke(180, 50, 50); strokeWeight(1.5); noFill();
+  let bw = s * 0.22, bh = s * 0.55;
+  rect(cx - bw / 2, cy - bh / 2, bw, bh, bw / 2);
+  fill(220, 60, 60); noStroke();
+  ellipse(cx, cy + bh / 2 - bw / 2, bw * 1.3);
+  fill(220, 60, 60);
+  rect(cx - bw * 0.18, cy - bh * 0.05, bw * 0.36, bh * 0.35);
+}
+
+function drawPressureSensor(cx, cy, s) {
+  // gauge
+  stroke(60, 60, 140); strokeWeight(1.5); noFill();
+  ellipse(cx, cy, s * 0.6);
+  // needle
+  let angle = -PI * 0.25;
+  let nl = s * 0.22;
+  stroke(200, 50, 50); strokeWeight(2);
+  line(cx, cy, cx + cos(angle) * nl, cy + sin(angle) * nl);
+  // tick marks
+  stroke(60, 60, 140); strokeWeight(1);
+  for (let a = PI; a <= TWO_PI; a += PI / 6) {
+    let x1 = cx + cos(a) * s * 0.25, y1 = cy + sin(a) * s * 0.25;
+    let x2 = cx + cos(a) * s * 0.28, y2 = cy + sin(a) * s * 0.28;
+    line(x1, y1, x2, y2);
+  }
+}
+
+function drawVFD(cx, cy, s) {
+  fill(60, 80, 140); noStroke();
+  rectMode(CENTER);
+  rect(cx, cy, s * 0.55, s * 0.45, 3);
+  fill(100, 220, 100);
+  // sine wave on front
+  noFill(); stroke(100, 220, 100); strokeWeight(1.5);
+  beginShape();
+  for (let t = -s * 0.2; t <= s * 0.2; t += 2) {
+    vertex(cx + t, cy + sin(t * 0.15 + frameCount * 0.05) * s * 0.1);
+  }
+  endShape();
+  rectMode(CORNER);
+}
+
+function drawFlowMeter(cx, cy, s) {
+  stroke(30, 100, 160); strokeWeight(1.5); noFill();
+  // pipe
+  let pw = s * 0.6, ph = s * 0.2;
+  rect(cx - pw / 2, cy - ph / 2, pw, ph, 3);
+  // arrow
+  fill(30, 100, 160);
+  triangle(cx + s * 0.12, cy - ph * 0.3, cx + s * 0.12, cy + ph * 0.3, cx + s * 0.25, cy);
+  // display
+  noFill(); stroke(30, 100, 160);
+  ellipse(cx - s * 0.05, cy - s * 0.25, s * 0.22);
+}
+
+function drawPLC(cx, cy, s) {
+  fill(80, 80, 90); noStroke();
+  rectMode(CENTER);
+  rect(cx, cy, s * 0.5, s * 0.45, 3);
+  // LEDs
+  fill(0, 220, 0);
+  ellipse(cx - s * 0.12, cy - s * 0.1, s * 0.07);
+  fill(220, 0, 0);
+  ellipse(cx + s * 0.12, cy - s * 0.1, s * 0.07);
+  // label
+  fill(200); noStroke();
+  textSize(s * 0.12); textAlign(CENTER, CENTER);
+  text("PLC", cx, cy + s * 0.08);
+  rectMode(CORNER);
+}
+
+function drawLeakDetector(cx, cy, s) {
+  // microphone-like icon
+  stroke(140, 80, 30); strokeWeight(1.5); noFill();
+  ellipse(cx, cy - s * 0.1, s * 0.3, s * 0.35);
+  line(cx, cy + s * 0.07, cx, cy + s * 0.22);
+  line(cx - s * 0.12, cy + s * 0.22, cx + s * 0.12, cy + s * 0.22);
+  // sound waves
+  noFill(); stroke(200, 130, 40, 180);
+  arc(cx + s * 0.22, cy - s * 0.1, s * 0.2, s * 0.2, -PI / 3, PI / 3);
+  arc(cx + s * 0.3, cy - s * 0.1, s * 0.3, s * 0.3, -PI / 3, PI / 3);
+}
+
+function drawValveActuator(cx, cy, s) {
+  // valve body (bowtie)
+  fill(100, 120, 160); noStroke();
+  triangle(cx - s * 0.2, cy - s * 0.15, cx - s * 0.2, cy + s * 0.15, cx, cy);
+  triangle(cx + s * 0.2, cy - s * 0.15, cx + s * 0.2, cy + s * 0.15, cx, cy);
+  // actuator on top
+  fill(80, 90, 110);
+  rectMode(CENTER);
+  rect(cx, cy - s * 0.25, s * 0.18, s * 0.15, 2);
+  rectMode(CORNER);
+}
+
+function drawServerIcon(cx, cy, s) {
+  rectMode(CENTER); fill(70, 80, 100); noStroke();
+  rect(cx, cy - s * 0.12, s * 0.55, s * 0.18, 3);
+  rect(cx, cy + s * 0.1, s * 0.55, s * 0.18, 3);
+  fill(0, 200, 0);
+  ellipse(cx + s * 0.18, cy - s * 0.12, s * 0.06);
+  ellipse(cx + s * 0.18, cy + s * 0.1, s * 0.06);
+  rectMode(CORNER);
+}
+
+function drawDatabaseIcon(cx, cy, s) {
+  fill(180, 160, 80); noStroke();
+  ellipse(cx, cy - s * 0.15, s * 0.55, s * 0.2);
+  rect(cx - s * 0.275, cy - s * 0.15, s * 0.55, s * 0.3);
+  fill(200, 180, 90);
+  ellipse(cx, cy + s * 0.15, s * 0.55, s * 0.2);
+  ellipse(cx, cy - s * 0.15, s * 0.55, s * 0.2);
+}
+
+function drawDesktopMonitor(cx, cy, s) {
+  fill(50, 55, 70); noStroke();
+  rectMode(CENTER);
+  rect(cx, cy - s * 0.08, s * 0.5, s * 0.35, 3);
+  fill(70, 130, 200);
+  rect(cx, cy - s * 0.08, s * 0.42, s * 0.27, 2);
+  fill(50, 55, 70);
+  rect(cx, cy + s * 0.17, s * 0.12, s * 0.1);
+  rect(cx, cy + s * 0.24, s * 0.3, s * 0.04, 2);
+  // mini dashboard
+  fill(100, 200, 120);
+  rect(cx - s * 0.1, cy - s * 0.12, s * 0.08, s * 0.05);
+  fill(240, 180, 60);
+  rect(cx + s * 0.04, cy - s * 0.12, s * 0.08, s * 0.08);
+  rectMode(CORNER);
+}
+
+function drawTablet(cx, cy, s) {
+  fill(50, 55, 70); noStroke();
+  rectMode(CENTER);
+  rect(cx, cy, s * 0.35, s * 0.48, 4);
+  fill(70, 130, 200);
+  rect(cx, cy - s * 0.02, s * 0.28, s * 0.36, 2);
+  // mini chart
+  fill(100, 200, 120);
+  rect(cx - s * 0.06, cy, s * 0.05, s * 0.06);
+  fill(240, 180, 60);
+  rect(cx + s * 0.02, cy - s * 0.03, s * 0.05, s * 0.09);
+  rectMode(CORNER);
+}
+
+function drawMobilePhone(cx, cy, s) {
+  fill(50, 55, 70); noStroke();
+  rectMode(CENTER);
+  rect(cx, cy, s * 0.22, s * 0.42, 4);
+  fill(70, 130, 200);
+  rect(cx, cy - s * 0.02, s * 0.17, s * 0.3, 2);
+  // notification dot
+  fill(240, 80, 80);
+  ellipse(cx + s * 0.05, cy - s * 0.1, s * 0.05);
+  rectMode(CORNER);
+}
+
+function drawCloudIcon(cx, cy, s) {
+  noStroke();
+  fill(240, 170, 80, 180);
+  ellipse(cx, cy - s * 0.08, s * 0.5, s * 0.3);
+  ellipse(cx - s * 0.18, cy, s * 0.35, s * 0.28);
+  ellipse(cx + s * 0.18, cy, s * 0.35, s * 0.28);
+  ellipse(cx, cy + s * 0.04, s * 0.55, s * 0.28);
+}
+
+// ---- register a hoverable/clickable component ----
+function addComponent(name, x, y, w, h, layerIdx) {
+  components.push({ name, x, y, w, h, layerIdx });
+}
+
+// ---- draw ----
+function draw() {
+  background(248, 249, 250);
+  components = [];
+
+  updateParticles();
+
+  // Title
+  noStroke();
+  fill(40);
+  textSize(15);
+  textAlign(CENTER, TOP);
+  text("SCADA System Architecture", cW / 2, 1);
+
+  let lw = cW - 2 * MARGIN_X;
+
+  // Draw layers bottom to top
+  for (let i = 0; i < LAYER_COUNT; i++) {
+    let r = layerRect(i);
+    let def = layerDefs[i];
+    let dimmed = highlightedLayer >= 0 && highlightedLayer !== i;
+    let alpha = dimmed ? 60 : 255;
+
+    // background
+    fill(def.bg[0], def.bg[1], def.bg[2], dimmed ? 80 : 200);
+    noStroke();
+    rect(r.x, r.y, r.w, r.h, CORNER_R);
+
+    // border if highlighted
+    if (highlightedLayer === i) {
+      noFill();
+      stroke(60, 120, 220);
+      strokeWeight(2.5);
+      rect(r.x, r.y, r.w, r.h, CORNER_R);
+    }
+
+    // layer label on left
+    noStroke();
+    fill(50, 50, 70, alpha);
+    textSize(constrain(layerH * 0.17, 9, 13));
+    textAlign(LEFT, TOP);
+    text(def.name, r.x + 8, r.y + 4);
+
+    // layer number badge
+    fill(80, 100, 140, alpha);
+    textSize(constrain(layerH * 0.13, 7, 10));
+    textAlign(RIGHT, TOP);
+    text("Layer " + (i + 1), r.x + r.w - 8, r.y + 4);
+
+    let cx = r.x + r.w / 2;
+    let cy = r.y + r.h / 2 + 4;
+    let iconS = constrain(layerH * 0.7, 30, 60);
+
+    push();
+    if (dimmed) {
+      // draw icons dimmed using tint-like approach
+      drawingContext.globalAlpha = 0.25;
+    }
+
+    // ----- Layer 0: Field Devices -----
+    if (i === 0) {
+      let groupW = lw / 3;
+      let groups = ["HVAC", "Pumping", "Compressed Air"];
+      let iconFuncs = [
+        [drawTemperatureSensor, drawPressureSensor, drawVFD],
+        [drawFlowMeter, drawPressureSensor, drawPLC],
+        [drawPressureSensor, drawLeakDetector, drawValveActuator]
+      ];
+      let iconNames = [
+        ["Temperature Sensor", "Pressure Sensor (HVAC)", "VFD"],
+        ["Flow Meter", "Pressure Sensor (Pump)", "PLC"],
+        ["Pressure Sensor (Air)", "Leak Detector", "Valve Actuator"]
+      ];
+      for (let g = 0; g < 3; g++) {
+        let gx = r.x + g * groupW;
+        // group label
+        fill(60, 70, 100);
+        noStroke();
+        textSize(constrain(layerH * 0.14, 8, 11));
+        textAlign(CENTER, BOTTOM);
+        text(groups[g], gx + groupW / 2, r.y + r.h - 2);
+        for (let d = 0; d < 3; d++) {
+          let dx = gx + (d + 0.5) * (groupW / 3);
+          let dy = cy - 2;
+          iconFuncs[g][d](dx, dy, iconS * 0.75);
+          addComponent(iconNames[g][d], dx - iconS * 0.3, dy - iconS * 0.3, iconS * 0.6, iconS * 0.6, i);
+        }
+      }
+    }
+
+    // ----- Layer 1: Communication Network -----
+    if (i === 1) {
+      // horizontal bar
+      fill(170, 175, 185);
+      noStroke();
+      let barH = layerH * 0.22;
+      rect(r.x + 20, cy - barH / 2, r.w - 40, barH, 4);
+      // protocol labels
+      let protos = ["Modbus", "BACnet", "Ethernet/IP", "OPC-UA"];
+      textSize(constrain(layerH * 0.17, 8, 12));
+      textAlign(CENTER, CENTER);
+      for (let p = 0; p < 4; p++) {
+        let px = r.x + 40 + p * ((r.w - 80) / 3);
+        fill(40, 50, 80);
+        text(protos[p], px, cy);
+        addComponent(protos[p], px - 35, cy - barH, 70, barH * 2, i);
+      }
+      // vertical connection lines down to field devices
+      stroke(140, 150, 170); strokeWeight(1);
+      let l0 = layerRect(0);
+      for (let c = 0; c < 9; c++) {
+        let groupW = lw / 3;
+        let g = floor(c / 3);
+        let d = c % 3;
+        let gx = r.x + g * groupW;
+        let dx = gx + (d + 0.5) * (groupW / 3);
+        // dashed-style short lines
+        for (let yy = r.y + r.h; yy < l0.y; yy += 6) {
+          line(dx, yy, dx, min(yy + 3, l0.y));
+        }
+      }
+    }
+
+    // ----- Layer 2: SCADA Server -----
+    if (i === 2) {
+      drawServerIcon(cx, cy, iconS);
+      addComponent("SCADA Server", cx - iconS * 0.3, cy - iconS * 0.25, iconS * 0.6, iconS * 0.5, i);
+      // modules
+      let modules = ["Data Processing", "Alarm Engine", "Control Logic"];
+      let mw = lw * 0.2;
+      for (let m = 0; m < 3; m++) {
+        let mx = r.x + lw * 0.15 + m * lw * 0.28;
+        let my = cy;
+        fill(230, 240, 230);
+        stroke(100, 140, 100);
+        strokeWeight(1);
+        rectMode(CENTER);
+        rect(mx, my, mw, layerH * 0.4, 5);
+        rectMode(CORNER);
+        fill(40, 60, 40);
+        noStroke();
+        textSize(constrain(layerH * 0.14, 7, 11));
+        textAlign(CENTER, CENTER);
+        text(modules[m], mx, my);
+        addComponent(modules[m], mx - mw / 2, my - layerH * 0.2, mw, layerH * 0.4, i);
+      }
+    }
+
+    // ----- Layer 3: Data Historian -----
+    if (i === 3) {
+      drawDatabaseIcon(cx, cy, iconS);
+      addComponent("Time-Series Database", cx - iconS * 0.35, cy - iconS * 0.25, iconS * 0.7, iconS * 0.5, i);
+      fill(90, 80, 40);
+      noStroke();
+      textSize(constrain(layerH * 0.15, 8, 12));
+      textAlign(CENTER, TOP);
+      text("Time-Series Database", cx, cy + iconS * 0.25);
+      textSize(constrain(layerH * 0.12, 7, 10));
+      fill(120, 110, 60);
+      text("Years of Trend Data", cx, cy + iconS * 0.25 + constrain(layerH * 0.17, 10, 14));
+    }
+
+    // ----- Layer 4: HMI / Web Clients -----
+    if (i === 4) {
+      let devices = [
+        { fn: drawDesktopMonitor, label: "Operator Workstation", name: "Operator Workstation" },
+        { fn: drawTablet, label: "Tablet", name: "Tablet Client" },
+        { fn: drawMobilePhone, label: "Mobile", name: "Mobile Phone" }
+      ];
+      for (let d = 0; d < 3; d++) {
+        let dx = r.x + lw * 0.2 + d * lw * 0.3;
+        devices[d].fn(dx, cy, iconS);
+        fill(60, 50, 90);
+        noStroke();
+        textSize(constrain(layerH * 0.13, 7, 10));
+        textAlign(CENTER, TOP);
+        text(devices[d].label, dx, cy + iconS * 0.3);
+        addComponent(devices[d].name, dx - iconS * 0.3, cy - iconS * 0.25, iconS * 0.6, iconS * 0.6, i);
+      }
+    }
+
+    // ----- Layer 5: AI Analytics -----
+    if (i === 5) {
+      drawCloudIcon(cx, cy - 4, iconS * 1.1);
+      let aiLabels = ["Predictive Analytics", "Optimization", "Anomaly Detection"];
+      for (let a = 0; a < 3; a++) {
+        let ax = r.x + lw * 0.2 + a * lw * 0.3;
+        fill(130, 70, 10);
+        noStroke();
+        textSize(constrain(layerH * 0.13, 7, 10));
+        textAlign(CENTER, CENTER);
+        text(aiLabels[a], ax, cy + 2);
+        addComponent(aiLabels[a], ax - lw * 0.12, cy - layerH * 0.15, lw * 0.24, layerH * 0.3, i);
+      }
+      addComponent("AI Cloud", cx - iconS * 0.4, cy - iconS * 0.3, iconS * 0.8, iconS * 0.6, i);
+    }
+
+    pop();
+  }
+
+  // draw connection lines between highlighted layer and adjacent layers
+  if (highlightedLayer >= 0) {
+    stroke(60, 120, 220, 160);
+    strokeWeight(1.5);
+    let hr = layerRect(highlightedLayer);
+    // connect to layer above
+    if (highlightedLayer < LAYER_COUNT - 1) {
+      let ar = layerRect(highlightedLayer + 1);
+      let step = lw / 6;
+      for (let s = 1; s <= 5; s++) {
+        let sx = MARGIN_X + s * step;
+        line(sx, hr.y, sx, ar.y + ar.h);
+      }
+    }
+    // connect to layer below
+    if (highlightedLayer > 0) {
+      let br = layerRect(highlightedLayer - 1);
+      let step = lw / 6;
+      for (let s = 1; s <= 5; s++) {
+        let sx = MARGIN_X + s * step;
+        line(sx, hr.y + hr.h, sx, br.y);
+      }
+    }
+  }
+
+  // draw particles on top
+  drawParticles();
+
+  // draw legend
+  drawLegend();
+
+  // handle tooltip
+  handleTooltip();
+}
+
+function drawLegend() {
+  let lx = MARGIN_X + 4;
+  let ly = cH - 8;
+  textSize(9);
+  textAlign(LEFT, BOTTOM);
+  noStroke();
+
+  fill(70, 140, 255); ellipse(lx + 4, ly - 3, 6); fill(60); text("Sensor Data (up)", lx + 12, ly);
+  lx += 100;
+  fill(60, 200, 100); ellipse(lx + 4, ly - 3, 6); fill(60); text("Commands (down)", lx + 12, ly);
+  lx += 104;
+  fill(240, 150, 40); ellipse(lx + 4, ly - 3, 6); fill(60); text("AI Data", lx + 12, ly);
+  lx += 60;
+  fill(120); text("Click layer to highlight  |  Hover for details", lx + 10, ly);
+}
+
+function handleTooltip() {
+  let found = false;
+  for (let c of components) {
+    if (mouseX >= c.x && mouseX <= c.x + c.w && mouseY >= c.y && mouseY <= c.y + c.h) {
+      if (tooltips[c.name]) {
+        tooltip.html("<strong>" + c.name + "</strong><br>" + tooltips[c.name]);
+        // position tooltip
+        let tx = mouseX + 14;
+        let ty = mouseY - 30;
+        // keep within canvas bounds
+        let canvasPos = select('canvas').elt.getBoundingClientRect();
+        if (tx + 260 > cW) tx = mouseX - 270;
+        if (ty < 0) ty = mouseY + 14;
+        tooltip.style('left', (canvasPos.left + tx) + 'px');
+        tooltip.style('top', (canvasPos.top + ty + window.scrollY) + 'px');
+        tooltip.style('display', 'block');
+        found = true;
+        cursor(HAND);
+        break;
+      }
+    }
+  }
+  if (!found) {
+    tooltip.style('display', 'none');
+    cursor(ARROW);
+  }
+}
+
+function mousePressed() {
+  // check if clicked on a layer
+  let clickedLayer = -1;
+  for (let i = 0; i < LAYER_COUNT; i++) {
+    let r = layerRect(i);
+    if (mouseX >= r.x && mouseX <= r.x + r.w && mouseY >= r.y && mouseY <= r.y + r.h) {
+      clickedLayer = i;
+      break;
+    }
+  }
+  if (clickedLayer >= 0) {
+    highlightedLayer = (highlightedLayer === clickedLayer) ? -1 : clickedLayer;
+  } else {
+    highlightedLayer = -1;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pump Types Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ── Global layout variables ──────────────────────────────────────
+    let drawHeight = 400;
+    let controlHeight = 50;
+    let canvasHeight = drawHeight + controlHeight;
+    let aspectRatio = 1.91;
+    let canvasWidth = canvasHeight * aspectRatio;
+
+    // ── Animation state ──────────────────────────────────────────────
+    let gearAngle = 0;
+    let impellerAngle = 0;
+    let gearSpeed = 0.01;
+    let impellerSpeed = 0.02;
+    let slowMotionGear = false;
+    let slowMotionCentrifugal = false;
+
+    // ── Fluid particle systems ───────────────────────────────────────
+    let gearParticles = [];
+    let centrifugalParticles = [];
+
+    // ── Hover tooltip ────────────────────────────────────────────────
+    let tooltipText = '';
+    let tooltipX = 0;
+    let tooltipY = 0;
+    let showTooltip = false;
+
+    // ── Classification tree data ─────────────────────────────────────
+    let pdTypes = [
+        { name: 'Gear', desc: 'Uses meshing gears to pump fluid. Common in hydraulic systems and oil transfer.' },
+        { name: 'Piston', desc: 'Uses reciprocating pistons. Used in high-pressure hydraulic and water jetting applications.' },
+        { name: 'Diaphragm', desc: 'Flexible diaphragm creates suction. Ideal for chemical dosing and slurry pumping.' },
+        { name: 'Vane', desc: 'Sliding vanes in a rotor trap fluid. Used in fuel transfer and refrigeration.' }
+    ];
+
+    let centTypes = [
+        { name: 'End-suction', desc: 'Single inlet, compact design. Most common type for HVAC and general water service.' },
+        { name: 'Split-case', desc: 'Horizontally split casing for easy maintenance. Used in large water supply and fire protection.' },
+        { name: 'Vertical Turbine', desc: 'Multistage vertical design for deep wells and high-lift applications.' },
+        { name: 'Submersible', desc: 'Motor and pump submerged in fluid. Used for well water, sewage, and drainage.' }
+    ];
+
+    // ── Bounding boxes for click detection ───────────────────────────
+    let gearPumpBox = {};
+    let centPumpBox = {};
+    let treeBoxesPD = [];
+    let treeBoxesCent = [];
+
+    function setup() {
+        const canvas = createCanvas(canvasWidth, canvasHeight);
+        var mainElement = document.querySelector('main');
+        canvas.parent(mainElement);
+        textFont('Arial');
+        initGearParticles();
+        initCentrifugalParticles();
+    }
+
+    function windowResized() {
+        canvasWidth = min(windowWidth, canvasHeight * aspectRatio);
+        canvasHeight = canvasWidth / aspectRatio;
+        drawHeight = canvasHeight - controlHeight;
+        resizeCanvas(canvasWidth, canvasHeight);
+        initGearParticles();
+        initCentrifugalParticles();
+    }
+
+    // ── Particle initializers ────────────────────────────────────────
+
+    function initGearParticles() {
+        gearParticles = [];
+        let halfW = canvasWidth / 2;
+        let cx = halfW / 2;
+        let cy = drawHeight * 0.28;
+        for (let i = 0; i < 18; i++) {
+            gearParticles.push({
+                t: random(TWO_PI),
+                phase: random(1),
+                cx: cx,
+                cy: cy
+            });
+        }
+    }
+
+    function initCentrifugalParticles() {
+        centrifugalParticles = [];
+        let halfW = canvasWidth / 2;
+        let cx = halfW + halfW / 2;
+        let cy = drawHeight * 0.28;
+        for (let i = 0; i < 20; i++) {
+            centrifugalParticles.push({
+                angle: random(TWO_PI),
+                r: random(0.1, 1.0),
+                speed: random(0.005, 0.015),
+                cx: cx,
+                cy: cy
+            });
+        }
+    }
+
+    // ── Main draw loop ───────────────────────────────────────────────
+
+    function draw() {
+        background(245);
+        showTooltip = false;
+
+        let halfW = canvasWidth / 2;
+        let sf = canvasWidth / 860;  // scale factor based on reference width
+
+        // Divider line
+        stroke(180);
+        strokeWeight(1);
+        line(halfW, 0, halfW, drawHeight);
+
+        // ── Section titles ───────────────────────────────────────────
+        noStroke();
+        fill(50);
+        textAlign(CENTER, TOP);
+        textSize(max(13, 15 * sf));
+        textStyle(BOLD);
+        text('Positive Displacement (Gear Pump)', halfW / 2, 8 * sf);
+        text('Centrifugal Pump', halfW + halfW / 2, 8 * sf);
+        textStyle(NORMAL);
+
+        // ── Draw pump diagrams ───────────────────────────────────────
+        let pumpDiagramTop = 30 * sf;
+        let pumpDiagramH = drawHeight * 0.45;
+
+        drawGearPump(halfW / 2, pumpDiagramTop + pumpDiagramH / 2, halfW * 0.8, pumpDiagramH, sf);
+        drawCentrifugalPump(halfW + halfW / 2, pumpDiagramTop + pumpDiagramH / 2, halfW * 0.8, pumpDiagramH, sf);
+
+        // Store bounding boxes for click detection
+        gearPumpBox = {
+            x: halfW / 2 - halfW * 0.4,
+            y: pumpDiagramTop,
+            w: halfW * 0.8,
+            h: pumpDiagramH
+        };
+        centPumpBox = {
+            x: halfW + halfW / 2 - halfW * 0.4,
+            y: pumpDiagramTop,
+            w: halfW * 0.8,
+            h: pumpDiagramH
+        };
+
+        // ── Update animation ─────────────────────────────────────────
+        let gearMult = slowMotionGear ? 0.2 : 1.0;
+        let centMult = slowMotionCentrifugal ? 0.2 : 1.0;
+        gearAngle += gearSpeed * gearMult;
+        impellerAngle += impellerSpeed * centMult;
+
+        // ── Classification trees ─────────────────────────────────────
+        let treeTop = pumpDiagramTop + pumpDiagramH + 18 * sf;
+        drawClassificationTree(halfW / 2, treeTop, halfW * 0.9, 'Positive Displacement', pdTypes, sf, true);
+        drawClassificationTree(halfW + halfW / 2, treeTop, halfW * 0.9, 'Centrifugal', centTypes, sf, false);
+
+        // ── Control bar ──────────────────────────────────────────────
+        fill(230);
+        noStroke();
+        rect(0, drawHeight, canvasWidth, controlHeight);
+        fill(80);
+        textSize(max(10, 12 * sf));
+        textAlign(CENTER, CENTER);
+        text('Click on a pump diagram for slow-motion view  |  Hover over pump type names for details', canvasWidth / 2, drawHeight + controlHeight / 2);
+
+        // ── Tooltip rendering ────────────────────────────────────────
+        if (showTooltip && tooltipText.length > 0) {
+            drawTooltip(tooltipX, tooltipY, tooltipText, sf);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  GEAR PUMP DRAWING
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawGearPump(cx, cy, w, h, sf) {
+        push();
+        translate(cx, cy);
+
+        let housingW = w * 0.7;
+        let housingH = h * 0.65;
+
+        // ── Housing (gray metal) ─────────────────────────────────────
+        fill(170);
+        stroke(100);
+        strokeWeight(2 * sf);
+        rectMode(CENTER);
+        rect(0, 0, housingW, housingH, 8 * sf);
+
+        // ── Suction and discharge ports ──────────────────────────────
+        fill(140);
+        stroke(100);
+        strokeWeight(1.5 * sf);
+        // Suction port (left)
+        rect(-housingW / 2 - 15 * sf, 0, 30 * sf, 24 * sf, 4 * sf);
+        // Discharge port (right)
+        rect(housingW / 2 + 15 * sf, 0, 30 * sf, 24 * sf, 4 * sf);
+
+        // ── Port labels ──────────────────────────────────────────────
+        noStroke();
+        fill(0, 120, 200);
+        textSize(max(8, 9 * sf));
+        textAlign(CENTER, CENTER);
+        text('Suction\nPort', -housingW / 2 - 15 * sf, 28 * sf);
+        text('Discharge\nPort', housingW / 2 + 15 * sf, 28 * sf);
+
+        // ── Blue fluid background inside housing ─────────────────────
+        noStroke();
+        fill(100, 160, 230, 80);
+        rect(0, 0, housingW - 6 * sf, housingH - 6 * sf, 6 * sf);
+
+        // ── Draw two interlocking gears ──────────────────────────────
+        let gearR = housingH * 0.22;
+        let gearGap = gearR * 1.15;
+        let numTeeth = 8;
+
+        drawGear(-gearGap / 2, 0, gearR, numTeeth, gearAngle, sf);
+        drawGear(gearGap / 2, 0, gearR, numTeeth, -gearAngle + PI / numTeeth, sf);
+
+        // ── Label: Gears ─────────────────────────────────────────────
+        noStroke();
+        fill(60);
+        textSize(max(8, 9 * sf));
+        text('Gears', 0, -gearR - 10 * sf);
+
+        // ── Label: Housing ───────────────────────────────────────────
+        text('Housing', 0, housingH / 2 + 14 * sf);
+
+        // ── Fluid particles ──────────────────────────────────────────
+        let gearMult = slowMotionGear ? 0.2 : 1.0;
+        for (let p of gearParticles) {
+            p.phase += 0.004 * gearMult;
+            if (p.phase > 1) p.phase = 0;
+
+            let px, py;
+            let t = p.phase;
+            if (t < 0.3) {
+                // Enter from left
+                let frac = t / 0.3;
+                px = lerp(-housingW / 2 - 20 * sf, -gearGap / 2 - gearR, frac);
+                py = lerp(0, sin(frac * PI) * gearR * 0.4, frac < 0.5 ? frac * 2 : (1 - frac) * 2);
+                py += (random() - 0.5) * 2;
+            } else if (t < 0.5) {
+                // Around the top or bottom gear
+                let frac = (t - 0.3) / 0.2;
+                let topBottom = (p.t > PI) ? -1 : 1;
+                let a = PI + frac * PI;
+                px = -gearGap / 2 + cos(a) * (gearR + 4 * sf);
+                py = topBottom * sin(a) * (gearR + 4 * sf);
+            } else if (t < 0.7) {
+                // Through mesh region
+                let frac = (t - 0.5) / 0.2;
+                px = lerp(-gearGap / 2, gearGap / 2, frac);
+                let topBottom = (p.t > PI) ? -1 : 1;
+                py = topBottom * (gearR + 4 * sf) * sin(frac * PI * 0.5 + PI * 0.5);
+            } else {
+                // Exit to right
+                let frac = (t - 0.7) / 0.3;
+                px = lerp(gearGap / 2 + gearR, housingW / 2 + 20 * sf, frac);
+                py = lerp(sin(frac * PI) * gearR * 0.3, 0, frac);
+                py += (random() - 0.5) * 2;
+            }
+
+            noStroke();
+            fill(30, 120, 220, 180);
+            circle(px, py, max(4, 5 * sf));
+        }
+
+        // ── Flow arrows (green) ──────────────────────────────────────
+        stroke(0, 160, 60);
+        strokeWeight(2 * sf);
+        fill(0, 160, 60);
+        // Left arrow (suction)
+        drawArrowLine(-housingW / 2 - 30 * sf, 0, -housingW / 2 + 5 * sf, 0, 7 * sf);
+        // Right arrow (discharge)
+        drawArrowLine(housingW / 2 - 5 * sf, 0, housingW / 2 + 30 * sf, 0, 7 * sf);
+        // Top path arrows
+        drawArrowLine(-gearGap * 0.6, -gearR - 6 * sf, gearGap * 0.6, -gearR - 6 * sf, 5 * sf);
+        // Bottom path arrows
+        drawArrowLine(-gearGap * 0.6, gearR + 6 * sf, gearGap * 0.6, gearR + 6 * sf, 5 * sf);
+
+        pop();
+    }
+
+    function drawGear(x, y, r, teeth, angle, sf) {
+        push();
+        translate(x, y);
+        rotate(angle);
+
+        let toothDepth = r * 0.25;
+        let innerR = r - toothDepth;
+
+        // Gear body
+        fill(190, 195, 200);
+        stroke(120);
+        strokeWeight(1.5 * sf);
+        beginShape();
+        for (let i = 0; i < teeth; i++) {
+            let a1 = (TWO_PI / teeth) * i;
+            let a2 = a1 + (TWO_PI / teeth) * 0.25;
+            let a3 = a1 + (TWO_PI / teeth) * 0.5;
+            let a4 = a1 + (TWO_PI / teeth) * 0.75;
+            vertex(cos(a1) * innerR, sin(a1) * innerR);
+            vertex(cos(a2) * r, sin(a2) * r);
+            vertex(cos(a3) * r, sin(a3) * r);
+            vertex(cos(a4) * innerR, sin(a4) * innerR);
+        }
+        endShape(CLOSE);
+
+        // Center hub
+        fill(160);
+        stroke(100);
+        circle(0, 0, r * 0.4);
+
+        // Center dot (shaft)
+        fill(120);
+        noStroke();
+        circle(0, 0, r * 0.15);
+
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  CENTRIFUGAL PUMP DRAWING
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawCentrifugalPump(cx, cy, w, h, sf) {
+        push();
+        translate(cx, cy);
+
+        let voluteR = min(w, h) * 0.32;
+
+        // ── Volute casing (spiral shape) ─────────────────────────────
+        fill(170);
+        stroke(100);
+        strokeWeight(2 * sf);
+
+        // Draw volute as a slightly off-center circle with expanding scroll
+        beginShape();
+        for (let a = 0; a <= TWO_PI; a += 0.05) {
+            let rr = voluteR + (a / TWO_PI) * voluteR * 0.2;
+            let ox = cos(a - PI / 4) * voluteR * 0.05;
+            let oy = sin(a - PI / 4) * voluteR * 0.05;
+            vertex(cos(a) * rr + ox, sin(a) * rr + oy);
+        }
+        endShape(CLOSE);
+
+        // ── Fluid background ─────────────────────────────────────────
+        noStroke();
+        fill(100, 160, 230, 80);
+        circle(0, 0, voluteR * 1.8);
+
+        // ── Discharge pipe (right, tangential at top-right) ──────────
+        fill(140);
+        stroke(100);
+        strokeWeight(1.5 * sf);
+        let dischargeX = voluteR * 0.9;
+        let dischargeY = -voluteR * 0.4;
+        rectMode(CORNER);
+        rect(dischargeX, dischargeY - 12 * sf, 40 * sf, 24 * sf, 0, 4 * sf, 4 * sf, 0);
+
+        // ── Suction eye (center pipe from left) ──────────────────────
+        fill(140);
+        rect(-voluteR - 40 * sf, -12 * sf, 40 * sf, 24 * sf, 4 * sf, 0, 0, 4 * sf);
+
+        // ── Suction eye circle (center of impeller) ──────────────────
+        fill(100, 160, 230, 120);
+        stroke(100);
+        strokeWeight(1 * sf);
+        circle(0, 0, voluteR * 0.5);
+
+        // ── Spinning impeller ────────────────────────────────────────
+        let impR = voluteR * 0.8;
+        let numBlades = 6;
+        stroke(160, 165, 170);
+        strokeWeight(3 * sf);
+        for (let i = 0; i < numBlades; i++) {
+            let a = impellerAngle + (TWO_PI / numBlades) * i;
+            let x1 = cos(a) * voluteR * 0.15;
+            let y1 = sin(a) * voluteR * 0.15;
+            // Curved blade: draw as a slight arc
+            let x2 = cos(a + 0.2) * impR;
+            let y2 = sin(a + 0.2) * impR;
+            let xm = cos(a + 0.1) * impR * 0.55;
+            let ym = sin(a + 0.1) * impR * 0.55;
+            noFill();
+            stroke(180, 185, 195);
+            strokeWeight(max(2, 3.5 * sf));
+            beginShape();
+            vertex(x1, y1);
+            quadraticVertex(xm + cos(a + PI / 2) * 4, ym + sin(a + PI / 2) * 4, x2, y2);
+            endShape();
+        }
+
+        // Center hub
+        fill(160);
+        stroke(100);
+        strokeWeight(1.5 * sf);
+        circle(0, 0, voluteR * 0.2);
+        fill(120);
+        noStroke();
+        circle(0, 0, voluteR * 0.08);
+
+        // ── Centrifugal fluid particles ──────────────────────────────
+        let centMult = slowMotionCentrifugal ? 0.2 : 1.0;
+        noStroke();
+        for (let p of centrifugalParticles) {
+            p.angle += p.speed * centMult * (1.5 - p.r);
+            p.r += 0.003 * centMult;
+            if (p.r > 1.0) {
+                p.r = 0.1;
+                p.angle = random(TWO_PI);
+            }
+
+            let pr = p.r * voluteR * 0.85;
+            let px = cos(p.angle) * pr;
+            let py = sin(p.angle) * pr;
+
+            fill(30, 120, 220, 200 - p.r * 100);
+            circle(px, py, max(3, 5 * sf));
+        }
+
+        // ── Flow arrows (green) ──────────────────────────────────────
+        stroke(0, 160, 60);
+        strokeWeight(2 * sf);
+        fill(0, 160, 60);
+        // Suction arrow (into eye from left)
+        drawArrowLine(-voluteR - 35 * sf, 0, -voluteR * 0.35, 0, 7 * sf);
+        // Discharge arrow (out to right)
+        drawArrowLine(dischargeX + 5 * sf, dischargeY, dischargeX + 35 * sf, dischargeY, 7 * sf);
+        // Radial arrows (inside the pump)
+        for (let i = 0; i < 4; i++) {
+            let a = (PI / 2) * i + PI / 4;
+            let x1 = cos(a) * voluteR * 0.3;
+            let y1 = sin(a) * voluteR * 0.3;
+            let x2 = cos(a) * voluteR * 0.65;
+            let y2 = sin(a) * voluteR * 0.65;
+            drawArrowLine(x1, y1, x2, y2, 5 * sf);
+        }
+
+        // ── Labels ───────────────────────────────────────────────────
+        noStroke();
+        fill(0, 120, 200);
+        textSize(max(8, 9 * sf));
+        textAlign(CENTER, CENTER);
+        text('Suction\nEye', -voluteR - 20 * sf, 28 * sf);
+        text('Discharge', dischargeX + 20 * sf, dischargeY + 24 * sf);
+
+        fill(60);
+        text('Impeller', 0, -voluteR - 14 * sf);
+        text('Volute Casing', 0, voluteR + 16 * sf);
+
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  CLASSIFICATION TREES
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawClassificationTree(cx, treeTop, treeW, title, types, sf, isPD) {
+        let boxH = max(18, 22 * sf);
+        let gap = max(6, 8 * sf);
+        let titleBoxW = treeW * 0.45;
+        let typeBoxW = treeW * 0.22;
+
+        // Title box
+        fill(80, 130, 190);
+        stroke(60, 100, 160);
+        strokeWeight(1.5 * sf);
+        rectMode(CENTER);
+        let titleY = treeTop;
+        rect(cx, titleY, titleBoxW, boxH, 5 * sf);
+        noStroke();
+        fill(255);
+        textSize(max(9, 11 * sf));
+        textAlign(CENTER, CENTER);
+        text(title, cx, titleY);
+
+        // Connector line down from title
+        stroke(120);
+        strokeWeight(1 * sf);
+        line(cx, titleY + boxH / 2, cx, titleY + boxH / 2 + gap);
+
+        // Horizontal connector
+        let childY = titleY + boxH + gap * 2;
+        let totalW = types.length * typeBoxW + (types.length - 1) * gap * 0.5;
+        let startX = cx - totalW / 2 + typeBoxW / 2;
+
+        line(startX, titleY + boxH / 2 + gap, startX + totalW - typeBoxW, titleY + boxH / 2 + gap);
+
+        // Store tree boxes for this frame
+        let boxes = [];
+
+        for (let i = 0; i < types.length; i++) {
+            let bx = startX + i * (typeBoxW + gap * 0.5);
+            let by = childY;
+
+            // Vertical connector from horizontal line
+            stroke(120);
+            strokeWeight(1 * sf);
+            line(bx, titleY + boxH / 2 + gap, bx, by - boxH / 2);
+
+            // Type box
+            let isHovered = mouseX > bx - typeBoxW / 2 && mouseX < bx + typeBoxW / 2 &&
+                            mouseY > by - boxH / 2 && mouseY < by + boxH / 2;
+
+            if (isHovered) {
+                fill(255, 220, 100);
+                stroke(200, 160, 0);
+                showTooltip = true;
+                tooltipText = types[i].name + ': ' + types[i].desc;
+                tooltipX = mouseX;
+                tooltipY = mouseY;
+            } else {
+                fill(220, 235, 250);
+                stroke(150, 180, 210);
+            }
+            strokeWeight(1.5 * sf);
+            rect(bx, by, typeBoxW, boxH, 4 * sf);
+
+            noStroke();
+            fill(40);
+            textSize(max(8, 10 * sf));
+            text(types[i].name, bx, by);
+
+            boxes.push({ x: bx - typeBoxW / 2, y: by - boxH / 2, w: typeBoxW, h: boxH, idx: i });
+        }
+
+        if (isPD) {
+            treeBoxesPD = boxes;
+        } else {
+            treeBoxesCent = boxes;
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  TOOLTIP
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawTooltip(tx, ty, msg, sf) {
+        textSize(max(10, 11 * sf));
+        let tw = textWidth(msg);
+        // Wrap long text
+        let maxTipW = canvasWidth * 0.4;
+        let lines = [];
+        if (tw > maxTipW) {
+            let words = msg.split(' ');
+            let currentLine = '';
+            for (let w of words) {
+                let test = currentLine + (currentLine.length > 0 ? ' ' : '') + w;
+                if (textWidth(test) > maxTipW && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = w;
+                } else {
+                    currentLine = test;
+                }
+            }
+            if (currentLine.length > 0) lines.push(currentLine);
+        } else {
+            lines = [msg];
+        }
+
+        let lineH = max(14, 16 * sf);
+        let tipH = lines.length * lineH + 10 * sf;
+        let tipW = maxTipW + 16 * sf;
+
+        // Position tooltip so it stays on canvas
+        let tipX = tx + 12 * sf;
+        let tipY = ty - tipH - 8 * sf;
+        if (tipX + tipW > canvasWidth) tipX = canvasWidth - tipW - 4;
+        if (tipY < 0) tipY = ty + 20 * sf;
+
+        // Background
+        fill(40, 40, 50, 230);
+        noStroke();
+        rect(tipX, tipY, tipW, tipH, 6 * sf);
+
+        // Text
+        fill(255);
+        textAlign(LEFT, TOP);
+        for (let i = 0; i < lines.length; i++) {
+            text(lines[i], tipX + 8 * sf, tipY + 5 * sf + i * lineH);
+        }
+        textAlign(CENTER, CENTER);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  UTILITY: ARROW LINE
+    // ══════════════════════════════════════════════════════════════════
+
+    function drawArrowLine(x1, y1, x2, y2, headSize) {
+        line(x1, y1, x2, y2);
+        let angle = atan2(y2 - y1, x2 - x1);
+        push();
+        translate(x2, y2);
+        rotate(angle);
+        noStroke();
+        triangle(0, 0, -headSize, -headSize * 0.4, -headSize, headSize * 0.4);
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  MOUSE INTERACTION
+    // ══════════════════════════════════════════════════════════════════
+
+    function mousePressed() {
+        // Check if clicked on gear pump diagram
+        if (mouseX > gearPumpBox.x && mouseX < gearPumpBox.x + gearPumpBox.w &&
+            mouseY > gearPumpBox.y && mouseY < gearPumpBox.y + gearPumpBox.h) {
+            slowMotionGear = !slowMotionGear;
+        }
+
+        // Check if clicked on centrifugal pump diagram
+        if (mouseX > centPumpBox.x && mouseX < centPumpBox.x + centPumpBox.w &&
+            mouseY > centPumpBox.y && mouseY < centPumpBox.y + centPumpBox.h) {
+            slowMotionCentrifugal = !slowMotionCentrifugal;
+        }
+    }
+    </script>
+</body>
+</html>

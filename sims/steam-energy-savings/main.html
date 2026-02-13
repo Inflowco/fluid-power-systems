@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Energy Savings Comparison</title>
+    <style>
+        body { margin: 0; padding: 16px; font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; }
+        .container { max-width: 920px; margin: 0 auto; }
+        h1 { color: #1565c0; font-size: 1.3em; text-align: center; margin-bottom: 6px; }
+        .subtitle { text-align: center; color: #666; font-size: 0.85em; margin-bottom: 16px; }
+        .controls { display: flex; gap: 16px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+        .control { display: flex; flex-direction: column; align-items: center; font-size: 0.8em; }
+        .control label { color: #555; margin-bottom: 4px; }
+        .control input { width: 100px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); font-size: 0.85em; }
+        th { background: #1565c0; color: white; padding: 10px 8px; text-align: left; cursor: pointer; user-select: none; }
+        th:hover { background: #0d47a1; }
+        td { padding: 10px 8px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #e3f2fd; }
+        .payback-bar { height: 16px; border-radius: 3px; background: #4caf50; transition: width 0.3s; }
+        .difficulty { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; color: white; }
+        .easy { background: #4caf50; }
+        .medium { background: #ff9800; }
+        .hard { background: #f44336; }
+        .total-row { background: #e3f2fd; font-weight: bold; }
+        .total-row td { border-top: 2px solid #1565c0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Steam Energy Savings Comparison</h1>
+        <p class="subtitle">Compare energy conservation measures by cost, savings, and payback</p>
+
+        <div class="controls">
+            <div class="control">
+                <label>Steam Rate (lb/hr)</label>
+                <input type="number" id="steamRate" value="20000" onchange="recalculate()">
+            </div>
+            <div class="control">
+                <label>Gas Cost ($/MMBtu)</label>
+                <input type="number" id="gasCost" value="8" step="0.5" onchange="recalculate()">
+            </div>
+            <div class="control">
+                <label>Operating Hours/yr</label>
+                <input type="number" id="opHours" value="8000" onchange="recalculate()">
+            </div>
+        </div>
+
+        <table id="savingsTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Measure</th>
+                    <th onclick="sortTable(1)">Cost ($)</th>
+                    <th onclick="sortTable(2)">Savings ($/yr)</th>
+                    <th onclick="sortTable(3)">Payback</th>
+                    <th onclick="sortTable(4)">CO₂ (tons/yr)</th>
+                    <th>Difficulty</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Repair failed steam traps (15)</td>
+                    <td>$7,500</td>
+                    <td>$54,000</td>
+                    <td>1.7 mo</td>
+                    <td>357</td>
+                    <td><span class="difficulty easy">Easy</span></td>
+                </tr>
+                <tr>
+                    <td>Insulate bare pipes (300 ft)</td>
+                    <td>$8,000</td>
+                    <td>$15,200</td>
+                    <td>6.3 mo</td>
+                    <td>101</td>
+                    <td><span class="difficulty easy">Easy</span></td>
+                </tr>
+                <tr>
+                    <td>Increase condensate return to 85%</td>
+                    <td>$25,000</td>
+                    <td>$60,500</td>
+                    <td>5.0 mo</td>
+                    <td>400</td>
+                    <td><span class="difficulty medium">Medium</span></td>
+                </tr>
+                <tr>
+                    <td>Recover flash steam</td>
+                    <td>$18,000</td>
+                    <td>$31,500</td>
+                    <td>6.9 mo</td>
+                    <td>208</td>
+                    <td><span class="difficulty medium">Medium</span></td>
+                </tr>
+                <tr>
+                    <td>Blowdown heat recovery</td>
+                    <td>$20,000</td>
+                    <td>$18,000</td>
+                    <td>13.3 mo</td>
+                    <td>119</td>
+                    <td><span class="difficulty medium">Medium</span></td>
+                </tr>
+                <tr>
+                    <td>Combustion optimization (O₂ trim)</td>
+                    <td>$15,000</td>
+                    <td>$32,000</td>
+                    <td>5.6 mo</td>
+                    <td>212</td>
+                    <td><span class="difficulty medium">Medium</span></td>
+                </tr>
+                <tr>
+                    <td>Install economizer</td>
+                    <td>$45,000</td>
+                    <td>$48,000</td>
+                    <td>11.3 mo</td>
+                    <td>317</td>
+                    <td><span class="difficulty hard">Hard</span></td>
+                </tr>
+                <tr>
+                    <td>Reduce system pressure</td>
+                    <td>$500</td>
+                    <td>$4,200</td>
+                    <td>1.4 mo</td>
+                    <td>28</td>
+                    <td><span class="difficulty easy">Easy</span></td>
+                </tr>
+                <tr>
+                    <td>Fix steam leaks (8 leaks)</td>
+                    <td>$2,000</td>
+                    <td>$12,000</td>
+                    <td>2.0 mo</td>
+                    <td>79</td>
+                    <td><span class="difficulty easy">Easy</span></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td>TOTAL</td>
+                    <td>$141,000</td>
+                    <td>$275,400/yr</td>
+                    <td>6.1 mo avg</td>
+                    <td>1,821</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <script>
+        function sortTable(col) {
+            const table = document.getElementById('savingsTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const getText = (row, c) => row.cells[c].textContent.replace(/[$,]/g, '');
+            const isNum = col > 0 && col < 5;
+            rows.sort((a, b) => {
+                let va = getText(a, col), vb = getText(b, col);
+                if (isNum) { va = parseFloat(va) || 0; vb = parseFloat(vb) || 0; return va - vb; }
+                return va.localeCompare(vb);
+            });
+            rows.forEach(r => tbody.appendChild(r));
+        }
+        function recalculate() {
+            // Placeholder for dynamic recalculation based on inputs
+        }
+    </script>
+</body>
+</html>

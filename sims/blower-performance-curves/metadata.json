@@ -1,0 +1,13 @@
+{
+    "name": "Blower Performance Curve Explorer",
+    "chapter": 5,
+    "section": "5.3",
+    "type": "microsim",
+    "bloom_level": "Apply",
+    "bloom_number": 3,
+    "description": "Interactive blower performance curve viewer showing pressure, efficiency, and power curves for PD (Roots), centrifugal, and high-speed turbo blowers. Demonstrates constant-volume vs. variable-flow behavior, affinity law speed changes, system curve intersection, surge zone, and BEP.",
+    "library": "p5.js",
+    "difficulty": "intermediate",
+    "ui_complexity": "high",
+    "concepts": ["blower performance curves", "affinity laws", "system curve", "operating point", "surge", "BEP", "VFD control"]
+}

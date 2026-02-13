@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooling Water Quality Monitor</title>
+<style>
+  body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+  main { display: flex; justify-content: center; }
+  * { box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0d1117; color: #e0e0e0; }
+
+  #app {
+    width: 100%; max-width: 1400px; height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  /* Title Bar */
+  #title-bar {
+    text-align: center; padding: 4px 0 2px 0;
+    background: #0d1117; flex-shrink: 0;
+  }
+  #title-bar h1 {
+    font-size: 15px; font-weight: 700; color: #8ab4f8;
+    letter-spacing: 1.5px; text-transform: uppercase; margin: 0;
+  }
+
+  /* Top Bar */
+  #top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, #0f2744, #1a3a6a);
+    padding: 5px 14px; min-height: 38px; flex-shrink: 0;
+    border-bottom: 2px solid #2a5298;
+  }
+  #top-bar .system-name {
+    font-size: 14px; font-weight: 700; color: #fff;
+    letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;
+  }
+  #top-bar .top-info {
+    display: flex; gap: 10px; align-items: center; font-size: 11px; color: #a0b8d0;
+  }
+  .status-dot {
+    width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+  }
+  .status-dot.green { background: #4caf50; box-shadow: 0 0 8px #4caf50; }
+  .status-dot.yellow { background: #ffc107; box-shadow: 0 0 8px #ffc107; }
+  .status-dot.red { background: #f44336; box-shadow: 0 0 8px #f44336; animation: blink-dot 1s infinite; }
+  @keyframes blink-dot { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* Controls Bar */
+  #controls-bar {
+    display: flex; align-items: center; gap: 6px; padding: 4px 14px;
+    background: #131920; border-bottom: 1px solid #1e2a38; flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  #controls-bar label { font-size: 10px; color: #6a7a8a; text-transform: uppercase; letter-spacing: 0.5px; }
+  .scenario-btn {
+    background: #1a2233; color: #8ab4f8; border: 1px solid #2a3a50; border-radius: 3px;
+    padding: 3px 10px; font-size: 10px; cursor: pointer; outline: none;
+    transition: all 0.2s; font-family: Arial, Helvetica, sans-serif;
+  }
+  .scenario-btn:hover { border-color: #4a8af5; color: #fff; }
+  .scenario-btn.active { background: #1a3a6a; border-color: #4a8af5; color: #fff; font-weight: 700; }
+  #ai-btn {
+    background: #0d3318; color: #66bb6a; border: 1px solid #2e7d32; border-radius: 3px;
+    padding: 3px 12px; font-size: 10px; cursor: pointer; outline: none; margin-left: auto;
+    font-family: Arial, Helvetica, sans-serif; font-weight: 600;
+  }
+  #ai-btn:hover { background: #1b5e20; color: #a5d6a7; }
+
+  /* Middle Row */
+  #middle { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+
+  /* Left Panel - Schematic */
+  #schematic-panel {
+    width: 310px; flex-shrink: 0; padding: 6px; display: flex; flex-direction: column;
+    border-right: 1px solid #1e2a38;
+  }
+  .panel-label {
+    font-size: 9px; font-weight: 600; color: #4a7ab5;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
+  }
+  #schematic-canvas-wrap { flex: 1; position: relative; min-height: 0; }
+
+  /* Right Panel - Parameter Cards */
+  #params-panel {
+    flex: 1; padding: 6px; display: flex; flex-direction: column; min-width: 0;
+  }
+  #param-cards {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 5px; overflow-y: auto; flex: 1;
+  }
+  .param-card {
+    background: #131920; border-radius: 5px; padding: 7px 9px;
+    border: 1px solid #1e2a38; cursor: pointer; transition: all 0.2s;
+    position: relative;
+  }
+  .param-card:hover { border-color: #4a8af5; background: #1a2233; }
+  .param-card.selected { border-color: #4a8af5; background: #1a2538; }
+  .param-card .pc-name {
+    font-size: 9px; color: #5a7a9a; text-transform: uppercase; letter-spacing: 0.4px;
+    font-weight: 600;
+  }
+  .param-card .pc-value {
+    font-size: 24px; font-weight: 700; margin: 1px 0; line-height: 1.1;
+  }
+  .param-card .pc-unit { font-size: 10px; color: #5a7a9a; font-weight: 400; }
+  .param-card .pc-range { font-size: 8px; color: #3a5a7a; margin-top: 2px; }
+  .param-card .pc-bar {
+    height: 3px; background: #1e2a38; border-radius: 2px; margin-top: 3px; overflow: hidden;
+  }
+  .param-card .pc-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .param-card .pc-status {
+    font-size: 8px; font-weight: 700; padding: 1px 5px; border-radius: 2px;
+    display: inline-block; margin-top: 2px; letter-spacing: 0.5px;
+  }
+  .pc-status-good { background: #0d3318; color: #4caf50; }
+  .pc-status-warn { background: #3d2e00; color: #ffc107; }
+  .pc-status-alarm { background: #3d0a0a; color: #f44336; animation: blink-dot 1.2s infinite; }
+
+  .value-good { color: #4caf50; }
+  .value-warn { color: #ffc107; }
+  .value-alarm { color: #f44336; }
+
+  /* Bottom Panel - Trend Chart */
+  #bottom-panel {
+    height: 165px; flex-shrink: 0; padding: 5px 12px 6px 12px;
+    border-top: 1px solid #1e2a38; display: flex; flex-direction: column;
+  }
+  #bottom-controls {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 3px;
+  }
+  #bottom-controls label { font-size: 10px; color: #5a7a9a; }
+  #trend-select {
+    background: #131920; color: #8ab4f8; border: 1px solid #2a3a50; border-radius: 3px;
+    padding: 2px 6px; font-size: 10px; cursor: pointer; outline: none;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  #trend-canvas-wrap { flex: 1; position: relative; min-height: 0; }
+  #trend-canvas { width: 100%; height: 100%; }
+
+  /* Parameter Detail Popup */
+  #param-popup {
+    display: none; position: fixed; z-index: 50;
+    background: #131920; border: 1px solid #2a5298; border-radius: 6px;
+    padding: 14px 18px; min-width: 280px; max-width: 360px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+  #param-popup.show { display: block; }
+  #param-popup h4 {
+    color: #8ab4f8; font-size: 13px; margin: 0 0 8px 0;
+    border-bottom: 1px solid #1e2a38; padding-bottom: 6px;
+  }
+  #param-popup .pp-row {
+    display: flex; justify-content: space-between; padding: 2px 0;
+    font-size: 11px;
+  }
+  #param-popup .pp-label { color: #5a7a9a; }
+  #param-popup .pp-val { color: #e0e0e0; font-weight: 600; }
+  #param-popup .pp-close {
+    background: #1a2233; color: #8ab4f8; border: 1px solid #2a3a50; border-radius: 3px;
+    padding: 3px 12px; font-size: 10px; cursor: pointer; margin-top: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  #param-popup .pp-close:hover { background: #2a3a50; color: #fff; }
+
+  /* AI Diagnosis Overlay */
+  #ai-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  #ai-overlay.show { display: flex; }
+  #ai-box {
+    background: #131920; border: 1px solid #2e7d32; border-radius: 8px;
+    padding: 18px 22px; max-width: 560px; width: 92%; max-height: 80vh;
+    overflow-y: auto; box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+  }
+  #ai-box h3 {
+    color: #66bb6a; font-size: 14px; margin: 0 0 10px 0;
+    display: flex; align-items: center; gap: 6px;
+  }
+  #ai-box h3::before { content: '\25C9'; color: #66bb6a; }
+  #ai-box p { font-size: 12px; line-height: 1.7; color: #b0c0d0; margin-bottom: 8px; }
+  #ai-box .ai-section {
+    font-size: 11px; font-weight: 700; color: #8ab4f8;
+    text-transform: uppercase; letter-spacing: 0.5px; margin: 12px 0 4px 0;
+  }
+  #ai-box .ai-close {
+    background: #1a2233; color: #8ab4f8; border: 1px solid #2a3a50; border-radius: 4px;
+    padding: 5px 16px; font-size: 11px; cursor: pointer; margin-top: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  #ai-box .ai-close:hover { background: #2a3a50; color: #fff; }
+
+  /* Responsive */
+  @media (max-width: 720px) {
+    #middle { flex-direction: column; }
+    #schematic-panel { width: 100%; height: 200px; border-right: none; border-bottom: 1px solid #1e2a38; }
+    #param-cards { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    #bottom-panel { height: 140px; }
+  }
+</style>
+</head>
+<body>
+<main>
+<div id="app">
+
+  <!-- Title -->
+  <div id="title-bar">
+    <h1>Cooling Water Quality Monitor</h1>
+  </div>
+
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <div class="system-name">
+      <span class="status-dot green" id="status-dot"></span>
+      Cooling Tower CT-200
+    </div>
+    <div class="top-info">
+      <span id="sim-datetime"></span>
+      <span style="color:#2a5298;">|</span>
+      <span>COC: <strong id="coc-display">3.2</strong></span>
+      <span style="color:#2a5298;">|</span>
+      <span>Makeup: <strong id="makeup-display">12</strong> GPM</span>
+      <span style="color:#2a5298;">|</span>
+      <span>Blowdown: <strong id="blowdown-display">4.0</strong> GPM</span>
+    </div>
+  </div>
+
+  <!-- Controls Bar -->
+  <div id="controls-bar">
+    <label>Scenario:</label>
+    <button class="scenario-btn active" data-scenario="normal">Normal Operation</button>
+    <button class="scenario-btn" data-scenario="rising-coc">Rising Conductivity (COC drift)</button>
+    <button class="scenario-btn" data-scenario="scale">Scale Forming (high LSI)</button>
+    <button class="scenario-btn" data-scenario="corrosion">Corrosion Event (low pH)</button>
+    <button class="scenario-btn" data-scenario="bio-upset">Biological Upset (low biocide)</button>
+    <button id="ai-btn">Show AI Diagnosis</button>
+  </div>
+
+  <!-- Middle: Schematic + Parameter Cards -->
+  <div id="middle">
+    <div id="schematic-panel">
+      <div class="panel-label">System Schematic</div>
+      <div id="schematic-canvas-wrap">
+        <canvas id="schematic-canvas"></canvas>
+      </div>
+    </div>
+
+    <div id="params-panel">
+      <div class="panel-label">Water Quality Parameters</div>
+      <div id="param-cards"></div>
+    </div>
+  </div>
+
+  <!-- Bottom: Trend Chart -->
+  <div id="bottom-panel">
+    <div id="bottom-controls">
+      <label>Trend (14 days):</label>
+      <select id="trend-select">
+        <option value="ph">pH</option>
+        <option value="conductivity">Conductivity (&micro;S/cm)</option>
+        <option value="calcium">Calcium Hardness (ppm)</option>
+        <option value="alkalinity">Alkalinity (ppm)</option>
+        <option value="biocide">Biocide Residual (ppm)</option>
+        <option value="corrosion_rate">Corrosion Rate (mpy)</option>
+        <option value="lsi">LSI Index</option>
+      </select>
+    </div>
+    <div id="trend-canvas-wrap">
+      <canvas id="trend-canvas"></canvas>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<!-- Parameter Detail Popup -->
+<div id="param-popup">
+  <h4 id="pp-title"></h4>
+  <div id="pp-content"></div>
+  <button class="pp-close" id="pp-close-btn">Close</button>
+</div>
+
+<!-- AI Diagnosis Overlay -->
+<div id="ai-overlay">
+  <div id="ai-box">
+    <h3>AI Water Chemistry Diagnosis</h3>
+    <div id="ai-diagnosis-text"></div>
+    <button class="ai-close" id="ai-close-btn">Close</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+<script>
+// ==========================================================================
+// Cooling Water Quality Monitor - p5.js Simulation Engine
+// ==========================================================================
+
+// ---- Simulated clock (starts 14 days ago) ----
+let simTime = new Date();
+simTime.setDate(simTime.getDate() - 14);
+simTime.setHours(6, 0, 0, 0);
+
+let currentScenario = 'normal';
+
+// ---- Water quality parameters model ----
+const params = {
+  ph:             { name: 'pH',               unit: '',        value: 7.8,  lo: 7.0,  hi: 8.5,  warnLo: 7.2, warnHi: 8.3, alarmLo: 6.8, alarmHi: 8.8,
+                    desc: 'Measure of water acidity/basicity. Critical for corrosion and scale control.' },
+  conductivity:   { name: 'Conductivity',     unit: '\u00B5S/cm', value: 1800, lo: 1000, hi: 2500, warnLo: 1100, warnHi: 2300, alarmLo: 800, alarmHi: 3000,
+                    desc: 'Indicates total dissolved solids. Used to control cycles of concentration.' },
+  calcium:        { name: 'Calcium Hardness',  unit: 'ppm',     value: 380,  lo: 200,  hi: 600,  warnLo: 220, warnHi: 550, alarmLo: 150, alarmHi: 700,
+                    desc: 'Calcium ion concentration. High values increase scaling potential.' },
+  alkalinity:     { name: 'Alkalinity',        unit: 'ppm',     value: 240,  lo: 100,  hi: 400,  warnLo: 120, warnHi: 370, alarmLo: 80,  alarmHi: 450,
+                    desc: 'Buffering capacity of water. Affects pH stability and scaling tendency.' },
+  biocide:        { name: 'Biocide Residual',  unit: 'ppm',     value: 0.5,  lo: 0.2,  hi: 1.0,  warnLo: 0.25, warnHi: 0.9, alarmLo: 0.1, alarmHi: 1.2,
+                    desc: 'Active biocide concentration. Must be maintained to prevent microbial growth.' },
+  corrosion_rate: { name: 'Corrosion Rate',    unit: 'mpy',     value: 2.8,  lo: 0,    hi: 5,    warnLo: -1, warnHi: 4, alarmLo: -1, alarmHi: 6,
+                    desc: 'Metal loss rate from corrosion coupons. Measured in mils per year.' },
+  lsi:            { name: 'LSI',               unit: '',        value: 0.1,  lo: -0.5, hi: 0.5,  warnLo: -0.4, warnHi: 0.4, alarmLo: -0.8, alarmHi: 0.8,
+                    desc: 'Langelier Saturation Index. Negative = corrosive, zero = balanced, positive = scaling.' }
+};
+
+// System operational values for schematic
+let sysData = {
+  supplyTemp: 85, returnTemp: 95, towerTemp: 82,
+  flowRate: 500, makeupGPM: 12, blowdownGPM: 4,
+  coc: 3.2, pumpStatus: 'Running', fanStatus: 'Running'
+};
+
+// ---- Trend data: 14 days, 1 sample per 6 hours = 56 points ----
+const TREND_POINTS = 56;
+let trendData = {};
+const paramKeys = Object.keys(params);
+let selectedParam = 'ph';
+
+// ---- p5.js sketch for the schematic ----
+let schematicSketch = null;
+
+// ---- Initialize trend history ----
+function initTrends() {
+  simTime = new Date();
+  simTime.setDate(simTime.getDate() - 14);
+  simTime.setHours(6, 0, 0, 0);
+
+  for (let key of paramKeys) {
+    trendData[key] = [];
+  }
+
+  // Pre-generate 14 days of history
+  for (let i = 0; i < TREND_POINTS; i++) {
+    let dayFrac = i / 4;
+    generateDataPoint(dayFrac);
+  }
+}
+
+function generateDataPoint(dayFrac) {
+  let sc = currentScenario;
+  let noise = (amp) => (Math.random() - 0.5) * amp;
+  let ramp = (start, end, day, startDay, endDay) => {
+    if (day < startDay) return start;
+    if (day > endDay) return end;
+    return start + (end - start) * ((day - startDay) / (endDay - startDay));
+  };
+
+  let vals = {};
+
+  if (sc === 'normal') {
+    vals.ph = 7.8 + noise(0.15) + Math.sin(dayFrac * 0.5) * 0.08;
+    vals.conductivity = 1800 + noise(80) + Math.sin(dayFrac * 0.3) * 50;
+    vals.calcium = 380 + noise(15) + Math.sin(dayFrac * 0.4) * 10;
+    vals.alkalinity = 240 + noise(12) + Math.sin(dayFrac * 0.35) * 8;
+    vals.biocide = 0.5 + noise(0.08) + Math.sin(dayFrac * 0.8) * 0.05;
+    vals.corrosion_rate = 2.8 + noise(0.4) + Math.sin(dayFrac * 0.3) * 0.3;
+    vals.lsi = 0.1 + noise(0.1) + Math.sin(dayFrac * 0.4) * 0.05;
+  } else if (sc === 'rising-coc') {
+    let r = ramp(0, 1, dayFrac, 2, 12);
+    vals.ph = 7.8 + noise(0.12) + r * 0.4;
+    vals.conductivity = 1800 + noise(60) + r * 1800;
+    vals.calcium = 380 + noise(12) + r * 350;
+    vals.alkalinity = 240 + noise(10) + r * 220;
+    vals.biocide = 0.5 + noise(0.06) - r * 0.15;
+    vals.corrosion_rate = 2.8 + noise(0.3) + r * 1.5;
+    vals.lsi = 0.1 + noise(0.08) + r * 1.2;
+  } else if (sc === 'scale') {
+    let r = ramp(0, 1, dayFrac, 3, 11);
+    vals.ph = 8.0 + noise(0.1) + r * 0.6;
+    vals.conductivity = 1900 + noise(50) + r * 400;
+    vals.calcium = 400 + noise(12) + r * 300;
+    vals.alkalinity = 260 + noise(10) + r * 180;
+    vals.biocide = 0.5 + noise(0.06);
+    vals.corrosion_rate = 2.5 + noise(0.3) - r * 0.8;
+    vals.lsi = 0.15 + noise(0.06) + r * 1.0;
+  } else if (sc === 'corrosion') {
+    let r = ramp(0, 1, dayFrac, 2, 10);
+    vals.ph = 7.8 + noise(0.1) - r * 1.5;
+    vals.conductivity = 1800 + noise(60) + r * 200;
+    vals.calcium = 380 + noise(12) - r * 80;
+    vals.alkalinity = 240 + noise(10) - r * 100;
+    vals.biocide = 0.5 + noise(0.06);
+    vals.corrosion_rate = 2.8 + noise(0.3) + r * 6;
+    vals.lsi = 0.1 + noise(0.06) - r * 1.2;
+  } else if (sc === 'bio-upset') {
+    let r = ramp(0, 1, dayFrac, 1, 8);
+    vals.ph = 7.8 + noise(0.12) - r * 0.5;
+    vals.conductivity = 1800 + noise(60) + r * 300;
+    vals.calcium = 380 + noise(12);
+    vals.alkalinity = 240 + noise(10) - r * 40;
+    vals.biocide = 0.5 + noise(0.04) - r * 0.5;
+    vals.corrosion_rate = 2.8 + noise(0.3) + r * 4;
+    vals.lsi = 0.1 + noise(0.06) - r * 0.3;
+  }
+
+  vals.biocide = Math.max(0, vals.biocide);
+  vals.corrosion_rate = Math.max(0, vals.corrosion_rate);
+
+  for (let key of paramKeys) {
+    trendData[key].push(vals[key]);
+  }
+
+  for (let key of paramKeys) {
+    params[key].value = vals[key];
+  }
+
+  updateSysData(dayFrac);
+}
+
+function updateSysData(dayFrac) {
+  let sc = currentScenario;
+  let noise = (amp) => (Math.random() - 0.5) * amp;
+  let ramp = (start, end, day, startDay, endDay) => {
+    if (day < startDay) return start;
+    if (day > endDay) return end;
+    return start + (end - start) * ((day - startDay) / (endDay - startDay));
+  };
+
+  if (sc === 'normal') {
+    sysData.supplyTemp = 85 + noise(1);
+    sysData.returnTemp = 95 + noise(1);
+    sysData.towerTemp = 82 + noise(1);
+    sysData.flowRate = 500 + noise(10);
+    sysData.makeupGPM = 12 + noise(1);
+    sysData.blowdownGPM = 4 + noise(0.5);
+    sysData.coc = 3.2 + noise(0.1);
+    sysData.pumpStatus = 'Running';
+    sysData.fanStatus = 'Running';
+  } else if (sc === 'rising-coc') {
+    let r = ramp(0, 1, dayFrac, 2, 12);
+    sysData.supplyTemp = 85 + noise(1) + r * 3;
+    sysData.returnTemp = 95 + noise(1) + r * 4;
+    sysData.towerTemp = 82 + noise(1) + r * 2;
+    sysData.flowRate = 500 + noise(10);
+    sysData.makeupGPM = 12 + noise(1);
+    sysData.blowdownGPM = 0.5 + noise(0.2);
+    sysData.coc = 3.2 + r * 4.5;
+    sysData.pumpStatus = 'Running';
+    sysData.fanStatus = 'Running';
+  } else if (sc === 'scale') {
+    let r = ramp(0, 1, dayFrac, 3, 11);
+    sysData.supplyTemp = 85 + noise(1) + r * 5;
+    sysData.returnTemp = 95 + noise(1) + r * 6;
+    sysData.towerTemp = 82 + noise(1) + r * 3;
+    sysData.flowRate = 500 + noise(10) - r * 60;
+    sysData.makeupGPM = 12 + noise(1);
+    sysData.blowdownGPM = 4 + noise(0.5);
+    sysData.coc = 3.2 + noise(0.1) + r * 1;
+    sysData.pumpStatus = 'Running';
+    sysData.fanStatus = 'Running';
+  } else if (sc === 'corrosion') {
+    let r = ramp(0, 1, dayFrac, 2, 10);
+    sysData.supplyTemp = 85 + noise(1);
+    sysData.returnTemp = 95 + noise(1) + r * 2;
+    sysData.towerTemp = 82 + noise(1);
+    sysData.flowRate = 500 + noise(10);
+    sysData.makeupGPM = 12 + noise(1) + r * 3;
+    sysData.blowdownGPM = 4 + noise(0.5) + r * 2;
+    sysData.coc = 3.2 + noise(0.1) - r * 0.5;
+    sysData.pumpStatus = 'Running';
+    sysData.fanStatus = 'Running';
+  } else if (sc === 'bio-upset') {
+    let r = ramp(0, 1, dayFrac, 1, 8);
+    sysData.supplyTemp = 85 + noise(1) + r * 2;
+    sysData.returnTemp = 95 + noise(1) + r * 3;
+    sysData.towerTemp = 82 + noise(1) + r * 1;
+    sysData.flowRate = 500 + noise(10) - r * 40;
+    sysData.makeupGPM = 12 + noise(1);
+    sysData.blowdownGPM = 4 + noise(0.5);
+    sysData.coc = 3.2 + noise(0.1);
+    sysData.pumpStatus = 'Running';
+    sysData.fanStatus = r > 0.7 ? 'Warning' : 'Running';
+  }
+}
+
+// ---- Parameter status helpers ----
+function getParamStatus(key) {
+  let p = params[key];
+  let v = p.value;
+  if (v < p.alarmLo || v > p.alarmHi) return 'alarm';
+  if (v < p.warnLo || v > p.warnHi) return 'warn';
+  return 'good';
+}
+
+function getOverallStatus() {
+  let hasAlarm = false, hasWarn = false;
+  for (let key of paramKeys) {
+    let s = getParamStatus(key);
+    if (s === 'alarm') hasAlarm = true;
+    if (s === 'warn') hasWarn = true;
+  }
+  if (hasAlarm) return 'alarm';
+  if (hasWarn) return 'warn';
+  return 'good';
+}
+
+// ---- Render parameter cards ----
+function renderParamCards() {
+  let container = document.getElementById('param-cards');
+  let html = '';
+  for (let key of paramKeys) {
+    let p = params[key];
+    let status = getParamStatus(key);
+    let valClass = 'value-' + status;
+    let statusLabel = status === 'good' ? 'NORMAL' : (status === 'warn' ? 'WARNING' : 'ALARM');
+    let statusClass = 'pc-status-' + status;
+    let selClass = selectedParam === key ? ' selected' : '';
+
+    let displayVal;
+    if (key === 'conductivity') displayVal = Math.round(p.value);
+    else if (key === 'calcium' || key === 'alkalinity') displayVal = Math.round(p.value);
+    else displayVal = p.value.toFixed(key === 'biocide' ? 2 : 1);
+
+    // Gauge bar: position of value within alarm range
+    let barMin = p.alarmLo === -1 ? p.lo : p.alarmLo;
+    let barMax = p.alarmHi;
+    let barRange = barMax - barMin;
+    let barPct = barRange > 0 ? Math.max(0, Math.min(100, ((p.value - barMin) / barRange) * 100)) : 50;
+    let barColor = status === 'good' ? '#4caf50' : (status === 'warn' ? '#ffc107' : '#f44336');
+
+    html += '<div class="param-card' + selClass + '" data-param="' + key + '">' +
+      '<div class="pc-name">' + p.name + '</div>' +
+      '<div class="pc-value ' + valClass + '">' + displayVal + ' <span class="pc-unit">' + p.unit + '</span></div>' +
+      '<div class="pc-range">Target: ' + p.lo + ' \u2013 ' + p.hi + ' ' + p.unit + '</div>' +
+      '<div class="pc-bar"><div class="pc-bar-fill" style="width:' + barPct.toFixed(0) + '%;background:' + barColor + ';"></div></div>' +
+      '<span class="pc-status ' + statusClass + '">' + statusLabel + '</span>' +
+      '</div>';
+  }
+  container.innerHTML = html;
+
+  // Click handlers for cards
+  document.querySelectorAll('.param-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      let key = this.dataset.param;
+      selectedParam = key;
+      document.getElementById('trend-select').value = selectedParam;
+      renderParamCards();
+      drawTrendChart();
+      showParamPopup(key, e);
+    });
+  });
+}
+
+// ---- Parameter detail popup ----
+function showParamPopup(key, event) {
+  let p = params[key];
+  let status = getParamStatus(key);
+  let popup = document.getElementById('param-popup');
+  let displayVal;
+  if (key === 'conductivity' || key === 'calcium' || key === 'alkalinity') displayVal = Math.round(p.value).toString();
+  else displayVal = p.value.toFixed(key === 'biocide' ? 2 : 1);
+
+  document.getElementById('pp-title').textContent = p.name + ' - Detailed View';
+
+  let statusText = status === 'good' ? 'NORMAL' : (status === 'warn' ? 'WARNING' : 'ALARM');
+  let statusColor = status === 'good' ? '#4caf50' : (status === 'warn' ? '#ffc107' : '#f44336');
+
+  let lsiInterpretation = '';
+  if (key === 'lsi') {
+    if (p.value < -0.5) lsiInterpretation = 'Significantly corrosive';
+    else if (p.value < 0) lsiInterpretation = 'Slightly corrosive';
+    else if (p.value < 0.5) lsiInterpretation = 'Balanced / slight scale tendency';
+    else lsiInterpretation = 'Scaling conditions';
+  }
+
+  let rows = [
+    ['Current Value', displayVal + ' ' + p.unit],
+    ['Status', '<span style="color:' + statusColor + ';font-weight:700;">' + statusText + '</span>'],
+    ['Target Range', p.lo + ' \u2013 ' + p.hi + ' ' + p.unit],
+    ['Warning Low', (p.warnLo === -1 ? 'N/A' : p.warnLo + ' ' + p.unit)],
+    ['Warning High', p.warnHi + ' ' + p.unit],
+    ['Alarm Low', (p.alarmLo === -1 ? 'N/A' : p.alarmLo + ' ' + p.unit)],
+    ['Alarm High', p.alarmHi + ' ' + p.unit]
+  ];
+
+  if (lsiInterpretation) {
+    rows.push(['Interpretation', lsiInterpretation]);
+  }
+
+  let html = rows.map(r =>
+    '<div class="pp-row"><span class="pp-label">' + r[0] + '</span><span class="pp-val">' + r[1] + '</span></div>'
+  ).join('');
+
+  html += '<div style="margin-top:8px;font-size:10px;color:#5a7a9a;line-height:1.5;">' + p.desc + '</div>';
+
+  document.getElementById('pp-content').innerHTML = html;
+
+  // Position near click but not off screen
+  let rect = event.target.closest('.param-card').getBoundingClientRect();
+  let popLeft = rect.right + 8;
+  let popTop = rect.top;
+  if (popLeft + 320 > window.innerWidth) popLeft = rect.left - 320;
+  if (popLeft < 0) popLeft = 10;
+  if (popTop + 280 > window.innerHeight) popTop = window.innerHeight - 290;
+  if (popTop < 0) popTop = 10;
+
+  popup.style.left = popLeft + 'px';
+  popup.style.top = popTop + 'px';
+  popup.classList.add('show');
+}
+
+function hideParamPopup() {
+  document.getElementById('param-popup').classList.remove('show');
+}
+
+// ---- Render top bar ----
+function renderTopBar() {
+  let opts = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  document.getElementById('sim-datetime').textContent = simTime.toLocaleDateString('en-US', opts);
+  document.getElementById('coc-display').textContent = sysData.coc.toFixed(1);
+  document.getElementById('makeup-display').textContent = sysData.makeupGPM.toFixed(0);
+  document.getElementById('blowdown-display').textContent = sysData.blowdownGPM.toFixed(1);
+
+  let dot = document.getElementById('status-dot');
+  let overall = getOverallStatus();
+  dot.className = 'status-dot ' + (overall === 'good' ? 'green' : (overall === 'warn' ? 'yellow' : 'red'));
+}
+
+// ==========================================================================
+// p5.js Schematic Drawing (instance mode)
+// ==========================================================================
+function startSchematicSketch() {
+  let wrap = document.getElementById('schematic-canvas-wrap');
+
+  schematicSketch = new p5(function(p) {
+    p.setup = function() {
+      let cnv = p.createCanvas(wrap.clientWidth, wrap.clientHeight);
+      cnv.parent(wrap);
+      cnv.style('display', 'block');
+    };
+
+    p.windowResized = function() {
+      p.resizeCanvas(wrap.clientWidth, wrap.clientHeight);
+    };
+
+    p.draw = function() {
+      let cw = p.width;
+      let ch = p.height;
+      p.background(13, 17, 23);
+
+      let mx = cw / 2;
+      let my = ch / 2;
+      let sc = Math.min(cw / 320, ch / 350);
+
+      p.push();
+      p.translate(mx, my);
+      p.scale(sc);
+
+      // ---- Cooling Tower (top center) ----
+      let tX = 0, tY = -120;
+      p.fill(20, 50, 80);
+      p.stroke(42, 82, 152);
+      p.strokeWeight(2);
+      p.beginShape();
+      p.vertex(tX - 42, tY - 32);
+      p.vertex(tX + 42, tY - 32);
+      p.vertex(tX + 37, tY + 32);
+      p.vertex(tX - 37, tY + 32);
+      p.endShape(p.CLOSE);
+
+      // Tower fan blades (animated)
+      p.stroke(100, 160, 230);
+      p.strokeWeight(1.5);
+      p.noFill();
+      let fanCY = tY - 18;
+      for (let a = 0; a < 3; a++) {
+        let angle = p.radians(a * 120 + (p.millis() * 0.1 % 360));
+        p.line(tX, fanCY, tX + p.cos(angle) * 14, fanCY + p.sin(angle) * 14);
+      }
+      p.fill(100, 160, 230);
+      p.noStroke();
+      p.circle(tX, fanCY, 6);
+
+      // Tower fill lines
+      p.stroke(50, 80, 110);
+      p.strokeWeight(1);
+      for (let i = -2; i <= 2; i++) {
+        p.line(tX - 26, tY + 4 + i * 7, tX + 26, tY + 4 + i * 7);
+      }
+
+      // Tower label
+      p.noStroke();
+      p.fill(100, 160, 230);
+      p.textFont('Arial');
+      p.textSize(10);
+      p.textAlign(p.CENTER);
+      p.textStyle(p.BOLD);
+      p.text('Cooling Tower', tX, tY - 40);
+      p.textStyle(p.NORMAL);
+      p.fill(76, 175, 80);
+      p.textSize(9);
+      p.text(sysData.towerTemp.toFixed(0) + '\u00B0F out', tX, tY + 44);
+
+      // ---- Pump (bottom left) ----
+      let pX = -85, pY = 25;
+      p.fill(20, 40, 30);
+      p.stroke(76, 175, 80);
+      p.strokeWeight(2);
+      p.circle(pX, pY, 32);
+      // Impeller animation
+      p.stroke(76, 175, 80);
+      p.strokeWeight(1.5);
+      let pAngle = p.radians((p.millis() * 0.15) % 360);
+      for (let i = 0; i < 4; i++) {
+        let a = pAngle + i * p.HALF_PI;
+        p.line(pX, pY, pX + p.cos(a) * 10, pY + p.sin(a) * 10);
+      }
+      p.noStroke();
+      p.fill(100, 160, 230);
+      p.textSize(9);
+      p.textAlign(p.CENTER);
+      p.textStyle(p.BOLD);
+      p.text('Pump', pX, pY + 28);
+      p.textStyle(p.NORMAL);
+      p.fill(76, 175, 80);
+      p.text(sysData.flowRate.toFixed(0) + ' GPM', pX, pY + 38);
+
+      // ---- Heat Exchanger (bottom right) ----
+      let hX = 85, hY = 25;
+      p.fill(50, 25, 25);
+      p.stroke(200, 80, 70);
+      p.strokeWeight(2);
+      p.rect(hX - 24, hY - 26, 48, 52, 3);
+      // HX plates
+      p.stroke(120, 50, 50);
+      p.strokeWeight(1);
+      for (let i = -2; i <= 2; i++) {
+        p.line(hX - 17, hY + i * 8, hX + 17, hY + i * 8);
+      }
+      p.noStroke();
+      p.fill(100, 160, 230);
+      p.textSize(9);
+      p.textAlign(p.CENTER);
+      p.textStyle(p.BOLD);
+      p.text('Heat Exch.', hX, hY - 34);
+      p.textStyle(p.NORMAL);
+      p.fill(79, 195, 247);
+      p.textSize(8);
+      p.text(sysData.supplyTemp.toFixed(0) + '\u00B0F in \u2192', hX, hY + 37);
+      p.fill(239, 83, 80);
+      p.text('\u2190 ' + sysData.returnTemp.toFixed(0) + '\u00B0F out', hX, hY + 48);
+
+      // ---- Pipes ----
+      // Tower to pump (cool water)
+      p.stroke(42, 82, 152);
+      p.strokeWeight(3);
+      p.noFill();
+      p.beginShape();
+      p.vertex(tX - 16, tY + 32);
+      p.vertex(tX - 16, pY);
+      p.vertex(pX + 16, pY);
+      p.endShape();
+
+      // Pump to HX (supply)
+      p.beginShape();
+      p.vertex(pX + 16, pY - 5);
+      p.vertex(hX - 24, pY - 5);
+      p.endShape();
+
+      // HX to tower (return - warm)
+      p.stroke(200, 80, 70);
+      p.beginShape();
+      p.vertex(hX + 24, hY - 10);
+      p.vertex(tX + 55, hY - 10);
+      p.vertex(tX + 55, tY + 10);
+      p.vertex(tX + 37, tY + 10);
+      p.endShape();
+
+      // ---- Makeup water (dashed) ----
+      p.stroke(79, 195, 247);
+      p.strokeWeight(2);
+      p.drawingContext.setLineDash([4, 4]);
+      p.line(tX + 42, tY, tX + 75, tY);
+      p.drawingContext.setLineDash([]);
+      p.noStroke();
+      p.fill(79, 195, 247);
+      p.textSize(8);
+      p.textAlign(p.LEFT);
+      p.text('Makeup', tX + 50, tY - 6);
+      p.text(sysData.makeupGPM.toFixed(0) + ' GPM', tX + 50, tY + 7);
+
+      // ---- Blowdown (dashed) ----
+      p.stroke(255, 152, 0);
+      p.strokeWeight(2);
+      p.drawingContext.setLineDash([4, 4]);
+      p.line(tX - 37, tY + 20, tX - 75, tY + 20);
+      p.drawingContext.setLineDash([]);
+      p.noStroke();
+      p.fill(255, 152, 0);
+      p.textSize(8);
+      p.textAlign(p.RIGHT);
+      p.text('Blowdown', tX - 50, tY + 15);
+      p.text(sysData.blowdownGPM.toFixed(1) + ' GPM', tX - 50, tY + 28);
+
+      // ---- Chemical injection point ----
+      let cX = -15, cY = pY + 58;
+      p.fill(156, 39, 176);
+      p.noStroke();
+      p.circle(cX, cY, 12);
+      p.stroke(206, 147, 216);
+      p.strokeWeight(1);
+      p.drawingContext.setLineDash([2, 2]);
+      p.line(cX, cY - 6, cX, pY + 5);
+      p.drawingContext.setLineDash([]);
+      p.noStroke();
+      p.fill(206, 147, 216);
+      p.textSize(8);
+      p.textAlign(p.CENTER);
+      p.text('Chemical', cX, cY + 14);
+      p.text('Injection', cX, cY + 23);
+
+      // ---- Animated flow arrows ----
+      let t = (p.millis() % 2000) / 2000;
+      p.fill(79, 195, 247);
+      p.noStroke();
+
+      // Arrow on supply pipe
+      let aX1 = pX + 16 + (hX - 24 - pX - 16) * t;
+      p.push();
+      p.translate(aX1, pY - 5);
+      p.triangle(6, 0, -4, -4, -4, 4);
+      p.pop();
+
+      // Arrow on return pipe
+      let aX2 = hX + 24 + (tX + 55 - hX - 24) * t;
+      p.fill(239, 83, 80, 200);
+      p.push();
+      p.translate(aX2, hY - 10);
+      p.triangle(6, 0, -4, -4, -4, 4);
+      p.pop();
+
+      p.pop();
+    };
+  });
+}
+
+// ==========================================================================
+// Trend Chart Rendering (Canvas 2D)
+// ==========================================================================
+function drawTrendChart() {
+  let canvas = document.getElementById('trend-canvas');
+  let wrap = document.getElementById('trend-canvas-wrap');
+  let cw = wrap.clientWidth;
+  let ch = wrap.clientHeight;
+  if (cw < 10 || ch < 10) return;
+
+  let dpr = window.devicePixelRatio || 1;
+  canvas.width = cw * dpr;
+  canvas.height = ch * dpr;
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+
+  let ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cw, ch);
+
+  let key = document.getElementById('trend-select').value;
+  let data = trendData[key] || [];
+  if (data.length === 0) return;
+
+  let p = params[key];
+  let padL = 52, padR = 14, padT = 10, padB = 26;
+  let gw = cw - padL - padR;
+  let gh = ch - padT - padB;
+
+  // Compute Y range
+  let validData = data.filter(v => v !== null && !isNaN(v));
+  if (validData.length === 0) return;
+  let minVal = Math.min(...validData);
+  let maxVal = Math.max(...validData);
+
+  minVal = Math.min(minVal, p.alarmLo !== -1 ? p.alarmLo : p.lo);
+  maxVal = Math.max(maxVal, p.alarmHi);
+  minVal = Math.min(minVal, p.lo);
+  maxVal = Math.max(maxVal, p.hi);
+
+  let range = maxVal - minVal;
+  if (range < 0.5) range = 0.5;
+  minVal -= range * 0.12;
+  maxVal += range * 0.12;
+  range = maxVal - minVal;
+
+  function xPos(i) { return padL + (i / (data.length - 1)) * gw; }
+  function yPos(v) { return padT + gh - ((v - minVal) / range) * gh; }
+
+  // Background
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, cw, ch);
+
+  // Grid lines
+  ctx.strokeStyle = '#1a2233';
+  ctx.lineWidth = 1;
+  let yTicks = 5;
+  for (let t = 0; t <= yTicks; t++) {
+    let v = minVal + (t / yTicks) * range;
+    let y = yPos(v);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cw - padR, y); ctx.stroke();
+    ctx.fillStyle = '#5a7a9a';
+    ctx.font = '9px Arial';
+    ctx.textAlign = 'right';
+    let label = (key === 'conductivity' || key === 'calcium' || key === 'alkalinity') ? Math.round(v).toString() : v.toFixed(1);
+    ctx.fillText(label, padL - 4, y + 3);
+  }
+
+  // Day labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#5a7a9a';
+  ctx.font = '8px Arial';
+  for (let d = 0; d <= 14; d += 2) {
+    let xi = (d / 14) * (data.length - 1);
+    let x = xPos(xi);
+    ctx.fillText('Day ' + d, x, ch - 5);
+    ctx.beginPath();
+    ctx.strokeStyle = '#1a2233';
+    ctx.moveTo(x, padT); ctx.lineTo(x, padT + gh);
+    ctx.stroke();
+  }
+
+  // Target band (green)
+  let yLo = yPos(p.lo);
+  let yHi = yPos(p.hi);
+  ctx.fillStyle = 'rgba(76, 175, 80, 0.07)';
+  ctx.fillRect(padL, Math.min(yLo, yHi), gw, Math.abs(yHi - yLo));
+
+  // Target lines (green dashed)
+  ctx.strokeStyle = '#4caf50';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath(); ctx.moveTo(padL, yLo); ctx.lineTo(cw - padR, yLo); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(padL, yHi); ctx.lineTo(cw - padR, yHi); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Warning lines (yellow dashed)
+  if (p.warnHi !== undefined) {
+    let yW = yPos(p.warnHi);
+    ctx.strokeStyle = '#ffc107';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(padL, yW); ctx.lineTo(cw - padR, yW); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  if (p.warnLo !== undefined && p.warnLo !== -1) {
+    let yW = yPos(p.warnLo);
+    ctx.strokeStyle = '#ffc107';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(padL, yW); ctx.lineTo(cw - padR, yW); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Alarm lines (red dashed)
+  if (p.alarmHi !== undefined) {
+    let yA = yPos(p.alarmHi);
+    ctx.strokeStyle = '#f44336';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(padL, yA); ctx.lineTo(cw - padR, yA); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#f44336';
+    ctx.font = '7px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('ALARM', cw - padR - 30, yA - 2);
+  }
+  if (p.alarmLo !== undefined && p.alarmLo !== -1) {
+    let yA = yPos(p.alarmLo);
+    ctx.strokeStyle = '#f44336';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(padL, yA); ctx.lineTo(cw - padR, yA); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#f44336';
+    ctx.font = '7px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText('ALARM', cw - padR - 30, yA + 9);
+  }
+
+  // Data line
+  ctx.strokeStyle = '#42a5f5';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] === null || isNaN(data[i])) { started = false; continue; }
+    let x = xPos(i);
+    let y = yPos(data[i]);
+    if (!started) { ctx.moveTo(x, y); started = true; }
+    else { ctx.lineTo(x, y); }
+  }
+  ctx.stroke();
+
+  // Glow effect on data line
+  ctx.strokeStyle = 'rgba(66, 165, 245, 0.3)';
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  started = false;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] === null || isNaN(data[i])) { started = false; continue; }
+    let x = xPos(i);
+    let y = yPos(data[i]);
+    if (!started) { ctx.moveTo(x, y); started = true; }
+    else { ctx.lineTo(x, y); }
+  }
+  ctx.stroke();
+
+  // Current value dot
+  let lastVal = data[data.length - 1];
+  if (lastVal !== null && !isNaN(lastVal)) {
+    let lx = xPos(data.length - 1);
+    let ly = yPos(lastVal);
+
+    // Glow
+    ctx.fillStyle = 'rgba(66, 165, 245, 0.3)';
+    ctx.beginPath(); ctx.arc(lx, ly, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#42a5f5';
+    ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2); ctx.fill();
+
+    let displayVal;
+    if (key === 'conductivity' || key === 'calcium' || key === 'alkalinity') displayVal = Math.round(lastVal).toString();
+    else displayVal = lastVal.toFixed(key === 'biocide' ? 2 : 1);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(displayVal + ' ' + p.unit, lx - 8, ly - 7);
+  }
+
+  // Unit label
+  ctx.fillStyle = '#3a5a7a';
+  ctx.font = '9px Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText(p.name + (p.unit ? ' (' + p.unit + ')' : ''), padL + 2, padT + 10);
+}
+
+// ==========================================================================
+// AI Diagnosis
+// ==========================================================================
+function getAIDiagnosis() {
+  let sc = currentScenario;
+  let s = '<div class="ai-section">Assessment</div>';
+
+  if (sc === 'normal') {
+    s += '<p>All water quality parameters are within normal operating ranges for Cooling Tower CT-200. The system is operating efficiently with stable chemistry.</p>';
+    s += '<div class="ai-section">Key Observations</div>';
+    s += '<p>- pH is stable at ' + params.ph.value.toFixed(1) + ', well within the 7.0\u20138.5 target range.<br>' +
+      '- Conductivity at ' + Math.round(params.conductivity.value) + ' \u00B5S/cm indicates COC is maintained at ' + sysData.coc.toFixed(1) + '.<br>' +
+      '- LSI of ' + params.lsi.value.toFixed(2) + ' indicates balanced water (neither scaling nor corrosive).<br>' +
+      '- Biocide residual at ' + params.biocide.value.toFixed(2) + ' ppm confirms chemical feed is functioning.<br>' +
+      '- Corrosion rate of ' + params.corrosion_rate.value.toFixed(1) + ' mpy is well below the 5 mpy threshold.</p>';
+    s += '<div class="ai-section">Recommended Actions</div>';
+    s += '<p>Continue normal operation and scheduled chemical testing. No corrective actions needed at this time.</p>';
+
+  } else if (sc === 'rising-coc') {
+    s += '<p><strong style="color:#ffc107;">RISING CYCLES OF CONCENTRATION \u2014 Blowdown System Malfunction</strong></p>';
+    s += '<div class="ai-section">Root Cause Analysis</div>';
+    s += '<p>The blowdown valve appears stuck partially closed (currently ' + sysData.blowdownGPM.toFixed(1) + ' GPM vs. normal 4 GPM). Without adequate blowdown, dissolved solids are concentrating in the recirculating water beyond design limits.</p>';
+    s += '<div class="ai-section">Evidence</div>';
+    s += '<p>- Conductivity has risen to ' + Math.round(params.conductivity.value) + ' \u00B5S/cm (target &lt;2500)<br>' +
+      '- COC has increased to ' + sysData.coc.toFixed(1) + ' (normal ~3.2)<br>' +
+      '- Calcium hardness at ' + Math.round(params.calcium.value) + ' ppm is trending upward<br>' +
+      '- LSI at ' + params.lsi.value.toFixed(2) + ' indicates increasing scale potential</p>';
+    s += '<div class="ai-section">Immediate Corrective Actions</div>';
+    s += '<p>1. Inspect and repair/replace the blowdown valve immediately.<br>' +
+      '2. Manually initiate blowdown to bring conductivity below 2500 \u00B5S/cm.<br>' +
+      '3. Check blowdown controller and conductivity sensor calibration.<br>' +
+      '4. Monitor LSI closely; if &gt;1.0, increase acid feed to prevent scaling.<br>' +
+      '5. Sample water for silica and sulfate to confirm COC calculation.</p>';
+
+  } else if (sc === 'scale') {
+    s += '<p><strong style="color:#f44336;">SCALE FORMING CONDITIONS \u2014 Calcium Carbonate Precipitation Risk</strong></p>';
+    s += '<div class="ai-section">Root Cause Analysis</div>';
+    s += '<p>The Langelier Saturation Index (LSI) has risen to ' + params.lsi.value.toFixed(2) + ', indicating supersaturated water that will deposit calcium carbonate scale on heat transfer surfaces, reducing efficiency and increasing energy costs.</p>';
+    s += '<div class="ai-section">Evidence</div>';
+    s += '<p>- LSI at ' + params.lsi.value.toFixed(2) + ' (target -0.5 to +0.5)<br>' +
+      '- pH trending high at ' + params.ph.value.toFixed(1) + '<br>' +
+      '- Calcium hardness rising to ' + Math.round(params.calcium.value) + ' ppm<br>' +
+      '- Alkalinity rising to ' + Math.round(params.alkalinity.value) + ' ppm<br>' +
+      '- Heat exchanger approach temperature increasing (reduced efficiency)<br>' +
+      '- Flow rate dropping to ' + sysData.flowRate.toFixed(0) + ' GPM (possible pipe restriction from deposits)</p>';
+    s += '<div class="ai-section">Immediate Corrective Actions</div>';
+    s += '<p>1. Increase sulfuric acid feed to lower pH to 7.5\u20138.0 range.<br>' +
+      '2. Increase blowdown to reduce calcium and alkalinity concentrations.<br>' +
+      '3. Check and increase scale inhibitor (phosphonate) dosage.<br>' +
+      '4. Schedule heat exchanger inspection for scale deposits.<br>' +
+      '5. If performance continues to degrade, clean with descaling solution (e.g., inhibited HCl).</p>';
+
+  } else if (sc === 'corrosion') {
+    s += '<p><strong style="color:#f44336;">ACTIVE CORROSION EVENT \u2014 Low pH and Rising Metal Loss</strong></p>';
+    s += '<div class="ai-section">Root Cause Analysis</div>';
+    s += '<p>pH has dropped to ' + params.ph.value.toFixed(1) + ', creating aggressive, corrosive water conditions. The corrosion coupon is reading ' + params.corrosion_rate.value.toFixed(1) + ' mpy, well above the 5 mpy action threshold. Pipe and equipment damage is occurring.</p>';
+    s += '<div class="ai-section">Evidence</div>';
+    s += '<p>- pH at ' + params.ph.value.toFixed(1) + ' (target 7.0\u20138.5) \u2014 water is acidic<br>' +
+      '- Corrosion rate at ' + params.corrosion_rate.value.toFixed(1) + ' mpy (target &lt;5 mpy)<br>' +
+      '- LSI at ' + params.lsi.value.toFixed(2) + ' (negative = corrosive water)<br>' +
+      '- Alkalinity depleted to ' + Math.round(params.alkalinity.value) + ' ppm (low buffering capacity)<br>' +
+      '- Calcium dropping to ' + Math.round(params.calcium.value) + ' ppm (dissolved by acidic water)</p>';
+    s += '<div class="ai-section">Immediate Corrective Actions</div>';
+    s += '<p>1. Check acid feed pump \u2014 may be overfeeding. Reduce or stop acid injection immediately.<br>' +
+      '2. Increase corrosion inhibitor dosage (phosphate or molybdate-based program).<br>' +
+      '3. Add soda ash or caustic to raise pH above 7.5.<br>' +
+      '4. Sample for dissolved iron and copper to assess pipe damage extent.<br>' +
+      '5. Inspect and replace corrosion coupons for fresh baseline reading.</p>';
+
+  } else if (sc === 'bio-upset') {
+    s += '<p><strong style="color:#f44336;">BIOLOGICAL UPSET \u2014 Microbiological Growth Event</strong></p>';
+    s += '<div class="ai-section">Root Cause Analysis</div>';
+    s += '<p>Biocide residual has dropped to ' + params.biocide.value.toFixed(2) + ' ppm (target 0.2\u20131.0 ppm), indicating chemical feed failure or overwhelming biological demand. Microbiological growth is likely occurring throughout the system \u2014 tower fill, basin, and piping.</p>';
+    s += '<div class="ai-section">Evidence</div>';
+    s += '<p>- Biocide residual at ' + params.biocide.value.toFixed(2) + ' ppm (effectively zero)<br>' +
+      '- Corrosion rate rising to ' + params.corrosion_rate.value.toFixed(1) + ' mpy (Microbiologically Influenced Corrosion \u2014 MIC)<br>' +
+      '- pH dropping to ' + params.ph.value.toFixed(1) + ' (organic acid production by bacteria)<br>' +
+      '- Flow rate reduced to ' + sysData.flowRate.toFixed(0) + ' GPM (biofilm restricting flow)<br>' +
+      '- Alkalinity depleted to ' + Math.round(params.alkalinity.value) + ' ppm (consumed by biological activity)</p>';
+    s += '<div class="ai-section">Immediate Corrective Actions</div>';
+    s += '<p>1. Check biocide feed pump and chemical supply. Refill drum if empty.<br>' +
+      '2. Perform a slug-feed (shock dose) of oxidizing biocide (e.g., sodium hypochlorite).<br>' +
+      '3. Follow with biodispersant to penetrate and remove biofilm.<br>' +
+      '4. Collect dip slides or ATP test to quantify bacterial population.<br>' +
+      '5. <strong>Test for Legionella</strong> if tower serves occupied building (regulatory requirement).<br>' +
+      '6. Inspect tower basin for visible slime, algae, or biological growth.</p>';
+  }
+
+  return s;
+}
+
+// ==========================================================================
+// Event Handlers
+// ==========================================================================
+function setupEvents() {
+  // Scenario buttons
+  document.querySelectorAll('.scenario-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentScenario = this.dataset.scenario;
+      hideParamPopup();
+      initTrends();
+      renderAll();
+    });
+  });
+
+  // AI Diagnosis
+  document.getElementById('ai-btn').addEventListener('click', function() {
+    document.getElementById('ai-diagnosis-text').innerHTML = getAIDiagnosis();
+    document.getElementById('ai-overlay').classList.add('show');
+  });
+  document.getElementById('ai-close-btn').addEventListener('click', function() {
+    document.getElementById('ai-overlay').classList.remove('show');
+  });
+  document.getElementById('ai-overlay').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+  });
+
+  // Param popup close
+  document.getElementById('pp-close-btn').addEventListener('click', hideParamPopup);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      hideParamPopup();
+      document.getElementById('ai-overlay').classList.remove('show');
+    }
+  });
+
+  // Trend dropdown
+  document.getElementById('trend-select').addEventListener('change', function() {
+    selectedParam = this.value;
+    renderParamCards();
+    drawTrendChart();
+  });
+
+  // Close popup when clicking outside
+  document.addEventListener('click', function(e) {
+    let popup = document.getElementById('param-popup');
+    if (popup.classList.contains('show') && !popup.contains(e.target) && !e.target.closest('.param-card')) {
+      hideParamPopup();
+    }
+  });
+
+  // Window resize
+  window.addEventListener('resize', function() {
+    drawTrendChart();
+  });
+}
+
+// ---- Main update loop ----
+function renderAll() {
+  renderTopBar();
+  renderParamCards();
+  drawTrendChart();
+}
+
+// ---- Simulation tick: adds a new data point every 3 seconds (= 6 hours simulated) ----
+function simTick() {
+  simTime = new Date(simTime.getTime() + 6 * 3600000);
+  let dayFrac = trendData.ph.length / 4;
+  generateDataPoint(dayFrac);
+
+  for (let key of paramKeys) {
+    if (trendData[key].length > TREND_POINTS * 2) {
+      trendData[key] = trendData[key].slice(-TREND_POINTS);
+    }
+  }
+
+  renderAll();
+}
+
+// ==========================================================================
+// Initialize
+// ==========================================================================
+initTrends();
+setupEvents();
+renderAll();
+startSchematicSketch();
+
+// Add new data point every 3 seconds
+setInterval(simTick, 3000);
+
+</script>
+</body>
+</html>

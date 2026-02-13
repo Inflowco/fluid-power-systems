@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HVAC Refrigerant Cycle</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ── HVAC Refrigerant Cycle MicroSim ──
+    // Self-contained p5.js simulation showing the four stages of the
+    // refrigerant cycle with animated particles, data panels, and controls.
+
+    // Canvas dimensions
+    let drawHeight = 400;
+    let controlHeight = 80;
+    let canvasHeight = drawHeight + controlHeight;
+    let aspectRatio = 1.91;
+    let canvasWidth = canvasHeight * aspectRatio;
+
+    // Simulation state
+    let simRunning = true;
+    let animSpeed = 1;          // 0=slow, 1=normal, 2=fast
+    let speedLabels = ['Slow', 'Normal', 'Fast'];
+    let speedFactors = [0.4, 1.0, 2.0];
+
+    // User controls
+    let outdoorTemp = 95;       // 80-110 F
+    let indoorSetpoint = 72;    // 68-78 F
+
+    // Derived system values (updated each frame from sliders)
+    let evapTemp, evapPressure;
+    let compOutTemp, compOutPressure;
+    let condTemp, condPressure;
+    let expOutTemp, expOutPressure;
+
+    // Refrigerant particles
+    let particles = [];
+    let maxParticles = 60;
+
+    // Path waypoints for the refrigerant loop (computed in updateLayout)
+    // The loop runs: Evaporator (left) -> Compressor (bottom) -> Condenser (right) -> Expansion Valve (top) -> back to Evaporator
+    let pathPoints = [];    // array of {x, y} defining the loop
+    let pathLengths = [];   // cumulative arc lengths
+    let totalPathLength = 0;
+
+    // Component boxes (computed in updateLayout)
+    let evapBox, compBox, condBox, expBox;
+
+    // Control hit zones
+    let btnStartPause = {};
+    let btnSpeedSlow = {}, btnSpeedNormal = {}, btnSpeedFast = {};
+    let sliderOutdoor = {};
+    let sliderIndoor = {};
+
+    // Dragging state
+    let draggingOutdoor = false;
+    let draggingIndoor = false;
+
+    // Layout variables
+    let centerX, centerY;
+    let loopW, loopH;
+
+    function updateLayout() {
+        centerX = canvasWidth * 0.5;
+        centerY = drawHeight * 0.48;
+        loopW = canvasWidth * 0.62;
+        loopH = drawHeight * 0.52;
+
+        let halfW = loopW / 2;
+        let halfH = loopH / 2;
+
+        // Component boxes: {x, y, w, h} where x,y is top-left
+        let boxW = 140;
+        let boxH = 70;
+
+        // Evaporator on the left (indoor unit)
+        evapBox = {
+            x: centerX - halfW - boxW / 2,
+            y: centerY - boxH / 2,
+            w: boxW, h: boxH
+        };
+
+        // Compressor at the bottom
+        compBox = {
+            x: centerX - boxW / 2,
+            y: centerY + halfH - boxH / 2 + 10,
+            w: boxW, h: boxH
+        };
+
+        // Condenser on the right (outdoor unit)
+        condBox = {
+            x: centerX + halfW - boxW / 2,
+            y: centerY - boxH / 2,
+            w: boxW, h: boxH
+        };
+
+        // Expansion valve at the top
+        let expW = 110;
+        let expH = 44;
+        expBox = {
+            x: centerX - expW / 2,
+            y: centerY - halfH - expH / 2 - 10,
+            w: expW, h: expH
+        };
+
+        // Build the path waypoints forming a rectangular loop
+        // Direction: Evaporator(right side) -> down-left to Compressor(left side)
+        //            Compressor(right side) -> down-right to Condenser(bottom)
+        //            Condenser(left side going up) -> up to Expansion Valve(right side)
+        //            Expansion Valve(left side) -> back down-left to Evaporator(top)
+
+        // We'll use corner points and component connection points
+        let evapRight = { x: evapBox.x + evapBox.w, y: evapBox.y + evapBox.h / 2 };
+        let evapTop = { x: evapBox.x + evapBox.w / 2, y: evapBox.y };
+
+        let compLeft = { x: compBox.x, y: compBox.y + compBox.h / 2 };
+        let compRight = { x: compBox.x + compBox.w, y: compBox.y + compBox.h / 2 };
+
+        let condLeft = { x: condBox.x, y: condBox.y + condBox.h / 2 };
+        let condTop = { x: condBox.x + condBox.w / 2, y: condBox.y };
+
+        let expLeft = { x: expBox.x, y: expBox.y + expBox.h / 2 };
+        let expRight = { x: expBox.x + expBox.w, y: expBox.y + expBox.h / 2 };
+
+        // Path: evaporator out -> corner bottom-left -> compressor in
+        //        compressor out -> corner bottom-right -> condenser in
+        //        condenser out -> corner top-right -> expansion valve in
+        //        expansion valve out -> corner top-left -> evaporator in
+
+        let cornerBL = { x: evapBox.x + evapBox.w + 20, y: compBox.y + compBox.h / 2 };
+        let cornerBR = { x: condBox.x - 20, y: compBox.y + compBox.h / 2 };
+        let cornerTR = { x: condBox.x + condBox.w / 2, y: expBox.y + expBox.h / 2 };
+        let cornerTL = { x: evapBox.x + evapBox.w / 2, y: expBox.y + expBox.h / 2 };
+
+        pathPoints = [
+            evapRight,                                          // 0: leaving evaporator (gas, low P)
+            { x: evapRight.x + 20, y: evapRight.y },           // 1
+            { x: evapRight.x + 20, y: compLeft.y },            // 2: corner going down
+            compLeft,                                           // 3: entering compressor
+            compRight,                                          // 4: leaving compressor (hot gas, high P)
+            { x: compRight.x + 20, y: compRight.y },           // 5
+            { x: condLeft.x - 20, y: compRight.y },            // 6: corner going right
+            { x: condLeft.x - 20, y: condLeft.y },             // 7
+            condLeft,                                           // 8: entering condenser
+            condTop,                                            // 9: leaving condenser (liquid, high P)
+            { x: condTop.x, y: expRight.y },                   // 10: going up
+            expRight,                                           // 11: entering expansion valve
+            expLeft,                                            // 12: leaving expansion valve (low P)
+            { x: evapTop.x, y: expLeft.y },                    // 13: going left
+            evapTop,                                            // 14: entering evaporator (top)
+            { x: evapBox.x + evapBox.w * 0.5, y: evapBox.y + evapBox.h * 0.5 }, // 15: inside evaporator mid
+            evapRight                                           // 16: back to start
+        ];
+
+        // Compute cumulative segment lengths
+        computePathLengths();
+    }
+
+    function computePathLengths() {
+        pathLengths = [0];
+        totalPathLength = 0;
+        for (let i = 1; i < pathPoints.length; i++) {
+            let dx = pathPoints[i].x - pathPoints[i - 1].x;
+            let dy = pathPoints[i].y - pathPoints[i - 1].y;
+            let segLen = Math.sqrt(dx * dx + dy * dy);
+            totalPathLength += segLen;
+            pathLengths.push(totalPathLength);
+        }
+    }
+
+    // Get position and normalized progress along path
+    function getPositionOnPath(t) {
+        // t is 0..1 along total path
+        let targetLen = t * totalPathLength;
+        for (let i = 1; i < pathLengths.length; i++) {
+            if (targetLen <= pathLengths[i]) {
+                let segStart = pathLengths[i - 1];
+                let segEnd = pathLengths[i];
+                let segFrac = (targetLen - segStart) / (segEnd - segStart);
+                let px = lerp(pathPoints[i - 1].x, pathPoints[i].x, segFrac);
+                let py = lerp(pathPoints[i - 1].y, pathPoints[i].y, segFrac);
+                return { x: px, y: py };
+            }
+        }
+        // Fallback
+        return { x: pathPoints[pathPoints.length - 1].x, y: pathPoints[pathPoints.length - 1].y };
+    }
+
+    // Determine which segment a particle is in, to set its visual state
+    // Segments (by path point index ranges):
+    //   0-3: Evaporator outlet to Compressor inlet (low-pressure gas, blue)
+    //   3-4: Inside compressor (transition)
+    //   4-8: Compressor outlet to Condenser inlet (high-pressure hot gas, red-orange)
+    //   8-9: Inside condenser (transition to liquid)
+    //   9-11: Condenser outlet to Expansion valve inlet (high-pressure liquid, orange)
+    //   11-12: Inside expansion valve (transition)
+    //   12-16: Expansion valve outlet back to Evaporator (low-pressure liquid/gas, blue)
+
+    function getParticleVisual(t) {
+        let targetLen = t * totalPathLength;
+        // Find which segment index we're in
+        let segIdx = 0;
+        for (let i = 1; i < pathLengths.length; i++) {
+            if (targetLen <= pathLengths[i]) {
+                segIdx = i - 1;
+                break;
+            }
+            if (i === pathLengths.length - 1) segIdx = i - 1;
+        }
+
+        // Define colors
+        let coldBlue = [80, 160, 240];
+        let hotRed = [230, 100, 40];
+        let warmOrange = [230, 160, 50];
+        let lightBlue = [140, 200, 255];
+
+        let col, sz;
+
+        if (segIdx < 3) {
+            // Evaporator to compressor: low-pressure gas (light blue, large)
+            col = lightBlue;
+            sz = 10;
+        } else if (segIdx === 3) {
+            // Inside compressor: transition from light blue gas to hot red gas
+            let frac = (targetLen - pathLengths[3]) / (pathLengths[4] - pathLengths[3]);
+            col = lerpArr(lightBlue, hotRed, frac);
+            sz = lerp(10, 7, frac);
+        } else if (segIdx >= 4 && segIdx < 8) {
+            // Compressor to condenser: high-pressure hot gas (red-orange, medium)
+            col = hotRed;
+            sz = 7;
+        } else if (segIdx === 8) {
+            // Inside condenser: transition from hot gas to warm liquid
+            let frac = (targetLen - pathLengths[8]) / (pathLengths[9] - pathLengths[8]);
+            col = lerpArr(hotRed, warmOrange, frac);
+            sz = lerp(7, 5, frac);
+        } else if (segIdx >= 9 && segIdx < 11) {
+            // Condenser to expansion valve: high-pressure liquid (orange, small)
+            col = warmOrange;
+            sz = 5;
+        } else if (segIdx === 11) {
+            // Inside expansion valve: transition from orange liquid to cold blue
+            let frac = (targetLen - pathLengths[11]) / (pathLengths[12] - pathLengths[11]);
+            col = lerpArr(warmOrange, coldBlue, frac);
+            sz = lerp(5, 6, frac);
+        } else {
+            // Expansion valve back to evaporator: low-pressure cold liquid entering evaporator
+            // Gradually becomes gas (larger, lighter blue)
+            let frac = 0;
+            if (pathLengths[16] - pathLengths[12] > 0) {
+                frac = (targetLen - pathLengths[12]) / (pathLengths[16] - pathLengths[12]);
+            }
+            col = lerpArr(coldBlue, lightBlue, frac);
+            sz = lerp(6, 10, frac);
+        }
+
+        return { col: col, size: sz };
+    }
+
+    function lerpArr(a, b, t) {
+        return [
+            lerp(a[0], b[0], t),
+            lerp(a[1], b[1], t),
+            lerp(a[2], b[2], t)
+        ];
+    }
+
+    function updateSystemValues() {
+        // Model: system values change with outdoor temp and indoor setpoint
+        // Baseline at outdoor=95, indoor=72
+        let outdoorOffset = outdoorTemp - 95;
+        let indoorOffset = indoorSetpoint - 72;
+
+        // Evaporator: low-pressure side
+        evapTemp = 40 + indoorOffset * 0.5;
+        evapPressure = 70 + indoorOffset * 2;
+
+        // Compressor outlet: high-pressure side
+        compOutTemp = 180 + outdoorOffset * 1.5 - indoorOffset * 1.0;
+        compOutPressure = 350 + outdoorOffset * 5;
+
+        // Condenser: high-pressure, cooling down
+        condTemp = outdoorTemp + 10 - indoorOffset * 0.3;
+        condPressure = compOutPressure;
+
+        // Expansion valve outlet: drops to evaporator conditions
+        expOutTemp = evapTemp;
+        expOutPressure = evapPressure;
+    }
+
+    function setup() {
+        const canvas = createCanvas(canvasWidth, canvasHeight);
+        var mainElement = document.querySelector('main');
+        canvas.parent(mainElement);
+
+        updateLayout();
+        updateSystemValues();
+        initParticles();
+    }
+
+    function initParticles() {
+        particles = [];
+        for (let i = 0; i < maxParticles; i++) {
+            particles.push({
+                t: random(),           // position along path (0..1)
+                speedOffset: random(-0.15, 0.15)  // slight variation
+            });
+        }
+    }
+
+    function draw() {
+        background(245);
+
+        updateSystemValues();
+
+        if (simRunning) {
+            updateParticles();
+        }
+
+        drawPipes();
+        drawEvaporator();
+        drawCompressor();
+        drawCondenser();
+        drawExpansionValve();
+        drawDataPanels();
+        drawParticles();
+        drawLabels();
+        drawControls();
+    }
+
+    function updateParticles() {
+        // Particle speed varies with system load
+        let loadFactor = map(outdoorTemp, 80, 110, 0.7, 1.4) *
+                         map(indoorSetpoint, 78, 68, 0.7, 1.3);
+        let baseSpeed = 0.0018 * speedFactors[animSpeed] * loadFactor;
+
+        for (let p of particles) {
+            p.t += baseSpeed * (1 + p.speedOffset);
+            if (p.t > 1) p.t -= 1;
+            if (p.t < 0) p.t += 1;
+        }
+
+        // Adjust particle count based on load
+        let targetCount = Math.floor(map(loadFactor, 0.5, 1.8, 35, 70));
+        targetCount = constrain(targetCount, 30, 75);
+        while (particles.length < targetCount) {
+            particles.push({ t: random(), speedOffset: random(-0.15, 0.15) });
+        }
+        while (particles.length > targetCount) {
+            particles.pop();
+        }
+    }
+
+    function drawPipes() {
+        push();
+        stroke(160);
+        strokeWeight(18);
+        noFill();
+        // Draw the pipe path as thick lines
+        for (let i = 0; i < pathPoints.length - 1; i++) {
+            // Skip segments inside components (we draw those as part of the component)
+            if (i === 3 || i === 8 || i === 11 || i === 14 || i === 15) continue;
+            line(pathPoints[i].x, pathPoints[i].y,
+                 pathPoints[i + 1].x, pathPoints[i + 1].y);
+        }
+
+        // Inner pipe color (lighter)
+        stroke(200);
+        strokeWeight(12);
+        for (let i = 0; i < pathPoints.length - 1; i++) {
+            if (i === 3 || i === 8 || i === 11 || i === 14 || i === 15) continue;
+            line(pathPoints[i].x, pathPoints[i].y,
+                 pathPoints[i + 1].x, pathPoints[i + 1].y);
+        }
+        pop();
+
+        // Draw flow direction arrows on pipes
+        push();
+        fill(100);
+        noStroke();
+        // Arrow between evaporator and compressor (going down)
+        drawFlowArrow(pathPoints[1].x, pathPoints[1].y, pathPoints[2].x, pathPoints[2].y);
+        // Arrow between compressor and condenser (going right)
+        drawFlowArrow(pathPoints[5].x, pathPoints[5].y, pathPoints[6].x, pathPoints[6].y);
+        // Arrow between condenser and expansion valve (going up)
+        drawFlowArrow(pathPoints[10].x, pathPoints[10].y, pathPoints[11].x, pathPoints[11].y);
+        // Arrow between expansion valve and evaporator (going left)
+        drawFlowArrow(pathPoints[12].x, pathPoints[12].y, pathPoints[13].x, pathPoints[13].y);
+        pop();
+    }
+
+    function drawFlowArrow(x1, y1, x2, y2) {
+        let mx = (x1 + x2) / 2;
+        let my = (y1 + y2) / 2;
+        let angle = atan2(y2 - y1, x2 - x1);
+        let sz = 8;
+        push();
+        translate(mx, my);
+        rotate(angle);
+        triangle(sz, 0, -sz / 2, -sz / 2, -sz / 2, sz / 2);
+        pop();
+    }
+
+    function drawEvaporator() {
+        push();
+        let b = evapBox;
+
+        // Box with blue tint
+        fill(200, 220, 245);
+        stroke(60, 100, 180);
+        strokeWeight(2);
+        rect(b.x, b.y, b.w, b.h, 6);
+
+        // Coil lines (fins)
+        stroke(60, 100, 180, 160);
+        strokeWeight(1.5);
+        let numFins = 8;
+        for (let i = 1; i <= numFins; i++) {
+            let fx = b.x + 12 + (b.w - 24) * (i / (numFins + 1));
+            line(fx, b.y + 10, fx, b.y + b.h - 10);
+        }
+
+        // Air flow arrows (left to right across fins)
+        fill(100, 160, 220, 150);
+        noStroke();
+        let arrowY1 = b.y + b.h * 0.3;
+        let arrowY2 = b.y + b.h * 0.7;
+        drawSmallArrow(b.x + 5, arrowY1, 0);
+        drawSmallArrow(b.x + 5, arrowY2, 0);
+        drawSmallArrow(b.x + b.w - 15, arrowY1, 0);
+        drawSmallArrow(b.x + b.w - 15, arrowY2, 0);
+
+        // Label
+        fill(30, 60, 120);
+        noStroke();
+        textSize(11);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text('EVAPORATOR', b.x + b.w / 2, b.y + b.h + 4);
+        textStyle(NORMAL);
+        textSize(9);
+        fill(80);
+        text('(Indoor Unit)', b.x + b.w / 2, b.y + b.h + 18);
+
+        pop();
+    }
+
+    function drawCompressor() {
+        push();
+        let b = compBox;
+
+        // Gray mechanical box
+        fill(180, 185, 190);
+        stroke(80);
+        strokeWeight(2);
+        rect(b.x, b.y, b.w, b.h, 6);
+
+        // Piston animation
+        let pistonPhase = (frameCount * speedFactors[animSpeed] * 0.05) % 1;
+        if (!simRunning) pistonPhase = 0.5;
+        let pistonOffset = sin(pistonPhase * TWO_PI) * 8;
+
+        // Cylinder body
+        fill(140, 145, 150);
+        stroke(80);
+        strokeWeight(1);
+        let cylX = b.x + b.w * 0.3;
+        let cylY = b.y + 12;
+        let cylW = b.w * 0.4;
+        let cylH = b.h - 24;
+        rect(cylX, cylY, cylW, cylH, 3);
+
+        // Piston
+        fill(100, 105, 110);
+        noStroke();
+        let pistonY = cylY + cylH * 0.3 + pistonOffset;
+        rect(cylX + 3, pistonY, cylW - 6, 10, 2);
+
+        // Piston rod
+        stroke(90);
+        strokeWeight(2);
+        line(cylX + cylW / 2, pistonY + 10, cylX + cylW / 2, cylY + cylH - 5);
+
+        // Motor symbol
+        fill(110);
+        noStroke();
+        ellipse(b.x + b.w * 0.82, b.y + b.h * 0.6, 22, 22);
+        fill(160);
+        textSize(8);
+        textAlign(CENTER, CENTER);
+        text('M', b.x + b.w * 0.82, b.y + b.h * 0.6);
+
+        // Label
+        fill(40);
+        noStroke();
+        textSize(11);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text('COMPRESSOR', b.x + b.w / 2, b.y + b.h + 4);
+        textStyle(NORMAL);
+
+        pop();
+    }
+
+    function drawCondenser() {
+        push();
+        let b = condBox;
+
+        // Box with red/orange tint
+        fill(245, 215, 200);
+        stroke(180, 80, 40);
+        strokeWeight(2);
+        rect(b.x, b.y, b.w, b.h, 6);
+
+        // Coil lines (fins)
+        stroke(180, 80, 40, 160);
+        strokeWeight(1.5);
+        let numFins = 8;
+        for (let i = 1; i <= numFins; i++) {
+            let fx = b.x + 12 + (b.w - 24) * (i / (numFins + 1));
+            line(fx, b.y + 10, fx, b.y + b.h - 10);
+        }
+
+        // Fan symbol (outdoor air)
+        noFill();
+        stroke(180, 80, 40, 130);
+        strokeWeight(1);
+        let fanX = b.x + b.w / 2;
+        let fanY = b.y + b.h / 2;
+        for (let a = 0; a < TWO_PI; a += PI / 2) {
+            let offset = simRunning ? (frameCount * speedFactors[animSpeed] * 0.03) : 0;
+            arc(fanX, fanY, 20, 20, a + offset, a + offset + PI / 3);
+        }
+
+        // Label
+        fill(120, 50, 20);
+        noStroke();
+        textSize(11);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text('CONDENSER', b.x + b.w / 2, b.y + b.h + 4);
+        textStyle(NORMAL);
+        textSize(9);
+        fill(80);
+        text('(Outdoor Unit)', b.x + b.w / 2, b.y + b.h + 18);
+
+        pop();
+    }
+
+    function drawExpansionValve() {
+        push();
+        let b = expBox;
+
+        // Small component with constriction shape
+        fill(220, 220, 210);
+        stroke(100);
+        strokeWeight(2);
+
+        // Draw hourglass / constriction shape
+        beginShape();
+        vertex(b.x, b.y);
+        vertex(b.x + b.w, b.y);
+        vertex(b.x + b.w * 0.65, b.y + b.h / 2);
+        vertex(b.x + b.w, b.y + b.h);
+        vertex(b.x, b.y + b.h);
+        vertex(b.x + b.w * 0.35, b.y + b.h / 2);
+        endShape(CLOSE);
+
+        // Internal constriction lines
+        stroke(140);
+        strokeWeight(1);
+        line(b.x + b.w * 0.35, b.y + b.h / 2, b.x + b.w * 0.65, b.y + b.h / 2);
+
+        // Label
+        fill(60);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, BOTTOM);
+        textStyle(BOLD);
+        text('EXPANSION', b.x + b.w / 2, b.y - 10);
+        text('VALVE', b.x + b.w / 2, b.y - 0);
+        textStyle(NORMAL);
+
+        pop();
+    }
+
+    function drawDataPanels() {
+        push();
+        textSize(10);
+        textAlign(LEFT, TOP);
+        let panelW = 115;
+        let panelH = 36;
+        let cornerR = 4;
+
+        // Evaporator data panel (to the left of evaporator)
+        let epx = evapBox.x - 10;
+        let epy = evapBox.y - panelH - 20;
+        drawDataBox(epx, epy, panelW, panelH, cornerR,
+            Math.round(evapTemp) + '\u00B0F, ' + Math.round(evapPressure) + ' psi',
+            'Low P, Low T', [80, 160, 240]);
+
+        // Compressor outlet panel (below compressor, offset right)
+        let cpx = compBox.x + compBox.w + 15;
+        let cpy = compBox.y + 5;
+        drawDataBox(cpx, cpy, panelW + 10, panelH, cornerR,
+            Math.round(compOutTemp) + '\u00B0F, ' + Math.round(compOutPressure) + ' psi',
+            'High P, High T', [230, 100, 40]);
+
+        // Condenser panel (to the right of condenser)
+        let cnpx = condBox.x + condBox.w + 10;
+        let cnpy = condBox.y - panelH - 20;
+        if (cnpx + panelW + 10 > canvasWidth) {
+            cnpx = condBox.x - panelW - 10;
+        }
+        drawDataBox(cnpx, cnpy, panelW + 10, panelH, cornerR,
+            Math.round(condTemp) + '\u00B0F, ' + Math.round(condPressure) + ' psi',
+            'High P, Cooling', [220, 140, 40]);
+
+        // Expansion valve outlet panel (above expansion valve)
+        let xpx = expBox.x + expBox.w + 15;
+        let xpy = expBox.y + 2;
+        drawDataBox(xpx, xpy, panelW, panelH, cornerR,
+            Math.round(expOutTemp) + '\u00B0F, ' + Math.round(expOutPressure) + ' psi',
+            'Pressure Drop', [80, 140, 220]);
+
+        pop();
+    }
+
+    function drawDataBox(x, y, w, h, r, line1, line2, accentColor) {
+        push();
+        // Background
+        fill(255, 255, 255, 230);
+        stroke(accentColor[0], accentColor[1], accentColor[2], 180);
+        strokeWeight(1.5);
+        rect(x, y, w, h, r);
+
+        // Accent bar on left
+        noStroke();
+        fill(accentColor[0], accentColor[1], accentColor[2]);
+        rect(x, y + 4, 3, h - 8);
+
+        // Text
+        fill(40);
+        noStroke();
+        textSize(11);
+        textStyle(BOLD);
+        textAlign(LEFT, TOP);
+        text(line1, x + 8, y + 5);
+        textStyle(NORMAL);
+        textSize(9);
+        fill(100);
+        text(line2, x + 8, y + 20);
+        pop();
+    }
+
+    function drawParticles() {
+        push();
+        noStroke();
+        for (let p of particles) {
+            let pos = getPositionOnPath(p.t);
+            let vis = getParticleVisual(p.t);
+            fill(vis.col[0], vis.col[1], vis.col[2], 210);
+            ellipse(pos.x, pos.y, vis.size, vis.size);
+
+            // Subtle glow for hot particles
+            if (vis.col[0] > 200) {
+                fill(vis.col[0], vis.col[1], vis.col[2], 50);
+                ellipse(pos.x, pos.y, vis.size * 1.6, vis.size * 1.6);
+            }
+        }
+        pop();
+    }
+
+    function drawSmallArrow(x, y, angle) {
+        push();
+        translate(x, y);
+        rotate(angle);
+        let sz = 6;
+        triangle(sz, 0, -sz / 2, -sz / 2, -sz / 2, sz / 2);
+        pop();
+    }
+
+    function drawLabels() {
+        push();
+        // Title
+        fill(30);
+        noStroke();
+        textSize(16);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text('Refrigerant Cycle Simulation', canvasWidth / 2, 6);
+        textStyle(NORMAL);
+
+        // State labels along the pipes
+        textSize(9);
+        textAlign(CENTER, CENTER);
+
+        // Low-pressure gas (evaporator to compressor)
+        let lbl1x = (pathPoints[0].x + pathPoints[2].x) / 2 + 25;
+        let lbl1y = (pathPoints[0].y + pathPoints[2].y) / 2;
+        drawPipeLabel('Low-P Gas', lbl1x, lbl1y, [60, 100, 180]);
+
+        // High-pressure gas (compressor to condenser)
+        let lbl2x = (pathPoints[5].x + pathPoints[6].x) / 2;
+        let lbl2y = pathPoints[5].y - 14;
+        drawPipeLabel('High-P Hot Gas', lbl2x, lbl2y, [200, 70, 30]);
+
+        // High-pressure liquid (condenser to expansion valve)
+        let lbl3x = pathPoints[10].x + 20;
+        let lbl3y = (pathPoints[9].y + pathPoints[10].y) / 2;
+        drawPipeLabel('High-P Liquid', lbl3x, lbl3y, [190, 130, 30]);
+
+        // Low-pressure mix (expansion valve to evaporator)
+        let lbl4x = (pathPoints[12].x + pathPoints[13].x) / 2;
+        let lbl4y = pathPoints[12].y - 14;
+        drawPipeLabel('Low-P Cold Mix', lbl4x, lbl4y, [60, 120, 190]);
+
+        pop();
+    }
+
+    function drawPipeLabel(txt, x, y, col) {
+        push();
+        translate(x, y);
+        textSize(9);
+        // Background pill
+        let tw = textWidth(txt) + 8;
+        fill(245, 245, 245, 200);
+        noStroke();
+        rectMode(CENTER);
+        rect(0, 0, tw, 14, 3);
+        // Text in specified color
+        fill(col[0], col[1], col[2]);
+        textAlign(CENTER, CENTER);
+        text(txt, 0, 0);
+        pop();
+    }
+
+    function drawControls() {
+        push();
+        let cy = drawHeight;
+
+        // Background
+        noStroke();
+        fill(235);
+        rect(0, cy, canvasWidth, controlHeight);
+        stroke(200);
+        strokeWeight(1);
+        line(0, cy, canvasWidth, cy);
+
+        let padX = 15;
+        let rowY = cy + 14;
+        let sliderW = 150;
+        let sliderH = 8;
+        let spacing = canvasWidth / 5.2;
+
+        // ── Outdoor Temperature Slider ──
+        let sx = padX;
+        noStroke();
+        fill(60);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text('Outdoor Temp', sx, rowY - 10);
+
+        // Track
+        fill(200);
+        rect(sx, rowY + 8, sliderW, sliderH, 4);
+
+        // Knob
+        let outdoorFrac = (outdoorTemp - 80) / 30;
+        let outdoorKnobX = sx + outdoorFrac * sliderW;
+        fill(210, 90, 40);
+        noStroke();
+        ellipse(outdoorKnobX, rowY + 8 + sliderH / 2, 16, 16);
+
+        // Value label
+        fill(60);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text(Math.round(outdoorTemp) + '\u00B0F', sx + sliderW + 8, rowY + 3);
+
+        // Range labels
+        textSize(8);
+        fill(120);
+        textAlign(LEFT, TOP);
+        text('80\u00B0F', sx, rowY + 22);
+        textAlign(RIGHT, TOP);
+        text('110\u00B0F', sx + sliderW, rowY + 22);
+
+        sliderOutdoor = { x: sx, y: rowY + 2, w: sliderW, h: 20 };
+
+        // ── Indoor Setpoint Slider ──
+        sx += spacing;
+        noStroke();
+        fill(60);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text('Indoor Setpoint', sx, rowY - 10);
+
+        fill(200);
+        rect(sx, rowY + 8, sliderW, sliderH, 4);
+
+        let indoorFrac = (indoorSetpoint - 68) / 10;
+        let indoorKnobX = sx + indoorFrac * sliderW;
+        fill(40, 120, 200);
+        noStroke();
+        ellipse(indoorKnobX, rowY + 8 + sliderH / 2, 16, 16);
+
+        fill(60);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text(Math.round(indoorSetpoint) + '\u00B0F', sx + sliderW + 8, rowY + 3);
+
+        textSize(8);
+        fill(120);
+        textAlign(LEFT, TOP);
+        text('68\u00B0F', sx, rowY + 22);
+        textAlign(RIGHT, TOP);
+        text('78\u00B0F', sx + sliderW, rowY + 22);
+
+        sliderIndoor = { x: sx, y: rowY + 2, w: sliderW, h: 20 };
+
+        // ── Start / Pause Button ──
+        sx += spacing;
+        let btnW = 90;
+        let btnH = 30;
+        let btnY = rowY - 2;
+        fill(simRunning ? color(200, 170, 50) : color(50, 170, 80));
+        stroke(120);
+        strokeWeight(1);
+        rect(sx, btnY, btnW, btnH, 6);
+        fill(255);
+        noStroke();
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        text(simRunning ? 'Pause' : 'Start', sx + btnW / 2, btnY + btnH / 2);
+        btnStartPause = { x: sx, y: btnY, w: btnW, h: btnH };
+
+        // ── Speed Buttons ──
+        sx += spacing;
+        noStroke();
+        fill(60);
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text('Speed:', sx, rowY - 10);
+
+        let sBtnW = 60;
+        let sBtnH = 26;
+        let sBtnY = rowY;
+        let gap = 5;
+
+        for (let i = 0; i < 3; i++) {
+            let bx = sx + i * (sBtnW + gap);
+            if (animSpeed === i) {
+                fill(70, 130, 210);
+            } else {
+                fill(180);
+            }
+            stroke(120);
+            strokeWeight(1);
+            rect(bx, sBtnY, sBtnW, sBtnH, 5);
+            fill(255);
+            noStroke();
+            textSize(10);
+            textAlign(CENTER, CENTER);
+            text(speedLabels[i], bx + sBtnW / 2, sBtnY + sBtnH / 2);
+
+            if (i === 0) btnSpeedSlow = { x: bx, y: sBtnY, w: sBtnW, h: sBtnH };
+            if (i === 1) btnSpeedNormal = { x: bx, y: sBtnY, w: sBtnW, h: sBtnH };
+            if (i === 2) btnSpeedFast = { x: bx, y: sBtnY, w: sBtnW, h: sBtnH };
+        }
+
+        pop();
+    }
+
+    // ── Mouse Interaction ──
+
+    function mousePressed() {
+        if (isInside(mouseX, mouseY, btnStartPause)) {
+            simRunning = !simRunning;
+            return;
+        }
+        if (isInside(mouseX, mouseY, btnSpeedSlow)) {
+            animSpeed = 0;
+            return;
+        }
+        if (isInside(mouseX, mouseY, btnSpeedNormal)) {
+            animSpeed = 1;
+            return;
+        }
+        if (isInside(mouseX, mouseY, btnSpeedFast)) {
+            animSpeed = 2;
+            return;
+        }
+        if (isInside(mouseX, mouseY, sliderOutdoor)) {
+            draggingOutdoor = true;
+            updateOutdoorSlider();
+        }
+        if (isInside(mouseX, mouseY, sliderIndoor)) {
+            draggingIndoor = true;
+            updateIndoorSlider();
+        }
+    }
+
+    function mouseDragged() {
+        if (draggingOutdoor) updateOutdoorSlider();
+        if (draggingIndoor) updateIndoorSlider();
+    }
+
+    function mouseReleased() {
+        draggingOutdoor = false;
+        draggingIndoor = false;
+    }
+
+    function updateOutdoorSlider() {
+        let frac = constrain((mouseX - sliderOutdoor.x) / sliderOutdoor.w, 0, 1);
+        outdoorTemp = 80 + frac * 30;
+    }
+
+    function updateIndoorSlider() {
+        let frac = constrain((mouseX - sliderIndoor.x) / sliderIndoor.w, 0, 1);
+        indoorSetpoint = 68 + frac * 10;
+    }
+
+    function isInside(mx, my, btn) {
+        return mx >= btn.x && mx <= btn.x + btn.w &&
+               my >= btn.y && my <= btn.y + btn.h;
+    }
+
+    // ── Responsive Resize ──
+
+    function windowResized() {
+        canvasWidth = max(600, windowWidth);
+        canvasHeight = canvasWidth / aspectRatio;
+        drawHeight = canvasHeight - controlHeight;
+
+        resizeCanvas(canvasWidth, canvasHeight);
+        updateLayout();
+    }
+    </script>
+</body>
+</html>

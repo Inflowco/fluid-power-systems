@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Distribution System Layout</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, Helvetica, sans-serif; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; text-align: center; }
+        h1 { color: #1565c0; font-size: 1.4em; margin-bottom: 10px; }
+        .subtitle { color: #666; font-size: 0.9em; margin-bottom: 20px; }
+        .diagram { background: white; border-radius: 8px; padding: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: relative; min-height: 400px; }
+        .component { display: inline-block; padding: 10px 16px; margin: 8px; border-radius: 6px; font-size: 0.85em; cursor: pointer; transition: transform 0.2s; }
+        .component:hover { transform: scale(1.05); }
+        .generation { background: #ffccbc; border: 2px solid #e65100; color: #bf360c; }
+        .distribution { background: #bbdefb; border: 2px solid #1565c0; color: #0d47a1; }
+        .utilization { background: #c8e6c9; border: 2px solid #2e7d32; color: #1b5e20; }
+        .recovery { background: #e1bee7; border: 2px solid #6a1b9a; color: #4a148c; }
+        .arrow { color: #999; font-size: 1.5em; margin: 0 4px; }
+        .section-label { font-weight: bold; color: #333; margin: 16px 0 8px 0; font-size: 0.9em; }
+        .legend { display: flex; justify-content: center; gap: 20px; margin-top: 20px; font-size: 0.8em; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .info-panel { background: #e3f2fd; border-radius: 6px; padding: 12px; margin-top: 16px; font-size: 0.85em; color: #333; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Steam Distribution System Layout</h1>
+        <p class="subtitle">Click any component to see its function and specifications</p>
+        <div class="diagram">
+            <div class="section-label">Generation</div>
+            <span class="component generation" onclick="showInfo('boiler')">Boiler</span>
+            <span class="arrow">&rarr;</span>
+            <span class="component generation" onclick="showInfo('header')">Steam Header</span>
+
+            <div class="section-label">Distribution</div>
+            <span class="component distribution" onclick="showInfo('prv')">PRV Station</span>
+            <span class="arrow">&rarr;</span>
+            <span class="component distribution" onclick="showInfo('branch')">Branch Lines</span>
+            <span class="arrow">&rarr;</span>
+            <span class="component distribution" onclick="showInfo('drip')">Drip Legs</span>
+
+            <div class="section-label">Utilization</div>
+            <span class="component utilization" onclick="showInfo('hx')">Heat Exchangers</span>
+            <span class="component utilization" onclick="showInfo('coil')">Steam Coils</span>
+            <span class="component utilization" onclick="showInfo('process')">Process Equipment</span>
+
+            <div class="section-label">Recovery</div>
+            <span class="component recovery" onclick="showInfo('trap')">Steam Traps</span>
+            <span class="arrow">&rarr;</span>
+            <span class="component recovery" onclick="showInfo('flash')">Flash Tank</span>
+            <span class="arrow">&rarr;</span>
+            <span class="component recovery" onclick="showInfo('condensate')">Condensate Return</span>
+            <span class="arrow">&rarr;</span>
+            <span class="component recovery" onclick="showInfo('feedwater')">Feedwater Tank</span>
+        </div>
+        <div class="info-panel" id="infoPanel"></div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#e65100"></div> Generation</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div> Distribution</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#2e7d32"></div> Utilization</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#6a1b9a"></div> Recovery</div>
+        </div>
+    </div>
+    <script>
+        const info = {
+            boiler: '<strong>Boiler:</strong> Converts fuel energy into steam. Firetube or watertube design, typically 80-85% efficient. Produces saturated steam at the design pressure (e.g., 150 psig).',
+            header: '<strong>Steam Header:</strong> Large-diameter pipe collecting steam from one or more boilers and distributing it to branch lines. Sized for low velocity (6,000-8,000 FPM).',
+            prv: '<strong>PRV Station:</strong> Pressure Reducing Valve reduces header pressure to match process requirements. Includes strainer, PRV, bypass valve, and pressure gauges.',
+            branch: '<strong>Branch Lines:</strong> Smaller pipes carrying steam from the header to individual equipment. Sized for 4,000-6,000 FPM velocity.',
+            drip: '<strong>Drip Legs:</strong> Vertical drops at low points to collect condensate. Same diameter as main, extends 12-18" below. Connected to steam traps.',
+            hx: '<strong>Heat Exchangers:</strong> Transfer steam energy to process fluids. Shell-and-tube or plate type. Steam condenses on one side, heating the process fluid on the other.',
+            coil: '<strong>Steam Coils:</strong> Finned tube coils for air heating in HVAC systems, unit heaters, and air handling units.',
+            process: '<strong>Process Equipment:</strong> Jacketed vessels, autoclaves, dryers, and other equipment using steam directly for heating or sterilization.',
+            trap: '<strong>Steam Traps:</strong> Remove condensate and air while preventing steam loss. Types: thermostatic, mechanical (F&T), thermodynamic (disc).',
+            flash: '<strong>Flash Tank:</strong> Captures flash steam from high-pressure condensate. Redirects low-pressure flash steam to useful heating loads.',
+            condensate: '<strong>Condensate Return:</strong> Piping system returning hot condensate to the boiler room. Gravity, electric pump, or pressure-powered pump.',
+            feedwater: '<strong>Feedwater Tank:</strong> Collects returned condensate and treated makeup water. Often includes a deaerator to remove dissolved oxygen.'
+        };
+        function showInfo(key) {
+            const panel = document.getElementById('infoPanel');
+            panel.innerHTML = info[key];
+            panel.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

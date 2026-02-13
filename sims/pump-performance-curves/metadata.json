@@ -1,0 +1,8 @@
+{
+  "title": "Pump Performance Curve Explorer",
+  "chapter": 9,
+  "bloom_level": "L2 Understand",
+  "bloom_verb": "Interpret",
+  "technology": "p5.js",
+  "learning_objective": "Interpret pump performance curves to identify BEP and understand speed-flow relationships"
+}

@@ -1,0 +1,18 @@
+{
+  "dc.title": "Intelligent Textbook Architecture",
+  "dc.description": "Interactive vis-network diagram showing how VS Code, Claude Code, MkDocs, and GitHub work together to build and publish an intelligent textbook.",
+  "dc.subject": "Software Architecture, Educational Technology",
+  "dc.type": "InteractiveResource",
+  "dc.format": "text/html",
+  "dc.creator": "Claude Code",
+  "dc.date": "2026-02-12",
+  "dc.language": "en",
+  "dc.rights": "CC BY-NC-SA 4.0",
+  "dc.source": "Fluid Power Systems Intelligent Textbook",
+  "dc.relation": "https://dmccreary.github.io/fluid-power-systems/",
+  "microsim.library": "vis-network",
+  "microsim.bloomLevel": "Understand",
+  "microsim.bloomVerb": "Explain",
+  "microsim.gradeLevel": "High School / Undergraduate",
+  "microsim.duration": "5 minutes"
+}

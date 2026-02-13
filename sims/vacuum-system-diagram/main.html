@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vacuum System Schematic</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; overflow: hidden; }
+        main { display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ─── Vacuum System Schematic MicroSim ───
+
+    // Layout constants (recalculated on resize)
+    let W, H;
+    let margin;
+    let pipeY;          // main header vertical position
+    let compY;          // component center‑line
+    let pumpRunning = true;
+    let pipeLengthFactor = 1.0;
+    let solenoidOpen = true;
+    let solenoidTimer = 0;
+    let solenoidCycle = 90; // frames per half‑cycle (1.5 s at 60 fps)
+
+    // Molecules
+    let molecules = [];
+    const NUM_MOLECULES = 120;
+
+    // Tooltip
+    let tooltipText = [];
+    let tooltipX = 0, tooltipY = 0;
+    let showTooltip = false;
+
+    // Slider
+    let pipeLengthSlider;
+    let sliderLabel;
+
+    // Pressure (0 = atmosphere, 1 = deepest vacuum at pump)
+    function pressureAt(xNorm) {
+        // xNorm 0 (pump) → 1 (process points)
+        if (!pumpRunning) return 0.05;
+        let base = lerp(0.95, 0.3, xNorm);
+        // longer pipes = more drop at process end
+        let drop = (pipeLengthFactor - 1.0) * 0.15 * xNorm;
+        return max(0.05, base - drop);
+    }
+
+    // Component positions (fractions of usable width)
+    // Recalculated in computeLayout()
+    let cx = {};  // component x positions
+    let branchAx, branchBx, branchBottomY;
+
+    function computeLayout() {
+        W = windowWidth;
+        H = windowHeight;
+        margin = W * 0.04;
+
+        let usable = (W - 2 * margin) * pipeLengthFactor;
+        if (usable > W - 2 * margin) usable = W - 2 * margin;
+        let startX = margin;
+
+        compY = H * 0.32;
+        pipeY = compY;
+
+        cx.pump       = startX + usable * 0.04;
+        cx.checkValve = startX + usable * 0.16;
+        cx.receiver   = startX + usable * 0.30;
+        cx.gauge      = startX + usable * 0.30;
+        cx.isoValve   = startX + usable * 0.44;
+        cx.headerStart= startX + usable * 0.50;
+        cx.headerEnd  = startX + usable * 0.92;
+
+        branchAx = startX + usable * 0.62;
+        branchBx = startX + usable * 0.82;
+        branchBottomY = H * 0.72;
+    }
+
+    // ─── Component definitions with hitboxes ───
+    function componentHitboxes() {
+        let sz = W * 0.035;
+        return [
+            { name: 'Vacuum Pump', x: cx.pump, y: compY, w: sz * 2.6, h: sz * 2.2,
+              tip: ['Vacuum Pump (Rotary Vane)', 'Function: Removes gas from system', 'to create/maintain vacuum.', 'Typical: 1-25 HP, 28" Hg capacity', 'Click to toggle Running/Stopped'] },
+            { name: 'Check Valve', x: cx.checkValve, y: compY, w: sz * 1.4, h: sz * 1.4,
+              tip: ['Check Valve (Swing Type)', 'Function: Prevents backflow of air', 'into system when pump stops.', 'Typical: Brass or SS, 1"-4" line size'] },
+            { name: 'Vacuum Receiver', x: cx.receiver, y: compY, w: sz * 2.2, h: sz * 2.8,
+              tip: ['Vacuum Receiver Tank', 'Function: Provides vacuum reserve,', 'dampens pulsations, collects condensate.', 'Typical: 30-500 gallon, ASME rated'] },
+            { name: 'Pressure Gauge', x: cx.gauge, y: compY - sz * 1.9, w: sz * 1.2, h: sz * 1.2,
+              tip: ['Vacuum Gauge (Bourdon Tube)', 'Function: Displays system vacuum', 'level at receiver outlet.', 'Range: 0 to -30" Hg (0 to -760 mmHg)'] },
+            { name: 'Isolation Valve', x: cx.isoValve, y: compY, w: sz * 1.4, h: sz * 1.4,
+              tip: ['Isolation Valve (Butterfly)', 'Function: Isolates downstream header', 'for maintenance or leak testing.', 'Typical: 2"-8" wafer style, manual/actuated'] },
+            { name: 'Header', x: (cx.headerStart + cx.headerEnd) / 2, y: compY, w: cx.headerEnd - cx.headerStart, h: sz * 0.8,
+              tip: ['Main Vacuum Header', 'Function: Distributes vacuum from', 'receiver to all process branch lines.', 'Typical: 2"-6" pipe, slope toward receiver'] },
+            { name: 'Process A', x: branchAx, y: branchBottomY, w: sz * 2.4, h: sz * 2.0,
+              tip: ['Process Point A: Packaging Station', 'Solenoid valve + suction cup for', 'pick-and-place operations.', 'Typical: 18-24" Hg, 0.5-2 CFM per cup'] },
+            { name: 'Process B', x: branchBx, y: branchBottomY, w: sz * 2.4, h: sz * 2.0,
+              tip: ['Process Point B: Vacuum Oven', 'Bleed valve + sealed chamber for', 'drying or degassing operations.', 'Typical: 25-29" Hg, 5-50 CFM capacity'] },
+        ];
+    }
+
+    // ─── Molecule class ───
+    class Molecule {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            // Start near a process point or along header
+            let r = random();
+            if (r < 0.35) {
+                this.x = branchAx + random(-10, 10);
+                this.y = branchBottomY + random(-8, 8);
+                this.segment = 'branchA';
+            } else if (r < 0.7) {
+                this.x = branchBx + random(-10, 10);
+                this.y = branchBottomY + random(-8, 8);
+                this.segment = 'branchB';
+            } else {
+                this.x = random(cx.headerStart, cx.headerEnd);
+                this.y = compY + random(-6, 6);
+                this.segment = 'header';
+            }
+            this.size = random(2.5, 5);
+            this.alpha = random(120, 220);
+            this.speed = random(0.6, 1.8);
+            this.wobble = random(0.3, 0.8);
+            this.phase = random(TWO_PI);
+        }
+        update() {
+            if (!pumpRunning) {
+                // Brownian drift when pump is off
+                this.x += random(-0.3, 0.3);
+                this.y += random(-0.3, 0.3);
+                return;
+            }
+
+            let spd = this.speed * (0.7 + 0.6 * pipeLengthFactor);
+
+            if (this.segment === 'branchA') {
+                this.y -= spd * 0.8;
+                this.x += sin(frameCount * 0.05 + this.phase) * this.wobble;
+                if (this.y <= compY + 4) {
+                    this.y = compY + random(-4, 4);
+                    this.segment = 'header';
+                }
+            } else if (this.segment === 'branchB') {
+                this.y -= spd * 0.8;
+                this.x += sin(frameCount * 0.05 + this.phase) * this.wobble;
+                if (this.y <= compY + 4) {
+                    this.y = compY + random(-4, 4);
+                    this.segment = 'header';
+                }
+            } else if (this.segment === 'header') {
+                this.x -= spd * 1.2;
+                this.y += sin(frameCount * 0.04 + this.phase) * this.wobble * 0.5;
+                if (this.x <= cx.pump - W * 0.02) {
+                    this.segment = 'exhaust';
+                    this.x = cx.pump;
+                    this.y = compY - W * 0.025;
+                }
+            } else if (this.segment === 'exhaust') {
+                this.y -= spd * 1.5;
+                this.x += sin(frameCount * 0.08 + this.phase) * this.wobble * 1.5;
+                this.alpha -= 2;
+                if (this.alpha <= 0 || this.y < compY - H * 0.3) {
+                    this.reset();
+                }
+            }
+        }
+        draw() {
+            let vacLevel;
+            if (this.segment === 'exhaust') {
+                vacLevel = 0;
+            } else {
+                let xNorm = map(this.x, cx.pump, cx.headerEnd, 0, 1, true);
+                vacLevel = pressureAt(xNorm);
+            }
+            let r = lerp(180, 80, vacLevel);
+            let g = lerp(210, 130, vacLevel);
+            let b = lerp(240, 220, vacLevel);
+            noStroke();
+            fill(r, g, b, this.alpha);
+            ellipse(this.x, this.y, this.size, this.size);
+        }
+    }
+
+    function setup() {
+        computeLayout();
+        let canvas = createCanvas(W, H);
+        canvas.parent('main');
+
+        // Create slider
+        pipeLengthSlider = createSlider(0.6, 1.4, 1.0, 0.01);
+        pipeLengthSlider.parent('main');
+        pipeLengthSlider.style('width', '160px');
+        pipeLengthSlider.position(W - 230, H - 42);
+
+        for (let i = 0; i < NUM_MOLECULES; i++) {
+            molecules.push(new Molecule());
+        }
+    }
+
+    function draw() {
+        pipeLengthFactor = pipeLengthSlider.value();
+        computeLayout();
+
+        // Solenoid cycle
+        solenoidTimer++;
+        if (solenoidTimer >= solenoidCycle) {
+            solenoidTimer = 0;
+            solenoidOpen = !solenoidOpen;
+        }
+
+        background(245, 247, 250);
+
+        drawTitle();
+        drawPressureGradient();
+        drawPiping();
+        drawComponents();
+        drawMolecules();
+        drawLabels();
+        drawStatusPanel();
+        drawSliderLabel();
+        checkTooltip();
+        if (showTooltip) drawTooltipBox();
+    }
+
+    // ─── Drawing helpers ───
+
+    function drawTitle() {
+        fill(30, 50, 80);
+        noStroke();
+        textAlign(CENTER, TOP);
+        textSize(constrain(W * 0.022, 14, 26));
+        textStyle(BOLD);
+        text('Industrial Vacuum System Schematic', W / 2, 8);
+        textStyle(NORMAL);
+    }
+
+    function drawPressureGradient() {
+        let barY = H - 55;
+        let barH = 18;
+        let barX = margin;
+        let barW = W - 2 * margin;
+
+        // gradient
+        noStroke();
+        for (let i = 0; i < barW; i++) {
+            let t = i / barW;
+            let vac = pressureAt(t);
+            let r = lerp(220, 10, vac);
+            let g = lerp(230, 50, vac);
+            let b = lerp(245, 160, vac);
+            fill(r, g, b);
+            rect(barX + i, barY, 1, barH);
+        }
+
+        // border
+        noFill();
+        stroke(100);
+        strokeWeight(1);
+        rect(barX, barY, barW, barH, 3);
+
+        // labels
+        noStroke();
+        fill(60);
+        textSize(constrain(W * 0.012, 8, 13));
+        textAlign(LEFT, TOP);
+        text('Deep Vacuum (Pump)', barX, barY + barH + 3);
+        textAlign(RIGHT, TOP);
+        text('Near Atmosphere (Process)', barX + barW, barY + barH + 3);
+        textAlign(CENTER, TOP);
+        text('Pressure Gradient', W / 2, barY - 14);
+    }
+
+    function drawPiping() {
+        let pipeW = constrain(W * 0.008, 4, 10);
+        stroke(100, 140, 180);
+        strokeWeight(pipeW);
+        strokeCap(ROUND);
+
+        // Pump exhaust (up from pump)
+        let exhTop = compY - W * 0.06;
+        line(cx.pump, compY - W * 0.02, cx.pump, exhTop);
+        // Small atmosphere vent arrows
+        noFill();
+        strokeWeight(pipeW * 0.5);
+        let arrSz = W * 0.008;
+        line(cx.pump - arrSz, exhTop + arrSz, cx.pump, exhTop);
+        line(cx.pump + arrSz, exhTop + arrSz, cx.pump, exhTop);
+
+        strokeWeight(pipeW);
+        // Pump to check valve
+        line(cx.pump + W * 0.025, compY, cx.checkValve - W * 0.015, compY);
+        // Check valve to receiver
+        line(cx.checkValve + W * 0.015, compY, cx.receiver - W * 0.028, compY);
+        // Receiver to iso valve
+        line(cx.receiver + W * 0.028, compY, cx.isoValve - W * 0.015, compY);
+        // Iso valve to header start
+        line(cx.isoValve + W * 0.015, compY, cx.headerStart, compY);
+        // Header
+        line(cx.headerStart, compY, cx.headerEnd, compY);
+
+        // Branch A
+        line(branchAx, compY, branchAx, branchBottomY - W * 0.025);
+        // Branch B
+        line(branchBx, compY, branchBx, branchBottomY - W * 0.025);
+
+        // Condensate drain from receiver
+        let drainY = compY + W * 0.04;
+        strokeWeight(pipeW * 0.6);
+        stroke(120, 160, 200);
+        line(cx.receiver, compY + W * 0.03, cx.receiver, drainY + W * 0.01);
+        // small valve symbol on drain
+        noStroke();
+        fill(150, 170, 190);
+        triangle(cx.receiver - 4, drainY, cx.receiver + 4, drainY, cx.receiver, drainY + 8);
+    }
+
+    function drawComponents() {
+        let sz = W * 0.035;
+
+        // ─── Vacuum Pump ───
+        drawPump(cx.pump, compY, sz);
+
+        // ─── Check Valve ───
+        drawCheckValve(cx.checkValve, compY, sz);
+
+        // ─── Receiver Tank ───
+        drawReceiver(cx.receiver, compY, sz);
+
+        // ─── Gauge ───
+        drawGauge(cx.gauge, compY - sz * 1.9, sz * 0.5);
+
+        // ─── Isolation Valve ───
+        drawIsolationValve(cx.isoValve, compY, sz);
+
+        // ─── Process A: Packaging Station ───
+        drawProcessA(branchAx, branchBottomY, sz);
+
+        // ─── Process B: Vacuum Oven ───
+        drawProcessB(branchBx, branchBottomY, sz);
+    }
+
+    function drawPump(x, y, sz) {
+        push();
+        translate(x, y);
+
+        // Body
+        let running = pumpRunning;
+        let bodyColor = running ? color(60, 130, 90) : color(140, 100, 100);
+        fill(bodyColor);
+        stroke(40, 80, 60);
+        strokeWeight(1.5);
+        rectMode(CENTER);
+        rect(0, 0, sz * 2.2, sz * 1.6, 5);
+
+        // Motor fins
+        let finW = sz * 0.1;
+        for (let i = -2; i <= 2; i++) {
+            fill(running ? color(70, 145, 100) : color(150, 110, 110));
+            rect(i * finW * 2.5, -sz * 0.95, finW, sz * 0.25);
+        }
+
+        // Shaft circle
+        fill(200, 200, 210);
+        stroke(100);
+        ellipse(0, 0, sz * 0.6, sz * 0.6);
+        if (running) {
+            // Spinning indicator
+            let ang = frameCount * 0.12;
+            stroke(60, 130, 90);
+            strokeWeight(2);
+            line(0, 0, cos(ang) * sz * 0.22, sin(ang) * sz * 0.22);
+        }
+
+        // Status indicator
+        noStroke();
+        fill(running ? color(0, 220, 80) : color(220, 50, 50));
+        ellipse(sz * 0.8, -sz * 0.55, sz * 0.2, sz * 0.2);
+
+        pop();
+    }
+
+    function drawCheckValve(x, y, sz) {
+        push();
+        translate(x, y);
+        // Diamond shape
+        fill(170, 180, 195);
+        stroke(80, 90, 110);
+        strokeWeight(1.5);
+        beginShape();
+        vertex(-sz * 0.5, 0);
+        vertex(0, -sz * 0.5);
+        vertex(sz * 0.5, 0);
+        vertex(0, sz * 0.5);
+        endShape(CLOSE);
+
+        // Arrow pointing right (flow direction)
+        stroke(60, 70, 90);
+        strokeWeight(2);
+        fill(60, 70, 90);
+        let arrLen = sz * 0.25;
+        line(-arrLen, 0, arrLen, 0);
+        triangle(arrLen, 0, arrLen - 4, -3, arrLen - 4, 3);
+        pop();
+    }
+
+    function drawReceiver(x, y, sz) {
+        push();
+        translate(x, y);
+        // Cylindrical tank (rounded rect)
+        fill(190, 200, 215);
+        stroke(90, 100, 120);
+        strokeWeight(1.5);
+        rectMode(CENTER);
+        rect(0, 0, sz * 1.8, sz * 2.4, 12);
+
+        // Tank bands
+        stroke(120, 130, 150);
+        strokeWeight(1);
+        line(-sz * 0.85, -sz * 0.6, sz * 0.85, -sz * 0.6);
+        line(-sz * 0.85, sz * 0.6, sz * 0.85, sz * 0.6);
+
+        // Vacuum level indicator inside tank
+        if (pumpRunning) {
+            noStroke();
+            let vacH = map(pressureAt(0.3), 0, 1, 0, sz * 1.8);
+            fill(40, 90, 170, 60);
+            rectMode(CORNER);
+            rect(-sz * 0.8, sz * 1.0 - vacH, sz * 1.6, vacH, 0, 0, 8, 8);
+        }
+
+        // Label
+        noStroke();
+        fill(70);
+        textSize(constrain(sz * 0.25, 6, 11));
+        textAlign(CENTER, CENTER);
+        text('RCVR', 0, sz * 0.9);
+        pop();
+    }
+
+    function drawGauge(x, y, r) {
+        push();
+        translate(x, y);
+        // Gauge body
+        fill(240, 240, 235);
+        stroke(80);
+        strokeWeight(1.5);
+        ellipse(0, 0, r * 2, r * 2);
+
+        // Tick marks
+        for (let a = -PI * 0.8; a <= PI * 0.8; a += PI * 0.16) {
+            let x1 = cos(a) * r * 0.75;
+            let y1 = sin(a) * r * 0.75;
+            let x2 = cos(a) * r * 0.9;
+            let y2 = sin(a) * r * 0.9;
+            stroke(60);
+            strokeWeight(1);
+            line(x1, y1, x2, y2);
+        }
+
+        // Needle
+        let vacReading = pumpRunning ? pressureAt(0.3) : 0.05;
+        let needleAngle = map(vacReading, 0, 1, PI * 0.8, -PI * 0.8);
+        stroke(200, 30, 30);
+        strokeWeight(1.5);
+        line(0, 0, cos(needleAngle) * r * 0.7, sin(needleAngle) * r * 0.7);
+
+        // Center dot
+        noStroke();
+        fill(60);
+        ellipse(0, 0, r * 0.15, r * 0.15);
+
+        // Connection stem to receiver
+        stroke(100);
+        strokeWeight(2);
+        let stemLen = constrain(W * 0.012, 6, 18);
+        line(0, r, 0, r + stemLen);
+
+        pop();
+    }
+
+    function drawIsolationValve(x, y, sz) {
+        push();
+        translate(x, y);
+        // Butterfly body (bow-tie shape)
+        fill(170, 175, 185);
+        stroke(80, 85, 100);
+        strokeWeight(1.5);
+        beginShape();
+        vertex(-sz * 0.45, -sz * 0.4);
+        vertex(0, 0);
+        vertex(-sz * 0.45, sz * 0.4);
+        endShape(CLOSE);
+        beginShape();
+        vertex(sz * 0.45, -sz * 0.4);
+        vertex(0, 0);
+        vertex(sz * 0.45, sz * 0.4);
+        endShape(CLOSE);
+
+        // Handle
+        stroke(100, 80, 60);
+        strokeWeight(3);
+        line(0, -sz * 0.5, 0, -sz * 0.05);
+        noStroke();
+        fill(100, 80, 60);
+        ellipse(0, -sz * 0.55, sz * 0.15, sz * 0.15);
+        pop();
+    }
+
+    function drawProcessA(x, y, sz) {
+        push();
+        translate(x, y);
+
+        // Solenoid valve
+        let solColor = solenoidOpen && pumpRunning ? color(50, 160, 80) : color(160, 70, 70);
+        fill(solColor);
+        stroke(60);
+        strokeWeight(1.2);
+        rectMode(CENTER);
+        rect(0, -sz * 0.5, sz * 0.8, sz * 0.5, 3);
+
+        // Solenoid coil symbol
+        stroke(220);
+        strokeWeight(1);
+        noFill();
+        for (let i = 0; i < 3; i++) {
+            arc(- sz * 0.15 + i * sz * 0.15, -sz * 0.5, sz * 0.12, sz * 0.25, PI, TWO_PI);
+        }
+
+        // Suction cup
+        fill(180, 160, 140);
+        stroke(100, 90, 80);
+        strokeWeight(1.2);
+        arc(0, sz * 0.35, sz * 1.2, sz * 0.8, 0, PI, CHORD);
+
+        // Package being held
+        if (solenoidOpen && pumpRunning) {
+            fill(200, 170, 120, 200);
+            stroke(150, 120, 80);
+            strokeWeight(1);
+            rect(0, sz * 0.85, sz * 0.9, sz * 0.4, 2);
+            noStroke();
+            fill(120, 90, 50);
+            textSize(constrain(sz * 0.2, 5, 9));
+            textAlign(CENTER, CENTER);
+            text('PKG', 0, sz * 0.85);
+        }
+
+        // Status label
+        noStroke();
+        fill(solenoidOpen && pumpRunning ? color(30, 130, 60) : color(160, 50, 50));
+        textSize(constrain(sz * 0.22, 6, 10));
+        textAlign(CENTER, TOP);
+        text(solenoidOpen && pumpRunning ? 'PICK' : 'PLACE', 0, sz * 1.2);
+
+        pop();
+    }
+
+    function drawProcessB(x, y, sz) {
+        push();
+        translate(x, y);
+
+        // Bleed valve (small)
+        fill(170, 175, 185);
+        stroke(80);
+        strokeWeight(1.2);
+        rectMode(CENTER);
+        rect(0, -sz * 0.55, sz * 0.5, sz * 0.3, 2);
+        // valve handle
+        stroke(100, 80, 60);
+        strokeWeight(2);
+        line(-sz * 0.15, -sz * 0.75, sz * 0.15, -sz * 0.75);
+
+        // Oven chamber
+        fill(190, 195, 210);
+        stroke(80, 85, 100);
+        strokeWeight(1.5);
+        rect(0, sz * 0.35, sz * 1.8, sz * 1.2, 5);
+
+        // Door line
+        strokeWeight(1);
+        stroke(100, 105, 120);
+        line(-sz * 0.85, -sz * 0.08, -sz * 0.85, sz * 0.9);
+
+        // Vacuum indication inside oven
+        if (pumpRunning) {
+            noStroke();
+            fill(40, 90, 170, 40);
+            rect(0, sz * 0.35, sz * 1.6, sz * 1.0, 3);
+        }
+
+        // Temperature indicator dots
+        noStroke();
+        fill(220, 80, 40);
+        ellipse(sz * 0.55, sz * 0.2, sz * 0.12, sz * 0.12);
+        fill(220, 160, 40);
+        ellipse(sz * 0.55, sz * 0.5, sz * 0.12, sz * 0.12);
+
+        // Label
+        noStroke();
+        fill(70);
+        textSize(constrain(sz * 0.22, 5, 10));
+        textAlign(CENTER, CENTER);
+        text('VACUUM OVEN', 0, sz * 0.35);
+
+        pop();
+    }
+
+    function drawMolecules() {
+        for (let m of molecules) {
+            m.update();
+            m.draw();
+        }
+    }
+
+    function drawLabels() {
+        let sz = constrain(W * 0.011, 7, 13);
+        fill(40, 55, 80);
+        noStroke();
+        textSize(sz);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+
+        let labelY = compY + W * 0.045;
+        text('Vacuum\nPump', cx.pump, labelY);
+        text('Check\nValve', cx.checkValve, labelY);
+        text('Receiver\nTank', cx.receiver, labelY + W * 0.025);
+        text('Isolation\nValve', cx.isoValve, labelY);
+
+        textAlign(CENTER, BOTTOM);
+        let headerLabelY = compY - W * 0.015;
+        text('Main Vacuum Header', (cx.headerStart + cx.headerEnd) / 2, headerLabelY);
+
+        textAlign(CENTER, TOP);
+        text('Process A\nPackaging', branchAx, branchBottomY + W * 0.055);
+        text('Process B\nVacuum Oven', branchBx, branchBottomY + W * 0.065);
+
+        // Exhaust label
+        textSize(constrain(sz * 0.85, 6, 11));
+        textStyle(NORMAL);
+        textAlign(CENTER, BOTTOM);
+        let exhTop = compY - W * 0.065;
+        text('Exhaust to\nAtmosphere', cx.pump, exhTop);
+
+        // Gauge label
+        textAlign(CENTER, BOTTOM);
+        let gaugeR = W * 0.035 * 0.5;
+        text('Gauge', cx.gauge, compY - W * 0.035 * 1.9 - gaugeR - 4);
+
+        textStyle(NORMAL);
+    }
+
+    function drawStatusPanel() {
+        let px = margin;
+        let py = H * 0.06;
+        let panelW = constrain(W * 0.18, 110, 200);
+        let panelH = constrain(H * 0.12, 50, 75);
+
+        fill(255, 255, 255, 220);
+        stroke(180);
+        strokeWeight(1);
+        rectMode(CORNER);
+        rect(px, py, panelW, panelH, 6);
+
+        noStroke();
+        textAlign(LEFT, TOP);
+        textSize(constrain(W * 0.012, 8, 13));
+
+        let tx = px + 10;
+        let ty = py + 8;
+        let lineH = constrain(H * 0.025, 13, 20);
+
+        fill(40);
+        textStyle(BOLD);
+        text('System Status', tx, ty);
+        textStyle(NORMAL);
+        ty += lineH;
+
+        fill(pumpRunning ? color(30, 140, 60) : color(200, 50, 50));
+        text('Pump: ' + (pumpRunning ? 'RUNNING' : 'STOPPED'), tx, ty);
+        ty += lineH;
+
+        let vacInHg = pumpRunning ? (pressureAt(0.3) * 29.92).toFixed(1) : '0.0';
+        fill(40, 60, 120);
+        text('Vacuum: ' + vacInHg + '" Hg', tx, ty);
+    }
+
+    function drawSliderLabel() {
+        noStroke();
+        fill(60);
+        textSize(constrain(W * 0.011, 8, 12));
+        textAlign(RIGHT, CENTER);
+        text('Pipe Length: ' + pipeLengthFactor.toFixed(2) + 'x', W - 240, H - 30);
+        pipeLengthSlider.position(W - 220, H - 40);
+    }
+
+    // ─── Tooltip system ───
+    function checkTooltip() {
+        showTooltip = false;
+        let hitboxes = componentHitboxes();
+        for (let c of hitboxes) {
+            if (abs(mouseX - c.x) < c.w / 2 && abs(mouseY - c.y) < c.h / 2) {
+                tooltipText = c.tip;
+                tooltipX = mouseX;
+                tooltipY = mouseY;
+                showTooltip = true;
+                cursor(HAND);
+                return;
+            }
+        }
+        cursor(ARROW);
+    }
+
+    function drawTooltipBox() {
+        let maxW = 0;
+        let lineH = constrain(W * 0.014, 10, 16);
+        textSize(constrain(W * 0.012, 8, 13));
+        for (let line of tooltipText) {
+            let w = textWidth(line);
+            if (w > maxW) maxW = w;
+        }
+        let padX = 10, padY = 6;
+        let boxW = maxW + padX * 2;
+        let boxH = tooltipText.length * lineH + padY * 2;
+
+        // Keep tooltip on screen
+        let tx = tooltipX + 14;
+        let ty = tooltipY - boxH - 6;
+        if (tx + boxW > W - 10) tx = tooltipX - boxW - 14;
+        if (ty < 5) ty = tooltipY + 20;
+
+        fill(30, 45, 65, 235);
+        stroke(80, 140, 200);
+        strokeWeight(1);
+        rect(tx, ty, boxW, boxH, 5);
+
+        noStroke();
+        fill(240, 245, 255);
+        textAlign(LEFT, TOP);
+        for (let i = 0; i < tooltipText.length; i++) {
+            if (i === 0) textStyle(BOLD);
+            else textStyle(NORMAL);
+            text(tooltipText[i], tx + padX, ty + padY + i * lineH);
+        }
+        textStyle(NORMAL);
+    }
+
+    // ─── Interaction ───
+    function mousePressed() {
+        // Check if pump was clicked
+        let sz = W * 0.035;
+        if (abs(mouseX - cx.pump) < sz * 1.3 && abs(mouseY - compY) < sz * 1.1) {
+            pumpRunning = !pumpRunning;
+        }
+    }
+
+    function windowResized() {
+        computeLayout();
+        resizeCanvas(windowWidth, windowHeight);
+        pipeLengthSlider.position(W - 230, H - 42);
+    }
+    </script>
+</body>
+</html>

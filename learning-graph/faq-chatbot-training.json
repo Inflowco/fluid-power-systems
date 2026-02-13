@@ -117,7 +117,7 @@
       "difficulty": "easy",
       "concepts": ["CMMS Software", "SCADA Systems", "AI Dashboard", "IoT Fundamentals"],
       "keywords": ["software", "CMMS", "SCADA", "dashboard", "IoT"],
-      "source_links": ["docs/chapters/11-systems/index.md"],
+      "source_links": ["docs/chapters/13-systems/index.md"],
       "has_example": false,
       "word_count": 115
     },
@@ -143,7 +143,7 @@
       "difficulty": "easy",
       "concepts": ["Course Overview"],
       "keywords": ["career", "jobs", "technician", "maintenance", "automation"],
-      "source_links": ["docs/chapters/12-safety/index.md"],
+      "source_links": ["docs/chapters/14-safety/index.md"],
       "has_example": false,
       "word_count": 104
     },
@@ -208,7 +208,7 @@
       "difficulty": "medium",
       "concepts": ["Predictive Maintenance", "Predictive Analytics", "Data Collection"],
       "keywords": ["predictive maintenance", "data analysis", "condition monitoring", "prediction"],
-      "source_links": ["docs/chapters/08-hydraulic/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/10-hydraulic/index.md", "docs/glossary.md"],
       "has_example": true,
       "word_count": 172
     },
@@ -234,7 +234,7 @@
       "difficulty": "medium",
       "concepts": ["IoT Fundamentals", "IoT Sensors", "Real-Time Monitoring"],
       "keywords": ["IoT", "Internet of Things", "sensors", "connectivity", "monitoring"],
-      "source_links": ["docs/chapters/06-cooling/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/07-cooling/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 142
     },
@@ -247,7 +247,7 @@
       "difficulty": "medium",
       "concepts": ["SCADA Systems", "Real-Time Monitoring", "System Monitoring"],
       "keywords": ["SCADA", "supervisory control", "data acquisition", "monitoring", "HMI"],
-      "source_links": ["docs/chapters/11-systems/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/13-systems/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 147
     },
@@ -260,7 +260,7 @@
       "difficulty": "medium",
       "concepts": ["CMMS Software", "Work Order Management", "Maintenance Planning With AI"],
       "keywords": ["CMMS", "maintenance management", "work orders", "scheduling", "inventory"],
-      "source_links": ["docs/chapters/11-systems/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/13-systems/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 138
     },
@@ -273,7 +273,7 @@
       "difficulty": "medium",
       "concepts": ["Cavitation Prevention", "Pumping System Fundamentals"],
       "keywords": ["cavitation", "vapor bubbles", "pump damage", "pressure"],
-      "source_links": ["docs/chapters/09-pumping/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/11-pumping/index.md", "docs/glossary.md"],
       "has_example": true,
       "word_count": 156
     },
@@ -455,7 +455,7 @@
       "difficulty": "medium",
       "concepts": ["Hydraulic Fluid Types", "Hydraulic Fluid"],
       "keywords": ["hydraulic fluid", "viscosity", "properties", "oil", "maintenance"],
-      "source_links": ["docs/chapters/08-hydraulic/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/10-hydraulic/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 136
     },
@@ -468,7 +468,7 @@
       "difficulty": "medium",
       "concepts": ["SCADA Systems", "CMMS Software"],
       "keywords": ["SCADA", "CMMS", "difference", "monitoring", "maintenance"],
-      "source_links": ["docs/chapters/11-systems/index.md"],
+      "source_links": ["docs/chapters/13-systems/index.md"],
       "has_example": false,
       "word_count": 125
     },
@@ -494,7 +494,7 @@
       "difficulty": "medium",
       "concepts": ["Cooling Tower Operations", "Cooling Water Fundamentals"],
       "keywords": ["cooling tower", "evaporation", "heat rejection", "water quality"],
-      "source_links": ["docs/chapters/06-cooling/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/07-cooling/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 140
     },
@@ -507,7 +507,7 @@
       "difficulty": "medium",
       "concepts": ["Combustible Dust Safety", "NFPA Standards", "Dust Collection Fundamentals"],
       "keywords": ["combustible dust", "explosion", "NFPA", "safety", "dust collection"],
-      "source_links": ["docs/chapters/07-dust-collection/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/09-dust-collection/index.md", "docs/glossary.md"],
       "has_example": true,
       "word_count": 122
     },
@@ -520,7 +520,7 @@
       "difficulty": "medium",
       "concepts": ["Water Hammer Prevention", "Pumping System Fundamentals"],
       "keywords": ["water hammer", "pressure surge", "valve", "prevention"],
-      "source_links": ["docs/chapters/09-pumping/index.md"],
+      "source_links": ["docs/chapters/11-pumping/index.md"],
       "has_example": false,
       "word_count": 127
     },
@@ -533,7 +533,7 @@
       "difficulty": "medium",
       "concepts": ["Vibration Analysis", "Vibration Principles", "Pattern Recognition In System Data"],
       "keywords": ["vibration", "analysis", "bearing", "misalignment", "diagnosis"],
-      "source_links": ["docs/chapters/10-fan/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/12-fan/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 127
     },
@@ -546,7 +546,7 @@
       "difficulty": "medium",
       "concepts": ["Leak Detection", "Ultrasonic Testing"],
       "keywords": ["leak detection", "ultrasonic", "pressure testing", "thermal imaging"],
-      "source_links": ["docs/chapters/05-compressed-air/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/06-compressed-air/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 138
     },
@@ -559,7 +559,7 @@
       "difficulty": "medium",
       "concepts": ["Corrosion Prevention", "Water Treatment Principles", "Water Quality Parameters"],
       "keywords": ["corrosion", "prevention", "water treatment", "materials", "cooling"],
-      "source_links": ["docs/chapters/06-cooling/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/07-cooling/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 133
     },
@@ -572,7 +572,7 @@
       "difficulty": "medium",
       "concepts": ["Scale Prevention", "Water Quality Parameters", "Cooling Water Fundamentals"],
       "keywords": ["scaling", "mineral deposits", "heat transfer", "water treatment"],
-      "source_links": ["docs/chapters/06-cooling/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/07-cooling/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 131
     },
@@ -598,7 +598,7 @@
       "difficulty": "medium",
       "concepts": ["Compressor Types", "Compressor Functions"],
       "keywords": ["compressor", "reciprocating", "rotary screw", "centrifugal"],
-      "source_links": ["docs/chapters/05-compressed-air/index.md", "docs/glossary.md"],
+      "source_links": ["docs/chapters/06-compressed-air/index.md", "docs/glossary.md"],
       "has_example": false,
       "word_count": 117
     },
@@ -624,7 +624,7 @@
       "difficulty": "medium",
       "concepts": ["Troubleshooting Methodologies", "Cavitation Prevention", "Vibration Analysis"],
       "keywords": ["pump noise", "cavitation", "bearing", "troubleshooting", "vibration"],
-      "source_links": ["docs/chapters/09-pumping/index.md"],
+      "source_links": ["docs/chapters/11-pumping/index.md"],
       "has_example": true,
       "word_count": 151
     },
@@ -650,7 +650,7 @@
       "difficulty": "medium",
       "concepts": ["Compressed Air Fundamentals", "Air System Efficiency", "Leak Detection"],
       "keywords": ["compressed air", "inefficiency", "leaks", "waste", "energy"],
-      "source_links": ["docs/chapters/05-compressed-air/index.md"],
+      "source_links": ["docs/chapters/06-compressed-air/index.md"],
       "has_example": true,
       "word_count": 143
     },
@@ -663,7 +663,7 @@
       "difficulty": "medium",
       "concepts": ["Filter Maintenance", "Dust Collection Fundamentals", "Automated Filter Cleaning"],
       "keywords": ["filter", "dust collection", "differential pressure", "cleaning", "maintenance"],
-      "source_links": ["docs/chapters/07-dust-collection/index.md"],
+      "source_links": ["docs/chapters/09-dust-collection/index.md"],
       "has_example": false,
       "word_count": 132
     },
@@ -676,7 +676,7 @@
       "difficulty": "medium",
       "concepts": ["Hydraulic System Fundamentals", "Troubleshooting Methodologies", "Heat Transfer Mechanisms"],
       "keywords": ["hydraulic", "overheating", "cooling", "troubleshoot", "heat exchanger"],
-      "source_links": ["docs/chapters/08-hydraulic/index.md"],
+      "source_links": ["docs/chapters/10-hydraulic/index.md"],
       "has_example": false,
       "word_count": 146
     },
@@ -702,7 +702,7 @@
       "difficulty": "easy",
       "concepts": ["System Safety Principles", "PPE Requirements", "OSHA Standards Overview"],
       "keywords": ["safety", "hazards", "PPE", "lockout/tagout", "pressure", "injection"],
-      "source_links": ["docs/chapters/12-safety/index.md"],
+      "source_links": ["docs/chapters/14-safety/index.md"],
       "has_example": false,
       "word_count": 142
     },
@@ -715,7 +715,7 @@
       "difficulty": "hard",
       "concepts": ["System Optimization Methods", "Energy Auditing", "Energy Efficiency Metrics"],
       "keywords": ["energy optimization", "audit", "VFD", "efficiency", "AI"],
-      "source_links": ["docs/chapters/11-systems/index.md"],
+      "source_links": ["docs/chapters/13-systems/index.md"],
       "has_example": false,
       "word_count": 147
     },
@@ -728,7 +728,7 @@
       "difficulty": "hard",
       "concepts": ["Controls Integration", "System Integration", "Advanced System Integration"],
       "keywords": ["legacy", "integration", "challenges", "protocols", "cybersecurity"],
-      "source_links": ["docs/chapters/11-systems/index.md"],
+      "source_links": ["docs/chapters/13-systems/index.md"],
       "has_example": false,
       "word_count": 148
     },
@@ -741,7 +741,7 @@
       "difficulty": "hard",
       "concepts": ["Predictive Maintenance", "Preventive Maintenance", "Maintenance Planning With AI"],
       "keywords": ["predictive", "preventive", "maintenance", "strategy", "selection"],
-      "source_links": ["docs/chapters/08-hydraulic/index.md"],
+      "source_links": ["docs/chapters/10-hydraulic/index.md"],
       "has_example": true,
       "word_count": 146
     },
@@ -767,7 +767,7 @@
       "difficulty": "hard",
       "concepts": ["AI Fundamentals", "System Integration", "Data Collection Methods"],
       "keywords": ["AI implementation", "pilot project", "data collection", "baseline", "phased"],
-      "source_links": ["docs/chapters/11-systems/index.md"],
+      "source_links": ["docs/chapters/13-systems/index.md"],
       "has_example": false,
       "word_count": 151
     },
@@ -780,7 +780,7 @@
       "difficulty": "medium",
       "concepts": ["Water Quality Parameters", "Water Treatment Principles", "Cooling Water Fundamentals"],
       "keywords": ["water quality", "cooling", "treatment", "testing", "chemical dosing"],
-      "source_links": ["docs/chapters/06-cooling/index.md"],
+      "source_links": ["docs/chapters/07-cooling/index.md"],
       "has_example": false,
       "word_count": 143
     },
@@ -793,7 +793,7 @@
       "difficulty": "medium",
       "concepts": ["Compressed Air Fundamentals", "Air System Efficiency", "Leak Detection"],
       "keywords": ["compressed air", "best practices", "leaks", "pressure", "efficiency"],
-      "source_links": ["docs/chapters/05-compressed-air/index.md"],
+      "source_links": ["docs/chapters/06-compressed-air/index.md"],
       "has_example": false,
       "word_count": 138
     },
@@ -806,7 +806,7 @@
       "difficulty": "medium",
       "concepts": ["System Documentation Practices", "CMMS Software", "Maintenance Logs"],
       "keywords": ["documentation", "maintenance records", "CMMS", "data quality", "AI"],
-      "source_links": ["docs/chapters/11-systems/index.md"],
+      "source_links": ["docs/chapters/13-systems/index.md"],
       "has_example": false,
       "word_count": 136
     },
@@ -858,7 +858,7 @@
       "difficulty": "hard",
       "concepts": ["Multi-Parameter Optimization", "Energy Management Systems (EMS)", "Mixed System Optimization"],
       "keywords": ["facility optimization", "energy", "multi-system", "AI", "heat recovery"],
-      "source_links": ["docs/chapters/11-systems/index.md"],
+      "source_links": ["docs/chapters/13-systems/index.md"],
       "has_example": false,
       "word_count": 148
     },

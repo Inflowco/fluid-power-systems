@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blower Types Comparison</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+        #controls {
+            background: #fff;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #ddd;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        #controls h2 {
+            font-size: 18px;
+            color: #333;
+            margin: 0;
+        }
+        #compareBtn {
+            background: #1565C0;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        #compareBtn:hover { background: #0D47A1; }
+        #compareBtn.active { background: #E65100; }
+        #canvas-container { width: 100%; }
+        #detail-panel {
+            display: none;
+            background: #fff;
+            margin: 0 12px 12px 12px;
+            padding: 16px 20px;
+            border-radius: 6px;
+            border: 2px solid #1565C0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        #detail-panel h3 { color: #1565C0; margin-bottom: 8px; font-size: 16px; }
+        #detail-panel p { color: #444; font-size: 14px; line-height: 1.5; margin-bottom: 4px; }
+        #comparison-table {
+            display: none;
+            margin: 0 12px 12px 12px;
+            overflow-x: auto;
+        }
+        #comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            background: #fff;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        #comparison-table th {
+            background: #1565C0;
+            color: #fff;
+            padding: 8px 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+        #comparison-table td {
+            padding: 6px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            color: #333;
+        }
+        #comparison-table tr:nth-child(even) { background: #f8f9fa; }
+        #comparison-table tr:hover { background: #e3f2fd; }
+        .cat-pd { background: #e8f5e9 !important; }
+        .cat-centrifugal { background: #e3f2fd !important; }
+        .cat-other { background: #fff3e0 !important; }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h2>Blower Types Comparison</h2>
+        <button id="compareBtn" onclick="toggleCompare()">Compare All</button>
+    </div>
+    <div id="canvas-container"><main></main></div>
+    <div id="detail-panel">
+        <h3 id="detail-title"></h3>
+        <p id="detail-text"></p>
+    </div>
+    <div id="comparison-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Property</th>
+                    <th>PD (Roots)</th>
+                    <th>Rotary Screw</th>
+                    <th>Centrifugal</th>
+                    <th>Regenerative</th>
+                    <th>High-Speed Turbo</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Category</strong></td>
+                    <td class="cat-pd">Positive Displacement</td>
+                    <td class="cat-pd">Positive Displacement</td>
+                    <td class="cat-centrifugal">Dynamic</td>
+                    <td class="cat-other">Dynamic</td>
+                    <td class="cat-centrifugal">Dynamic</td>
+                </tr>
+                <tr>
+                    <td><strong>Flow (CFM)</strong></td>
+                    <td>Up to 14,000</td>
+                    <td>Up to 6,700</td>
+                    <td>Up to 100,000+</td>
+                    <td>Up to 600</td>
+                    <td>Up to 10,000</td>
+                </tr>
+                <tr>
+                    <td><strong>Max Pressure</strong></td>
+                    <td>15-20 psig</td>
+                    <td>25 psig</td>
+                    <td>3-15 psig</td>
+                    <td>5 psig</td>
+                    <td>25 psig</td>
+                </tr>
+                <tr>
+                    <td><strong>Efficiency</strong></td>
+                    <td>50-65%</td>
+                    <td>60-75%</td>
+                    <td>75-85%</td>
+                    <td>40-55%</td>
+                    <td>70-80%</td>
+                </tr>
+                <tr>
+                    <td><strong>Noise Level</strong></td>
+                    <td>High</td>
+                    <td>Low</td>
+                    <td>Moderate</td>
+                    <td>Low</td>
+                    <td>Low (&lt;85 dBA)</td>
+                </tr>
+                <tr>
+                    <td><strong>Oil Required</strong></td>
+                    <td>Yes</td>
+                    <td>Yes or Oil-Free</td>
+                    <td>Varies</td>
+                    <td>No</td>
+                    <td>No</td>
+                </tr>
+                <tr>
+                    <td><strong>Flow Type</strong></td>
+                    <td>Constant Volume</td>
+                    <td>Near-Constant</td>
+                    <td>Variable (curve)</td>
+                    <td>Variable (curve)</td>
+                    <td>Variable (curve)</td>
+                </tr>
+                <tr>
+                    <td><strong>Maintenance</strong></td>
+                    <td>Moderate</td>
+                    <td>Moderate</td>
+                    <td>Low-Moderate</td>
+                    <td>Very Low</td>
+                    <td>Very Low</td>
+                </tr>
+                <tr>
+                    <td><strong>Best Application</strong></td>
+                    <td>Conveying, aeration</td>
+                    <td>Dense-phase, aeration</td>
+                    <td>Large WWTP, dust</td>
+                    <td>Vacuum loaders</td>
+                    <td>Aeration, process air</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+    // ══════════════════════════════════════════════════════════════════
+    //  BLOWER DATA
+    // ══════════════════════════════════════════════════════════════════
+    const blowers = [
+        {
+            name: 'PD (Roots)',
+            category: 'Positive Displacement',
+            efficiency: '50-65%',
+            effColor: 'yellow',
+            pressure: '15-20 psig',
+            flow: 'Up to 14,000 CFM',
+            noise: 'High (100-110 dBA)',
+            oil: 'Yes (gears/bearings)',
+            flowType: 'Constant Volume',
+            bestApp: 'Pneumatic conveying, wastewater aeration, industrial vacuum',
+            description: 'Positive displacement (Roots) blowers use two figure-eight-shaped lobes rotating in opposite directions to trap and push air. Invented in 1860, the Roots blower delivers constant airflow regardless of discharge pressure, making it ideal for pneumatic conveying where system pressure varies. Available in twin-lobe and tri-lobe designs. Tri-lobe models reduce pulsation by 30% and noise by 4-7 dBA.'
+        },
+        {
+            name: 'Rotary Screw',
+            category: 'Positive Displacement',
+            efficiency: '60-75%',
+            effColor: 'green',
+            pressure: '25 psig',
+            flow: 'Up to 6,700 CFM',
+            noise: 'Low',
+            oil: 'Yes or Oil-Free',
+            flowType: 'Near-Constant Volume',
+            bestApp: 'Dense-phase conveying, long-distance conveying, aeration',
+            description: 'Rotary screw blowers use two helical rotors (screws) that mesh and compress air progressively. Unlike PD blowers which trap air in pulses, screw blowers compress smoothly and continuously, producing much lower noise and vibration. Higher efficiency than PD blowers at elevated pressures (above 8 psi). Oil-free models available for food and pharmaceutical applications.'
+        },
+        {
+            name: 'Centrifugal',
+            category: 'Dynamic',
+            efficiency: '75-85%',
+            effColor: 'green',
+            pressure: '3-15 psig',
+            flow: 'Up to 100,000+ CFM',
+            noise: 'Moderate',
+            oil: 'Varies by design',
+            flowType: 'Variable (follows curve)',
+            bestApp: 'Large wastewater plants, dust collection, high-volume applications',
+            description: 'Centrifugal blowers use a spinning impeller to accelerate air outward by centrifugal force. Kinetic energy is converted to pressure in a volute or diffuser. Single-stage units reach 3 psi; multistage units reach 15 psi. Very high efficiency with airfoil impellers. Flow varies with system pressure — must be carefully matched to the system. Multistage units can experience surge if pressure exceeds capability.'
+        },
+        {
+            name: 'Regenerative',
+            category: 'Dynamic',
+            efficiency: '40-55%',
+            effColor: 'red',
+            pressure: '5 psig',
+            flow: 'Up to 600 CFM',
+            noise: 'Low',
+            oil: 'No',
+            flowType: 'Variable (follows curve)',
+            bestApp: 'Vacuum loaders, packaging, aquaculture, dental vacuum, spa jets',
+            description: 'Regenerative (side-channel) blowers use an impeller with many small blades spinning at high speed inside an annular channel. Air is accelerated, decelerated, and re-accelerated multiple times per revolution — each pass adds energy, "regenerating" pressure. Compact, oil-free, minimal maintenance. Widely used in plastics vacuum loader systems for short-distance pellet conveying.'
+        },
+        {
+            name: 'High-Speed Turbo',
+            category: 'Dynamic',
+            efficiency: '70-80%',
+            effColor: 'green',
+            pressure: '2-25 psig',
+            flow: 'Up to 10,000+ SCFM',
+            noise: 'Low (<85 dBA)',
+            oil: 'No (air-foil bearings)',
+            flowType: 'Variable (follows curve)',
+            bestApp: 'Wastewater aeration, process air, high-efficiency applications',
+            description: 'High-speed turbo blowers represent the newest technology. A centrifugal impeller is mounted directly on a permanent-magnet motor spinning at 8,000-75,000 RPM on air-foil bearings — non-contact, non-wearing, oil-free. Highest total package efficiency of any blower type. Integrated VFD for precise speed control. Transforming wastewater treatment with 30-40% energy savings vs PD blowers and minimal maintenance. Payback of 2-4 years is typical.'
+        }
+    ];
+
+    // ══════════════════════════════════════════════════════════════════
+    //  GLOBAL STATE
+    // ══════════════════════════════════════════════════════════════════
+    let canvasW, canvasH;
+    let cellW, cellH;
+    let panelBoxes = [];
+    let hoveredPanel = -1;
+    let selectedPanel = -1;
+    let showCompare = false;
+    let animAngle = 0;
+    let airflowOffset = 0;
+    let sf = 1;
+    let tooltipData = null;
+
+    function setup() {
+        calcSize();
+        let canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+    }
+
+    function calcSize() {
+        canvasW = min(windowWidth, 960);
+        // Top row: 3 blowers, Bottom row: 2 blowers centered
+        cellW = canvasW / 3;
+        cellH = max(200, min(260, canvasW / 3.2));
+        canvasH = cellH * 2 + 8;
+        sf = canvasW / 780;
+    }
+
+    function windowResized() {
+        calcSize();
+        resizeCanvas(canvasW, canvasH);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  MAIN DRAW
+    // ══════════════════════════════════════════════════════════════════
+    function draw() {
+        background(245);
+        animAngle += 0.02;
+        airflowOffset += 1.5;
+
+        panelBoxes = [];
+        hoveredPanel = -1;
+        tooltipData = null;
+
+        // Top row: 3 blowers (PD, Screw, Centrifugal)
+        for (let i = 0; i < 3; i++) {
+            let x = i * cellW;
+            let y = 0;
+            panelBoxes.push({ x, y, w: cellW, h: cellH, idx: i });
+            if (mouseX >= x && mouseX < x + cellW && mouseY >= y && mouseY < y + cellH) {
+                hoveredPanel = i;
+            }
+            drawBlowerPanel(x, y, cellW, cellH, i, i === hoveredPanel, i === selectedPanel);
+        }
+
+        // Bottom row: 2 blowers centered (Regenerative, Turbo)
+        let bottomOffset = (canvasW - cellW * 2) / 2;
+        for (let i = 0; i < 2; i++) {
+            let x = bottomOffset + i * cellW;
+            let y = cellH + 4;
+            let idx = i + 3;
+            panelBoxes.push({ x, y, w: cellW, h: cellH, idx: idx });
+            if (mouseX >= x && mouseX < x + cellW && mouseY >= y && mouseY < y + cellH) {
+                hoveredPanel = idx;
+            }
+            drawBlowerPanel(x, y, cellW, cellH, idx, idx === hoveredPanel, idx === selectedPanel);
+        }
+
+        if (tooltipData) {
+            drawTooltip(tooltipData.x, tooltipData.y, tooltipData.blower);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  DRAW BLOWER PANEL
+    // ══════════════════════════════════════════════════════════════════
+    function drawBlowerPanel(x, y, w, h, idx, isHovered, isSelected) {
+        let blower = blowers[idx];
+        let isPD = idx < 2;
+        let catColor = isPD ? color(46, 125, 50) : color(21, 101, 192);
+        let catColorBg = isPD ? color(46, 125, 50, 22) : color(21, 101, 192, 22);
+        let catColorBgHover = isPD ? color(46, 125, 50, 45) : color(21, 101, 192, 45);
+
+        push();
+        let bgColor = isHovered ? catColorBgHover : catColorBg;
+        noStroke();
+        fill(bgColor);
+        rect(x + 2, y + 2, w - 4, h - 4, 6);
+
+        if (isSelected) {
+            noFill();
+            stroke(catColor);
+            strokeWeight(3);
+            rect(x + 2, y + 2, w - 4, h - 4, 6);
+        }
+
+        noFill();
+        stroke(isPD ? color(46, 125, 50, 80) : color(21, 101, 192, 80));
+        strokeWeight(1);
+        rect(x + 2, y + 2, w - 4, h - 4, 6);
+
+        // Category label
+        noStroke();
+        fill(catColor);
+        textAlign(CENTER, TOP);
+        textSize(max(9, 10 * sf));
+        text(blower.category.toUpperCase(), x + w / 2, y + 6);
+
+        // Blower name
+        fill(40);
+        textSize(max(12, 14 * sf));
+        textStyle(BOLD);
+        text(blower.name, x + w / 2, y + 20);
+        textStyle(NORMAL);
+
+        // Draw diagram
+        let diagCx = x + w / 2;
+        let diagCy = y + h * 0.48;
+        let diagSize = min(w, h) * 0.42;
+        drawBlowerDiagram(diagCx, diagCy, diagSize, idx);
+        drawBlowerAirflow(diagCx, diagCy, diagSize, idx, isPD);
+
+        // Efficiency badge
+        drawEfficiencyBadge(x + w - 44 * sf, y + h - 28 * sf, blower.efficiency, blower.effColor, sf);
+
+        if (isHovered) {
+            tooltipData = { x: mouseX, y: mouseY, blower: blower };
+        }
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  BLOWER DIAGRAMS
+    // ══════════════════════════════════════════════════════════════════
+    function drawBlowerDiagram(cx, cy, size, idx) {
+        push();
+        translate(cx, cy);
+        let r = size * 0.45;
+        switch (idx) {
+            case 0: drawRootsBlower(r); break;
+            case 1: drawScrewBlower(r); break;
+            case 2: drawCentrifugalBlower(r); break;
+            case 3: drawRegenerativeBlower(r); break;
+            case 4: drawTurboBlower(r); break;
+        }
+        pop();
+    }
+
+    // ── PD Roots Blower ─────────────────────────────────────────────
+    function drawRootsBlower(r) {
+        // Oval housing
+        fill(200, 210, 220, 80);
+        stroke(130, 140, 160);
+        strokeWeight(max(2, 2.5 * sf));
+        ellipse(0, 0, r * 2.2, r * 1.8);
+
+        // Two figure-eight lobes rotating opposite
+        let lobePhases = [animAngle, animAngle + PI];
+        let colors = [color(100, 150, 200, 160), color(150, 100, 200, 160)];
+
+        for (let li = 0; li < 2; li++) {
+            let offsetX = (li === 0) ? -r * 0.28 : r * 0.28;
+            let a = (li === 0) ? lobePhases[0] : -lobePhases[1];
+
+            push();
+            translate(offsetX, 0);
+            rotate(a);
+
+            fill(colors[li]);
+            stroke(80, 90, 110);
+            strokeWeight(max(1.5, 2 * sf));
+
+            // Figure-eight shape (two lobes)
+            beginShape();
+            for (let t = 0; t < TWO_PI; t += 0.05) {
+                let lobeR = r * 0.38 * (0.5 + 0.5 * abs(cos(t)));
+                vertex(cos(t) * lobeR, sin(t) * lobeR);
+            }
+            endShape(CLOSE);
+
+            // Center shaft
+            fill(100, 110, 130);
+            stroke(70, 80, 100);
+            strokeWeight(1);
+            circle(0, 0, r * 0.14);
+            pop();
+        }
+
+        // Inlet/outlet labels
+        noStroke();
+        fill(80);
+        textSize(max(8, 9 * sf));
+        textAlign(CENTER, CENTER);
+        text('IN', -r * 1.0, -r * 0.8);
+        text('OUT', r * 1.0, -r * 0.8);
+    }
+
+    // ── Rotary Screw Blower ─────────────────────────────────────────
+    function drawScrewBlower(r) {
+        // Elongated housing
+        fill(200, 210, 220, 80);
+        stroke(130, 140, 160);
+        strokeWeight(max(2, 2.5 * sf));
+        rectMode(CENTER);
+        rect(0, 0, r * 2.4, r * 1.6, 8);
+
+        // Two meshing helical screws
+        let screwY = [-r * 0.25, r * 0.25];
+        let screwColors = [color(100, 160, 200, 180), color(160, 100, 200, 180)];
+
+        for (let si = 0; si < 2; si++) {
+            push();
+            translate(0, screwY[si]);
+            fill(screwColors[si]);
+            stroke(80, 90, 110);
+            strokeWeight(max(1, 1.5 * sf));
+
+            // Draw helical screw profile
+            let screwLen = r * 2.0;
+            let screwH = r * 0.28;
+            let phase = (si === 0) ? animAngle * 3 : -animAngle * 3 + PI;
+            let numLobes = 6;
+
+            beginShape();
+            for (let t = -screwLen / 2; t <= screwLen / 2; t += 1) {
+                let tNorm = (t + screwLen / 2) / screwLen;
+                let wave = sin(tNorm * numLobes * TWO_PI + phase) * screwH * 0.5;
+                vertex(t, -screwH * 0.5 + wave * 0.3);
+            }
+            for (let t = screwLen / 2; t >= -screwLen / 2; t -= 1) {
+                let tNorm = (t + screwLen / 2) / screwLen;
+                let wave = sin(tNorm * numLobes * TWO_PI + phase) * screwH * 0.5;
+                vertex(t, screwH * 0.5 + wave * 0.3);
+            }
+            endShape(CLOSE);
+            pop();
+        }
+
+        noStroke();
+        fill(80);
+        textSize(max(8, 9 * sf));
+        textAlign(CENTER, CENTER);
+        text('IN', -r * 1.1, -r * 0.7);
+        text('OUT', r * 1.1, -r * 0.7);
+    }
+
+    // ── Centrifugal Blower ──────────────────────────────────────────
+    function drawCentrifugalBlower(r) {
+        // Scroll/volute housing
+        fill(200, 210, 220, 80);
+        stroke(130, 140, 160);
+        strokeWeight(max(2, 2.5 * sf));
+        beginShape();
+        for (let a = 0; a <= TWO_PI; a += 0.05) {
+            let rr = r * 0.82 + (a / TWO_PI) * r * 0.22;
+            vertex(cos(a) * rr, sin(a) * rr);
+        }
+        endShape(CLOSE);
+
+        // Inlet eye
+        fill(230, 240, 250, 100);
+        stroke(130, 140, 160);
+        strokeWeight(1);
+        circle(0, 0, r * 0.55);
+
+        // Discharge
+        fill(200, 210, 220);
+        stroke(130, 140, 160);
+        strokeWeight(max(1.5, 2 * sf));
+        rectMode(CORNER);
+        rect(r * 0.6, -r * 0.2, r * 0.5, r * 0.28, 0, 3, 3, 0);
+
+        // Backward-curved impeller blades
+        let numBlades = 8;
+        let bladeR = r * 0.68;
+        let innerR = r * 0.22;
+        stroke(120, 130, 150);
+        strokeWeight(max(2, 2.5 * sf));
+        noFill();
+        for (let i = 0; i < numBlades; i++) {
+            let a = animAngle + (TWO_PI / numBlades) * i;
+            let x1 = cos(a) * innerR;
+            let y1 = sin(a) * innerR;
+            let tipA = a - 0.35;
+            let x2 = cos(tipA) * bladeR;
+            let y2 = sin(tipA) * bladeR;
+            let mx = cos(a - 0.15) * (innerR + bladeR) * 0.52;
+            let my = sin(a - 0.15) * (innerR + bladeR) * 0.52;
+            beginShape();
+            vertex(x1, y1);
+            quadraticVertex(mx - cos(a + HALF_PI) * 4, my - sin(a + HALF_PI) * 4, x2, y2);
+            endShape();
+        }
+
+        // Hub
+        fill(150, 155, 165);
+        stroke(110, 115, 125);
+        strokeWeight(max(1, 1.5 * sf));
+        circle(0, 0, r * 0.16);
+    }
+
+    // ── Regenerative (Side-Channel) Blower ──────────────────────────
+    function drawRegenerativeBlower(r) {
+        // Compact circular housing with annular channel
+        fill(200, 210, 220, 80);
+        stroke(130, 140, 160);
+        strokeWeight(max(2, 2.5 * sf));
+        circle(0, 0, r * 2.0);
+
+        // Annular channel (ring)
+        noFill();
+        stroke(130, 140, 160, 120);
+        strokeWeight(r * 0.2);
+        circle(0, 0, r * 1.5);
+
+        // Many small blades on impeller
+        let numBlades = 24;
+        let bladeR = r * 0.72;
+        let innerR = r * 0.48;
+        stroke(100, 120, 160);
+        strokeWeight(max(1, 1.5 * sf));
+        for (let i = 0; i < numBlades; i++) {
+            let a = animAngle * 2 + (TWO_PI / numBlades) * i;
+            let x1 = cos(a) * innerR;
+            let y1 = sin(a) * innerR;
+            let x2 = cos(a) * bladeR;
+            let y2 = sin(a) * bladeR;
+            line(x1, y1, x2, y2);
+        }
+
+        // Hub
+        fill(150, 155, 165);
+        stroke(110, 115, 125);
+        strokeWeight(max(1, 1.5 * sf));
+        circle(0, 0, r * 0.35);
+        fill(120);
+        noStroke();
+        circle(0, 0, r * 0.15);
+
+        // Channel flow arrows
+        stroke(21, 101, 192, 140);
+        fill(21, 101, 192, 140);
+        strokeWeight(1);
+        let arrowAngle = animAngle * 1.5;
+        for (let i = 0; i < 4; i++) {
+            let aa = arrowAngle + i * HALF_PI;
+            let ax = cos(aa) * r * 0.75;
+            let ay = sin(aa) * r * 0.75;
+            let tipA = aa + 0.3;
+            let tipX = cos(tipA) * r * 0.75;
+            let tipY = sin(tipA) * r * 0.75;
+            drawArrow(ax, ay, tipX, tipY, max(4, 5 * sf));
+        }
+    }
+
+    // ── High-Speed Turbo Blower ─────────────────────────────────────
+    function drawTurboBlower(r) {
+        // Compact scroll housing
+        fill(200, 210, 220, 80);
+        stroke(130, 140, 160);
+        strokeWeight(max(2, 2.5 * sf));
+        beginShape();
+        for (let a = 0; a <= TWO_PI; a += 0.05) {
+            let rr = r * 0.75 + (a / TWO_PI) * r * 0.2;
+            vertex(cos(a) * rr, sin(a) * rr);
+        }
+        endShape(CLOSE);
+
+        // Discharge
+        fill(200, 210, 220);
+        stroke(130, 140, 160);
+        strokeWeight(max(1.5, 2 * sf));
+        rectMode(CORNER);
+        rect(r * 0.5, -r * 0.15, r * 0.45, r * 0.22, 0, 3, 3, 0);
+
+        // High-speed impeller (thin, high-efficiency blades) spinning fast
+        let numBlades = 10;
+        let bladeR = r * 0.6;
+        let innerR = r * 0.15;
+        stroke(50, 100, 180);
+        strokeWeight(max(1.5, 2 * sf));
+        noFill();
+        for (let i = 0; i < numBlades; i++) {
+            let a = animAngle * 3 + (TWO_PI / numBlades) * i;
+            let x1 = cos(a) * innerR;
+            let y1 = sin(a) * innerR;
+            let tipA = a - 0.25;
+            let x2 = cos(tipA) * bladeR;
+            let y2 = sin(tipA) * bladeR;
+            line(x1, y1, x2, y2);
+        }
+
+        // Air-foil bearing ring indicator
+        noFill();
+        stroke(50, 100, 180, 100);
+        strokeWeight(2);
+        drawingContext.setLineDash([3, 3]);
+        circle(0, 0, r * 0.35);
+        drawingContext.setLineDash([]);
+
+        // PM motor core
+        fill(60, 80, 140);
+        stroke(40, 50, 90);
+        strokeWeight(1);
+        circle(0, 0, r * 0.18);
+
+        // Speed indicator text
+        noStroke();
+        fill(50, 100, 180);
+        textSize(max(7, 8 * sf));
+        textAlign(CENTER, CENTER);
+        text('Air-Foil', 0, r * 0.82);
+        text('Bearings', 0, r * 0.95);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  AIRFLOW ARROWS
+    // ══════════════════════════════════════════════════════════════════
+    function drawBlowerAirflow(cx, cy, size, idx, isPD) {
+        push();
+        translate(cx, cy);
+        let r = size * 0.45;
+        let c = isPD ? color(46, 125, 50, 180) : color(21, 101, 192, 180);
+        stroke(c);
+        fill(c);
+        strokeWeight(max(1.5, 2 * sf));
+
+        let phase = (airflowOffset % 40) / 40;
+
+        if (idx === 0) {
+            // PD Roots: air enters left, exits right
+            let inX = -r * 1.3 + phase * r * 0.3;
+            drawArrow(inX, -r * 0.5, -r * 0.5, -r * 0.5, max(5, 6 * sf));
+            let outX = r * 0.5 + phase * r * 0.3;
+            drawArrow(r * 0.5, -r * 0.5, outX + r * 0.4, -r * 0.5, max(5, 6 * sf));
+        } else if (idx === 1) {
+            // Screw: air enters left, exits right
+            let inX = -r * 1.4 + phase * r * 0.3;
+            drawArrow(inX, 0, -r * 0.8, 0, max(5, 6 * sf));
+            let outX = r * 0.8 + phase * r * 0.3;
+            drawArrow(r * 0.8, 0, outX + r * 0.4, 0, max(5, 6 * sf));
+        } else if (idx === 2 || idx === 4) {
+            // Centrifugal / Turbo: inlet axial (left into eye), outlet tangential
+            let inX = -r * 1.3 + phase * r * 0.3;
+            drawArrow(inX, 0, -r * 0.4, 0, max(5, 6 * sf));
+            let outPhase = (airflowOffset % 35) / 35;
+            let outX = r * 0.75 + outPhase * r * 0.4;
+            drawArrow(r * 0.75, -r * 0.06, outX + r * 0.3, -r * 0.06, max(5, 6 * sf));
+        } else if (idx === 3) {
+            // Regenerative: inlet and outlet on housing
+            let inX = -r * 1.2 + phase * r * 0.3;
+            drawArrow(inX, r * 0.3, -r * 0.6, r * 0.3, max(5, 6 * sf));
+            let outX = r * 0.6 + phase * r * 0.3;
+            drawArrow(r * 0.6, -r * 0.3, outX + r * 0.4, -r * 0.3, max(5, 6 * sf));
+        }
+        pop();
+    }
+
+    function drawArrow(x1, y1, x2, y2, headSize) {
+        line(x1, y1, x2, y2);
+        let a = atan2(y2 - y1, x2 - x1);
+        push();
+        translate(x2, y2);
+        rotate(a);
+        noStroke();
+        triangle(0, 0, -headSize, -headSize * 0.4, -headSize, headSize * 0.4);
+        pop();
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  EFFICIENCY BADGE
+    // ══════════════════════════════════════════════════════════════════
+    function drawEfficiencyBadge(x, y, label, colorName, s) {
+        let bg, fg;
+        if (colorName === 'green') { bg = color(46, 125, 50); fg = color(255); }
+        else if (colorName === 'yellow') { bg = color(245, 180, 0); fg = color(50); }
+        else { bg = color(211, 47, 47); fg = color(255); }
+
+        let badgeW = max(52, 56 * s);
+        let badgeH = max(18, 20 * s);
+        noStroke();
+        fill(bg);
+        rectMode(CENTER);
+        rect(x, y, badgeW, badgeH, badgeH / 2);
+        fill(fg);
+        textSize(max(9, 10 * s));
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        text(label, x, y);
+        textStyle(NORMAL);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  TOOLTIP
+    // ══════════════════════════════════════════════════════════════════
+    function drawTooltip(tx, ty, blower) {
+        let lines = [
+            'Efficiency: ' + blower.efficiency,
+            'Pressure: ' + blower.pressure,
+            'Flow: ' + blower.flow,
+            'Noise: ' + blower.noise,
+            'Oil: ' + blower.oil,
+            'Best For: ' + blower.bestApp
+        ];
+
+        textSize(max(11, 12 * sf));
+        let lineH = max(16, 18 * sf);
+        let maxW = 0;
+        for (let l of lines) maxW = max(maxW, textWidth(l));
+        let tipW = maxW + 24 * sf;
+        let tipH = lines.length * lineH + 16 * sf;
+        let titleH = lineH + 4;
+        let totalH = titleH + tipH;
+
+        let tipX = tx + 14;
+        let tipY = ty - totalH - 8;
+        if (tipX + tipW > canvasW) tipX = canvasW - tipW - 8;
+        if (tipY < 0) tipY = ty + 20;
+        if (tipX < 4) tipX = 4;
+
+        noStroke();
+        fill(0, 0, 0, 40);
+        rect(tipX + 3, tipY + 3, tipW, totalH, 6);
+
+        let isPD = blower.category === 'Positive Displacement';
+        let headerColor = isPD ? color(46, 125, 50) : color(21, 101, 192);
+        fill(headerColor);
+        rect(tipX, tipY, tipW, titleH, 6, 6, 0, 0);
+        fill(255);
+        textAlign(LEFT, CENTER);
+        textStyle(BOLD);
+        textSize(max(12, 13 * sf));
+        text(blower.name, tipX + 10, tipY + titleH / 2);
+        textStyle(NORMAL);
+
+        fill(40, 40, 50, 235);
+        rect(tipX, tipY + titleH, tipW, tipH, 0, 0, 6, 6);
+        textSize(max(11, 12 * sf));
+        textAlign(LEFT, TOP);
+        for (let i = 0; i < lines.length; i++) {
+            let colonIdx = lines[i].indexOf(':');
+            let label = lines[i].substring(0, colonIdx + 1);
+            let value = lines[i].substring(colonIdx + 1);
+            fill(180, 210, 255);
+            text(label, tipX + 10, tipY + titleH + 8 + i * lineH);
+            fill(255);
+            text(value, tipX + 10 + textWidth(label), tipY + titleH + 8 + i * lineH);
+        }
+        textAlign(CENTER, CENTER);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    //  INTERACTION
+    // ══════════════════════════════════════════════════════════════════
+    function mousePressed() {
+        for (let box of panelBoxes) {
+            if (mouseX >= box.x && mouseX < box.x + box.w &&
+                mouseY >= box.y && mouseY < box.y + box.h) {
+                if (selectedPanel === box.idx) {
+                    selectedPanel = -1;
+                    document.getElementById('detail-panel').style.display = 'none';
+                } else {
+                    selectedPanel = box.idx;
+                    showDetailPanel(box.idx);
+                }
+                return;
+            }
+        }
+    }
+
+    function showDetailPanel(idx) {
+        let blower = blowers[idx];
+        let panel = document.getElementById('detail-panel');
+        let isPD = idx < 2;
+        panel.style.display = 'block';
+        panel.style.borderColor = isPD ? '#2E7D32' : '#1565C0';
+        document.getElementById('detail-title').textContent = blower.name + ' (' + blower.category + ')';
+        document.getElementById('detail-title').style.color = isPD ? '#2E7D32' : '#1565C0';
+        document.getElementById('detail-text').textContent = blower.description;
+    }
+
+    function toggleCompare() {
+        showCompare = !showCompare;
+        let btn = document.getElementById('compareBtn');
+        let table = document.getElementById('comparison-table');
+        if (showCompare) {
+            btn.textContent = 'Hide Comparison';
+            btn.classList.add('active');
+            table.style.display = 'block';
+        } else {
+            btn.textContent = 'Compare All';
+            btn.classList.remove('active');
+            table.style.display = 'none';
+        }
+    }
+    </script>
+</body>
+</html>

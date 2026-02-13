@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compressed Air Leak Detector</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+        main { display: flex; justify-content: center; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+// Compressed Air Leak Detector MicroSim
+// Bloom Level: Analyze (L4) - diagnose, prioritize
+// Students use an ultrasonic leak detector to find compressed air leaks
+// and prioritize repairs based on cost impact analysis.
+
+// --- Layout ---
+let canvasWidth = 900;
+let titleH = 36;
+let schematicH = 310;
+let detectionH = 140;
+let reportH = 300;
+let canvasHeight;
+
+// --- Test Point Definitions ---
+let testPointDefs = [
+    { name: 'Coupling',       desc: 'Pipe coupling joint' },
+    { name: 'Thread Fitting', desc: 'NPT threaded connection' },
+    { name: 'Hose Connection',desc: 'Rubber hose barb fitting' },
+    { name: 'Valve Stem',     desc: 'Gate valve packing gland' },
+    { name: 'FRL Drain',      desc: 'Filter-Regulator-Lubricator drain' },
+    { name: 'Quick-Connect',  desc: 'Quick-disconnect coupling' },
+    { name: 'Regulator Vent', desc: 'Pressure regulator vent port' },
+    { name: 'Cylinder Seal',  desc: 'Pneumatic cylinder rod seal' }
+];
+
+// --- Simulation State ---
+let testPoints = [];
+let selectedPoint = -1;
+let taggedLeaks = [];
+let isPrioritized = false;
+let score = -1;
+let electricityRate = 0.12;
+let compressorKW = 25;
+let hoursPerYear = 8760;
+let systemCFM = 200;
+let probeAnimPhase = 0;
+let showingMeter = false;
+let meterValue = 0;
+let meterTargetValue = 0;
+let backgroundNoiseDB = 18;
+let probeActive = false;
+let probeFlashTimer = 0;
+
+// Pulsing animation for test points
+let pulsePhase = 0;
+
+// p5.js controls
+let electricitySlider;
+
+// Layout constants
+let margin = 15;
+
+function setup() {
+    updateCanvasSize();
+    canvasHeight = titleH + schematicH + detectionH + reportH;
+    let canvas = createCanvas(canvasWidth, canvasHeight);
+    canvas.parent(document.querySelector('main'));
+    canvas.style('cursor', 'crosshair');
+    textFont('Arial');
+
+    electricitySlider = createSlider(0.08, 0.25, 0.12, 0.01);
+    electricitySlider.parent(document.querySelector('main'));
+    electricitySlider.style('width', '130px');
+
+    generateNewScenario();
+    repositionControls();
+}
+
+function updateCanvasSize() {
+    let container = document.querySelector('main');
+    if (container) {
+        canvasWidth = min(container.offsetWidth, 920);
+    }
+    if (canvasWidth < 420) canvasWidth = 420;
+}
+
+function windowResized() {
+    updateCanvasSize();
+    canvasHeight = titleH + schematicH + detectionH + reportH;
+    resizeCanvas(canvasWidth, canvasHeight);
+    computeTestPointPositions();
+    repositionControls();
+}
+
+function repositionControls() {
+    let sliderX = canvasWidth - 290;
+    let sliderY = titleH + schematicH + detectionH + reportH - 36;
+    electricitySlider.position(sliderX, sliderY);
+}
+
+// --- Scenario Generation ---
+function generateNewScenario() {
+    let numLeaks = floor(random(4, 7));
+    let indices = [0, 1, 2, 3, 4, 5, 6, 7];
+    shuffleArray(indices);
+    let leakIndices = new Set(indices.slice(0, numLeaks));
+
+    testPoints = [];
+    for (let i = 0; i < 8; i++) {
+        let hasLeak = leakIndices.has(i);
+        let leakSize = 'none';
+        let cfm = 0;
+        let acousticDB = random(15, 25);
+
+        if (hasLeak) {
+            let r = random();
+            if (r < 0.33) {
+                leakSize = 'small';
+                cfm = random(1, 3);
+                acousticDB = random(40, 55);
+            } else if (r < 0.7) {
+                leakSize = 'medium';
+                cfm = random(3, 10);
+                acousticDB = random(55, 75);
+            } else {
+                leakSize = 'large';
+                cfm = random(10, 25);
+                acousticDB = random(75, 95);
+            }
+        }
+
+        testPoints.push({
+            x: 0, y: 0,
+            name: testPointDefs[i].name,
+            desc: testPointDefs[i].desc,
+            hasLeak: hasLeak,
+            leakSize: leakSize,
+            acousticDB: acousticDB,
+            cfm: cfm,
+            annualCost: 0,
+            probed: false
+        });
+    }
+
+    computeTestPointPositions();
+    updateCosts();
+
+    selectedPoint = -1;
+    taggedLeaks = [];
+    isPrioritized = false;
+    score = -1;
+    showingMeter = false;
+    meterValue = 0;
+    meterTargetValue = 0;
+    probeActive = false;
+}
+
+function computeTestPointPositions() {
+    let sx = canvasWidth * 0.03;
+    let sw = canvasWidth * 0.94;
+    let headerY = titleH + 175;
+
+    // Positions along system branches
+    let positions = [
+        { x: sx + sw * 0.22, y: headerY - 65 },
+        { x: sx + sw * 0.34, y: headerY + 65 },
+        { x: sx + sw * 0.44, y: headerY - 65 },
+        { x: sx + sw * 0.54, y: headerY + 65 },
+        { x: sx + sw * 0.63, y: headerY - 65 },
+        { x: sx + sw * 0.72, y: headerY + 65 },
+        { x: sx + sw * 0.81, y: headerY - 65 },
+        { x: sx + sw * 0.91, y: headerY + 65 }
+    ];
+
+    for (let i = 0; i < 8; i++) {
+        testPoints[i].x = positions[i].x;
+        testPoints[i].y = positions[i].y;
+    }
+}
+
+function updateCosts() {
+    electricityRate = electricitySlider.value();
+    let costPerCFMPerYear = (compressorKW / systemCFM) * electricityRate * hoursPerYear;
+    for (let tp of testPoints) {
+        tp.annualCost = tp.cfm * costPerCFMPerYear;
+    }
+    for (let tl of taggedLeaks) {
+        let tp = testPoints.find(p => p.name === tl.name);
+        if (tp) tl.annualCost = tp.annualCost;
+    }
+}
+
+function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        let j = floor(random(i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+}
+
+// ============================
+// MAIN DRAW
+// ============================
+function draw() {
+    updateCosts();
+    background(240, 242, 245);
+
+    pulsePhase += 0.04;
+    probeAnimPhase += 0.05;
+
+    drawTitle();
+    drawSchematic();
+    drawDetectionDisplay();
+    drawLeakReport();
+
+    meterValue = lerp(meterValue, meterTargetValue, 0.1);
+
+    if (probeFlashTimer > 0) probeFlashTimer--;
+}
+
+// ============================
+// TITLE
+// ============================
+function drawTitle() {
+    push();
+    fill(35, 55, 90);
+    noStroke();
+    rect(0, 0, canvasWidth, titleH);
+
+    fill(255);
+    noStroke();
+    textSize(18);
+    textAlign(CENTER, CENTER);
+    textStyle(BOLD);
+    text('Compressed Air Leak Detector', canvasWidth / 2, titleH / 2);
+    textStyle(NORMAL);
+    pop();
+}
+
+// ============================
+// SCHEMATIC
+// ============================
+function drawSchematic() {
+    push();
+    let yOff = titleH;
+
+    fill(248, 250, 253);
+    noStroke();
+    rect(0, yOff, canvasWidth, schematicH);
+
+    stroke(210);
+    strokeWeight(1);
+    line(0, yOff + schematicH, canvasWidth, yOff + schematicH);
+
+    let sx = canvasWidth * 0.03;
+    let sw = canvasWidth * 0.94;
+    let headerY = yOff + 175;
+
+    // --- Compressor ---
+    drawCompressor(sx + sw * 0.01, headerY - 30, 55, 60);
+
+    // Pipe: compressor to receiver
+    stroke(60, 100, 160);
+    strokeWeight(7);
+    line(sx + sw * 0.01 + 55, headerY, sx + sw * 0.11, headerY);
+
+    // Flow arrows on main pipe
+    drawFlowArrows(sx + sw * 0.01 + 55, headerY, sx + sw * 0.11, headerY);
+
+    // --- Receiver Tank ---
+    drawReceiver(sx + sw * 0.11, headerY - 40, 42, 80);
+
+    // Pipe: receiver to dryer
+    stroke(60, 100, 160);
+    strokeWeight(7);
+    line(sx + sw * 0.11 + 42, headerY, sx + sw * 0.19, headerY);
+    drawFlowArrows(sx + sw * 0.11 + 42, headerY, sx + sw * 0.19, headerY);
+
+    // --- Dryer ---
+    drawDryer(sx + sw * 0.19, headerY - 25, 38, 50);
+
+    // Pipe: dryer to main header start
+    stroke(60, 100, 160);
+    strokeWeight(7);
+    line(sx + sw * 0.19 + 38, headerY, sx + sw * 0.96, headerY);
+
+    // Flow arrows along main header
+    for (let f = 0.28; f < 0.95; f += 0.12) {
+        drawFlowArrow(sx + sw * f, headerY, 1);
+    }
+
+    // Main header label
+    fill(60, 80, 120);
+    noStroke();
+    textSize(10);
+    textAlign(CENTER, CENTER);
+    text('MAIN HEADER (100 PSI)', sx + sw * 0.58, headerY - 12);
+
+    // --- Branch lines to test points ---
+    stroke(80, 120, 175);
+    strokeWeight(3);
+    for (let i = 0; i < 8; i++) {
+        let tp = testPoints[i];
+        line(tp.x, headerY, tp.x, tp.y);
+
+        // Small fitting symbol at header junction
+        fill(120, 140, 170);
+        stroke(80, 100, 140);
+        strokeWeight(1.5);
+        rect(tp.x - 5, headerY - 5, 10, 10, 2);
+    }
+
+    // --- Draw branch end equipment ---
+    for (let i = 0; i < 8; i++) {
+        drawBranchEnd(i);
+    }
+
+    // --- Draw test point circles (pulsing) ---
+    for (let i = 0; i < 8; i++) {
+        drawTestPoint(i);
+    }
+
+    // Instructions
+    fill(90, 100, 120);
+    noStroke();
+    textSize(11);
+    textAlign(CENTER, BOTTOM);
+    text('Click on pulsing circles to probe with ultrasonic detector. Tag leaks found above 30 dB.', canvasWidth / 2, yOff + schematicH - 4);
+
+    pop();
+}
+
+function drawCompressor(x, y, w, h) {
+    push();
+    // Shadow
+    fill(0, 0, 0, 20);
+    noStroke();
+    rect(x + 3, y + 3, w, h, 8);
+
+    // Body
+    fill(85, 120, 175);
+    stroke(50, 75, 120);
+    strokeWeight(2);
+    rect(x, y, w, h, 8);
+
+    // Motor animation (spinning)
+    let cx = x + w / 2;
+    let cy = y + h / 2 - 5;
+    fill(60, 90, 145);
+    noStroke();
+    ellipse(cx, cy, 28, 28);
+
+    stroke(180, 210, 255);
+    strokeWeight(2);
+    for (let i = 0; i < 4; i++) {
+        let angle = probeAnimPhase * 3 + i * HALF_PI;
+        line(cx, cy, cx + cos(angle) * 11, cy + sin(angle) * 11);
+    }
+
+    fill(140, 170, 220);
+    noStroke();
+    ellipse(cx, cy, 8, 8);
+
+    // Label
+    fill(255);
+    noStroke();
+    textSize(9);
+    textAlign(CENTER, CENTER);
+    textStyle(BOLD);
+    text('COMPRESSOR', x + w / 2, y + h - 12);
+    textStyle(NORMAL);
+    pop();
+}
+
+function drawReceiver(x, y, w, h) {
+    push();
+    // Shadow
+    fill(0, 0, 0, 15);
+    noStroke();
+    rect(x + 2, y + 2, w, h, 12);
+
+    // Tank body
+    fill(175, 190, 210);
+    stroke(65, 80, 110);
+    strokeWeight(2);
+    rect(x, y, w, h, 12);
+
+    // Pressure fill indication
+    let fillH = h * 0.55;
+    fill(100, 150, 210, 50);
+    noStroke();
+    rect(x + 4, y + h - 4 - fillH, w - 8, fillH, 8);
+
+    // Gauge circle on top
+    fill(220, 225, 230);
+    stroke(100, 110, 125);
+    strokeWeight(1);
+    ellipse(x + w / 2, y + 12, 16, 16);
+    fill(60);
+    noStroke();
+    textSize(6);
+    textAlign(CENTER, CENTER);
+    text('PSI', x + w / 2, y + 12);
+
+    // Label
+    fill(45, 55, 80);
+    noStroke();
+    textSize(8);
+    textAlign(CENTER, CENTER);
+    text('RECEIVER', x + w / 2, y + h / 2 + 5);
+    pop();
+}
+
+function drawDryer(x, y, w, h) {
+    push();
+    // Shadow
+    fill(0, 0, 0, 15);
+    noStroke();
+    rect(x + 2, y + 2, w, h, 5);
+
+    // Body
+    fill(140, 190, 155);
+    stroke(70, 120, 85);
+    strokeWeight(2);
+    rect(x, y, w, h, 5);
+
+    // Snowflake symbol
+    stroke(220, 240, 225);
+    strokeWeight(1.5);
+    let cx = x + w / 2;
+    let cy = y + h / 2 - 4;
+    for (let i = 0; i < 3; i++) {
+        let a = i * PI / 3;
+        line(cx + cos(a) * 7, cy + sin(a) * 7, cx - cos(a) * 7, cy - sin(a) * 7);
+    }
+
+    // Label
+    fill(40, 70, 50);
+    noStroke();
+    textSize(8);
+    textAlign(CENTER, CENTER);
+    text('DRYER', x + w / 2, y + h - 10);
+    pop();
+}
+
+function drawBranchEnd(index) {
+    let tp = testPoints[index];
+    let isAbove = tp.y < titleH + 175;
+    let endY = isAbove ? tp.y - 20 : tp.y + 20;
+
+    push();
+    // Small equipment icon at branch end
+    fill(200, 205, 215);
+    stroke(140, 150, 165);
+    strokeWeight(1);
+
+    if (index === 0) {
+        // Coupling symbol
+        rect(tp.x - 8, endY - 5, 16, 10, 2);
+        stroke(160, 170, 185);
+        line(tp.x, endY - 5, tp.x, endY + 5);
+    } else if (index === 1) {
+        // Thread fitting
+        rect(tp.x - 7, endY - 6, 14, 12, 1);
+        stroke(170, 175, 185);
+        strokeWeight(0.5);
+        for (let ly = endY - 4; ly < endY + 5; ly += 2) {
+            line(tp.x - 5, ly, tp.x + 5, ly);
+        }
+    } else if (index === 2) {
+        // Hose (curved)
+        noFill();
+        stroke(180, 140, 80);
+        strokeWeight(4);
+        arc(tp.x, endY, 20, 16, 0, PI);
+    } else if (index === 3) {
+        // Valve
+        fill(190, 175, 175);
+        stroke(130, 120, 120);
+        strokeWeight(1.5);
+        triangle(tp.x - 8, endY - 6, tp.x, endY, tp.x - 8, endY + 6);
+        triangle(tp.x + 8, endY - 6, tp.x, endY, tp.x + 8, endY + 6);
+        stroke(100);
+        strokeWeight(2);
+        line(tp.x, endY - 6, tp.x, endY - 14);
+    } else if (index === 4) {
+        // FRL unit
+        fill(200, 210, 220);
+        stroke(120, 130, 145);
+        rect(tp.x - 10, endY - 7, 20, 14, 3);
+        fill(180, 195, 210);
+        noStroke();
+        rect(tp.x - 7, endY - 4, 5, 8, 1);
+        rect(tp.x - 1, endY - 4, 5, 8, 1);
+        rect(tp.x + 5, endY - 4, 5, 8, 1);
+    } else if (index === 5) {
+        // Quick-connect
+        fill(210, 200, 180);
+        stroke(160, 150, 130);
+        strokeWeight(1.5);
+        ellipse(tp.x, endY, 16, 16);
+        fill(180, 170, 150);
+        ellipse(tp.x, endY, 8, 8);
+    } else if (index === 6) {
+        // Regulator
+        fill(195, 200, 210);
+        stroke(130, 140, 155);
+        strokeWeight(1.5);
+        rect(tp.x - 10, endY - 8, 20, 16, 3);
+        fill(220, 225, 235);
+        noStroke();
+        ellipse(tp.x, endY - 2, 10, 10);
+    } else if (index === 7) {
+        // Cylinder
+        fill(190, 195, 205);
+        stroke(120, 130, 145);
+        strokeWeight(1.5);
+        rect(tp.x - 14, endY - 6, 28, 12, 2);
+        // Rod
+        stroke(160, 165, 175);
+        strokeWeight(3);
+        line(tp.x + 14, endY, tp.x + 22, endY);
+    }
+    pop();
+}
+
+function drawFlowArrows(x1, y, x2, y2) {
+    let dist_ = abs(x2 - x1);
+    if (dist_ > 40) {
+        let mx = (x1 + x2) / 2;
+        drawFlowArrow(mx, y, 1);
+    }
+}
+
+function drawFlowArrow(x, y, dir) {
+    push();
+    let phase = (probeAnimPhase * 20 + x) % 30;
+    let alpha = map(phase, 0, 30, 200, 60);
+    fill(100, 180, 255, alpha);
+    noStroke();
+    let s = 5;
+    triangle(x + s * dir, y, x - s * dir, y - s, x - s * dir, y + s);
+    pop();
+}
+
+function drawTestPoint(index) {
+    let tp = testPoints[index];
+    let r = 15;
+    let hovering = dist(mouseX, mouseY, tp.x, tp.y) < r + 4;
+    let isSelected = (selectedPoint === index);
+    let isTagged = taggedLeaks.some(l => l.name === tp.name);
+
+    push();
+
+    // Pulsing outer glow for unprobed points
+    if (!tp.probed) {
+        let pulse = sin(pulsePhase + index * 0.7) * 0.5 + 0.5;
+        let glowR = r * 2.5 + pulse * 12;
+        fill(80, 160, 255, 25 + pulse * 35);
+        noStroke();
+        ellipse(tp.x, tp.y, glowR, glowR);
+
+        let glowR2 = r * 2 + pulse * 6;
+        fill(80, 160, 255, 40 + pulse * 30);
+        ellipse(tp.x, tp.y, glowR2, glowR2);
+    }
+
+    // Tagged glow
+    if (isTagged) {
+        let pulse = sin(probeAnimPhase * 2 + index) * 0.3 + 0.7;
+        fill(255, 120, 40, 60 * pulse);
+        noStroke();
+        ellipse(tp.x, tp.y, r * 3.2, r * 3.2);
+    }
+
+    // Main circle
+    if (isSelected && probeFlashTimer > 0) {
+        // Flash effect when first probed
+        let flash = probeFlashTimer / 15.0;
+        fill(255, 255, 200, 200 * flash);
+        stroke(255, 220, 100);
+        strokeWeight(3);
+    } else if (isSelected) {
+        fill(255, 210, 60);
+        stroke(200, 160, 0);
+        strokeWeight(3);
+    } else if (isTagged) {
+        fill(255, 100, 40);
+        stroke(200, 70, 20);
+        strokeWeight(2);
+    } else if (hovering) {
+        fill(200, 225, 255);
+        stroke(60, 120, 210);
+        strokeWeight(2.5);
+    } else if (tp.probed) {
+        fill(210, 215, 225);
+        stroke(140, 150, 170);
+        strokeWeight(1.5);
+    } else {
+        fill(255, 255, 255, 220);
+        stroke(100, 130, 175);
+        strokeWeight(1.5);
+    }
+    ellipse(tp.x, tp.y, r * 2, r * 2);
+
+    // Number
+    fill(isTagged ? 255 : 40);
+    noStroke();
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    textStyle(BOLD);
+    text(index + 1, tp.x, tp.y);
+    textStyle(NORMAL);
+
+    // Label
+    fill(40, 50, 75);
+    noStroke();
+    textSize(9);
+    let headerY = titleH + 175;
+    if (tp.y < headerY) {
+        textAlign(CENTER, BOTTOM);
+        text(tp.name, tp.x, tp.y - r - 3);
+    } else {
+        textAlign(CENTER, TOP);
+        text(tp.name, tp.x, tp.y + r + 3);
+    }
+
+    // Check mark for probed non-leak points
+    if (tp.probed && !isTagged && !tp.hasLeak) {
+        fill(60, 180, 80);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, CENTER);
+        let checkY = tp.y < headerY ? tp.y + r + 8 : tp.y - r - 8;
+        text('OK', tp.x, checkY);
+    }
+
+    pop();
+}
+
+// ============================
+// DETECTION DISPLAY
+// ============================
+function drawDetectionDisplay() {
+    push();
+    let yOff = titleH + schematicH;
+
+    // Dark background
+    fill(25, 30, 45);
+    noStroke();
+    rect(0, yOff, canvasWidth, detectionH);
+
+    stroke(50, 60, 80);
+    strokeWeight(1);
+    line(0, yOff + detectionH, canvasWidth, yOff + detectionH);
+
+    // === Acoustic Intensity Meter (left) ===
+    let meterX = margin + 5;
+    let meterW = canvasWidth * 0.42;
+    let meterY = yOff + 12;
+
+    // Label
+    fill(170, 190, 215);
+    noStroke();
+    textSize(13);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    text('Acoustic Intensity', meterX, meterY);
+    textStyle(NORMAL);
+
+    // Meter bar background
+    let barY = meterY + 22;
+    let barH = 26;
+    fill(15, 18, 28);
+    stroke(50, 60, 80);
+    strokeWeight(1);
+    rect(meterX, barY, meterW, barH, 5);
+
+    // Meter bar segments (colored gradient)
+    if (showingMeter || meterValue > 2) {
+        let fillW = map(constrain(meterValue, 0, 100), 0, 100, 0, meterW - 4);
+        // Draw segmented bar
+        let segW = (meterW - 4) / 50;
+        for (let s = 0; s < 50; s++) {
+            let segX = meterX + 2 + s * segW;
+            if (segX - meterX - 2 > fillW) break;
+            let pct = s / 50.0;
+            let c;
+            if (pct < 0.25) {
+                c = lerpColor(color(30, 160, 60), color(120, 200, 40), pct / 0.25);
+            } else if (pct < 0.50) {
+                c = lerpColor(color(120, 200, 40), color(230, 180, 30), (pct - 0.25) / 0.25);
+            } else if (pct < 0.75) {
+                c = lerpColor(color(230, 180, 30), color(230, 100, 30), (pct - 0.50) / 0.25);
+            } else {
+                c = lerpColor(color(230, 100, 30), color(220, 40, 40), (pct - 0.75) / 0.25);
+            }
+            fill(c);
+            noStroke();
+            rect(segX, barY + 3, segW - 1, barH - 6, 1);
+        }
+    }
+
+    // Scale labels
+    fill(100, 120, 145);
+    noStroke();
+    textSize(9);
+    textAlign(CENTER, TOP);
+    for (let v = 0; v <= 100; v += 10) {
+        let xPos = map(v, 0, 100, meterX + 2, meterX + meterW - 2);
+        if (v % 20 === 0) {
+            text(v, xPos, barY + barH + 3);
+        }
+        // Tick mark
+        stroke(70, 80, 100);
+        strokeWeight(v % 20 === 0 ? 1 : 0.5);
+        line(xPos, barY + barH - 2, xPos, barY + barH + 1);
+        noStroke();
+    }
+
+    // dB scale label
+    fill(100, 120, 145);
+    textSize(9);
+    textAlign(RIGHT, TOP);
+    text('dB', meterX + meterW, barY + barH + 3);
+
+    // Digital dB reading
+    if (showingMeter) {
+        fill(80, 255, 140);
+        textSize(22);
+        textAlign(LEFT, TOP);
+        textStyle(BOLD);
+        text(nf(meterValue, 1, 1) + ' dB', meterX, barY + barH + 18);
+        textStyle(NORMAL);
+
+        // Threshold indicator
+        let threshDB = 30;
+        if (meterValue > threshDB) {
+            fill(255, 80, 60);
+            textSize(11);
+            text('LEAK DETECTED', meterX + 140, barY + barH + 22);
+        } else {
+            fill(80, 200, 120);
+            textSize(11);
+            text('BACKGROUND NOISE', meterX + 140, barY + barH + 22);
+        }
+    } else {
+        fill(80, 100, 130);
+        textSize(14);
+        textAlign(LEFT, TOP);
+        text('-- Select a test point --', meterX, barY + barH + 22);
+    }
+
+    // === Leak Estimate (center-right) ===
+    let costX = canvasWidth * 0.50;
+
+    fill(170, 190, 215);
+    noStroke();
+    textSize(13);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    text('Leak Estimate', costX, meterY);
+    textStyle(NORMAL);
+
+    if (showingMeter && selectedPoint >= 0) {
+        let tp = testPoints[selectedPoint];
+        let lineH = 20;
+
+        // Location
+        fill(160, 175, 200);
+        textSize(12);
+        text('Location: ', costX, meterY + 22);
+        fill(220, 230, 245);
+        textStyle(BOLD);
+        text(tp.name, costX + 70, meterY + 22);
+        textStyle(NORMAL);
+
+        // CFM
+        fill(160, 175, 200);
+        text('Leak Rate: ', costX, meterY + 22 + lineH);
+        fill(80, 220, 255);
+        textStyle(BOLD);
+        text(tp.hasLeak ? nf(tp.cfm, 1, 1) + ' CFM' : '0.0 CFM', costX + 75, meterY + 22 + lineH);
+        textStyle(NORMAL);
+
+        // Annual Cost
+        fill(160, 175, 200);
+        text('Annual Cost: ', costX, meterY + 22 + lineH * 2);
+        fill(255, 200, 80);
+        textStyle(BOLD);
+        text(tp.hasLeak ? '$' + nfc(round(tp.annualCost)) : '$0', costX + 90, meterY + 22 + lineH * 2);
+        textStyle(NORMAL);
+
+        // Classification
+        if (tp.hasLeak) {
+            let sizeLabel = tp.leakSize.charAt(0).toUpperCase() + tp.leakSize.slice(1);
+            let sizeColor = tp.leakSize === 'large' ? color(255, 70, 70) :
+                            tp.leakSize === 'medium' ? color(255, 170, 50) :
+                            color(160, 220, 80);
+            fill(sizeColor);
+            textSize(11);
+            textStyle(BOLD);
+            text(sizeLabel + ' Leak', costX, meterY + 22 + lineH * 3);
+            textStyle(NORMAL);
+        } else {
+            fill(60, 190, 110);
+            textSize(11);
+            text('No Significant Leak', costX, meterY + 22 + lineH * 3);
+        }
+    } else {
+        fill(80, 100, 130);
+        textSize(12);
+        text('Probe a test point to see estimates', costX, meterY + 35);
+    }
+
+    // === Running Total (far right) ===
+    let totalX = canvasWidth - 175;
+
+    fill(170, 190, 215);
+    noStroke();
+    textSize(13);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    text('Summary', totalX, meterY);
+    textStyle(NORMAL);
+
+    let totalCFM = 0;
+    let totalCost = 0;
+    for (let tl of taggedLeaks) {
+        totalCFM += tl.cfm;
+        totalCost += tl.annualCost;
+    }
+
+    fill(160, 175, 200);
+    textSize(12);
+    text('Tagged Leaks: ', totalX, meterY + 22);
+    fill(255, 255, 255);
+    textStyle(BOLD);
+    text(taggedLeaks.length, totalX + 100, meterY + 22);
+    textStyle(NORMAL);
+
+    fill(160, 175, 200);
+    text('Total CFM: ', totalX, meterY + 40);
+    fill(80, 220, 255);
+    text(nf(totalCFM, 1, 1), totalX + 100, meterY + 40);
+
+    fill(160, 175, 200);
+    text('Total Cost: ', totalX, meterY + 58);
+    fill(255, 200, 80);
+    textStyle(BOLD);
+    text('$' + nfc(round(totalCost)), totalX + 100, meterY + 58);
+    textStyle(NORMAL);
+
+    // System loss percentage
+    let pctLost = (totalCFM / systemCFM) * 100;
+    fill(160, 175, 200);
+    text('System Loss: ', totalX, meterY + 76);
+    let lossColor = pctLost > 10 ? color(255, 70, 70) :
+                    pctLost > 5 ? color(255, 170, 50) :
+                    color(60, 200, 110);
+    fill(lossColor);
+    textStyle(BOLD);
+    text(nf(pctLost, 1, 1) + '%', totalX + 100, meterY + 76);
+    textStyle(NORMAL);
+
+    // Points probed count
+    let probedCount = testPoints.filter(tp => tp.probed).length;
+    fill(100, 115, 140);
+    textSize(10);
+    text('Probed: ' + probedCount + ' / 8', totalX, meterY + 96);
+
+    pop();
+}
+
+// ============================
+// LEAK REPORT TABLE
+// ============================
+function drawLeakReport() {
+    push();
+    let yOff = titleH + schematicH + detectionH;
+
+    fill(250, 251, 253);
+    noStroke();
+    rect(0, yOff, canvasWidth, reportH);
+
+    // Title row with buttons
+    fill(30, 40, 60);
+    noStroke();
+    textSize(14);
+    textAlign(LEFT, TOP);
+    textStyle(BOLD);
+    text('Leak Report', margin, yOff + 8);
+    textStyle(NORMAL);
+
+    // Buttons
+    let btnY = yOff + 4;
+    let btnH = 28;
+
+    // Tag Leak button
+    drawCustomButton(margin + 110, btnY, 85, btnH, 'Tag Leak',
+        color(220, 110, 30), color(180, 80, 15), selectedPoint >= 0);
+
+    // Prioritize button
+    drawCustomButton(margin + 205, btnY, 90, btnH, 'Prioritize',
+        color(40, 110, 190), color(25, 75, 145), taggedLeaks.length > 0);
+
+    // New Scenario button
+    drawCustomButton(margin + 305, btnY, 105, btnH, 'New Scenario',
+        color(90, 100, 120), color(60, 70, 85), true);
+
+    // Table
+    let tableY = yOff + 38;
+    let rowH = 24;
+    let tableW = canvasWidth - margin * 2;
+
+    // Column definitions
+    let cols = [
+        { label: 'Location',           x: margin,                  w: tableW * 0.25 },
+        { label: 'Acoustic Level (dB)', x: margin + tableW * 0.25, w: tableW * 0.18 },
+        { label: 'Estimated CFM',       x: margin + tableW * 0.43, w: tableW * 0.15 },
+        { label: 'Annual Cost ($)',      x: margin + tableW * 0.58, w: tableW * 0.18 },
+        { label: 'Priority Rank',       x: margin + tableW * 0.76, w: tableW * 0.24 }
+    ];
+
+    // Header row
+    fill(55, 75, 120);
+    noStroke();
+    rect(margin, tableY, tableW, rowH, 4, 4, 0, 0);
+
+    fill(255);
+    textSize(11);
+    textStyle(BOLD);
+    textAlign(LEFT, CENTER);
+    for (let c of cols) {
+        text(c.label, c.x + 6, tableY + rowH / 2);
+    }
+    textStyle(NORMAL);
+
+    // Data rows
+    let displayLeaks = isPrioritized ?
+        [...taggedLeaks].sort((a, b) => b.annualCost - a.annualCost) :
+        [...taggedLeaks];
+
+    if (isPrioritized) {
+        for (let i = 0; i < displayLeaks.length; i++) {
+            displayLeaks[i].priorityRank = i + 1;
+        }
+    }
+
+    let maxRows = 7;
+    for (let i = 0; i < min(displayLeaks.length, maxRows); i++) {
+        let leak = displayLeaks[i];
+        let ry = tableY + rowH + i * rowH;
+
+        // Row background
+        if (i % 2 === 0) {
+            fill(244, 246, 250);
+        } else {
+            fill(235, 238, 244);
+        }
+        noStroke();
+        rect(margin, ry, tableW, rowH);
+
+        // Leak severity color bar on left
+        let sevColor = leak.annualCost > 1500 ? color(220, 50, 50) :
+                       leak.annualCost > 450 ? color(230, 160, 30) :
+                       color(120, 190, 60);
+        fill(sevColor);
+        noStroke();
+        rect(margin, ry, 4, rowH);
+
+        // Row data
+        fill(35, 45, 65);
+        textSize(11);
+        textAlign(LEFT, CENTER);
+        text(leak.name, cols[0].x + 10, ry + rowH / 2);
+        text(nf(leak.acousticDB, 1, 1), cols[1].x + 6, ry + rowH / 2);
+        text(nf(leak.cfm, 1, 1), cols[2].x + 6, ry + rowH / 2);
+
+        // Cost with color
+        let costColor = leak.annualCost > 1500 ? color(200, 40, 40) :
+                        leak.annualCost > 450 ? color(190, 120, 20) :
+                        color(60, 140, 60);
+        fill(costColor);
+        textStyle(BOLD);
+        text('$' + nfc(round(leak.annualCost)), cols[3].x + 6, ry + rowH / 2);
+        textStyle(NORMAL);
+
+        // Priority
+        if (isPrioritized) {
+            let pColor = leak.priorityRank === 1 ? color(220, 40, 40) :
+                         leak.priorityRank === 2 ? color(220, 130, 20) :
+                         leak.priorityRank <= 4 ? color(170, 170, 30) :
+                         color(70, 150, 70);
+            fill(pColor);
+            textStyle(BOLD);
+            textSize(12);
+            text('#' + leak.priorityRank, cols[4].x + 6, ry + rowH / 2);
+
+            // Priority bar
+            let barMaxW = tableW * 0.15;
+            let barW = map(leak.annualCost, 0, maxCostInLeaks(), 0, barMaxW);
+            fill(red(pColor), green(pColor), blue(pColor), 80);
+            noStroke();
+            rect(cols[4].x + 30, ry + 4, barW, rowH - 8, 2);
+            textStyle(NORMAL);
+        } else {
+            fill(150);
+            text('--', cols[4].x + 6, ry + rowH / 2);
+        }
+    }
+
+    // Table border
+    let rowCount = min(displayLeaks.length, maxRows);
+    let tableBottom = tableY + rowH + rowCount * rowH;
+    if (rowCount === 0) tableBottom = tableY + rowH + rowH;
+
+    noFill();
+    stroke(180, 185, 195);
+    strokeWeight(1);
+    rect(margin, tableY, tableW, tableBottom - tableY, 4);
+
+    // Column separators
+    stroke(210, 215, 225);
+    strokeWeight(0.5);
+    for (let i = 1; i < cols.length; i++) {
+        line(cols[i].x, tableY + rowH, cols[i].x, tableBottom);
+    }
+
+    // Empty state
+    if (taggedLeaks.length === 0) {
+        fill(130, 140, 165);
+        noStroke();
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        text('No leaks tagged yet. Probe test points and click "Tag Leak" when a leak is detected.',
+             canvasWidth / 2, tableY + rowH + rowH / 2);
+    }
+
+    // Total Annual Leak Cost summary
+    let totalCost = 0;
+    for (let tl of taggedLeaks) totalCost += tl.annualCost;
+
+    if (taggedLeaks.length > 0) {
+        let summaryY = tableBottom + 8;
+        fill(35, 55, 90);
+        noStroke();
+        rect(margin, summaryY, tableW, 28, 4);
+
+        fill(255);
+        textSize(13);
+        textAlign(LEFT, CENTER);
+        textStyle(BOLD);
+        text('Total Annual Leak Cost:  $' + nfc(round(totalCost)) +
+             '   |   Total Leak Rate:  ' + nf(taggedLeaks.reduce((s, l) => s + l.cfm, 0), 1, 1) + ' CFM' +
+             '   |   Leaks Found:  ' + taggedLeaks.length,
+             margin + 10, summaryY + 14);
+        textStyle(NORMAL);
+    }
+
+    // Score display
+    if (score >= 0) {
+        let scoreBoxW = 170;
+        let scoreBoxH = 55;
+        let scoreX = canvasWidth - scoreBoxW - margin;
+        let scoreY = yOff + 2;
+
+        // Score background
+        let scoreColor = score >= 80 ? color(35, 150, 55) :
+                         score >= 50 ? color(200, 150, 25) :
+                         color(200, 55, 55);
+        fill(scoreColor);
+        noStroke();
+        rect(scoreX, scoreY, scoreBoxW, scoreBoxH, 8);
+
+        // Score shadow text
+        fill(0, 0, 0, 40);
+        textSize(20);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        text('Score: ' + score + '%', scoreX + scoreBoxW / 2 + 1, scoreY + 19);
+
+        fill(255);
+        text('Score: ' + score + '%', scoreX + scoreBoxW / 2, scoreY + 18);
+        textStyle(NORMAL);
+        textSize(11);
+        let msg = score >= 80 ? 'Excellent Analysis!' :
+                  score >= 60 ? 'Good effort!' :
+                  score >= 40 ? 'Keep practicing!' :
+                  'Try again!';
+        text(msg, scoreX + scoreBoxW / 2, scoreY + 40);
+    }
+
+    // Electricity rate label and slider
+    let sliderLabelX = canvasWidth - 290;
+    let sliderLabelY = yOff + reportH - 32;
+    fill(70, 80, 100);
+    noStroke();
+    textSize(11);
+    textAlign(LEFT, CENTER);
+    text('Electricity Rate:', sliderLabelX, sliderLabelY);
+    // Value display after slider
+    fill(40, 55, 85);
+    textStyle(BOLD);
+    text('$' + nf(electricitySlider.value(), 1, 2) + '/kWh', sliderLabelX + 140, sliderLabelY);
+    textStyle(NORMAL);
+
+    pop();
+}
+
+function maxCostInLeaks() {
+    let m = 1;
+    for (let tl of taggedLeaks) {
+        if (tl.annualCost > m) m = tl.annualCost;
+    }
+    return m;
+}
+
+function drawCustomButton(x, y, w, h, label, bgColor, borderColor, enabled) {
+    push();
+    let hovering = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
+
+    if (enabled) {
+        if (hovering) {
+            fill(red(bgColor) + 20, green(bgColor) + 20, blue(bgColor) + 20);
+        } else {
+            fill(bgColor);
+        }
+        stroke(borderColor);
+    } else {
+        fill(190, 195, 205);
+        stroke(170, 175, 180);
+    }
+    strokeWeight(1.5);
+    rect(x, y, w, h, 5);
+
+    fill(enabled ? 255 : 150);
+    noStroke();
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    textStyle(BOLD);
+    text(label, x + w / 2, y + h / 2);
+    textStyle(NORMAL);
+    pop();
+}
+
+// ============================
+// INTERACTION
+// ============================
+function mousePressed() {
+    let yOff = titleH + schematicH + detectionH;
+
+    // Check buttons
+    let btnY = yOff + 4;
+    let btnH = 28;
+
+    // Tag Leak
+    if (mouseX >= margin + 110 && mouseX <= margin + 195 &&
+        mouseY >= btnY && mouseY <= btnY + btnH && selectedPoint >= 0) {
+        tagLeak();
+        return;
+    }
+
+    // Prioritize
+    if (mouseX >= margin + 205 && mouseX <= margin + 295 &&
+        mouseY >= btnY && mouseY <= btnY + btnH && taggedLeaks.length > 0) {
+        prioritizeLeaks();
+        return;
+    }
+
+    // New Scenario
+    if (mouseX >= margin + 305 && mouseX <= margin + 410 &&
+        mouseY >= btnY && mouseY <= btnY + btnH) {
+        generateNewScenario();
+        return;
+    }
+
+    // Check test point clicks (in schematic area)
+    if (mouseY > titleH && mouseY < titleH + schematicH) {
+        for (let i = 0; i < 8; i++) {
+            let tp = testPoints[i];
+            if (dist(mouseX, mouseY, tp.x, tp.y) < 20) {
+                selectedPoint = i;
+                showingMeter = true;
+                meterTargetValue = tp.acousticDB;
+                tp.probed = true;
+                probeFlashTimer = 15;
+
+                // Add slight noise variation each time you probe
+                if (!tp.hasLeak) {
+                    tp.acousticDB = random(15, 25);
+                    meterTargetValue = tp.acousticDB;
+                }
+                return;
+            }
+        }
+    }
+}
+
+function tagLeak() {
+    if (selectedPoint < 0) return;
+    let tp = testPoints[selectedPoint];
+
+    // Prevent duplicate tagging
+    if (taggedLeaks.some(l => l.name === tp.name)) return;
+
+    taggedLeaks.push({
+        name: tp.name,
+        acousticDB: tp.acousticDB,
+        cfm: tp.cfm,
+        annualCost: tp.annualCost,
+        priorityRank: 0,
+        hasActualLeak: tp.hasLeak
+    });
+
+    isPrioritized = false;
+    score = -1;
+}
+
+function prioritizeLeaks() {
+    if (taggedLeaks.length === 0) return;
+
+    isPrioritized = true;
+    taggedLeaks.sort((a, b) => b.annualCost - a.annualCost);
+
+    for (let i = 0; i < taggedLeaks.length; i++) {
+        taggedLeaks[i].priorityRank = i + 1;
+    }
+
+    calculateScore();
+}
+
+function calculateScore() {
+    let actualLeaks = testPoints.filter(tp => tp.hasLeak);
+    let totalActual = actualLeaks.length;
+
+    let correctlyTagged = taggedLeaks.filter(tl => tl.hasActualLeak).length;
+    let falsePositives = taggedLeaks.filter(tl => !tl.hasActualLeak).length;
+
+    // Detection score (40 pts): proportion of actual leaks found
+    let detectionScore = (correctlyTagged / totalActual) * 40;
+
+    // Accuracy score (20 pts): penalty for false positives
+    let fpPenalty = min(falsePositives * 7, 20);
+    let accuracyScore = 20 - fpPenalty;
+
+    // Prioritization score (40 pts): correct cost-based ordering
+    let correctLeaks = taggedLeaks.filter(tl => tl.hasActualLeak);
+    let priorityScore = 0;
+    if (correctLeaks.length >= 2) {
+        let sorted = [...correctLeaks].sort((a, b) => b.annualCost - a.annualCost);
+        let correctOrder = 0;
+        for (let i = 0; i < sorted.length; i++) {
+            if (sorted[i].name === correctLeaks[i].name) correctOrder++;
+        }
+        priorityScore = (correctOrder / sorted.length) * 40;
+    } else if (correctLeaks.length === 1) {
+        priorityScore = 20;
+    }
+
+    score = round(detectionScore + accuracyScore + priorityScore);
+    score = constrain(score, 0, 100);
+}
+    </script>
+</body>
+</html>

@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sensor Data to Maintenance Decision Pipeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // ── Global layout variables ──
+    let drawHeight = 450;
+    let controlHeight = 80;
+    let canvasHeight = drawHeight + controlHeight;
+    let aspectRatio = 1.91;
+    let canvasWidth = canvasHeight * aspectRatio;
+
+    // ── Sidebar and main panel geometry (computed in updateLayout) ──
+    let sidebarWidth, mainX, mainW, mainY, mainH;
+
+    // ── Stage state ──
+    let currentStage = 1;
+    const totalStages = 6;
+    const stageLabels = [
+        "Raw Sensor Reading",
+        "Data Transmission",
+        "Trend Comparison",
+        "Threshold Evaluation",
+        "Alert Generation",
+        "Maintenance Decision"
+    ];
+
+    // ── Interactive controls ──
+    let readingSlider;       // Stage 3 slider
+    let alertToggle = 0;     // Stage 5 toggle (0 = Warning, 1 = Critical, 2 = Normal)
+    const alertLabels = ["Warning", "Critical", "Normal"];
+
+    // ── Simulated 30-day trend data ──
+    let trendData = [];
+
+    // ── Animation ──
+    let stageTransition = 1.0; // 0 → 1 fade-in
+
+    // ── Buttons (positioned dynamically) ──
+    let btnPrevX, btnPrevY, btnPrevW, btnPrevH;
+    let btnNextX, btnNextY, btnNextW, btnNextH;
+
+    // ── Stage 3 slider geometry ──
+    let sliderX, sliderY, sliderW;
+    let sliderVal = 0.28;
+    let sliderDragging = false;
+
+    // ── Stage 5 toggle button geometry ──
+    let togBtnX, togBtnY, togBtnW, togBtnH;
+
+    // ── Stage 6 option hover ──
+    let hoveredOption = -1;
+
+    function setup() {
+        const canvas = createCanvas(canvasWidth, canvasHeight);
+        var mainElement = document.querySelector('main');
+        canvas.parent(mainElement);
+        textFont('Arial');
+
+        // Generate 30-day trend data (gradual rise from ~0.08 to ~0.28)
+        generateTrendData();
+
+        updateLayout();
+    }
+
+    function generateTrendData() {
+        trendData = [];
+        for (let i = 0; i < 30; i++) {
+            let base = 0.08 + (i / 29) * 0.16;
+            let noise = (Math.random() - 0.5) * 0.02;
+            trendData.push(Math.max(0.04, base + noise));
+        }
+        // Ensure the last value matches our current reading approximately
+        trendData[29] = sliderVal;
+    }
+
+    function updateLayout() {
+        sidebarWidth = Math.max(140, canvasWidth * 0.17);
+        mainX = 10;
+        mainW = canvasWidth - sidebarWidth - 30;
+        mainY = 10;
+        mainH = drawHeight - 20;
+
+        // Nav buttons in control area
+        btnPrevW = 100;
+        btnPrevH = 36;
+        btnNextW = 100;
+        btnNextH = 36;
+
+        let controlCenterY = drawHeight + controlHeight / 2;
+        btnPrevX = mainX + mainW / 2 - 130;
+        btnPrevY = controlCenterY - btnPrevH / 2;
+        btnNextX = mainX + mainW / 2 + 30;
+        btnNextY = controlCenterY - btnNextH / 2;
+
+        // Slider for Stage 3
+        sliderW = mainW * 0.5;
+        sliderX = mainX + mainW / 2 - sliderW / 2;
+        sliderY = mainY + mainH - 50;
+
+        // Toggle button for Stage 5
+        togBtnW = 160;
+        togBtnH = 30;
+        togBtnX = mainX + mainW / 2 - togBtnW / 2;
+        togBtnY = mainY + mainH - 45;
+    }
+
+    function windowResized() {
+        canvasWidth = canvasHeight * aspectRatio;
+        resizeCanvas(canvasWidth, canvasHeight);
+        updateLayout();
+    }
+
+    function draw() {
+        background(240);
+
+        // Animate transition
+        if (stageTransition < 1.0) {
+            stageTransition = Math.min(1.0, stageTransition + 0.06);
+        }
+        let alpha = stageTransition * 255;
+
+        // ── Draw main panel background ──
+        fill(255);
+        stroke(200);
+        strokeWeight(1);
+        rect(mainX, mainY, mainW, mainH, 8);
+
+        // ── Draw stage content ──
+        push();
+        // clip to main panel
+        drawingContext.save();
+        drawingContext.beginPath();
+        drawingContext.roundRect(mainX, mainY, mainW, mainH, 8);
+        drawingContext.clip();
+
+        drawStageContent(currentStage, alpha);
+
+        drawingContext.restore();
+        pop();
+
+        // ── Draw sidebar ──
+        drawSidebar();
+
+        // ── Draw control bar ──
+        drawControlBar();
+    }
+
+    // ══════════════════════════════════════════════
+    //  STAGE CONTENT RENDERERS
+    // ══════════════════════════════════════════════
+
+    function drawStageContent(stage, alpha) {
+        let cx = mainX + mainW / 2;
+        let cy = mainY + mainH / 2;
+        let titleY = mainY + 35;
+
+        // Stage title
+        noStroke();
+        fill(40, 40, 60, alpha);
+        textSize(16);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text("Stage " + stage + ": " + stageLabels[stage - 1], cx, titleY);
+        textStyle(NORMAL);
+
+        switch (stage) {
+            case 1: drawStage1(cx, cy, alpha); break;
+            case 2: drawStage2(cx, cy, alpha); break;
+            case 3: drawStage3(cx, cy, alpha); break;
+            case 4: drawStage4(cx, cy, alpha); break;
+            case 5: drawStage5(cx, cy, alpha); break;
+            case 6: drawStage6(cx, cy, alpha); break;
+        }
+    }
+
+    // ── Stage 1: Raw Sensor Reading ──
+    function drawStage1(cx, cy, a) {
+        let boxW = Math.min(420, mainW - 60);
+        let boxH = 200;
+        let bx = cx - boxW / 2;
+        let by = cy - boxH / 2 + 10;
+
+        // Sensor icon area
+        fill(230, 240, 250, a);
+        stroke(70, 130, 200, a);
+        strokeWeight(2);
+        rect(bx, by, boxW, boxH, 10);
+
+        // Sensor icon (circle with wave)
+        let iconX = bx + 55;
+        let iconY = by + boxH / 2;
+        fill(70, 130, 200, a);
+        noStroke();
+        ellipse(iconX, iconY, 50, 50);
+        fill(255, 255, 255, a);
+        textSize(22);
+        textAlign(CENTER, CENTER);
+        text("~", iconX, iconY - 3);
+
+        // Sensor data
+        let textX = bx + 100;
+        fill(40, 40, 60, a);
+        textAlign(LEFT, CENTER);
+        textSize(15);
+        textStyle(BOLD);
+        text("Pump #3 Vibration Sensor", textX, by + 45);
+        textStyle(NORMAL);
+        textSize(13);
+        fill(80, 80, 100, a);
+        text("Type: Accelerometer (ICP)", textX, by + 75);
+        text("Location: Bearing housing, drive end", textX, by + 95);
+
+        // Big reading
+        textSize(32);
+        textStyle(BOLD);
+        fill(30, 100, 180, a);
+        text("0.28 in/s", textX, by + 140);
+        textStyle(NORMAL);
+        textSize(12);
+        fill(100, 100, 120, a);
+        text("velocity (peak)", textX + 175, by + 140);
+
+        // Timestamp
+        textSize(12);
+        fill(120, 120, 140, a);
+        textAlign(CENTER, BOTTOM);
+        text("Timestamp: 2026-02-09  14:32:07 UTC", cx, by + boxH - 12);
+    }
+
+    // ── Stage 2: Data Transmission ──
+    function drawStage2(cx, cy, a) {
+        let boxW = Math.min(460, mainW - 40);
+        let boxH = 230;
+        let bx = cx - boxW / 2;
+        let by = cy - boxH / 2 + 10;
+
+        // Cloud icon area
+        fill(220, 235, 255, a);
+        stroke(70, 120, 200, a);
+        strokeWeight(2);
+        rect(bx, by, boxW, boxH, 10);
+
+        // Cloud shape
+        let cloudX = bx + 60;
+        let cloudY = by + 50;
+        fill(70, 130, 200, a);
+        noStroke();
+        ellipse(cloudX, cloudY, 44, 34);
+        ellipse(cloudX + 20, cloudY - 8, 36, 28);
+        ellipse(cloudX + 40, cloudY, 44, 34);
+        ellipse(cloudX + 20, cloudY + 6, 50, 22);
+
+        // Arrow from cloud down
+        stroke(70, 130, 200, a);
+        strokeWeight(2);
+        line(cloudX + 20, cloudY + 18, cloudX + 20, cloudY + 42);
+        fill(70, 130, 200, a);
+        noStroke();
+        triangle(cloudX + 12, cloudY + 38, cloudX + 28, cloudY + 38, cloudX + 20, cloudY + 48);
+
+        // Database row
+        let dbY = by + 110;
+        fill(245, 248, 255, a);
+        stroke(100, 140, 210, a);
+        strokeWeight(1);
+        rect(bx + 20, dbY, boxW - 40, 100, 6);
+
+        // Table header
+        fill(70, 100, 160, a);
+        textSize(12);
+        textStyle(BOLD);
+        textAlign(LEFT, TOP);
+        let cols = ["timestamp", "sensor_id", "value", "unit"];
+        let colW = (boxW - 60) / 4;
+        for (let i = 0; i < 4; i++) {
+            text(cols[i], bx + 30 + i * colW, dbY + 10);
+        }
+
+        // Separator line
+        stroke(180, 200, 230, a);
+        line(bx + 25, dbY + 30, bx + boxW - 25, dbY + 30);
+
+        // Data row
+        noStroke();
+        textStyle(NORMAL);
+        fill(40, 50, 70, a);
+        textSize(11);
+        let vals = ["2026-02-09 14:32:07", "PUMP3-VIB-01", "0.28", "in/s"];
+        for (let i = 0; i < 4; i++) {
+            text(vals[i], bx + 30 + i * colW, dbY + 42);
+        }
+
+        // Extra metadata
+        textSize(10);
+        fill(100, 110, 140, a);
+        text("status: valid  |  quality: 98%  |  protocol: MQTT  |  topic: plant/pump3/vibration", bx + 30, dbY + 68);
+
+        // Label
+        fill(80, 80, 100, a);
+        textSize(11);
+        textAlign(CENTER, TOP);
+        text("Cloud Platform Database Record", cx, by + 12);
+    }
+
+    // ── Stage 3: Trend Comparison ──
+    function drawStage3(cx, cy, a) {
+        // Update last data point to match slider
+        trendData[29] = sliderVal;
+
+        let chartX = mainX + 50;
+        let chartY = mainY + 65;
+        let chartW = mainW - 120;
+        let chartH = mainH - 170;
+
+        // Chart background
+        fill(250, 252, 255, a);
+        stroke(200, 210, 220, a);
+        strokeWeight(1);
+        rect(chartX, chartY, chartW, chartH, 4);
+
+        // Y-axis labels and grid lines
+        textSize(10);
+        textAlign(RIGHT, CENTER);
+        fill(100, 100, 120, a);
+        let ySteps = [0, 0.10, 0.15, 0.20, 0.30, 0.40];
+        for (let v of ySteps) {
+            let yy = map(v, 0, 0.45, chartY + chartH, chartY);
+            stroke(230, 230, 240, a);
+            strokeWeight(0.5);
+            line(chartX, yy, chartX + chartW, yy);
+            noStroke();
+            text(v.toFixed(2), chartX - 5, yy);
+        }
+
+        // Threshold zones
+        noStroke();
+        // Normal zone
+        let normTop = map(0.15, 0, 0.45, chartY + chartH, chartY);
+        let normBot = chartY + chartH;
+        fill(200, 240, 200, a * 0.3);
+        rect(chartX, normTop, chartW, normBot - normTop);
+
+        // Warning zone
+        let warnTop = map(0.30, 0, 0.45, chartY + chartH, chartY);
+        fill(255, 240, 180, a * 0.3);
+        rect(chartX, warnTop, chartW, normTop - warnTop);
+
+        // Critical zone
+        fill(255, 200, 200, a * 0.3);
+        rect(chartX, chartY, chartW, warnTop - chartY);
+
+        // Zone labels on right
+        textSize(9);
+        textAlign(LEFT, CENTER);
+        fill(60, 140, 60, a);
+        text("Normal", chartX + chartW + 5, (normTop + normBot) / 2);
+        fill(180, 140, 0, a);
+        text("Warning", chartX + chartW + 5, (warnTop + normTop) / 2);
+        fill(180, 50, 50, a);
+        text("Critical", chartX + chartW + 5, (chartY + warnTop) / 2);
+
+        // Baseline line
+        let baseY = map(0.08, 0, 0.45, chartY + chartH, chartY);
+        stroke(100, 180, 100, a);
+        strokeWeight(1.5);
+        drawingContext.setLineDash([5, 5]);
+        line(chartX, baseY, chartX + chartW, baseY);
+        drawingContext.setLineDash([]);
+        noStroke();
+        fill(80, 150, 80, a);
+        textSize(10);
+        textAlign(LEFT, BOTTOM);
+        text("Baseline: 0.08 in/s", chartX + 5, baseY - 3);
+
+        // Trend line
+        stroke(30, 100, 200, a);
+        strokeWeight(2);
+        noFill();
+        beginShape();
+        for (let i = 0; i < 30; i++) {
+            let px = map(i, 0, 29, chartX + 5, chartX + chartW - 5);
+            let py = map(trendData[i], 0, 0.45, chartY + chartH, chartY);
+            py = constrain(py, chartY, chartY + chartH);
+            vertex(px, py);
+        }
+        endShape();
+
+        // Current value dot
+        let dotX = chartX + chartW - 5;
+        let dotY = map(sliderVal, 0, 0.45, chartY + chartH, chartY);
+        dotY = constrain(dotY, chartY, chartY + chartH);
+        fill(220, 60, 60, a);
+        noStroke();
+        ellipse(dotX, dotY, 10, 10);
+        fill(40, 40, 60, a);
+        textSize(11);
+        textStyle(BOLD);
+        textAlign(LEFT, CENTER);
+        text(sliderVal.toFixed(2) + " in/s", dotX + 8, dotY);
+        textStyle(NORMAL);
+
+        // X-axis label
+        textSize(10);
+        fill(100, 100, 120, a);
+        textAlign(CENTER, TOP);
+        text("30-Day History", chartX + chartW / 2, chartY + chartH + 5);
+        textAlign(LEFT, TOP);
+        text("Day 1", chartX, chartY + chartH + 5);
+        textAlign(RIGHT, TOP);
+        text("Today", chartX + chartW, chartY + chartH + 5);
+
+        // Slider
+        drawSlider(a);
+
+        // Reading label
+        textSize(12);
+        fill(40, 40, 60, a);
+        textAlign(CENTER, TOP);
+        text("Adjust current reading: " + sliderVal.toFixed(2) + " in/s", cx, sliderY + 18);
+    }
+
+    function drawSlider(a) {
+        // Track
+        stroke(180, 180, 200, a);
+        strokeWeight(3);
+        line(sliderX, sliderY, sliderX + sliderW, sliderY);
+
+        // Filled portion
+        let handleX = map(sliderVal, 0.04, 0.45, sliderX, sliderX + sliderW);
+        stroke(70, 130, 200, a);
+        strokeWeight(3);
+        line(sliderX, sliderY, handleX, sliderY);
+
+        // Handle
+        fill(70, 130, 200, a);
+        noStroke();
+        ellipse(handleX, sliderY, 16, 16);
+        fill(255, 255, 255, a);
+        ellipse(handleX, sliderY, 8, 8);
+    }
+
+    // ── Stage 4: Threshold Evaluation ──
+    function drawStage4(cx, cy, a) {
+        let gaugeY = mainY + 90;
+        let gaugeH = 60;
+        let gaugeW = mainW - 100;
+        let gaugeX = mainX + 50;
+
+        // Zone bar
+        // Normal
+        let normW = map(0.15, 0, 0.45, 0, gaugeW);
+        fill(120, 200, 120, a);
+        noStroke();
+        rect(gaugeX, gaugeY, normW, gaugeH, 6, 0, 0, 6);
+
+        // Warning
+        let warnStart = normW;
+        let warnW = map(0.30 - 0.15, 0, 0.45, 0, gaugeW);
+        fill(240, 200, 60, a);
+        rect(gaugeX + warnStart, gaugeY, warnW, gaugeH);
+
+        // Critical
+        let critStart = warnStart + warnW;
+        let critW = gaugeW - critStart;
+        fill(220, 70, 70, a);
+        rect(gaugeX + critStart, gaugeY, critW, gaugeH, 0, 6, 6, 0);
+
+        // Zone labels
+        textSize(13);
+        fill(255, 255, 255, a);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        text("NORMAL", gaugeX + normW / 2, gaugeY + gaugeH / 2);
+        text("WARNING", gaugeX + warnStart + warnW / 2, gaugeY + gaugeH / 2);
+        text("CRITICAL", gaugeX + critStart + critW / 2, gaugeY + gaugeH / 2);
+        textStyle(NORMAL);
+
+        // Range labels
+        textSize(10);
+        fill(80, 80, 100, a);
+        textAlign(CENTER, TOP);
+        text("< 0.15 in/s", gaugeX + normW / 2, gaugeY + gaugeH + 6);
+        text("0.15 - 0.30 in/s", gaugeX + warnStart + warnW / 2, gaugeY + gaugeH + 6);
+        text("> 0.30 in/s", gaugeX + critStart + critW / 2, gaugeY + gaugeH + 6);
+
+        // Needle / indicator for 0.28
+        let needleX = map(0.28, 0, 0.45, gaugeX, gaugeX + gaugeW);
+        stroke(20, 20, 40, a);
+        strokeWeight(3);
+        line(needleX, gaugeY - 10, needleX, gaugeY + gaugeH + 2);
+        fill(20, 20, 40, a);
+        noStroke();
+        triangle(needleX - 8, gaugeY - 10, needleX + 8, gaugeY - 10, needleX, gaugeY - 2);
+        textSize(12);
+        textStyle(BOLD);
+        textAlign(CENTER, BOTTOM);
+        text("0.28 in/s", needleX, gaugeY - 14);
+        textStyle(NORMAL);
+
+        // Evaluation details card
+        let cardW = Math.min(420, mainW - 60);
+        let cardH = 180;
+        let cardX = cx - cardW / 2;
+        let cardY = gaugeY + gaugeH + 40;
+
+        fill(255, 250, 235, a);
+        stroke(220, 190, 100, a);
+        strokeWeight(2);
+        rect(cardX, cardY, cardW, cardH, 8);
+
+        noStroke();
+        fill(40, 40, 60, a);
+        textSize(14);
+        textStyle(BOLD);
+        textAlign(LEFT, TOP);
+        text("Threshold Evaluation Result", cardX + 15, cardY + 12);
+        textStyle(NORMAL);
+
+        textSize(12);
+        let ly = cardY + 38;
+        let lSpacing = 22;
+        fill(80, 80, 100, a);
+        text("Current Value:        0.28 in/s", cardX + 15, ly);
+        ly += lSpacing;
+        text("Zone:                      WARNING (0.15 - 0.30 in/s)", cardX + 15, ly);
+        ly += lSpacing;
+        text("Distance to Critical:  0.02 in/s  (7% margin)", cardX + 15, ly);
+        ly += lSpacing;
+        text("Baseline Deviation:   +250% above baseline (0.08 in/s)", cardX + 15, ly);
+        ly += lSpacing;
+        text("Trend Direction:        Increasing (+0.04 in/s per week)", cardX + 15, ly);
+        ly += lSpacing;
+
+        fill(200, 120, 0, a);
+        textStyle(BOLD);
+        text("STATUS: WARNING — Action recommended", cardX + 15, ly);
+        textStyle(NORMAL);
+    }
+
+    // ── Stage 5: Alert Generation ──
+    function drawStage5(cx, cy, a) {
+        // Alert data for three severity levels
+        let alerts = [
+            {   // Warning (default)
+                severity: "WARNING",
+                color: [240, 180, 40],
+                bgColor: [255, 248, 225],
+                borderColor: [230, 170, 30],
+                heading: "Pump #3 Vibration Trending Up",
+                current: "0.28 in/s",
+                baseline: "0.08 in/s",
+                rate: "+0.04 in/s per week",
+                eta: "~5 days to critical threshold",
+                action: "Schedule bearing inspection within 3 days"
+            },
+            {   // Critical
+                severity: "CRITICAL",
+                color: [220, 50, 50],
+                bgColor: [255, 235, 235],
+                borderColor: [210, 60, 60],
+                heading: "Pump #3 Vibration Exceeds Critical Limit",
+                current: "0.34 in/s",
+                baseline: "0.08 in/s",
+                rate: "+0.06 in/s per week (accelerating)",
+                eta: "EXCEEDED — Immediate action required",
+                action: "Initiate emergency bearing replacement"
+            },
+            {   // Normal
+                severity: "NORMAL",
+                color: [60, 150, 60],
+                bgColor: [235, 250, 235],
+                borderColor: [80, 170, 80],
+                heading: "Pump #3 Vibration Within Normal Range",
+                current: "0.10 in/s",
+                baseline: "0.08 in/s",
+                rate: "+0.005 in/s per week",
+                eta: "No threshold breach projected (26+ weeks)",
+                action: "Continue routine monitoring schedule"
+            }
+        ];
+
+        let al = alerts[alertToggle];
+
+        // Alert card
+        let cardW = Math.min(480, mainW - 40);
+        let cardH = 270;
+        let cardX = cx - cardW / 2;
+        let cardY = mainY + 60;
+
+        fill(al.bgColor[0], al.bgColor[1], al.bgColor[2], a);
+        stroke(al.borderColor[0], al.borderColor[1], al.borderColor[2], a);
+        strokeWeight(2);
+        rect(cardX, cardY, cardW, cardH, 10);
+
+        // Severity badge
+        let badgeW = al.severity.length * 11 + 20;
+        fill(al.color[0], al.color[1], al.color[2], a);
+        noStroke();
+        rect(cardX + 15, cardY + 15, badgeW, 28, 4);
+        fill(255, 255, 255, a);
+        textSize(14);
+        textStyle(BOLD);
+        textAlign(LEFT, CENTER);
+        text(al.severity, cardX + 25, cardY + 29);
+        textStyle(NORMAL);
+
+        // Heading
+        fill(40, 40, 60, a);
+        textSize(15);
+        textStyle(BOLD);
+        textAlign(LEFT, TOP);
+        text(al.heading, cardX + 15, cardY + 55);
+        textStyle(NORMAL);
+
+        // Data fields
+        textSize(12);
+        fill(60, 60, 80, a);
+        let fy = cardY + 85;
+        let fSpacing = 26;
+
+        textStyle(BOLD);
+        text("Current Reading:", cardX + 15, fy);
+        textStyle(NORMAL);
+        text(al.current, cardX + 150, fy);
+        fy += fSpacing;
+
+        textStyle(BOLD);
+        text("Baseline:", cardX + 15, fy);
+        textStyle(NORMAL);
+        text(al.baseline, cardX + 150, fy);
+        fy += fSpacing;
+
+        textStyle(BOLD);
+        text("Rate of Change:", cardX + 15, fy);
+        textStyle(NORMAL);
+        text(al.rate, cardX + 150, fy);
+        fy += fSpacing;
+
+        textStyle(BOLD);
+        text("Time to Critical:", cardX + 15, fy);
+        textStyle(NORMAL);
+        text(al.eta, cardX + 150, fy);
+        fy += fSpacing + 8;
+
+        // Recommended action
+        stroke(al.borderColor[0], al.borderColor[1], al.borderColor[2], a * 0.5);
+        strokeWeight(1);
+        line(cardX + 15, fy, cardX + cardW - 15, fy);
+        fy += 12;
+        noStroke();
+
+        fill(al.color[0], al.color[1], al.color[2], a);
+        textStyle(BOLD);
+        textSize(12);
+        text("Recommended Action:", cardX + 15, fy);
+        textStyle(NORMAL);
+        fill(40, 40, 60, a);
+        text(al.action, cardX + 165, fy);
+
+        // Toggle button
+        let btnLabel = "Show: " + alertLabels[(alertToggle + 1) % 3] + " Example";
+        fill(70, 100, 160, a);
+        noStroke();
+        rect(togBtnX, togBtnY, togBtnW, togBtnH, 5);
+        fill(255, 255, 255, a);
+        textSize(11);
+        textAlign(CENTER, CENTER);
+        text(btnLabel, togBtnX + togBtnW / 2, togBtnY + togBtnH / 2);
+    }
+
+    // ── Stage 6: Maintenance Decision ──
+    function drawStage6(cx, cy, a) {
+        // Header
+        fill(40, 40, 60, a);
+        textSize(13);
+        textAlign(CENTER, TOP);
+        text("Technician Review — Maintenance Work Order", cx, mainY + 55);
+
+        // Alert summary
+        let sumW = Math.min(460, mainW - 40);
+        let sumX = cx - sumW / 2;
+        let sumY = mainY + 80;
+
+        fill(255, 248, 225, a);
+        stroke(220, 190, 100, a);
+        strokeWeight(1);
+        rect(sumX, sumY, sumW, 50, 6);
+        noStroke();
+        fill(180, 130, 0, a);
+        textSize(11);
+        textStyle(BOLD);
+        textAlign(LEFT, CENTER);
+        text("WARNING: Pump #3 vibration 0.28 in/s  |  Baseline: 0.08 in/s  |  ETC: ~5 days", sumX + 12, sumY + 25);
+        textStyle(NORMAL);
+
+        // Decision options
+        let options = [
+            {
+                label: "Schedule bearing inspection within 3 days",
+                tag: "RECOMMENDED",
+                tagColor: [60, 150, 60],
+                desc: "Plan inspection during next scheduled downtime. Order bearings as precaution.",
+                borderColor: [60, 150, 60]
+            },
+            {
+                label: "Continue monitoring",
+                tag: "DEFER",
+                tagColor: [180, 140, 40],
+                desc: "Increase monitoring frequency to every 4 hours. Set critical alert at 0.30 in/s.",
+                borderColor: [180, 180, 180]
+            },
+            {
+                label: "Emergency shutdown",
+                tag: "ESCALATE",
+                tagColor: [200, 60, 60],
+                desc: "Immediate pump shutdown and emergency maintenance dispatch. Use backup pump.",
+                borderColor: [200, 200, 200]
+            }
+        ];
+
+        let optY = sumY + 65;
+        let optW = Math.min(460, mainW - 40);
+        let optH = 72;
+        let optSpacing = 8;
+
+        for (let i = 0; i < options.length; i++) {
+            let oy = optY + i * (optH + optSpacing);
+            let opt = options[i];
+            let isHovered = (hoveredOption === i);
+
+            // Card
+            if (isHovered) {
+                fill(opt.borderColor[0], opt.borderColor[1], opt.borderColor[2], a * 0.12);
+            } else {
+                fill(252, 252, 255, a);
+            }
+            stroke(opt.borderColor[0], opt.borderColor[1], opt.borderColor[2], a);
+            strokeWeight(isHovered ? 2 : 1);
+            rect(sumX, oy, optW, optH, 6);
+
+            // Tag
+            noStroke();
+            fill(opt.tagColor[0], opt.tagColor[1], opt.tagColor[2], a);
+            let tagW = opt.tag.length * 8 + 14;
+            rect(sumX + 10, oy + 10, tagW, 20, 3);
+            fill(255, 255, 255, a);
+            textSize(10);
+            textStyle(BOLD);
+            textAlign(LEFT, CENTER);
+            text(opt.tag, sumX + 17, oy + 20);
+            textStyle(NORMAL);
+
+            // Label
+            fill(40, 40, 60, a);
+            textSize(13);
+            textStyle(BOLD);
+            text(opt.label, sumX + tagW + 20, oy + 20);
+            textStyle(NORMAL);
+
+            // Description
+            fill(90, 90, 110, a);
+            textSize(11);
+            text(opt.desc, sumX + 15, oy + 48);
+        }
+    }
+
+    // ══════════════════════════════════════════════
+    //  SIDEBAR
+    // ══════════════════════════════════════════════
+
+    function drawSidebar() {
+        let sx = canvasWidth - sidebarWidth - 5;
+        let sy = 10;
+        let sw = sidebarWidth;
+        let sh = drawHeight - 20;
+
+        // Background
+        fill(248, 249, 252);
+        stroke(210, 215, 225);
+        strokeWeight(1);
+        rect(sx, sy, sw, sh, 8);
+
+        // Title
+        fill(60, 60, 80);
+        textSize(11);
+        textStyle(BOLD);
+        textAlign(CENTER, TOP);
+        text("PIPELINE STAGES", sx + sw / 2, sy + 12);
+        textStyle(NORMAL);
+
+        // Stage items
+        let itemH = 55;
+        let itemStartY = sy + 38;
+        let itemW = sw - 20;
+
+        for (let i = 1; i <= totalStages; i++) {
+            let iy = itemStartY + (i - 1) * (itemH + 4);
+            let isCompleted = i < currentStage;
+            let isCurrent = i === currentStage;
+            let isUpcoming = i > currentStage;
+
+            // Item background
+            if (isCurrent) {
+                fill(55, 120, 200);
+                noStroke();
+                rect(sx + 10, iy, itemW, itemH, 6);
+                // Text
+                fill(255);
+                textSize(11);
+                textStyle(BOLD);
+                textAlign(LEFT, TOP);
+                text(i + ". " + stageLabels[i - 1], sx + 18, iy + 8);
+                textStyle(NORMAL);
+                // Arrow indicator
+                textSize(14);
+                textAlign(RIGHT, CENTER);
+                text("\u25B6", sx + itemW + 4, iy + itemH / 2);
+            } else if (isCompleted) {
+                fill(80, 180, 100);
+                noStroke();
+                rect(sx + 10, iy, itemW, itemH, 6);
+                fill(255);
+                textSize(11);
+                textStyle(BOLD);
+                textAlign(LEFT, TOP);
+                text(i + ". " + stageLabels[i - 1], sx + 18, iy + 8);
+                textStyle(NORMAL);
+                // Checkmark
+                textSize(14);
+                textAlign(RIGHT, CENTER);
+                text("\u2713", sx + itemW + 4, iy + itemH / 2);
+            } else {
+                fill(210, 215, 225);
+                noStroke();
+                rect(sx + 10, iy, itemW, itemH, 6);
+                fill(130, 130, 150);
+                textSize(11);
+                textStyle(BOLD);
+                textAlign(LEFT, TOP);
+                text(i + ". " + stageLabels[i - 1], sx + 18, iy + 8);
+                textStyle(NORMAL);
+            }
+
+            // Stage short description (second line)
+            let shortDescs = [
+                "Sensor output signal",
+                "Cloud database storage",
+                "Historical trend analysis",
+                "Alarm level comparison",
+                "Alert notification",
+                "Technician action plan"
+            ];
+            if (isCurrent) fill(220, 230, 255);
+            else if (isCompleted) fill(200, 240, 210);
+            else fill(150, 150, 170);
+            textSize(9);
+            textAlign(LEFT, TOP);
+            text(shortDescs[i - 1], sx + 18, iy + 28);
+        }
+    }
+
+    // ══════════════════════════════════════════════
+    //  CONTROL BAR
+    // ══════════════════════════════════════════════
+
+    function drawControlBar() {
+        // Background
+        fill(232, 235, 240);
+        noStroke();
+        rect(0, drawHeight, canvasWidth, controlHeight);
+
+        // Separator line
+        stroke(200, 205, 215);
+        strokeWeight(1);
+        line(0, drawHeight, canvasWidth, drawHeight);
+
+        // Previous button
+        let prevEnabled = currentStage > 1;
+        if (prevEnabled) {
+            fill(70, 100, 160);
+        } else {
+            fill(180, 185, 195);
+        }
+        noStroke();
+        rect(btnPrevX, btnPrevY, btnPrevW, btnPrevH, 6);
+        fill(255);
+        textSize(13);
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text("\u25C0  Previous", btnPrevX + btnPrevW / 2, btnPrevY + btnPrevH / 2);
+        textStyle(NORMAL);
+
+        // Next button
+        let nextEnabled = currentStage < totalStages;
+        if (nextEnabled) {
+            fill(70, 100, 160);
+        } else {
+            fill(180, 185, 195);
+        }
+        noStroke();
+        rect(btnNextX, btnNextY, btnNextW, btnNextH, 6);
+        fill(255);
+        textSize(13);
+        textStyle(BOLD);
+        textAlign(CENTER, CENTER);
+        text("Next  \u25B6", btnNextX + btnNextW / 2, btnNextY + btnNextH / 2);
+        textStyle(NORMAL);
+
+        // Stage indicator
+        fill(80, 80, 110);
+        textSize(12);
+        textAlign(CENTER, CENTER);
+        textStyle(NORMAL);
+        text("Stage " + currentStage + " of " + totalStages, (btnPrevX + btnPrevW + btnNextX) / 2, btnPrevY + btnPrevH / 2);
+
+        // Dots
+        let dotStartX = (btnPrevX + btnPrevW + btnNextX) / 2 - (totalStages * 14) / 2;
+        let dotCY = btnPrevY + btnPrevH / 2 + 18;
+        for (let i = 1; i <= totalStages; i++) {
+            let dx = dotStartX + (i - 1) * 14 + 7;
+            if (i === currentStage) {
+                fill(55, 120, 200);
+                ellipse(dx, dotCY, 8, 8);
+            } else if (i < currentStage) {
+                fill(80, 180, 100);
+                ellipse(dx, dotCY, 7, 7);
+            } else {
+                fill(190, 195, 205);
+                ellipse(dx, dotCY, 7, 7);
+            }
+        }
+    }
+
+    // ══════════════════════════════════════════════
+    //  INTERACTION
+    // ══════════════════════════════════════════════
+
+    function mousePressed() {
+        // Previous button
+        if (currentStage > 1 &&
+            mouseX >= btnPrevX && mouseX <= btnPrevX + btnPrevW &&
+            mouseY >= btnPrevY && mouseY <= btnPrevY + btnPrevH) {
+            currentStage--;
+            stageTransition = 0.0;
+            return;
+        }
+
+        // Next button
+        if (currentStage < totalStages &&
+            mouseX >= btnNextX && mouseX <= btnNextX + btnNextW &&
+            mouseY >= btnNextY && mouseY <= btnNextY + btnNextH) {
+            currentStage++;
+            stageTransition = 0.0;
+            return;
+        }
+
+        // Stage 3 slider
+        if (currentStage === 3) {
+            let handleX = map(sliderVal, 0.04, 0.45, sliderX, sliderX + sliderW);
+            if (dist(mouseX, mouseY, handleX, sliderY) < 15) {
+                sliderDragging = true;
+            }
+        }
+
+        // Stage 5 toggle button
+        if (currentStage === 5 &&
+            mouseX >= togBtnX && mouseX <= togBtnX + togBtnW &&
+            mouseY >= togBtnY && mouseY <= togBtnY + togBtnH) {
+            alertToggle = (alertToggle + 1) % 3;
+        }
+
+        // Sidebar click (navigate to any stage)
+        let sx = canvasWidth - sidebarWidth - 5;
+        let itemStartY = 10 + 38;
+        let itemH = 55;
+        let itemW = sidebarWidth - 20;
+        for (let i = 1; i <= totalStages; i++) {
+            let iy = itemStartY + (i - 1) * (itemH + 4);
+            if (mouseX >= sx + 10 && mouseX <= sx + 10 + itemW &&
+                mouseY >= iy && mouseY <= iy + itemH) {
+                currentStage = i;
+                stageTransition = 0.0;
+                break;
+            }
+        }
+    }
+
+    function mouseDragged() {
+        if (sliderDragging && currentStage === 3) {
+            sliderVal = map(mouseX, sliderX, sliderX + sliderW, 0.04, 0.45);
+            sliderVal = constrain(sliderVal, 0.04, 0.45);
+            sliderVal = Math.round(sliderVal * 100) / 100;
+            trendData[29] = sliderVal;
+        }
+    }
+
+    function mouseReleased() {
+        sliderDragging = false;
+    }
+
+    function mouseMoved() {
+        // Stage 6 option hover detection
+        if (currentStage === 6) {
+            let sumW = Math.min(460, mainW - 40);
+            let sumX = mainX + mainW / 2 - sumW / 2;
+            let optY = mainY + 80 + 50 + 65;
+            let optH = 72;
+            let optSpacing = 8;
+            hoveredOption = -1;
+            for (let i = 0; i < 3; i++) {
+                let oy = optY + i * (optH + optSpacing);
+                if (mouseX >= sumX && mouseX <= sumX + sumW &&
+                    mouseY >= oy && mouseY <= oy + optH) {
+                    hoveredOption = i;
+                    break;
+                }
+            }
+        } else {
+            hoveredOption = -1;
+        }
+    }
+
+    function keyPressed() {
+        if (keyCode === LEFT_ARROW && currentStage > 1) {
+            currentStage--;
+            stageTransition = 0.0;
+        } else if (keyCode === RIGHT_ARROW && currentStage < totalStages) {
+            currentStage++;
+            stageTransition = 0.0;
+        }
+    }
+    </script>
+</body>
+</html>

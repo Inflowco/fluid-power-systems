@@ -1,0 +1,9 @@
+{
+  "title": "Pneumatic Conveying Pipeline Design Calculator",
+  "chapter": 13,
+  "type": "microsim",
+  "bloom_level": "L3 Apply",
+  "bloom_verbs": ["calculate", "apply"],
+  "technology": "p5.js",
+  "learning_objective": "Students will be able to calculate equivalent length and estimate pressure drop for a pneumatic conveying pipeline."
+}

@@ -1,0 +1,4492 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Cooling water fundamentals, cooling tower types and operations, water distribution systems, water treatment principles, corrosion prevention, scale prevention, water quality monitoring and parameters, AI-driven smart monitoring and predictive maintenance, and energy efficiency strategies">
+      
+      
+        <meta name="author" content="Peter Vinck, Inflow Corp.">
+      
+      
+        <link rel="canonical" href="https://dmccreary.github.io/fluid-power-systems/chapters/07-cooling/">
+      
+      
+        <link rel="prev" href="../06-compressed-air/">
+      
+      
+        <link rel="next" href="../08-steam/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Chapter 7 - Cooling Water Systems and Smart Monitoring - Fluid Power Systems</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-H81SZL21DT"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-H81SZL21DT",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-H81SZL21DT",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Chapter 7 - Cooling Water Systems and Smart Monitoring - Fluid Power Systems" />
+<meta property="og:description" content="Cooling water fundamentals, cooling tower types and operations, water distribution systems, water treatment principles, corrosion prevention, scale prevention, water quality monitoring and parameters, AI-driven smart monitoring and predictive maintenance, and energy efficiency strategies" />
+<meta property="og:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/07-cooling/index.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="https://dmccreary.github.io/fluid-power-systems/chapters/07-cooling/" />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Chapter 7 - Cooling Water Systems and Smart Monitoring - Fluid Power Systems" />
+<meta property="twitter:description" content="Cooling water fundamentals, cooling tower types and operations, water distribution systems, water treatment principles, corrosion prevention, scale prevention, water quality monitoring and parameters, AI-driven smart monitoring and predictive maintenance, and energy efficiency strategies" />
+<meta property="twitter:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/07-cooling/index.png" />
+</head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-7-cooling-water-systems-and-smart-monitoring" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fluid Power Systems" class="md-header__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fluid Power Systems
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Chapter 7 - Cooling Water Systems and Smart Monitoring
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fluid Power Systems" class="md-nav__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    Fluid Power Systems
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-components-and-controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Components and Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-hvac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. HVAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-vacuum/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. Vacuum
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-blowers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Blowers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-compressed-air/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Compressed Air
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Cooling
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Cooling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#71-what-is-a-cooling-water-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 What Is a Cooling Water System?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#72-cooling-tower-types-and-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Cooling Tower Types and Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2 Cooling Tower Types and Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#721-natural-draft-cooling-towers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2.1 Natural Draft Cooling Towers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#722-mechanical-draft-cooling-towers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2.2 Mechanical Draft Cooling Towers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#723-crossflow-vs-counterflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2.3 Crossflow vs. Counterflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2.3 Crossflow vs. Counterflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-tower-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Tower Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#724-key-cooling-tower-terms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2.4 Key Cooling Tower Terms
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2.4 Key Cooling Tower Terms">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-heat-rejection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Heat Rejection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#73-cooling-water-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Cooling Water Distribution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.3 Cooling Water Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#731-circulating-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3.1 Circulating Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#732-heat-exchangers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3.2 Heat Exchangers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#733-piping-and-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3.3 Piping and Valves
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#74-water-treatment-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Water Treatment Principles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.4 Water Treatment Principles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#741-the-three-enemies-of-cooling-water-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4.1 The Three Enemies of Cooling Water Systems
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#742-chemical-treatment-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4.2 Chemical Treatment Programs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.4.2 Chemical Treatment Programs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-water-treatment-cycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Water Treatment Cycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#743-cycles-of-concentration-and-blowdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4.3 Cycles of Concentration and Blowdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.4.3 Cycles of Concentration and Blowdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-cycles-of-concentration-and-blowdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Cycles of Concentration and Blowdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#744-biological-control-and-legionella-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4.4 Biological Control and Legionella Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#75-corrosion-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5 Corrosion Prevention
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.5 Corrosion Prevention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#751-types-of-corrosion-in-cooling-water-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5.1 Types of Corrosion in Cooling Water Systems
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#752-corrosion-inhibitors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5.2 Corrosion Inhibitors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#753-material-selection-for-corrosion-resistance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5.3 Material Selection for Corrosion Resistance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.5.3 Material Selection for Corrosion Resistance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-corrosion-and-scale-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Corrosion and Scale Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#76-scale-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6 Scale Prevention
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.6 Scale Prevention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#761-causes-of-scale-formation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6.1 Causes of Scale Formation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#762-impact-of-scale-on-heat-transfer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6.2 Impact of Scale on Heat Transfer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#763-scale-prevention-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6.3 Scale Prevention Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#764-the-langelier-saturation-index-lsi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6.4 The Langelier Saturation Index (LSI)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.6.4 The Langelier Saturation Index (LSI)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-langelier-saturation-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Langelier Saturation Index
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#77-water-quality-monitoring-and-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.7 Water Quality Monitoring and Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.7 Water Quality Monitoring and Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#771-key-water-quality-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.7.1 Key Water Quality Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#772-monitoring-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.7.2 Monitoring Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.7.2 Monitoring Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-water-quality-monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Water Quality Monitor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#78-ai-driven-smart-monitoring-and-predictive-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8 AI-Driven Smart Monitoring and Predictive Maintenance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.8 AI-Driven Smart Monitoring and Predictive Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#781-iot-sensor-network-for-cooling-water" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8.1 IoT Sensor Network for Cooling Water
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#782-how-ai-predicts-cooling-water-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8.2 How AI Predicts Cooling Water Problems
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#783-ai-applications-in-cooling-water-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8.3 AI Applications in Cooling Water Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#784-benefits-of-ai-driven-cooling-water-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8.4 Benefits of AI-Driven Cooling Water Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#79-energy-efficiency-and-sustainability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9 Energy Efficiency and Sustainability
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.9 Energy Efficiency and Sustainability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#791-sources-of-energy-waste" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9.1 Sources of Energy Waste
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#792-energy-optimization-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9.2 Energy Optimization Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#793-water-conservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9.3 Water Conservation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.9.3 Water Conservation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-maintenance-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Maintenance Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#794-sustainability-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9.4 Sustainability Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.9.4 Sustainability Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-water-and-energy-use-intensity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Water and Energy Use Intensity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-energy-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Energy Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#710-utility-rebates-incentives-and-building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.10 Utility Rebates, Incentives, and Building the Business Case
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.10 Utility Rebates, Incentives, and Building the Business Case">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-incentive-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Incentive Programs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-find-available-rebates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Find Available Rebates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-cooling-water-system-upgrades-and-rebate-potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Cooling Water System Upgrades and Rebate Potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Business Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#711-lab-preview-inspect-a-cooling-system-and-analyze-water-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.11 Lab Preview: Inspect a Cooling System and Analyze Water Data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.11 Lab Preview: Inspect a Cooling System and Analyze Water Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lab-activities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab Activities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lab-safety-reminders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab Safety Reminders
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-steam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. Steam Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-dust-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Dust Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-hydraulic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Hydraulic Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11-pumping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Pumping Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-fan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Fans
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Systems and Software
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../prompts/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-we-built-this-site/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How We Built This Site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../feedback/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feedback
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#71-what-is-a-cooling-water-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 What Is a Cooling Water System?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#72-cooling-tower-types-and-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Cooling Tower Types and Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2 Cooling Tower Types and Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#721-natural-draft-cooling-towers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2.1 Natural Draft Cooling Towers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#722-mechanical-draft-cooling-towers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2.2 Mechanical Draft Cooling Towers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#723-crossflow-vs-counterflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2.3 Crossflow vs. Counterflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2.3 Crossflow vs. Counterflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-tower-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Tower Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#724-key-cooling-tower-terms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2.4 Key Cooling Tower Terms
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2.4 Key Cooling Tower Terms">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-heat-rejection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Heat Rejection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#73-cooling-water-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Cooling Water Distribution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.3 Cooling Water Distribution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#731-circulating-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3.1 Circulating Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#732-heat-exchangers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3.2 Heat Exchangers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#733-piping-and-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3.3 Piping and Valves
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#74-water-treatment-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 Water Treatment Principles
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.4 Water Treatment Principles">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#741-the-three-enemies-of-cooling-water-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4.1 The Three Enemies of Cooling Water Systems
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#742-chemical-treatment-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4.2 Chemical Treatment Programs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.4.2 Chemical Treatment Programs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-water-treatment-cycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Water Treatment Cycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#743-cycles-of-concentration-and-blowdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4.3 Cycles of Concentration and Blowdown
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.4.3 Cycles of Concentration and Blowdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-cycles-of-concentration-and-blowdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Cycles of Concentration and Blowdown
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#744-biological-control-and-legionella-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4.4 Biological Control and Legionella Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#75-corrosion-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5 Corrosion Prevention
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.5 Corrosion Prevention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#751-types-of-corrosion-in-cooling-water-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5.1 Types of Corrosion in Cooling Water Systems
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#752-corrosion-inhibitors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5.2 Corrosion Inhibitors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#753-material-selection-for-corrosion-resistance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.5.3 Material Selection for Corrosion Resistance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.5.3 Material Selection for Corrosion Resistance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-corrosion-and-scale-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Corrosion and Scale Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#76-scale-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6 Scale Prevention
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.6 Scale Prevention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#761-causes-of-scale-formation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6.1 Causes of Scale Formation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#762-impact-of-scale-on-heat-transfer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6.2 Impact of Scale on Heat Transfer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#763-scale-prevention-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6.3 Scale Prevention Methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#764-the-langelier-saturation-index-lsi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.6.4 The Langelier Saturation Index (LSI)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.6.4 The Langelier Saturation Index (LSI)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-langelier-saturation-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Langelier Saturation Index
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#77-water-quality-monitoring-and-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.7 Water Quality Monitoring and Parameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.7 Water Quality Monitoring and Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#771-key-water-quality-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.7.1 Key Water Quality Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#772-monitoring-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.7.2 Monitoring Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.7.2 Monitoring Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-water-quality-monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Water Quality Monitor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#78-ai-driven-smart-monitoring-and-predictive-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8 AI-Driven Smart Monitoring and Predictive Maintenance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.8 AI-Driven Smart Monitoring and Predictive Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#781-iot-sensor-network-for-cooling-water" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8.1 IoT Sensor Network for Cooling Water
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#782-how-ai-predicts-cooling-water-problems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8.2 How AI Predicts Cooling Water Problems
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#783-ai-applications-in-cooling-water-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8.3 AI Applications in Cooling Water Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#784-benefits-of-ai-driven-cooling-water-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.8.4 Benefits of AI-Driven Cooling Water Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#79-energy-efficiency-and-sustainability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9 Energy Efficiency and Sustainability
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.9 Energy Efficiency and Sustainability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#791-sources-of-energy-waste" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9.1 Sources of Energy Waste
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#792-energy-optimization-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9.2 Energy Optimization Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#793-water-conservation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9.3 Water Conservation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.9.3 Water Conservation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-maintenance-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Maintenance Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#794-sustainability-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.9.4 Sustainability Metrics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.9.4 Sustainability Metrics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-water-and-energy-use-intensity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Water and Energy Use Intensity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cooling-energy-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cooling Energy Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#710-utility-rebates-incentives-and-building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.10 Utility Rebates, Incentives, and Building the Business Case
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.10 Utility Rebates, Incentives, and Building the Business Case">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-incentive-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Incentive Programs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-find-available-rebates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Find Available Rebates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-cooling-water-system-upgrades-and-rebate-potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Cooling Water System Upgrades and Rebate Potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Business Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#711-lab-preview-inspect-a-cooling-system-and-analyze-water-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.11 Lab Preview: Inspect a Cooling System and Analyze Water Data
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.11 Lab Preview: Inspect a Cooling System and Analyze Water Data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lab-activities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab Activities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lab-safety-reminders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab Safety Reminders
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/dmccreary/fluid-power-systems/blob/master/docs/chapters/07-cooling/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="chapter-7-cooling-water-systems-and-smart-monitoring">Chapter 7: Cooling Water Systems and Smart Monitoring</h1>
+<h2 id="summary">Summary</h2>
+<p>This chapter introduces cooling water systems as essential infrastructure in industrial facilities, data centers, power plants, and commercial buildings. Students will learn how cooling water systems reject waste heat from processes and equipment, starting with the fundamentals of heat transfer and the cooling water cycle. The chapter covers the major cooling tower types — natural draft, mechanical draft (forced and induced), crossflow, and counterflow — and explains how cooling water is distributed through pumps, piping, and heat exchangers. Students will study water treatment principles including chemical treatment, biocides, and pH control, then advance to corrosion prevention strategies (types of corrosion, inhibitors, material selection) and scale prevention (causes, treatment, monitoring). The chapter covers water quality monitoring parameters — conductivity, pH, alkalinity, hardness, and total dissolved solids (TDS) — and then introduces AI-driven smart monitoring and predictive maintenance that uses IoT sensors and machine learning to detect developing problems before they cause equipment damage or unplanned downtime. The chapter concludes with energy efficiency and sustainability strategies, including water recycling, blowdown optimization, and free cooling.</p>
+<h2 id="concepts-covered">Concepts Covered</h2>
+<ol>
+<li>Cooling water fundamentals — heat rejection, the cooling water cycle, and system components</li>
+<li>Cooling tower types — natural draft, mechanical draft (forced and induced draft), crossflow, and counterflow designs</li>
+<li>Cooling water distribution — circulating pumps, piping systems, and heat exchangers</li>
+<li>Water treatment principles — chemical treatment, biocides, pH control, and treatment programs</li>
+<li>Corrosion prevention — types of corrosion, corrosion inhibitors, and material selection</li>
+<li>Scale prevention — causes of scale formation, treatment methods, and monitoring techniques</li>
+<li>Water quality monitoring — conductivity, pH, alkalinity, hardness, TDS, and other key parameters</li>
+<li>IoT sensors for water quality — continuous monitoring of chemical and physical parameters</li>
+<li>AI-driven smart monitoring — machine learning for anomaly detection and trend analysis</li>
+<li>Predictive maintenance for cooling systems — predicting pump failures, fouling, and corrosion events</li>
+<li>Energy efficiency in cooling water systems — VFDs, free cooling, approach temperature optimization</li>
+<li>Sustainability — water recycling, blowdown optimization, and environmental compliance</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Chapter 1: Introduction to Fluid Power Systems and AI (understanding of fluid types, basic system concepts, and the role of AI)</li>
+<li>Chapter 2: System Components and Smart Controls (knowledge of pumps, fans, compressors, valves, filters, PLCs, and IoT sensors)</li>
+<li>Chapter 3: HVAC Systems with AI Optimization (understanding of refrigerant cycles, heat transfer, maintenance procedures, and AI-driven controls)</li>
+<li>Chapter 4: Vacuum Systems and Data-Driven Maintenance (understanding of pressure measurement, leak detection methods, and predictive maintenance concepts)</li>
+<li>Chapter 5: Compressed Air Systems and Efficiency (understanding of system efficiency, energy optimization, and AI-driven diagnostics)</li>
+</ul>
+<hr />
+<h2 id="71-what-is-a-cooling-water-system">7.1 What Is a Cooling Water System?</h2>
+<p>A <strong>cooling water system</strong> removes waste heat from industrial processes, equipment, and buildings by circulating water through heat-producing equipment and then rejecting that heat to the atmosphere. Every facility that generates significant heat — from a data center full of servers to a chemical plant running exothermic reactions to a commercial building's air conditioning system — relies on cooling water to keep equipment at safe operating temperatures.</p>
+<p>The basic principle is simple. Water absorbs heat from a process (such as a condenser, compressor jacket, or injection mold) as it passes through a heat exchanger. The heated water then travels to a cooling tower or other heat rejection device, where it gives up that heat to the atmosphere. The cooled water returns to the process to absorb more heat, completing the cycle. This continuous loop of absorbing heat, rejecting heat, and recirculating is the cooling water cycle.</p>
+<p>Cooling water systems are found in virtually every industry:</p>
+<ul>
+<li><strong>Power generation</strong> — steam turbine condensers require enormous volumes of cooling water</li>
+<li><strong>Chemical and petrochemical plants</strong> — reactors, distillation columns, and compressors generate process heat</li>
+<li><strong>Data centers</strong> — servers generate heat that must be removed to prevent equipment damage and maintain reliability</li>
+<li><strong>HVAC</strong> — chiller condensers reject the heat removed from buildings</li>
+<li><strong>Manufacturing</strong> — injection molding, metal casting, welding, and machining all produce heat</li>
+<li><strong>Food and beverage</strong> — pasteurization, sterilization, and refrigeration systems reject heat through cooling water</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>System Characteristic</th>
+<th>Typical Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supply temperature (to process)</td>
+<td>80–85°F (27–29°C)</td>
+</tr>
+<tr>
+<td>Return temperature (from process)</td>
+<td>95–105°F (35–41°C)</td>
+</tr>
+<tr>
+<td>Temperature range (delta T)</td>
+<td>10–20°F (6–11°C)</td>
+</tr>
+<tr>
+<td>Typical flow rate (medium facility)</td>
+<td>500–5,000 GPM</td>
+</tr>
+<tr>
+<td>Cycles of concentration</td>
+<td>3–6 (open recirculating)</td>
+</tr>
+<tr>
+<td>Makeup water requirement</td>
+<td>2–5% of circulation rate</td>
+</tr>
+<tr>
+<td>Average system life</td>
+<td>20–30 years</td>
+</tr>
+</tbody>
+</table>
+<p>There are three basic types of cooling water systems:</p>
+<ul>
+<li><strong>Once-through systems</strong> — water is drawn from a natural source (river, lake, ocean), passed through the heat exchanger once, and discharged back to the source at a higher temperature. These systems are simple but use enormous quantities of water and face environmental restrictions on thermal discharge.</li>
+<li><strong>Open recirculating systems</strong> — the most common type in industrial facilities. Water circulates in a loop between the heat exchangers and a cooling tower. The tower rejects heat to the atmosphere through evaporation. A small amount of water is lost to evaporation, drift, and blowdown, and is replaced by makeup water.</li>
+<li><strong>Closed recirculating systems</strong> — water circulates in a sealed loop between the heat exchangers and a secondary heat rejection device (such as a fluid cooler or dry cooler). The water does not contact the atmosphere, so it stays cleaner and requires less chemical treatment. These systems are used where water quality must be tightly controlled.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Why Cooling Water Matters for Technicians</p>
+<p>Cooling water system failures can shut down entire production lines in minutes. A fouled heat exchanger that cannot reject enough heat will cause process temperatures to rise above safe limits, triggering automatic shutdowns. A corroded pipe that develops a leak can flood equipment rooms and contaminate processes. Understanding cooling water fundamentals helps you prevent these costly failures through proper monitoring and maintenance.</p>
+</div>
+<h2 id="72-cooling-tower-types-and-operations">7.2 Cooling Tower Types and Operations</h2>
+<p>A <strong>cooling tower</strong> is the heart of an open recirculating cooling water system. It rejects heat from the warm return water to the atmosphere, primarily through evaporation. When water evaporates, it absorbs a large amount of energy (approximately 1,000 BTU per pound of water evaporated), which is far more efficient than simply warming the air. About 80 percent of the heat rejection in a cooling tower occurs through evaporation; the remaining 20 percent occurs through sensible heat transfer (warming the air).</p>
+<h3 id="721-natural-draft-cooling-towers">7.2.1 Natural Draft Cooling Towers</h3>
+<p>A <strong>natural draft cooling tower</strong> uses the buoyancy of warm, moist air to create airflow through the tower without any fans. These towers are the massive hyperboloid (hourglass-shaped) concrete structures seen at large power plants. The warm, moist air inside the tower is less dense than the cooler, drier air outside. This density difference creates a natural updraft that draws air up through the tower.</p>
+<p>Key characteristics of natural draft towers:</p>
+<ul>
+<li><strong>Height</strong>: 300–600 feet tall (the height creates the draft)</li>
+<li><strong>Capacity</strong>: Very high — designed for large power plant condensers</li>
+<li><strong>Energy use</strong>: Zero fan energy (the main advantage)</li>
+<li><strong>Cost</strong>: Very high initial cost due to massive concrete structure</li>
+<li><strong>Applications</strong>: Large power plants (nuclear, coal, gas)</li>
+<li><strong>Limitation</strong>: Performance depends on ambient weather conditions</li>
+</ul>
+<h3 id="722-mechanical-draft-cooling-towers">7.2.2 Mechanical Draft Cooling Towers</h3>
+<p><strong>Mechanical draft cooling towers</strong> use fans to force or induce air through the tower, giving the operator control over airflow independent of weather conditions. They are much smaller and less expensive than natural draft towers, and are the type used in the vast majority of industrial and commercial applications.</p>
+<p>There are two subtypes based on fan placement:</p>
+<ul>
+<li><strong>Forced draft</strong> — the fan is located at the air inlet (bottom or side) and pushes air through the tower fill and up past the falling water. Advantages: the fan is accessible for maintenance and operates in clean, cool air. Disadvantage: the discharged moist air can recirculate back into the fan inlet, reducing performance.</li>
+<li><strong>Induced draft</strong> — the fan is located at the top of the tower and pulls air upward through the fill. Advantages: better air distribution, less recirculation, lower noise at ground level. Disadvantage: the fan operates in the warm, moist discharge air, which increases motor load and exposes the fan to corrosive conditions.</li>
+</ul>
+<p>Induced draft towers are more common than forced draft in industrial applications because of their superior performance and lower recirculation risk.</p>
+<h3 id="723-crossflow-vs-counterflow">7.2.3 Crossflow vs. Counterflow</h3>
+<p>In addition to draft type, cooling towers are classified by the relative direction of air and water flow:</p>
+<ul>
+<li><strong>Crossflow</strong> — air flows horizontally through the tower fill while water falls vertically by gravity. The water distribution basin is open at the top, and the fill is arranged in vertical banks on the sides of the tower. Crossflow towers are simpler to maintain because the distribution basins and fill are accessible from outside the tower.</li>
+<li><strong>Counterflow</strong> — air flows upward through the tower fill directly opposite to the falling water. The water is distributed by pressurized spray nozzles above the fill. Counterflow towers are more thermally efficient because the coldest air contacts the coldest water at the bottom, maximizing the temperature difference. However, the spray nozzles are inside the tower and harder to service.</li>
+</ul>
+<h4 id="diagram-cooling-tower-types">Diagram: Cooling Tower Types</h4>
+<iframe src="../../sims/cooling-tower-types/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Cooling Tower Types</summary>
+Type: diagram
+
+Bloom Taxonomy: Understand (L2)
+Bloom Verb: compare, classify
+Learning Objective: Students will be able to compare the operating principles of different cooling tower types and classify each by its airflow pattern and draft method.
+
+Purpose: Animated cross-section diagrams showing the internal operation of four cooling tower configurations with water and air flow paths
+
+Layout: 2x2 grid of animated tower cross-sections, each with labels and a summary card below
+
+Grid positions:
+1. Top-left — Natural Draft Tower:
+   - Tall hyperboloid concrete shell
+   - Water sprayed onto fill media at the base
+   - Warm moist air rising naturally through tower
+   - Air entering at base through louvers
+   - Labels: "Concrete Shell," "Fill Media," "Water Distribution," "Air Inlet," "Warm Air Discharge," "Basin"
+
+2. Top-right — Induced Draft (Counterflow):
+   - Fan at top pulling air upward
+   - Water sprayed downward through fill
+   - Air and water flowing in opposite directions
+   - Labels: "Fan," "Motor," "Drift Eliminators," "Spray Nozzles," "Fill Media," "Cold Water Basin"
+
+3. Bottom-left — Forced Draft (Crossflow):
+   - Fan at side pushing air horizontally
+   - Water falling vertically through fill banks on sides
+   - Open distribution basin at top
+   - Labels: "Fan," "Fill Media," "Distribution Basin," "Air Inlet," "Cold Water Basin"
+
+4. Bottom-right — Induced Draft (Crossflow):
+   - Fan at top pulling air inward from sides
+   - Water falling vertically through fill on both sides
+   - Air flowing horizontally through fill then up through fan
+   - Labels: "Fan," "Fill Media," "Hot Water Basin," "Louvers," "Cold Water Basin"
+
+Summary card below each tower:
+- Draft type (Natural/Forced/Induced)
+- Flow pattern (Crossflow/Counterflow)
+- Fan energy (None/Low/Medium)
+- Thermal efficiency (Good/Better/Best)
+- Best for: (1-2 application examples)
+
+Interactive elements:
+- Click any tower to pause/play its animation
+- Hover over labels for detailed explanations
+- Toggle button: "Show Air Flow" highlights air path with blue arrows
+- Toggle button: "Show Water Flow" highlights water path with green arrows
+
+Color scheme: Blue for cool air, red/orange for warm air, light blue for cool water, orange for warm water, gray for structure
+Responsive design: Grid adjusts from 2x2 to single column on narrow screens. Must respond to window resize events.
+
+Implementation: p5.js with animated air and water flow paths and interactive hover tooltips
+</details>
+
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Natural Draft</th>
+<th>Induced Draft (Counterflow)</th>
+<th>Induced Draft (Crossflow)</th>
+<th>Forced Draft</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fan energy</td>
+<td>None</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Thermal efficiency</td>
+<td>Good</td>
+<td>Best</td>
+<td>Good</td>
+<td>Good</td>
+</tr>
+<tr>
+<td>Maintenance access</td>
+<td>Difficult</td>
+<td>Moderate</td>
+<td>Easy</td>
+<td>Easy</td>
+</tr>
+<tr>
+<td>Recirculation risk</td>
+<td>None</td>
+<td>Low</td>
+<td>Low</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Noise at ground level</td>
+<td>Low</td>
+<td>Low</td>
+<td>Low</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Initial cost</td>
+<td>Very high</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Low–Medium</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Large power plants</td>
+<td>Industrial, data centers</td>
+<td>Commercial HVAC</td>
+<td>Small industrial</td>
+</tr>
+</tbody>
+</table>
+<h3 id="724-key-cooling-tower-terms">7.2.4 Key Cooling Tower Terms</h3>
+<p>Understanding cooling tower performance requires familiarity with these terms:</p>
+<ul>
+<li><strong>Range</strong> — the temperature difference between the hot water entering the tower and the cold water leaving. A tower receiving 100°F water and producing 85°F water has a 15°F range.</li>
+<li><strong>Approach</strong> — the temperature difference between the cold water leaving the tower and the ambient wet-bulb temperature. If the cold water is 85°F and the wet-bulb temperature is 78°F, the approach is 7°F. Lower approach means higher performance but requires a larger, more expensive tower.</li>
+<li><strong>Wet-bulb temperature</strong> — the lowest temperature that can be achieved by evaporative cooling. It is the theoretical limit for cooling tower performance. A tower cannot cool water below the wet-bulb temperature.</li>
+<li><strong>Drift</strong> — tiny water droplets carried out of the tower by the air discharge. Drift eliminators reduce this loss to less than 0.001% of the circulation rate.</li>
+<li><strong>Blowdown</strong> — water intentionally drained from the system to control the concentration of dissolved solids. As water evaporates in the tower, dissolved minerals remain behind and concentrate.</li>
+<li><strong>Makeup water</strong> — fresh water added to replace losses from evaporation, drift, and blowdown.</li>
+<li><strong>Cycles of concentration (COC)</strong> — the ratio of dissolved solids in the circulating water to dissolved solids in the makeup water. Higher COC means less makeup water and blowdown are needed, but increases the risk of scaling and corrosion.</li>
+</ul>
+<p>[ \text{COC} = \frac{\text{TDS in circulating water}}{\text{TDS in makeup water}} ]</p>
+<p>[ \text{Makeup} = \text{Evaporation} + \text{Drift} + \text{Blowdown} ]</p>
+<p>The heat rejected by a cooling tower can be calculated from the water flow rate and temperature change:</p>
+<p>[ Q \text{ (BTU/hr)} = \text{GPM} \times 500 \times \Delta T ]</p>
+<p>where GPM is the condenser water flow rate, ( \Delta T ) is the temperature difference in °F, and the constant 500 accounts for water's density (8.33 lb/gal) multiplied by specific heat (1.0 BTU/lb·°F) multiplied by 60 min/hr (= 499.8, rounded to 500).</p>
+<h4 id="worked-example-heat-rejection">Worked Example: Heat Rejection</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Cooling tower handling 800 GPM condenser water</li>
+<li>85°F supply temperature to chiller</li>
+<li>95°F return temperature from chiller</li>
+</ul>
+<p><strong>Find:</strong> Heat rejection in BTU/hr and tons of cooling</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate the temperature difference:</li>
+</ol>
+<p>[ \Delta T = 95°F - 85°F = 10°F ]</p>
+<ol>
+<li>Calculate heat rejection using the cooling water heat equation:</li>
+</ol>
+<p>[ Q = 800 \text{ GPM} \times 500 \times 10°F = 4{,}000{,}000 \text{ BTU/hr} ]</p>
+<ol>
+<li>Convert to tons of cooling (1 ton = 12,000 BTU/hr):</li>
+</ol>
+<p>[ \text{Tons} = \frac{4{,}000{,}000}{12{,}000} = 333 \text{ tons} ]</p>
+<p><strong>Answer:</strong> The heat rejection is <strong>4,000,000 BTU/hr</strong>, equivalent to <strong>333 tons</strong> of cooling.</p>
+<blockquote>
+<p><strong>Practical note:</strong> The "500" constant is one of the most useful numbers in HVAC and cooling water calculations. It accounts for water's density (8.33 lb/gal) times specific heat (1.0 BTU/lb·°F) times 60 min/hr = 499.8, rounded to 500. This constant only applies to water — for glycol solutions or other fluids, the density and specific heat must be adjusted.</p>
+</blockquote>
+<h2 id="73-cooling-water-distribution">7.3 Cooling Water Distribution</h2>
+<p>The distribution system connects the cooling tower to the heat-producing equipment. It includes circulating pumps, piping, valves, and heat exchangers that work together to deliver cool water where it is needed and return warm water to the tower for cooling.</p>
+<h3 id="731-circulating-pumps">7.3.1 Circulating Pumps</h3>
+<p><strong>Circulating pumps</strong> drive the cooling water through the entire system. In most facilities, these are centrifugal pumps sized for the total flow rate and pressure drop of the system. Key considerations include:</p>
+<ul>
+<li><strong>Flow rate</strong> — sized to deliver the required GPM to all heat exchangers in the system</li>
+<li><strong>Head pressure</strong> — must overcome the total friction loss in piping, fittings, valves, and heat exchangers, plus any elevation difference between the basin and the highest point in the system</li>
+<li><strong>Redundancy</strong> — critical systems use multiple pumps (one running, one standby) to ensure continuous cooling if a pump fails</li>
+<li><strong>VFD control</strong> — variable frequency drives allow pump speed to adjust based on actual cooling demand, saving significant energy during partial load conditions</li>
+</ul>
+<h3 id="732-heat-exchangers">7.3.2 Heat Exchangers</h3>
+<p><strong>Heat exchangers</strong> are the devices where heat transfers from the process to the cooling water. The three most common types in cooling water service are:</p>
+<ul>
+<li><strong>Shell-and-tube</strong> — the workhorse of industrial cooling. One fluid flows through a bundle of tubes while the other flows around the tubes inside a shell. Robust, easy to clean, and available in a wide range of materials and sizes.</li>
+<li><strong>Plate-and-frame</strong> — thin corrugated metal plates stacked together with gaskets. The two fluids flow in alternating channels between plates. Very high heat transfer efficiency in a compact size, but more sensitive to fouling and harder to clean than shell-and-tube.</li>
+<li><strong>Plate-and-shell</strong> — combines plate heat transfer efficiency with shell-and-tube robustness. Used in applications requiring both high performance and mechanical strength.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Heat Exchanger Type</th>
+<th>Heat Transfer Efficiency</th>
+<th>Fouling Tolerance</th>
+<th>Cleanability</th>
+<th>Size</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shell-and-tube</td>
+<td>Good</td>
+<td>High</td>
+<td>Easy (tube side)</td>
+<td>Large</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Plate-and-frame</td>
+<td>Excellent</td>
+<td>Low</td>
+<td>Moderate</td>
+<td>Compact</td>
+<td>Medium–High</td>
+</tr>
+<tr>
+<td>Plate-and-shell</td>
+<td>Very good</td>
+<td>Moderate</td>
+<td>Moderate</td>
+<td>Compact</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="733-piping-and-valves">7.3.3 Piping and Valves</h3>
+<p>Cooling water piping is typically carbon steel or, in corrosive applications, stainless steel, fiberglass-reinforced plastic (FRP), or PVC (for low-pressure applications). Key design considerations include:</p>
+<ul>
+<li><strong>Velocity</strong> — water velocity in cooling water piping should be maintained between 3 and 8 feet per second. Below 3 fps, sediment settles and biological growth accelerates. Above 8 fps, erosion-corrosion increases, especially at elbows and tees.</li>
+<li><strong>Pipe sizing</strong> — sized to maintain the velocity range above while keeping total system pressure drop within the pump's capacity</li>
+<li><strong>Isolation valves</strong> — allow individual heat exchangers or sections to be isolated for maintenance without shutting down the entire system</li>
+<li><strong>Balancing valves</strong> — ensure proper flow distribution to each heat exchanger. Without balancing, some exchangers receive too much flow and others too little.</li>
+<li><strong>Strainers</strong> — installed upstream of heat exchangers to catch debris (leaves, insects, scale particles) that could foul heat transfer surfaces</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Maintain Minimum Water Velocity</p>
+<p>Water velocity below 3 feet per second in cooling water piping creates conditions that accelerate biological growth, sediment accumulation, and under-deposit corrosion. Stagnant or slow-moving water is the number one cause of localized corrosion pitting in cooling water systems. Always verify that design flow velocities are maintained, especially in dead-leg piping sections.</p>
+</div>
+<h2 id="74-water-treatment-principles">7.4 Water Treatment Principles</h2>
+<p>Cooling water picks up and concentrates contaminants as it circulates. The evaporation process in the cooling tower removes pure water, leaving behind dissolved minerals, suspended solids, biological organisms, and airborne debris. Without proper treatment, these contaminants cause three major problems: <strong>corrosion</strong>, <strong>scale</strong>, and <strong>biological fouling</strong> — the "big three" of cooling water chemistry. A comprehensive water treatment program addresses all three simultaneously.</p>
+<h3 id="741-the-three-enemies-of-cooling-water-systems">7.4.1 The Three Enemies of Cooling Water Systems</h3>
+<ul>
+<li><strong>Corrosion</strong> — the electrochemical destruction of metal surfaces. Corrosion thins pipe walls, perforates heat exchanger tubes, and generates rust and metal oxide particles that foul the system. (Covered in detail in Section 7.5.)</li>
+<li><strong>Scale</strong> — mineral deposits (primarily calcium carbonate and calcium sulfate) that form on heat transfer surfaces. Scale acts as insulation, reducing heat exchanger efficiency and increasing energy consumption. (Covered in detail in Section 7.6.)</li>
+<li><strong>Biological fouling</strong> — the growth of bacteria, algae, fungi, and biofilm in the cooling water. Biological fouling clogs heat exchangers, degrades heat transfer, and creates conditions for under-deposit corrosion. Some bacteria (such as Legionella pneumophila) pose serious health risks.</li>
+</ul>
+<h3 id="742-chemical-treatment-programs">7.4.2 Chemical Treatment Programs</h3>
+<p>A typical cooling water treatment program includes several categories of chemicals:</p>
+<ul>
+<li><strong>Corrosion inhibitors</strong> — chemicals that form a protective film on metal surfaces to slow the electrochemical corrosion process. Common types include phosphonates, molybdate, zinc, and azoles (for copper and its alloys).</li>
+<li><strong>Scale inhibitors</strong> — chemicals that interfere with crystal growth to prevent mineral deposits from forming on heat transfer surfaces. Common types include phosphonates, polymers, and phosphate esters. Scale inhibitors work by distorting the crystal structure of forming scale, keeping minerals in suspension.</li>
+<li><strong>Biocides</strong> — chemicals that kill or control the growth of microorganisms. There are two types:<ul>
+<li><strong>Oxidizing biocides</strong> (such as chlorine, bromine, and chlorine dioxide) — fast-acting, broad-spectrum killers that work by oxidizing cell membranes. Used as the primary biocide in most programs.</li>
+<li><strong>Non-oxidizing biocides</strong> (such as isothiazolone, glutaraldehyde, and DBNPA) — used as supplements to oxidizing biocides, especially for controlling specific organisms like Legionella or slime-forming bacteria.</li>
+</ul>
+</li>
+<li><strong>Dispersants</strong> — chemicals that keep suspended solids and biological debris in suspension so they can be removed by filtration or blowdown, rather than settling and forming deposits.</li>
+<li><strong>pH adjusters</strong> — acids (typically sulfuric acid) or caustic to maintain the water pH within the target range (typically 7.0 to 9.0) for optimal effectiveness of the corrosion and scale inhibitors.</li>
+</ul>
+<h4 id="diagram-cooling-water-treatment-cycle">Diagram: Cooling Water Treatment Cycle</h4>
+<iframe src="../../sims/cooling-water-treatment-cycle/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Cooling Water Treatment Cycle</summary>
+Type: diagram
+
+Bloom Taxonomy: Understand (L2)
+Bloom Verb: describe, trace
+Learning Objective: Students will be able to describe the purpose of each chemical treatment in a cooling water system and trace the treatment cycle from makeup water through the recirculating loop.
+
+Purpose: Interactive flow diagram showing cooling water moving through the treatment cycle with chemical injection points and contaminant levels displayed at each stage.
+
+Layout: Circular flow diagram showing the cooling water cycle with treatment injection points and water quality indicators.
+
+Components shown (clockwise from cooling tower):
+1. Cooling tower — warm water entering at top, cool water exiting at bottom into basin
+2. Basin/sump — with blowdown valve and makeup water inlet
+3. Makeup water treatment — softener or RO unit with quality indicators
+4. Chemical injection point A — corrosion inhibitor and scale inhibitor dosing pumps
+5. Circulating pump — pushing water through the system
+6. Chemical injection point B — biocide dosing pump (before heat exchangers)
+7. Strainer/filter — removing suspended solids before heat exchangers
+8. Heat exchanger — process side and cooling water side with temperature indicators
+9. Return line — warm water returning to cooling tower
+
+Water quality indicators at key points:
+- pH value shown at injection and return points
+- Conductivity/TDS shown at makeup, basin, and blowdown
+- Biocide residual shown after injection point B
+- Temperature shown at heat exchanger inlet and outlet
+
+Animated elements:
+- Water particles flowing through the system in a continuous loop
+- Chemical injection shown as colored pulses entering at injection points
+- Evaporation shown as water vapor rising from cooling tower
+- Blowdown shown as periodic discharge from basin
+- Makeup water entering to replace losses
+
+Interactive elements:
+- Hover over any component for name, function, and typical specifications
+- Click any water quality indicator for detailed parameter breakdown
+- Slider: "Cycles of Concentration" (2-8) — shows how TDS increases and blowdown changes
+- Toggle: "Show Chemical Injection" — highlights each chemical's path and function
+- Toggle: "Show Contaminants" — shows how corrosion, scale, and biological contaminants develop without treatment
+
+Color scheme: Light blue for cool clean water, orange for warm water, green for treated water, red for contaminants, purple for chemical injection
+Responsive design: Must respond to window resize events. Components wrap on narrow screens.
+
+Implementation: p5.js with animated water flow, chemical injection pulses, and dynamic water quality indicators
+</details>
+
+<h3 id="743-cycles-of-concentration-and-blowdown">7.4.3 Cycles of Concentration and Blowdown</h3>
+<p><strong>Cycles of concentration (COC)</strong> is the single most important number in cooling water chemistry management. As water evaporates in the tower, dissolved minerals stay behind and concentrate. If the makeup water has 200 ppm of dissolved solids and the circulating water has 800 ppm, the system is running at 4 cycles of concentration.</p>
+<p>Higher COC means less water waste (less makeup and blowdown needed), but more concentrated minerals increase the risk of scale and corrosion. The treatment program must balance these factors.</p>
+<table>
+<thead>
+<tr>
+<th>Cycles of Concentration</th>
+<th>Makeup Water Savings</th>
+<th>Scale Risk</th>
+<th>Corrosion Risk</th>
+<th>Chemical Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>Baseline</td>
+<td>Low</td>
+<td>Low</td>
+<td>Higher (more blowdown dilutes chemicals)</td>
+</tr>
+<tr>
+<td>3–4</td>
+<td>20–30% vs. COC 2</td>
+<td>Moderate</td>
+<td>Moderate</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>5–6</td>
+<td>35–45% vs. COC 2</td>
+<td>High</td>
+<td>High</td>
+<td>Lower (less dilution) but more inhibitor needed</td>
+</tr>
+<tr>
+<td>7+</td>
+<td>50%+ vs. COC 2</td>
+<td>Very high</td>
+<td>Very high</td>
+<td>Requires aggressive treatment program</td>
+</tr>
+</tbody>
+</table>
+<p>[ \text{Blowdown (GPM)} = \frac{\text{Evaporation (GPM)}}{\text{COC} - 1} ]</p>
+<p>[ \text{Makeup (GPM)} = \text{Evaporation} + \text{Blowdown} + \text{Drift} ]</p>
+<p>Most facilities operate between 3 and 6 cycles of concentration as the best balance between water savings and treatment cost.</p>
+<h4 id="worked-example-cycles-of-concentration-and-blowdown">Worked Example: Cycles of Concentration and Blowdown</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Evaporation rate = 100 GPM</li>
+<li>Target COC = 5</li>
+</ul>
+<p><strong>Find:</strong> Blowdown GPM and total makeup GPM</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate blowdown from the evaporation rate and COC:</li>
+</ol>
+<p>[ \text{Blowdown} = \frac{\text{Evaporation}}{\text{COC} - 1} = \frac{100}{5 - 1} = 25 \text{ GPM} ]</p>
+<ol>
+<li>Calculate total makeup water (neglecting drift, which is typically less than 0.001% of circulation):</li>
+</ol>
+<p>[ \text{Makeup} = \text{Evaporation} + \text{Blowdown} = 100 + 25 = 125 \text{ GPM} ]</p>
+<p><strong>Answer:</strong> The required blowdown is <strong>25 GPM</strong> and the total makeup water is <strong>125 GPM</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> Increasing COC from 3 to 5 reduces blowdown from 50 GPM to 25 GPM — cutting water waste in half. But higher COC increases mineral concentration, requiring better chemical treatment to prevent scaling. Every facility must find the balance point where water savings justify the additional treatment cost.</p>
+</blockquote>
+<h3 id="744-biological-control-and-legionella-prevention">7.4.4 Biological Control and Legionella Prevention</h3>
+<p>Biological control deserves special emphasis because of the health risk posed by <strong>Legionella pneumophila</strong>, the bacterium that causes Legionnaires' disease — a severe and potentially fatal form of pneumonia. Cooling towers are a known source of Legionella because they provide warm water (ideal growth temperature: 77–113°F), nutrients from airborne organic matter, and aerosolized water droplets that can be inhaled.</p>
+<p>Effective Legionella control in cooling towers requires:</p>
+<ul>
+<li><strong>Maintaining biocide residual</strong> — keeping a measurable oxidizing biocide residual at all times</li>
+<li><strong>Minimizing stagnation</strong> — ensuring all parts of the system have adequate flow (no dead legs)</li>
+<li><strong>Controlling biofilm</strong> — biofilm provides a protected environment for Legionella growth; dispersants and non-oxidizing biocides help penetrate biofilm</li>
+<li><strong>Regular testing</strong> — quarterly or monthly Legionella testing per ASHRAE Standard 188</li>
+<li><strong>Water management plan</strong> — a documented plan that identifies hazards and control measures, required by ASHRAE 188 and many local health codes</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Legionella Is a Serious Health and Legal Risk</p>
+<p>Cooling tower outbreaks of Legionnaires' disease have caused multiple fatalities in the United States and worldwide. Facilities that operate cooling towers are legally required to maintain water management plans in many jurisdictions. A Legionella outbreak can result in facility shutdowns, lawsuits, and criminal charges. This is not a topic to take lightly — proper water treatment and monitoring are essential.</p>
+</div>
+<h2 id="75-corrosion-prevention">7.5 Corrosion Prevention</h2>
+<p><strong>Corrosion</strong> is the electrochemical process by which metals deteriorate through reaction with their environment. In cooling water systems, corrosion attacks pipes, heat exchanger tubes, pump impellers, cooling tower structural steel, and virtually every metal surface that contacts the water. Left unchecked, corrosion causes equipment failures, leaks, contamination of process fluids, and costly emergency repairs.</p>
+<h3 id="751-types-of-corrosion-in-cooling-water-systems">7.5.1 Types of Corrosion in Cooling Water Systems</h3>
+<p>Several types of corrosion occur in cooling water systems, and each requires a different prevention approach:</p>
+<ul>
+<li><strong>General (uniform) corrosion</strong> — a uniform thinning of the metal surface across a large area. The most common type, and relatively predictable. A steel pipe losing 2 mils (0.002 inches) of wall thickness per year from general corrosion can be planned for and managed.</li>
+<li><strong>Pitting corrosion</strong> — localized attack that creates small, deep holes in the metal surface. Much more dangerous than general corrosion because it can penetrate a pipe wall or heat exchanger tube while the overall wall thickness appears adequate. Pitting is often caused by chloride ions, stagnant conditions, or deposits on the metal surface.</li>
+<li><strong>Galvanic corrosion</strong> — occurs when two dissimilar metals are in electrical contact in the presence of an electrolyte (the cooling water). The more active (anodic) metal corrodes preferentially. Common examples include steel pipe connected to copper heat exchanger tubes, or aluminum components in contact with steel.</li>
+<li><strong>Erosion-corrosion</strong> — the combined effect of chemical corrosion and mechanical erosion from high water velocity or entrained particles. Most common at pipe elbows, tees, and pump impellers where velocity changes direction.</li>
+<li><strong>Microbiologically influenced corrosion (MIC)</strong> — corrosion caused or accelerated by microorganisms, particularly sulfate-reducing bacteria (SRB) that produce hydrogen sulfide under deposits. MIC can cause rapid pitting failure even in systems with otherwise good corrosion control.</li>
+<li><strong>Under-deposit corrosion</strong> — corrosion that occurs beneath deposits of scale, biofilm, or sediment. The deposit creates an oxygen-depleted zone that becomes anodic relative to the surrounding metal, driving localized attack.</li>
+</ul>
+<h3 id="752-corrosion-inhibitors">7.5.2 Corrosion Inhibitors</h3>
+<p>Corrosion inhibitors form a protective film on metal surfaces that slows or stops the electrochemical corrosion process. The choice of inhibitor depends on the metals in the system, water chemistry, and regulatory requirements.</p>
+<table>
+<thead>
+<tr>
+<th>Inhibitor Type</th>
+<th>Protects</th>
+<th>Mechanism</th>
+<th>Typical Dosage</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phosphonates</td>
+<td>Steel, copper alloys</td>
+<td>Cathodic film formation</td>
+<td>5–15 ppm (as PO₄)</td>
+<td>Most common; also provides scale inhibition</td>
+</tr>
+<tr>
+<td>Molybdate</td>
+<td>Steel</td>
+<td>Anodic passivation</td>
+<td>2–10 ppm (as Mo)</td>
+<td>Excellent pitting protection; higher cost</td>
+</tr>
+<tr>
+<td>Zinc</td>
+<td>Steel</td>
+<td>Cathodic film</td>
+<td>0.5–2 ppm (as Zn)</td>
+<td>Often combined with phosphonates; environmental discharge limits</td>
+</tr>
+<tr>
+<td>Azoles (tolyltriazole, BZT)</td>
+<td>Copper, brass, bronze</td>
+<td>Adsorption film on copper surfaces</td>
+<td>1–5 ppm</td>
+<td>Essential when copper alloys are present</td>
+</tr>
+<tr>
+<td>Silicate</td>
+<td>Aluminum, steel</td>
+<td>Barrier film</td>
+<td>10–20 ppm (as SiO₂)</td>
+<td>Used in aluminum heat exchangers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="753-material-selection-for-corrosion-resistance">7.5.3 Material Selection for Corrosion Resistance</h3>
+<p>Choosing the right materials during system design is the most effective long-term corrosion prevention strategy:</p>
+<ul>
+<li><strong>Carbon steel</strong> — inexpensive but requires chemical treatment; suitable for piping and structural components where some corrosion is tolerable</li>
+<li><strong>Copper alloys (admiralty brass, cupronickel)</strong> — excellent heat transfer and moderate corrosion resistance; traditional choice for heat exchanger tubes</li>
+<li><strong>Stainless steel (304, 316)</strong> — excellent corrosion resistance but susceptible to chloride pitting above 150 ppm chloride; 316 is better than 304 for chloride service</li>
+<li><strong>Titanium</strong> — virtually immune to cooling water corrosion; used in aggressive water chemistry or seawater cooling; high cost</li>
+<li><strong>Fiberglass-reinforced plastic (FRP)</strong> — immune to electrochemical corrosion; used for cooling tower structures and piping in corrosive environments</li>
+<li><strong>Concrete</strong> — used for cooling tower basins and structures; requires protective coatings in acidic water</li>
+</ul>
+<h4 id="diagram-cooling-corrosion-and-scale-simulator">Diagram: Cooling Corrosion and Scale Simulator</h4>
+<iframe src="../../sims/cooling-corrosion-scale-sim/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Cooling Corrosion and Scale Simulator</summary>
+Type: microsim
+
+Bloom Taxonomy: Apply (L3)
+Bloom Verb: demonstrate, implement
+Learning Objective: Students will be able to demonstrate how water chemistry parameters affect corrosion and scale formation rates, and implement treatment adjustments to bring both under control.
+
+Purpose: Interactive simulation where students adjust water chemistry parameters and observe the resulting corrosion rate and scale formation on a heat exchanger tube cross-section.
+
+Canvas layout:
+- Top area: Heat exchanger tube cross-section showing metal wall, scale layer, and water flow
+- Middle area: Water chemistry parameter controls (sliders)
+- Bottom area: Corrosion rate meter, scale thickness meter, and Langelier Saturation Index (LSI) display
+
+Visual elements:
+- Animated heat exchanger tube cross-section (circular) showing:
+  - Metal wall thickness (shrinks as corrosion progresses)
+  - Scale layer (grows on the water side)
+  - Pitting corrosion spots (appear under certain conditions)
+  - Water flow with dissolved particles
+- Corrosion rate gauge: 0–20 mpy (mils per year), green/yellow/red zones
+- Scale formation rate gauge: 0–10 mm/year, green/yellow/red zones
+- LSI calculator display: shows current value and interpretation (negative = corrosive, zero = balanced, positive = scale-forming)
+
+Interactive controls:
+- Slider: "pH" (6.0 to 9.5) — lower pH increases corrosion, higher pH increases scale
+- Slider: "Calcium Hardness" (50 to 800 ppm as CaCO₃) — higher hardness increases scale risk
+- Slider: "Alkalinity" (50 to 500 ppm as CaCO₃) — affects both buffering and scale formation
+- Slider: "TDS" (200 to 3000 ppm) — higher TDS increases conductivity and corrosion
+- Slider: "Temperature" (70°F to 130°F) — higher temperature accelerates both corrosion and scale
+- Slider: "Corrosion Inhibitor Dosage" (0 to 20 ppm) — reduces corrosion rate
+- Slider: "Scale Inhibitor Dosage" (0 to 20 ppm) — reduces scale formation rate
+- Button: "Reset to Defaults" — returns all parameters to baseline
+- Button: "Run 1 Year" — fast-forwards simulation to show cumulative effect over one year
+
+Behavior:
+- Adjusting pH toward acidic (below 7) increases corrosion and decreases scale
+- Adjusting pH toward alkaline (above 8.5) increases scale and decreases corrosion
+- The optimal zone is pH 7.5–8.5 with appropriate inhibitor dosages
+- High calcium + high alkalinity + high temperature = rapid scale formation
+- Low pH + high TDS + no inhibitor = rapid corrosion with pitting
+- Students must find the balance that minimizes both corrosion and scale
+
+Langelier Saturation Index calculation:
+LSI = pH - pHs (where pHs is the saturation pH calculated from temperature, calcium, alkalinity, and TDS)
+- LSI < -0.5: aggressive corrosion
+- LSI -0.5 to +0.5: balanced (target zone)
+- LSI > +0.5: scale-forming
+
+Instructional Rationale: Parameter exploration with real-time visual feedback is appropriate because the Apply/demonstrate objective requires students to manipulate variables and observe cause-and-effect relationships, developing intuition for how water chemistry balances affect corrosion and scale in real cooling systems.
+
+Responsive design: Must respond to window resize events. Canvas adjusts to container width.
+
+Implementation: p5.js with animated tube cross-section, real-time LSI calculation, and interactive slider controls
+</details>
+
+<h2 id="76-scale-prevention">7.6 Scale Prevention</h2>
+<p><strong>Scale</strong> is the hard mineral deposit that forms on heat transfer surfaces when dissolved minerals in the cooling water exceed their solubility limits and precipitate out of solution. The most common scale in cooling water systems is <strong>calcium carbonate (CaCO₃)</strong>, followed by calcium sulfate, silica, and calcium phosphate. Scale acts as insulation on heat exchanger surfaces, dramatically reducing heat transfer efficiency and forcing equipment to work harder.</p>
+<h3 id="761-causes-of-scale-formation">7.6.1 Causes of Scale Formation</h3>
+<p>Scale forms when the concentration of dissolved minerals exceeds the saturation point for the water's temperature and chemistry. Several factors promote scale formation:</p>
+<ul>
+<li><strong>High cycles of concentration</strong> — as water evaporates in the cooling tower, minerals concentrate. At 5 COC, a mineral at 200 ppm in makeup water reaches 1,000 ppm in the circulating water.</li>
+<li><strong>High temperature</strong> — calcium carbonate has <strong>inverse solubility</strong> — it becomes less soluble as temperature increases. This means scale forms preferentially on the hottest surfaces (the heat exchanger tubes), exactly where it causes the most damage.</li>
+<li><strong>High pH</strong> — calcium carbonate solubility decreases as pH rises above 8.5</li>
+<li><strong>High calcium hardness</strong> — more calcium ions in solution means more potential for calcium carbonate precipitation</li>
+<li><strong>High alkalinity</strong> — more carbonate and bicarbonate ions available to combine with calcium</li>
+</ul>
+<h3 id="762-impact-of-scale-on-heat-transfer">7.6.2 Impact of Scale on Heat Transfer</h3>
+<p>Even a thin layer of scale has a dramatic effect on heat transfer. Scale has a thermal conductivity approximately 100 times lower than steel, so a thin layer of scale is equivalent to adding a thick layer of insulation to the heat exchanger surface.</p>
+<table>
+<thead>
+<tr>
+<th>Scale Thickness</th>
+<th>Heat Transfer Loss</th>
+<th>Energy Cost Increase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1/32 inch (0.8 mm)</td>
+<td>~10%</td>
+<td>~10%</td>
+</tr>
+<tr>
+<td>1/16 inch (1.6 mm)</td>
+<td>~25%</td>
+<td>~25%</td>
+</tr>
+<tr>
+<td>1/8 inch (3.2 mm)</td>
+<td>~40%</td>
+<td>~40%</td>
+</tr>
+<tr>
+<td>1/4 inch (6.4 mm)</td>
+<td>~60%</td>
+<td>~60%</td>
+</tr>
+</tbody>
+</table>
+<p>A 1/16-inch layer of scale on the condenser tubes of a 500-ton chiller can increase the chiller's energy consumption by 25 percent — potentially costing $10,000 to $25,000 per year in additional electricity. Scale prevention is one of the highest-return investments in cooling water management.</p>
+<h3 id="763-scale-prevention-methods">7.6.3 Scale Prevention Methods</h3>
+<p>Effective scale prevention uses a combination of approaches:</p>
+<ul>
+<li><strong>Chemical scale inhibitors</strong> — phosphonates, polymers, and phosphate esters that interfere with crystal formation. These chemicals work at very low dosages (5–15 ppm) and are the primary scale prevention tool.</li>
+<li><strong>Blowdown control</strong> — maintaining the cycles of concentration at a level where mineral concentrations stay below saturation. Automated conductivity controllers measure the TDS and open the blowdown valve when the setpoint is exceeded.</li>
+<li><strong>pH control</strong> — maintaining pH in the target range (typically 7.0–8.5) to prevent calcium carbonate precipitation. Sulfuric acid is commonly used to lower pH.</li>
+<li><strong>Softening makeup water</strong> — removing calcium and magnesium from the makeup water before it enters the system. Water softeners or reverse osmosis units reduce the mineral load, allowing higher cycles of concentration.</li>
+<li><strong>Side-stream filtration</strong> — filtering a portion of the circulating water to remove suspended solids and precipitated minerals before they can deposit on heat transfer surfaces.</li>
+</ul>
+<h3 id="764-the-langelier-saturation-index-lsi">7.6.4 The Langelier Saturation Index (LSI)</h3>
+<p>The <strong>Langelier Saturation Index (LSI)</strong> is the primary tool for predicting whether cooling water will be corrosive or scale-forming. The LSI compares the actual pH of the water to the theoretical pH at which calcium carbonate is in equilibrium (the saturation pH, or pHs).</p>
+<p>[ \text{LSI} = \text{pH} - \text{pH}_s ]</p>
+<p>where pH is the measured water pH and pHs is calculated from water temperature, calcium hardness, total alkalinity, and total dissolved solids.</p>
+<table>
+<thead>
+<tr>
+<th>LSI Value</th>
+<th>Interpretation</th>
+<th>Recommended Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Below -2.0</td>
+<td>Severely corrosive</td>
+<td>Increase pH, add calcium, add corrosion inhibitor</td>
+</tr>
+<tr>
+<td>-2.0 to -0.5</td>
+<td>Moderately corrosive</td>
+<td>Add corrosion inhibitor, consider pH adjustment</td>
+</tr>
+<tr>
+<td>-0.5 to +0.5</td>
+<td>Balanced (target zone)</td>
+<td>Maintain current treatment program</td>
+</tr>
+<tr>
+<td>+0.5 to +2.0</td>
+<td>Moderately scale-forming</td>
+<td>Add scale inhibitor, increase blowdown, consider acid feed</td>
+</tr>
+<tr>
+<td>Above +2.0</td>
+<td>Severely scale-forming</td>
+<td>Reduce COC, add acid, add scale inhibitor</td>
+</tr>
+</tbody>
+</table>
+<h4 id="worked-example-langelier-saturation-index">Worked Example: Langelier Saturation Index</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Measured pH = 8.2</li>
+<li>Calculated saturation pH (pHs) = 7.8</li>
+</ul>
+<p><strong>Find:</strong> LSI value and water tendency</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate the LSI:</li>
+</ol>
+<p>[ \text{LSI} = \text{pH} - \text{pH}_s = 8.2 - 7.8 = +0.4 ]</p>
+<ol>
+<li>
+<p>Interpret the result using the LSI table:</p>
+<ul>
+<li>LSI &gt; 0: Scale-forming tendency</li>
+<li>LSI = 0: Balanced</li>
+<li>LSI &lt; 0: Corrosive tendency</li>
+</ul>
+</li>
+</ol>
+<p><strong>Answer:</strong> The LSI is <strong>+0.4</strong>, indicating a <strong>mildly scale-forming</strong> water condition.</p>
+<blockquote>
+<p><strong>Practical note:</strong> At +0.4, the water is at the upper edge of the balanced zone and trending toward scale formation. Treatment options include increasing blowdown to reduce mineral concentration, adding a scale inhibitor, or lowering pH with acid feed. The best response depends on the specific system — in a system with copper alloy heat exchangers, a slightly positive LSI is often preferred because it forms a thin protective calcium carbonate film that reduces copper corrosion.</p>
+</blockquote>
+<div class="admonition tip">
+<p class="admonition-title">LSI Is Your Compass</p>
+<p>Think of the LSI as a compass that tells you which direction your water chemistry is heading. Negative LSI means the water wants to dissolve metal (corrosion). Positive LSI means the water wants to deposit minerals (scale). The treatment program's job is to keep the LSI near zero — balanced — so the water does neither. Checking the LSI should be part of every routine water quality test.</p>
+</div>
+<h2 id="77-water-quality-monitoring-and-parameters">7.7 Water Quality Monitoring and Parameters</h2>
+<p>Effective cooling water management requires regular monitoring of key water quality parameters. These parameters tell you whether the treatment program is working, whether equipment is at risk, and whether adjustments are needed. Without monitoring, you are operating blind — problems develop silently until equipment fails or water quality deteriorates to the point of visible damage.</p>
+<h3 id="771-key-water-quality-parameters">7.7.1 Key Water Quality Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>What It Measures</th>
+<th>Target Range (typical)</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pH</td>
+<td>Hydrogen ion concentration (acidity/alkalinity)</td>
+<td>7.0–8.5</td>
+<td>Controls corrosion/scale balance; affects inhibitor effectiveness</td>
+</tr>
+<tr>
+<td>Conductivity</td>
+<td>Total ionic content (proxy for TDS)</td>
+<td>1,000–3,000 µS/cm</td>
+<td>Controls cycles of concentration; triggers blowdown</td>
+</tr>
+<tr>
+<td>Total Dissolved Solids (TDS)</td>
+<td>Total dissolved mineral content</td>
+<td>500–2,000 ppm</td>
+<td>Indicates concentration level; corrosion risk above limits</td>
+</tr>
+<tr>
+<td>Calcium hardness</td>
+<td>Dissolved calcium (as CaCO₃)</td>
+<td>200–800 ppm</td>
+<td>Scale-forming potential; used in LSI calculation</td>
+</tr>
+<tr>
+<td>Total alkalinity</td>
+<td>Bicarbonate and carbonate content (as CaCO₃)</td>
+<td>100–500 ppm</td>
+<td>Buffering capacity; scale potential; used in LSI calculation</td>
+</tr>
+<tr>
+<td>Chloride</td>
+<td>Dissolved chloride ions</td>
+<td>&lt; 250 ppm</td>
+<td>Pitting corrosion risk, especially for stainless steel</td>
+</tr>
+<tr>
+<td>Silica</td>
+<td>Dissolved silica (as SiO₂)</td>
+<td>&lt; 150 ppm</td>
+<td>Silica scale (very hard to remove once formed)</td>
+</tr>
+<tr>
+<td>Iron</td>
+<td>Dissolved and suspended iron</td>
+<td>&lt; 3 ppm</td>
+<td>Indicates active corrosion in the system</td>
+</tr>
+<tr>
+<td>Copper</td>
+<td>Dissolved copper</td>
+<td>&lt; 0.5 ppm</td>
+<td>Indicates corrosion of copper alloy components</td>
+</tr>
+<tr>
+<td>Oxidizing biocide residual</td>
+<td>Free chlorine or bromine</td>
+<td>0.2–1.0 ppm (as Cl₂)</td>
+<td>Biological control effectiveness</td>
+</tr>
+<tr>
+<td>Bacteria count (TPC)</td>
+<td>Total planktonic bacteria</td>
+<td>&lt; 10,000 CFU/mL</td>
+<td>Biological fouling risk</td>
+</tr>
+</tbody>
+</table>
+<h3 id="772-monitoring-methods">7.7.2 Monitoring Methods</h3>
+<p>Water quality can be monitored manually (grab samples tested in a lab or with field test kits) or continuously (IoT sensors feeding data to a monitoring platform).</p>
+<p><strong>Manual testing</strong> involves collecting water samples at regular intervals (daily, weekly, or monthly depending on the parameter) and analyzing them using:</p>
+<ul>
+<li><strong>Colorimetric test kits</strong> — reagents that produce a color change proportional to the parameter concentration, compared to a color chart or measured with a photometer</li>
+<li><strong>Titration</strong> — adding a reagent drop by drop until a color change indicates the endpoint (used for hardness and alkalinity)</li>
+<li><strong>Portable meters</strong> — handheld electronic instruments for pH, conductivity, ORP, and temperature</li>
+</ul>
+<p><strong>Continuous monitoring</strong> uses permanently installed sensors connected to a controller or IoT platform:</p>
+<ul>
+<li><strong>pH sensors</strong> — glass electrode or ISFET sensors that measure hydrogen ion activity continuously</li>
+<li><strong>Conductivity sensors</strong> — measure the water's ability to conduct electricity, which is proportional to TDS</li>
+<li><strong>ORP (oxidation-reduction potential) sensors</strong> — measure the biocide oxidizing strength of the water</li>
+<li><strong>Turbidity sensors</strong> — measure suspended solids that indicate biological growth or precipitation</li>
+<li><strong>Corrosion rate monitors</strong> — electrochemical probes (linear polarization resistance, or LPR) that measure the actual corrosion rate on a test coupon in real time</li>
+<li><strong>Flow sensors</strong> — monitor makeup water, blowdown, and circulation flow rates</li>
+</ul>
+<h4 id="diagram-cooling-water-quality-monitor">Diagram: Cooling Water Quality Monitor</h4>
+<iframe src="../../sims/cooling-water-quality-monitor/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Cooling Water Quality Monitor</summary>
+Type: microsim
+
+Bloom Taxonomy: Analyze (L4)
+Bloom Verb: interpret, diagnose
+Learning Objective: Students will be able to interpret cooling water quality data from a monitoring dashboard and diagnose common water chemistry problems based on parameter trends and sensor patterns.
+
+Purpose: Simulated cooling water monitoring dashboard where students observe real-time sensor data, identify normal and abnormal conditions, and practice diagnosing water chemistry problems from parameter trends.
+
+Canvas layout:
+- Top bar: System name ("Cooling Tower CT-200"), date/time, overall system status indicator
+- Left panel: System schematic showing cooling tower, pumps, heat exchangers, and chemical injection with real-time parameter values at key points
+- Right panel: Water quality parameter cards (pH, conductivity, calcium, alkalinity, biocide, corrosion rate, LSI)
+- Bottom panel: Trend chart showing selected parameter over last 14 simulated days
+
+System schematic (left panel):
+- Cooling tower with basin temperature and water level
+- Circulating pump with flow rate
+- Heat exchanger with inlet/outlet temperatures and approach temperature
+- Chemical injection points with dosing rate indicators
+- Makeup water inlet with flow meter
+- Blowdown valve with flow meter
+- Color-coded water quality: blue (good), yellow (marginal), red (out of specification)
+
+Water quality cards (right panel):
+- pH: current value with normal range indicator (7.0-8.5 green zone)
+- Conductivity: current value in µS/cm with target indicator
+- Calcium hardness: current value in ppm
+- Alkalinity: current value in ppm
+- Biocide residual: current value in ppm with minimum threshold
+- Corrosion rate: current value in mpy with normal/high indicator
+- LSI: calculated value with corrosive/balanced/scaling indicator
+
+Trend chart (bottom):
+- Selectable parameter from dropdown
+- 14-day time axis with current time marker
+- Target range shown as green band
+- Warning thresholds shown as yellow dashed lines
+- Alarm thresholds shown as red dashed lines
+- AI prediction shown as dotted extension of the trend line
+
+Interactive controls:
+- Scenario selector: "Normal Operation," "Rising Conductivity (COC drift)," "Scale Forming (high LSI)," "Corrosion Event (low pH)," "Biological Upset (low biocide)"
+- Each scenario changes dashboard values and trend patterns to reflect that condition
+- Click any parameter card for detailed data popup
+- Dropdown to select trend chart parameter
+- Button: "Show AI Diagnosis" — displays AI interpretation of the current scenario with recommended corrective actions
+
+Scenario behaviors:
+- Normal Operation: All values within target ranges, stable trends, LSI near zero
+- Rising Conductivity: Conductivity trending up, blowdown valve may be stuck, COC increasing beyond target
+- Scale Forming: LSI trending positive, calcium and alkalinity rising, heat exchanger approach temperature increasing (fouling)
+- Corrosion Event: pH dropping below 7.0, corrosion rate increasing, iron levels rising, LSI trending negative
+- Biological Upset: Biocide residual dropping to zero, bacteria count rising, biofilm forming (shown as turbidity increase)
+
+Instructional Rationale: Multi-parameter dashboard with fault scenarios is appropriate because the Analyze/diagnose objective requires students to correlate multiple simultaneous parameter trends to identify the root cause of a water chemistry problem, mirroring real-world diagnostic reasoning in cooling water management.
+
+Responsive design: Must respond to window resize events. Panels stack vertically on narrow screens.
+
+Implementation: p5.js with simulated real-time data updates, trend charts, and scenario switching
+</details>
+
+<h2 id="78-ai-driven-smart-monitoring-and-predictive-maintenance">7.8 AI-Driven Smart Monitoring and Predictive Maintenance</h2>
+<p>Traditional cooling water management relies on periodic manual testing — a technician collects water samples once or twice a week, runs tests, and adjusts chemical feed rates based on the results. This approach has two fundamental limitations: it only captures a snapshot of water chemistry at the moment of testing, and it reacts to problems after they develop rather than predicting them before they cause damage.</p>
+<p><strong>AI-driven smart monitoring</strong> transforms cooling water management from a reactive, periodic process into a continuous, predictive system. IoT sensors measure key parameters every few minutes, and machine learning algorithms analyze the data to detect developing problems, predict equipment failures, and optimize treatment programs in real time.</p>
+<h3 id="781-iot-sensor-network-for-cooling-water">7.8.1 IoT Sensor Network for Cooling Water</h3>
+<p>A modern smart monitoring system for a cooling water system typically includes these continuously monitored parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Sensor</th>
+<th>Location</th>
+<th>Measurement</th>
+<th>Update Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pH probe</td>
+<td>Basin return</td>
+<td>Water acidity/alkalinity</td>
+<td>Every 60 seconds</td>
+</tr>
+<tr>
+<td>Conductivity probe</td>
+<td>Basin and makeup</td>
+<td>TDS / cycles of concentration</td>
+<td>Every 60 seconds</td>
+</tr>
+<tr>
+<td>ORP probe</td>
+<td>After biocide injection</td>
+<td>Biocide effectiveness</td>
+<td>Every 60 seconds</td>
+</tr>
+<tr>
+<td>Temperature sensors</td>
+<td>Supply, return, ambient</td>
+<td>Water and air temperatures</td>
+<td>Every 30 seconds</td>
+</tr>
+<tr>
+<td>Flow meters</td>
+<td>Makeup, blowdown, circulation</td>
+<td>Water flow rates</td>
+<td>Every 30 seconds</td>
+</tr>
+<tr>
+<td>Corrosion probe (LPR)</td>
+<td>Circulation line</td>
+<td>Real-time corrosion rate</td>
+<td>Every 5 minutes</td>
+</tr>
+<tr>
+<td>Turbidity sensor</td>
+<td>Basin</td>
+<td>Suspended solids / biological growth</td>
+<td>Every 5 minutes</td>
+</tr>
+<tr>
+<td>Vibration sensor</td>
+<td>Pump bearings</td>
+<td>Mechanical condition</td>
+<td>Every 60 seconds</td>
+</tr>
+<tr>
+<td>Motor current sensor</td>
+<td>Pump motor</td>
+<td>Power consumption, load changes</td>
+<td>Every 30 seconds</td>
+</tr>
+</tbody>
+</table>
+<h3 id="782-how-ai-predicts-cooling-water-problems">7.8.2 How AI Predicts Cooling Water Problems</h3>
+<p>The AI system analyzes the continuous sensor data through several methods:</p>
+<ol>
+<li><strong>Baseline learning</strong> — when the system is freshly treated and operating normally, the AI establishes baseline values and normal variation ranges for all parameters</li>
+<li><strong>Trend analysis</strong> — the AI tracks how each parameter changes over time. A gradual increase in conductivity over several days indicates that the blowdown controller may be drifting, even though the current reading is still within range.</li>
+<li><strong>Cross-parameter correlation</strong> — the AI looks for relationships between parameters that indicate specific problems. For example, simultaneous increases in corrosion rate and iron concentration, combined with decreasing pH, strongly indicate an acid corrosion event.</li>
+<li><strong>Pattern matching</strong> — the AI compares current patterns to historical patterns that preceded past equipment problems. A specific combination of rising approach temperature, stable water chemistry, and declining heat exchanger performance typically indicates biological fouling inside the exchanger.</li>
+<li><strong>Predictive modeling</strong> — based on trend rates, the AI estimates when each parameter will reach a critical threshold and generates alerts with recommended actions before the problem becomes severe.</li>
+</ol>
+<h3 id="783-ai-applications-in-cooling-water-management">7.8.3 AI Applications in Cooling Water Management</h3>
+<table>
+<thead>
+<tr>
+<th>Application</th>
+<th>How AI Helps</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chemical dosing optimization</td>
+<td>AI adjusts chemical feed rates based on real-time water chemistry, weather, and system load</td>
+<td>10–20% reduction in chemical costs; more consistent treatment</td>
+</tr>
+<tr>
+<td>Blowdown optimization</td>
+<td>AI calculates optimal COC based on current makeup water quality and scale/corrosion risk</td>
+<td>15–30% reduction in makeup water consumption</td>
+</tr>
+<tr>
+<td>Fouling detection</td>
+<td>AI detects increasing approach temperature at heat exchangers before efficiency loss becomes significant</td>
+<td>Earlier cleaning; prevents energy waste</td>
+</tr>
+<tr>
+<td>Pump failure prediction</td>
+<td>AI analyzes vibration, current, and pressure trends to predict bearing or seal failure</td>
+<td>70–85% reduction in unplanned pump downtime</td>
+</tr>
+<tr>
+<td>Legionella risk assessment</td>
+<td>AI monitors temperature, biocide residual, and stagnation indicators to flag elevated risk</td>
+<td>Enhanced safety; regulatory compliance</td>
+</tr>
+<tr>
+<td>Energy optimization</td>
+<td>AI adjusts cooling tower fan speed and pump flow based on actual heat load and weather conditions</td>
+<td>15–25% reduction in cooling system energy consumption</td>
+</tr>
+</tbody>
+</table>
+<h3 id="784-benefits-of-ai-driven-cooling-water-management">7.8.4 Benefits of AI-Driven Cooling Water Management</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Traditional Management</th>
+<th>AI-Driven Management</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Water chemistry testing</td>
+<td>1-2 tests per week (manual grab samples)</td>
+<td>Continuous (every 1-5 minutes)</td>
+<td>500-1000x more data points</td>
+</tr>
+<tr>
+<td>Time to detect chemistry upset</td>
+<td>Days to a week</td>
+<td>Minutes to hours</td>
+<td>90%+ faster response</td>
+</tr>
+<tr>
+<td>Chemical consumption</td>
+<td>Conservative dosing (safety margin)</td>
+<td>Optimized real-time dosing</td>
+<td>10-20% reduction</td>
+</tr>
+<tr>
+<td>Makeup water consumption</td>
+<td>Fixed blowdown rate</td>
+<td>Dynamic COC optimization</td>
+<td>15-30% reduction</td>
+</tr>
+<tr>
+<td>Unplanned equipment downtime</td>
+<td>6-12 events/year</td>
+<td>1-3 events/year</td>
+<td>70-85% reduction</td>
+</tr>
+<tr>
+<td>Heat exchanger cleaning frequency</td>
+<td>Fixed schedule</td>
+<td>Condition-based (when approach temp rises)</td>
+<td>20-40% fewer cleanings</td>
+</tr>
+<tr>
+<td>Energy consumption</td>
+<td>Fixed fan/pump speeds</td>
+<td>Variable speed based on load</td>
+<td>15-25% reduction</td>
+</tr>
+</tbody>
+</table>
+<h2 id="79-energy-efficiency-and-sustainability">7.9 Energy Efficiency and Sustainability</h2>
+<p>Cooling water systems are significant energy and water consumers. The pumps, fans, and chemical treatment systems required to operate a cooling water system can account for 10 to 20 percent of a facility's total energy consumption. Additionally, cooling towers consume large volumes of water through evaporation — a 1,000-ton cooling system can evaporate over 30,000 gallons of water per day. This makes cooling water systems a high-priority target for energy and water conservation.</p>
+<h3 id="791-sources-of-energy-waste">7.9.1 Sources of Energy Waste</h3>
+<p>The most common sources of energy waste in cooling water systems include:</p>
+<ul>
+<li><strong>Oversized pumps running at full speed</strong> — circulating pumps sized for maximum design load waste energy during normal operation when the actual load is 50-70% of design. Without VFDs, these pumps run at full speed regardless of demand.</li>
+<li><strong>Cooling tower fans running at full speed</strong> — tower fans sized for the worst-case summer afternoon run continuously even when the ambient wet-bulb temperature is low and less airflow is needed.</li>
+<li><strong>Scale on heat exchangers</strong> — as discussed in Section 7.6, even 1/16 inch of scale increases energy consumption by 25%. Fouled exchangers force the chiller or process to work harder.</li>
+<li><strong>High approach temperature</strong> — an unnecessarily high cooling tower approach temperature means the supply water is warmer than it needs to be, reducing heat exchanger performance and forcing process equipment to compensate.</li>
+<li><strong>Excessive blowdown</strong> — draining more water than necessary wastes the energy used to heat that water in the process and the energy embedded in the chemical treatment. It also wastes the water itself.</li>
+</ul>
+<h3 id="792-energy-optimization-strategies">7.9.2 Energy Optimization Strategies</h3>
+<ul>
+<li><strong>VFD control on circulating pumps</strong> — installing variable frequency drives on the circulating pumps and modulating speed based on actual cooling demand. At half speed, a pump consumes approximately one-eighth the energy (cubic relationship between speed and power). This is typically the single highest-return energy investment in a cooling water system.</li>
+<li><strong>VFD control on cooling tower fans</strong> — modulating fan speed based on return water temperature and ambient conditions. On cool days or at night, the fan can run at reduced speed or even shut off entirely (free cooling).</li>
+<li><strong>Free cooling</strong> — when the ambient wet-bulb temperature is low enough (typically below 55°F), the cooling tower alone can provide sufficiently cold water without running the chiller. A heat exchanger (waterside economizer) transfers heat from the chilled water loop to the condenser water loop, bypassing the chiller compressor entirely.</li>
+<li><strong>Approach temperature optimization</strong> — reducing the cooling tower approach temperature by maintaining clean fill, proper water distribution, and optimized fan operation delivers colder water, improving downstream efficiency.</li>
+<li><strong>Scale and fouling prevention</strong> — maintaining clean heat transfer surfaces through proper water treatment. As shown in Section 7.6, even thin scale layers have a dramatic impact on energy consumption.</li>
+<li><strong>Blowdown optimization</strong> — using conductivity-controlled automatic blowdown instead of continuous blowdown. The AI-driven approach described in Section 7.8 takes this further by dynamically adjusting COC based on real-time conditions.</li>
+</ul>
+<h3 id="793-water-conservation">7.9.3 Water Conservation</h3>
+<p>Water is an increasingly scarce and expensive resource. Cooling water systems offer several opportunities for water conservation:</p>
+<ul>
+<li><strong>Maximize cycles of concentration</strong> — increasing COC from 3 to 6 reduces makeup water consumption by approximately 30%. This requires excellent water treatment and monitoring but is one of the most effective water conservation measures.</li>
+<li><strong>Recover blowdown water</strong> — blowdown water can be used for irrigation, cooling tower basin cleaning, or other non-potable purposes instead of being discharged to the sewer.</li>
+<li><strong>Use reclaimed water for makeup</strong> — treated wastewater (reclaimed or recycled water) can be used as cooling tower makeup water. This requires additional treatment and monitoring but eliminates the use of potable water.</li>
+<li><strong>Minimize drift</strong> — modern drift eliminators reduce drift losses to less than 0.001% of the circulation rate. Replacing old drift eliminators can save significant water in large systems.</li>
+<li><strong>Alternative cooling technologies</strong> — dry coolers and adiabatic cooling systems use significantly less water than conventional cooling towers, though they are less energy-efficient in hot climates.</li>
+</ul>
+<h4 id="diagram-cooling-maintenance-checklist">Diagram: Cooling Maintenance Checklist</h4>
+<iframe src="../../sims/cooling-maintenance-checklist/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Cooling Maintenance Checklist</summary>
+Type: infographic
+
+Bloom Taxonomy: Apply (L3)
+Bloom Verb: perform, execute
+Learning Objective: Students will be able to perform a systematic cooling water system maintenance inspection by following a structured checklist for cooling towers, pumps, heat exchangers, water treatment, and piping.
+
+Purpose: Interactive visual checklist organized by component area that technicians can reference during cooling water system maintenance procedures.
+
+Layout: Five-section infographic with a central cooling water system illustration. Each section covers one maintenance area.
+
+Section 1 — Cooling Tower:
+- Icon: cooling tower cross-section
+- Checklist items:
+  - Inspect fill media for scale, biological growth, or damage
+  - Check water distribution nozzles or basins for even flow
+  - Inspect drift eliminators for damage or clogging
+  - Clean debris screens and basin strainers
+  - Check fan blade condition and hub tightness
+  - Verify fan motor current and vibration levels
+  - Inspect structural members for corrosion
+  - Verify basin water level and float valve operation
+
+Section 2 — Circulating Pumps:
+- Icon: centrifugal pump cross-section
+- Checklist items:
+  - Check pump bearing temperature and vibration
+  - Record motor amperage and compare to nameplate
+  - Inspect mechanical seal for leaks
+  - Verify suction and discharge pressure readings
+  - Check alignment between pump and motor
+  - Inspect coupling condition
+  - Verify VFD operation (if equipped)
+
+Section 3 — Heat Exchangers:
+- Icon: shell-and-tube heat exchanger
+- Checklist items:
+  - Record approach temperature and compare to baseline
+  - Check for pressure drop increase across tube side
+  - Inspect tube sheet for leaks (dye test if needed)
+  - Schedule cleaning when approach temp exceeds threshold
+  - Verify isolation valve operation
+  - Inspect sacrificial anodes (if installed)
+
+Section 4 — Water Treatment:
+- Icon: chemical dosing pump
+- Checklist items:
+  - Test pH, conductivity, calcium, alkalinity, and biocide residual
+  - Calculate LSI and verify it is within -0.5 to +0.5
+  - Check chemical feed pump operation and calibration
+  - Verify chemical tank levels and order replacements as needed
+  - Inspect blowdown valve operation
+  - Review corrosion coupon data (monthly)
+  - Conduct Legionella testing per schedule
+
+Section 5 — Piping and Valves:
+- Icon: pipe section with valve
+- Checklist items:
+  - Walk the system looking for leaks, corrosion, or insulation damage
+  - Check pipe supports and hangers for sagging or damage
+  - Verify isolation valves operate freely (exercise annually)
+  - Inspect strainer screens and clean as needed
+  - Drain and inspect dead legs (quarterly)
+  - Check expansion joints and flexible connectors
+
+Interactive elements:
+- Click each checklist item to mark it complete (checkbox animation with green checkmark)
+- Hover over each icon to see a description of that maintenance area
+- Progress bar at the top showing percentage of checklist completed
+- "Reset Checklist" button to clear all checks
+- "Print Checklist" button to generate a printable version
+
+Color scheme: Green for completed items, gray for unchecked items, red highlight for safety-critical items
+Responsive design: Must respond to window resize events. Sections stack vertically on narrow screens.
+
+Implementation: HTML/CSS/JavaScript with interactive checkboxes and SVG icons
+</details>
+
+<h3 id="794-sustainability-metrics">7.9.4 Sustainability Metrics</h3>
+<p>To manage cooling water sustainability effectively, track these key metrics:</p>
+<ul>
+<li><strong>Water use intensity</strong> — gallons of cooling water makeup per unit of production or per ton of cooling. This normalizes water consumption to production output, making meaningful year-over-year comparisons possible.</li>
+<li><strong>Cycles of concentration</strong> — higher COC means less water waste per unit of cooling. Track actual COC versus target.</li>
+<li><strong>Cooling system energy intensity</strong> — kWh per ton of cooling delivered. This includes the energy consumed by pumps, fans, and chillers. Lower values indicate a more efficient system.</li>
+<li><strong>Chemical discharge compliance</strong> — verify that blowdown water meets local discharge limits for pH, TDS, phosphorus, zinc, and other treatment chemicals.</li>
+</ul>
+<p>[ \text{Water Use Intensity} = \frac{\text{Makeup Water (gallons)}}{\text{Production Output (units or ton-hours)}} ]</p>
+<p>[ \text{Energy Intensity} = \frac{\text{Total Cooling System Energy (kWh)}}{\text{Total Cooling Delivered (ton-hours)}} ]</p>
+<h4 id="worked-example-water-and-energy-use-intensity">Worked Example: Water and Energy Use Intensity</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Annual makeup water = 2,000,000 gallons</li>
+<li>Annual energy consumption for cooling system = 500,000 kWh</li>
+<li>Total cooling delivered = 50,000 ton-hours</li>
+</ul>
+<p><strong>Find:</strong> Water Use Intensity (WUI) and Energy Use Intensity (EUI)</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate WUI:</li>
+</ol>
+<p>[ \text{WUI} = \frac{2{,}000{,}000 \text{ gal}}{50{,}000 \text{ ton-hr}} = 40 \text{ gal/ton-hr} ]</p>
+<ol>
+<li>Calculate EUI:</li>
+</ol>
+<p>[ \text{EUI} = \frac{500{,}000 \text{ kWh}}{50{,}000 \text{ ton-hr}} = 10 \text{ kWh/ton-hr} ]</p>
+<p><strong>Answer:</strong> The Water Use Intensity is <strong>40 gal/ton-hr</strong> and the Energy Use Intensity is <strong>10 kWh/ton-hr</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> Industry benchmarks for water-cooled systems: WUI of 25-35 gal/ton-hr is good; above 45 suggests excessive blowdown or drift. EUI below 0.8 kWh/ton-hr is excellent for the chiller alone; the 10 kWh/ton-hr here includes pumps, fans, and auxiliary loads across the full cooling plant. Tracking these intensities month-over-month normalizes for seasonal variation and production changes, making it possible to detect efficiency degradation independent of load fluctuations.</p>
+</blockquote>
+<h4 id="diagram-cooling-energy-comparison">Diagram: Cooling Energy Comparison</h4>
+<iframe src="../../sims/cooling-energy-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Cooling Energy Comparison</summary>
+Type: infographic
+
+Bloom Taxonomy: Evaluate (L5)
+Bloom Verb: assess, justify
+Learning Objective: Students will be able to assess the energy and water consumption of different cooling strategies and justify recommendations for efficient and sustainable cooling water system design.
+
+Purpose: Interactive comparison showing energy and water consumption across different cooling strategies, with cost and environmental impact calculations.
+
+Layout: Two-panel display with a cooling strategy comparison on the left and an optimization impact comparison on the right, with a combined summary chart at the bottom.
+
+Left panel — Cooling Strategy Comparison:
+- Four strategies displayed as cards: Once-Through, Open Recirculating (standard), Open Recirculating (optimized with VFDs), Dry/Hybrid Cooling
+- Each card shows:
+  - Annual energy consumption (kWh) for a 500-ton cooling system
+  - Annual water consumption (gallons)
+  - Annual energy cost at default electricity rate
+  - Annual water cost at default water rate
+  - Annual CO2 emissions (using EPA grid average)
+  - Suitability rating by climate (hot/temperate/cold)
+
+Right panel — Optimization Impact Comparison:
+- Four optimizations displayed as columns:
+  1. "Baseline (no optimization)" — standard fixed-speed operation
+  2. "VFD on Pumps" — variable speed circulating pumps
+  3. "VFD on Fans + Free Cooling" — variable speed fans with waterside economizer
+  4. "Full Optimization (VFDs + AI + Water Treatment)" — comprehensive AI-driven optimization
+- Each column shows:
+  - Annual energy consumption (kWh)
+  - Annual water consumption (gallons)
+  - Annual total cost (energy + water + chemicals)
+  - Percentage savings vs. baseline
+  - Simple payback period for the upgrade investment
+
+Bottom panel — Combined Summary Chart:
+- Grouped bar chart: energy cost and water cost by strategy and optimization level
+- Stacked bars showing the breakdown: pump energy, fan energy, chiller energy, water cost, chemical cost
+- Line overlay: total annual operating cost
+- Highlighted "best combination" indicator for each climate zone
+
+Interactive controls:
+- Slider: "Cooling Load" (25%, 50%, 75%, 100% of design capacity) — shows how efficiency changes at partial load
+- Slider: "Electricity Rate" ($0.08 to $0.25 per kWh) — recalculates all energy costs
+- Slider: "Water Rate" ($2 to $15 per 1,000 gallons) — recalculates all water costs
+- Slider: "Average Wet-Bulb Temperature" (50°F to 80°F) — shows climate impact on tower performance and free cooling hours
+- Toggle: "Show CO2 Impact" — adds emissions data to all displays
+- Dropdown: "System Size" (100 tons, 500 tons, 1,000 tons, 5,000 tons) — scales all values
+
+Behavior:
+- At partial loads, VFD control shows dramatic energy savings due to cubic power law
+- In cold climates (low wet-bulb), free cooling provides thousands of hours of chiller-free operation
+- Full optimization combines VFDs, AI-driven control, and water treatment for maximum savings
+- Water-scarce regions benefit most from dry/hybrid cooling despite higher energy costs
+- Higher electricity and water rates amplify the payback advantage of optimized systems
+
+Instructional Rationale: Multi-variable comparison with adjustable parameters is appropriate because the Evaluate/justify objective requires students to weigh multiple factors (energy, water, cost, climate, environmental impact) and defend a specific recommendation based on quantified data for a given facility's conditions.
+
+Responsive design: Must respond to window resize events. Panels stack vertically on narrow screens.
+
+Implementation: HTML/CSS/JavaScript with Chart.js for bar/line charts and interactive parameter controls
+</details>
+
+<h2 id="710-utility-rebates-incentives-and-building-the-business-case">7.10 Utility Rebates, Incentives, and Building the Business Case</h2>
+<p>Many of the energy efficiency and water conservation upgrades discussed in this chapter qualify for <strong>utility rebate programs</strong> and <strong>government incentives</strong> that can dramatically reduce upfront costs and shorten payback periods. Cooling water systems are prime targets for incentive programs because they consume significant electricity (pumps and fans) and water, and proven efficiency technologies like VFDs and free cooling deliver measurable, verifiable savings.</p>
+<h3 id="available-incentive-programs">Available Incentive Programs</h3>
+<table>
+<thead>
+<tr>
+<th>Program Type</th>
+<th>Examples</th>
+<th>Typical Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Utility prescriptive rebates</td>
+<td>VFD on cooling tower fan, VFD on circulating pump, premium-efficiency motors</td>
+<td>$50–$150 per HP for VFDs; $10–$25 per HP for premium motors</td>
+</tr>
+<tr>
+<td>Utility custom/calculated rebates</td>
+<td>Free cooling (waterside economizer), condenser water reset, automated water treatment</td>
+<td>$0.03–$0.12 per kWh saved annually</td>
+</tr>
+<tr>
+<td>Federal tax credits (IRA §179D)</td>
+<td>Energy-efficient commercial building deduction for qualifying HVAC/cooling upgrades</td>
+<td>Up to $5.00/sq ft for whole-building projects</td>
+</tr>
+<tr>
+<td>State/local programs</td>
+<td>Water conservation rebates, industrial process efficiency grants</td>
+<td>Varies by state — $500 to $50,000+ per project</td>
+</tr>
+<tr>
+<td>DOE programs</td>
+<td>Better Plants, 50001 Ready, CHP Technical Assistance</td>
+<td>Technical assistance, recognition, no-cost energy assessments</td>
+</tr>
+</tbody>
+</table>
+<h3 id="how-to-find-available-rebates">How to Find Available Rebates</h3>
+<ol>
+<li><strong>Check your utility's website</strong> — Search for "[utility name] commercial rebates" or "business energy incentives." Most large utilities offer both prescriptive rebates (fixed dollar amounts per qualifying unit) and custom/calculated rebates (based on verified energy savings). Cooling tower VFD rebates and pump VFD rebates are among the most commonly available prescriptive programs.</li>
+<li><strong>Use the DSIRE database</strong> — The Database of State Incentives for Renewables and Efficiency (<a href="https://www.dsireusa.org">dsireusa.org</a>) catalogs federal, state, and local incentive programs. Search by state and technology type (e.g., "variable speed drives," "HVAC efficiency," "water conservation") to find applicable programs.</li>
+<li><strong>Contact your utility account representative</strong> — Large commercial and industrial customers often have dedicated account managers who can identify applicable programs, walk you through the application process, and help coordinate pre-installation inspections.</li>
+<li><strong>Get pre-approval before starting work</strong> — Many rebate programs require pre-approval and baseline energy or water usage documentation before equipment is purchased or installed. Starting a project without pre-approval can disqualify you from receiving the rebate.</li>
+</ol>
+<h3 id="common-cooling-water-system-upgrades-and-rebate-potential">Common Cooling Water System Upgrades and Rebate Potential</h3>
+<table>
+<thead>
+<tr>
+<th>Upgrade</th>
+<th>Typical Cost</th>
+<th>Annual Savings</th>
+<th>Typical Rebate</th>
+<th>Net Payback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VFD on cooling tower fans (50 HP)</td>
+<td>$8,000–$12,000</td>
+<td>$4,500–$7,000/yr</td>
+<td>$3,000–$6,000</td>
+<td>0.8–1.8 years</td>
+</tr>
+<tr>
+<td>Water-side economizer (free cooling)</td>
+<td>$25,000–$60,000</td>
+<td>$8,000–$20,000/yr</td>
+<td>$5,000–$15,000</td>
+<td>1.5–3.5 years</td>
+</tr>
+<tr>
+<td>Premium-efficiency cooling tower motors</td>
+<td>$2,500–$5,000</td>
+<td>$600–$1,200/yr</td>
+<td>$500–$1,200</td>
+<td>1.5–3.5 years</td>
+</tr>
+<tr>
+<td>Automated water treatment controls</td>
+<td>$15,000–$30,000</td>
+<td>$5,000–$12,000/yr (water + chemicals)</td>
+<td>$3,000–$8,000</td>
+<td>1.5–3.0 years</td>
+</tr>
+<tr>
+<td>Condenser water reset controls</td>
+<td>$5,000–$10,000</td>
+<td>$3,000–$6,000/yr</td>
+<td>$2,000–$4,000</td>
+<td>0.5–1.5 years</td>
+</tr>
+</tbody>
+</table>
+<h3 id="building-the-business-case">Building the Business Case</h3>
+<p>When presenting a cooling water efficiency project to management, focus on <strong>total lifecycle cost</strong> rather than just the initial purchase price. A VFD on a 50 HP cooling tower fan may cost $10,000 to install, but it saves $5,000–$7,000 per year in electricity, and a utility rebate of $4,000–$6,000 can reduce the net out-of-pocket cost to as little as $4,000. That translates to a simple payback of less than one year — far exceeding the typical corporate hurdle rate of 2–3 years. The VFD will then continue saving $5,000+ per year for its 15–20 year service life, delivering a total return many times the initial investment.</p>
+<p>Frame efficiency upgrades in terms that resonate with financial decision-makers. Calculate and present the <strong>internal rate of return (IRR)</strong> and <strong>net present value (NPV)</strong>, not just simple payback. Include the value of rebates and tax credits as reductions to the initial investment. Quantify avoided risks — for example, the cost of an unplanned chiller shutdown due to fouled condensers versus the cost of automated water treatment controls that prevent fouling. Mention that energy prices have historically risen 2–4% per year, which means savings grow over time while the equipment cost is fixed.</p>
+<p>Finally, include environmental and regulatory benefits. Many organizations have corporate sustainability goals, greenhouse gas reduction targets, or ESG (Environmental, Social, and Governance) reporting requirements. A cooling water optimization project that reduces electricity consumption by 20% and water consumption by 30% delivers measurable progress toward these goals. Documenting the avoided CO₂ emissions (using EPA eGRID emission factors) and water savings strengthens the business case and may qualify the project for additional internal funding from sustainability budgets.</p>
+<h2 id="711-lab-preview-inspect-a-cooling-system-and-analyze-water-data">7.11 Lab Preview: Inspect a Cooling System and Analyze Water Data</h2>
+<p>In this week's hands-on lab, you will apply the concepts from this chapter by inspecting a cooling water system, testing water quality, calculating key indices, and interpreting AI-generated monitoring data.</p>
+<h3 id="lab-activities">Lab Activities</h3>
+<ol>
+<li><strong>Identify cooling water system components</strong> — walk through the lab cooling water system and identify the cooling tower, circulating pumps, heat exchangers, chemical injection points, blowdown valve, and makeup water connection. Label each component on a provided system diagram.</li>
+<li><strong>Inspect the cooling tower</strong> — examine the tower fill, drift eliminators, water distribution system, fan, and basin. Document the condition of each component and note any visible biological growth, scale deposits, or structural damage.</li>
+<li><strong>Test water quality</strong> — collect water samples from the basin, makeup water line, and blowdown. Using field test kits and portable meters, measure pH, conductivity, calcium hardness, total alkalinity, chloride, and biocide residual. Record all results.</li>
+<li><strong>Calculate the Langelier Saturation Index</strong> — using your water quality measurements and the water temperature, calculate the LSI. Determine whether the water is corrosive, balanced, or scale-forming, and recommend any treatment adjustments.</li>
+<li><strong>Calculate cycles of concentration</strong> — compare the conductivity (or TDS) of the circulating water to the makeup water. Calculate the actual COC and compare it to the facility's target. If the COC is off-target, explain what might be causing it and what adjustments are needed.</li>
+<li><strong>Measure heat exchanger performance</strong> — record the cooling water inlet temperature, outlet temperature, and process-side temperatures at a heat exchanger. Calculate the approach temperature and compare it to the design specification. If the approach is higher than expected, explain what could be causing the degradation.</li>
+<li><strong>Review AI monitoring data</strong> — access the AI-based cooling water monitoring software provided. Review the current parameter values, trend charts, and any alerts or recommendations generated by the AI. Evaluate whether the AI's diagnosis matches your field observations and water quality test results.</li>
+<li><strong>Document your findings</strong> — record all measurements, observations, calculations, and AI diagnostic interpretations in your lab report. Include your LSI calculation, COC calculation, and recommendations for improving the system's water treatment, energy efficiency, or maintenance program.</li>
+</ol>
+<h3 id="lab-safety-reminders">Lab Safety Reminders</h3>
+<ul>
+<li><strong>Wear safety glasses, gloves, and appropriate clothing</strong> at all times when working near cooling towers and chemical treatment equipment</li>
+<li><strong>Handle water treatment chemicals carefully</strong> — many cooling water chemicals are corrosive, toxic, or irritating. Read the Safety Data Sheet (SDS) before handling any chemical. Wear chemical-resistant gloves and eye protection.</li>
+<li><strong>Be aware of biological hazards</strong> — cooling tower water may contain Legionella and other pathogens. Avoid breathing mist or spray from the cooling tower. Wash hands thoroughly after handling cooling water samples.</li>
+<li><strong>Watch for slip hazards</strong> — cooling tower decks and basin areas are often wet and slippery. Wear slip-resistant footwear and use caution.</li>
+<li><strong>Follow lockout/tagout procedures</strong> before performing any maintenance on pumps, fans, or electrical equipment</li>
+<li><strong>Never climb on cooling tower structures</strong> without proper fall protection and authorization</li>
+<li><strong>Report any chemical spills</strong> immediately and follow facility spill response procedures</li>
+</ul>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<ul>
+<li><strong>Cooling water systems</strong> remove waste heat from industrial processes and equipment by circulating water through heat exchangers and rejecting heat to the atmosphere through cooling towers. They are essential in power generation, chemical processing, data centers, HVAC, and manufacturing.</li>
+<li><strong>Three system types</strong> — once-through, open recirculating, and closed recirculating — serve different applications. Open recirculating systems with cooling towers are the most common in industrial facilities.</li>
+<li><strong>Cooling tower types</strong> include natural draft (no fans, used at large power plants), and mechanical draft with forced or induced airflow in crossflow or counterflow configurations. Induced draft counterflow towers offer the best thermal efficiency for most industrial applications.</li>
+<li><strong>Water treatment</strong> addresses the "big three" problems — corrosion, scale, and biological fouling — through chemical inhibitors, biocides, pH control, dispersants, and blowdown management. Proper treatment prevents equipment damage and maintains heat transfer efficiency.</li>
+<li><strong>Cycles of concentration (COC)</strong> is the key control parameter. Higher COC saves water and chemicals but increases scale and corrosion risk. Most facilities operate between 3 and 6 COC as the optimal balance.</li>
+<li><strong>Corrosion prevention</strong> requires understanding the types of corrosion (general, pitting, galvanic, erosion, MIC, under-deposit), applying appropriate chemical inhibitors, and selecting corrosion-resistant materials during system design.</li>
+<li><strong>Scale prevention</strong> is critical because even thin scale deposits dramatically reduce heat transfer efficiency — a 1/16-inch layer of scale increases energy consumption by approximately 25%. The Langelier Saturation Index (LSI) is the primary tool for predicting scale or corrosion tendency.</li>
+<li><strong>Water quality monitoring</strong> of pH, conductivity, calcium, alkalinity, chloride, biocide residual, and corrosion rate provides the data needed to manage the treatment program and detect developing problems.</li>
+<li><strong>Legionella prevention</strong> in cooling towers is a serious health and legal requirement. Maintaining biocide residual, controlling biofilm, and implementing ASHRAE 188 water management plans are essential.</li>
+<li><strong>AI-driven smart monitoring</strong> uses IoT sensors and machine learning to transform cooling water management from periodic manual testing to continuous, predictive optimization — detecting problems in minutes instead of days and reducing chemical, water, and energy consumption by 10 to 30 percent.</li>
+<li><strong>Energy efficiency</strong> depends on VFD control of pumps and fans, free cooling when ambient conditions allow, maintaining clean heat transfer surfaces, and optimizing approach temperatures. VFD control on circulating pumps is typically the single highest-return energy investment.</li>
+<li><strong>Sustainability</strong> in cooling water systems encompasses water conservation (maximizing COC, recovering blowdown, using reclaimed water), energy reduction, environmental compliance for chemical discharge, and lifecycle cost analysis of cooling technologies.</li>
+</ul>
+<details class="question">
+<summary>Review: A cooling water system's heat exchanger approach temperature has increased from 8°F to 14°F over the past three months, while the corrosion rate has remained stable at 2 mpy. The water chemistry shows pH 8.2, conductivity 2,400 µS/cm, calcium hardness 650 ppm, and total alkalinity 380 ppm at a water temperature of 105°F. Calculate the approximate LSI, identify the most likely cause of the rising approach temperature, and explain how AI monitoring would detect and address this problem earlier.</summary>
+<p><strong>LSI Calculation:</strong></p>
+<p>The LSI = pH - pHs. Given the high calcium hardness (650 ppm), high alkalinity (380 ppm), and high temperature (105°F), the saturation pH (pHs) will be approximately 7.2-7.4, giving an LSI of approximately +0.8 to +1.0. This is in the <strong>moderately scale-forming</strong> range.</p>
+<p><strong>Most likely cause of rising approach temperature:</strong></p>
+<p>The stable corrosion rate rules out corrosion as the cause. The positive LSI combined with high calcium and alkalinity indicates <strong>calcium carbonate scale formation</strong> on the heat exchanger tubes. The scale acts as insulation, reducing heat transfer and increasing the approach temperature. The 6°F increase in approach temperature is consistent with approximately 1/32 to 1/16 inch of scale accumulation, which would cause roughly 10-25% reduction in heat transfer efficiency.</p>
+<p><strong>Recommended actions:</strong>
+1. Clean the heat exchanger to remove existing scale
+2. Increase scale inhibitor dosage
+3. Consider adding acid feed to lower pH to 7.8-8.0, bringing the LSI closer to zero
+4. Evaluate increasing blowdown to reduce the calcium concentration
+5. Consider softening the makeup water if calcium levels remain problematic</p>
+<p><strong>How AI monitoring would help:</strong></p>
+<p>AI monitoring would detect the gradually rising approach temperature within the first week or two — long before the 6°F increase accumulated over three months. The AI would correlate the approach temperature trend with the positive LSI, high calcium, and high alkalinity, and generate an alert: "Heat exchanger HX-101 approach temperature trending upward. LSI = +0.9 (scale-forming). Recommend increasing scale inhibitor dosage and scheduling cleaning within 14 days." This early intervention would prevent the 25% energy penalty that accumulated over three months, saving thousands of dollars in wasted energy. The AI would also monitor the effectiveness of the corrective action by tracking whether the approach temperature stabilizes or continues to rise after treatment adjustments.</p>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../06-compressed-air/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 6. Compressed Air">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                6. Compressed Air
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../08-steam/" class="md-footer__link md-footer__link--next" aria-label="Next: 8. Steam Systems">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                8. Steam Systems
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "toc.follow", "navigation.top", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../js/extra.js"></script>
+      
+    
+  </body>
+</html>

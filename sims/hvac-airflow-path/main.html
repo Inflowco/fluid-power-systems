@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HVAC Airflow Path</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // HVAC Airflow Path MicroSim
+    // Shows the complete air path through an air handling unit
+
+    let drawHeight = 400;
+    let controlHeight = 50;
+    let canvasHeight = drawHeight + controlHeight;
+    let aspectRatio = 1.91;
+    let canvasWidth = canvasHeight * aspectRatio;
+
+    // Mode: 'cooling' or 'heating'
+    let mode = 'cooling';
+
+    // Particles
+    let particles = [];
+    let maxParticles = 120;
+
+    // Stage definitions - will be computed in setup based on canvas size
+    let stages = [];
+
+    // Tooltip
+    let tooltipText = '';
+    let tooltipX = 0;
+    let tooltipY = 0;
+    let showTooltip = false;
+
+    // Fan rotation
+    let fanAngle = 0;
+
+    // Damper animation
+    let damperAngle = 0;
+    let damperOpen = true;
+    let damperTarget = PI / 6;
+
+    // Stage descriptions
+    const stageDescriptions = {
+        'Occupied Room': 'The conditioned space where occupants live and work. Air is delivered through supply diffusers and removed through return grilles.',
+        'Return Air': 'Air extracted from the occupied space through return grilles, carrying heat, moisture, and contaminants back to the AHU.',
+        'Outdoor Air Intake': 'Fresh outside air brought in through a dampered opening to maintain indoor air quality and provide ventilation.',
+        'Mixed Air': 'The blend of return air and outdoor air that enters the air handling unit for conditioning.',
+        'Filter Bank': 'Pleated filters that remove dust, pollen, and particulate matter from the mixed air stream before it reaches the coils.',
+        'Cooling Coil': 'Rows of finned tubes carrying chilled water or refrigerant that remove heat and moisture from the air.',
+        'Heating Coil': 'Hot water coil or electric heating elements that add heat to the air when warming is needed.',
+        'Supply Fan': 'A centrifugal or axial fan that creates the pressure differential to move air through the ductwork system.',
+        'Supply Duct': 'Insulated sheet metal or fiberglass ductwork that carries conditioned air from the AHU to the occupied spaces.',
+        'Supply Diffuser': 'Ceiling or wall-mounted outlets that distribute conditioned air evenly into the occupied space.'
+    };
+
+    // Button positions
+    let coolBtnX, coolBtnY, coolBtnW, coolBtnH;
+    let heatBtnX, heatBtnY, heatBtnW, heatBtnH;
+
+    function setup() {
+        updateCanvasSize();
+        const canvas = createCanvas(canvasWidth, canvasHeight);
+        var mainElement = document.querySelector('main');
+        canvas.parent(mainElement);
+        textFont('Arial');
+        computeStages();
+        initParticles();
+    }
+
+    function updateCanvasSize() {
+        let containerWidth = windowWidth;
+        if (containerWidth < canvasHeight * aspectRatio) {
+            canvasWidth = containerWidth;
+            canvasHeight = canvasWidth / aspectRatio;
+            drawHeight = canvasHeight - controlHeight;
+        } else {
+            canvasHeight = drawHeight + controlHeight;
+            canvasWidth = canvasHeight * aspectRatio;
+        }
+    }
+
+    function windowResized() {
+        drawHeight = 400;
+        controlHeight = 50;
+        updateCanvasSize();
+        resizeCanvas(canvasWidth, canvasHeight);
+        computeStages();
+    }
+
+    function computeStages() {
+        // Layout coordinates scaled to canvas
+        let w = canvasWidth;
+        let h = drawHeight;
+
+        // Vertical zones
+        let topY = h * 0.08;
+        let ahuTopY = h * 0.30;
+        let ahuBotY = h * 0.70;
+        let bottomY = h * 0.88;
+        let ahuMidY = (ahuTopY + ahuBotY) / 2;
+
+        // Horizontal zones
+        let roomLeft = w * 0.72;
+        let roomRight = w * 0.95;
+        let roomMidX = (roomLeft + roomRight) / 2;
+
+        let ahuLeft = w * 0.05;
+        let ahuRight = w * 0.65;
+
+        // Section widths within AHU
+        let sectionW = (ahuRight - ahuLeft) / 5;
+        let oaX = ahuLeft;
+        let filterX = ahuLeft + sectionW;
+        let coolX = ahuLeft + sectionW * 2;
+        let heatX = ahuLeft + sectionW * 3;
+        let fanX = ahuLeft + sectionW * 4;
+
+        stages = [
+            // 0: Occupied Room
+            { name: 'Occupied Room', x: roomLeft, y: ahuTopY, w: roomRight - roomLeft, h: ahuBotY - ahuTopY,
+              cx: roomMidX, cy: ahuMidY },
+            // 1: Return grille (bottom of room going left)
+            { name: 'Return Air', x: roomLeft, y: ahuBotY, w: roomRight - roomLeft, h: bottomY - ahuBotY,
+              cx: roomMidX, cy: (ahuBotY + bottomY) / 2,
+              pathStartX: roomMidX, pathStartY: ahuBotY,
+              pathEndX: roomMidX, pathEndY: bottomY },
+            // 2: Return duct (bottom, going left)
+            { name: 'Return Air', x: ahuLeft, y: bottomY - h * 0.08, w: roomRight - ahuLeft, h: h * 0.08,
+              cx: (ahuLeft + roomRight) / 2, cy: bottomY - h * 0.04, isReturnDuct: true },
+            // 3: Outdoor Air Intake
+            { name: 'Outdoor Air Intake', x: oaX - w * 0.02, y: ahuTopY - h * 0.15, w: sectionW, h: h * 0.15,
+              cx: oaX + sectionW / 2, cy: ahuTopY - h * 0.07 },
+            // 4: Mixed Air
+            { name: 'Mixed Air', x: oaX, y: ahuTopY, w: sectionW, h: ahuBotY - ahuTopY,
+              cx: oaX + sectionW / 2, cy: ahuMidY },
+            // 5: Filter Bank
+            { name: 'Filter Bank', x: filterX, y: ahuTopY, w: sectionW, h: ahuBotY - ahuTopY,
+              cx: filterX + sectionW / 2, cy: ahuMidY },
+            // 6: Cooling Coil
+            { name: 'Cooling Coil', x: coolX, y: ahuTopY, w: sectionW, h: ahuBotY - ahuTopY,
+              cx: coolX + sectionW / 2, cy: ahuMidY },
+            // 7: Heating Coil
+            { name: 'Heating Coil', x: heatX, y: ahuTopY, w: sectionW, h: ahuBotY - ahuTopY,
+              cx: heatX + sectionW / 2, cy: ahuMidY },
+            // 8: Supply Fan
+            { name: 'Supply Fan', x: fanX, y: ahuTopY, w: sectionW, h: ahuBotY - ahuTopY,
+              cx: fanX + sectionW / 2, cy: ahuMidY },
+            // 9: Supply Duct (top, going right)
+            { name: 'Supply Duct', x: ahuLeft, y: topY, w: roomRight - ahuLeft, h: h * 0.08,
+              cx: (ahuLeft + roomRight) / 2, cy: topY + h * 0.04, isSupplyDuct: true },
+            // 10: Supply Diffuser
+            { name: 'Supply Diffuser', x: roomLeft, y: topY, w: roomRight - roomLeft, h: ahuTopY - topY,
+              cx: roomMidX, cy: (topY + ahuTopY) / 2 }
+        ];
+
+        // Button positions in the control area
+        coolBtnX = canvasWidth / 2 - 130;
+        coolBtnY = drawHeight + 10;
+        coolBtnW = 120;
+        coolBtnH = 30;
+        heatBtnX = canvasWidth / 2 + 10;
+        heatBtnY = drawHeight + 10;
+        heatBtnW = 120;
+        heatBtnH = 30;
+    }
+
+    function initParticles() {
+        particles = [];
+        for (let i = 0; i < maxParticles; i++) {
+            particles.push(createParticle(random(0, 1)));
+        }
+    }
+
+    function createParticle(progressOffset) {
+        return {
+            progress: progressOffset,  // 0 to 1 along the entire path
+            speed: random(0.002, 0.004),
+            offset: random(-8, 8),      // perpendicular offset for visual spread
+            size: random(3, 6)
+        };
+    }
+
+    // Compute particle position along the airflow path
+    function getParticlePos(progress) {
+        let w = canvasWidth;
+        let h = drawHeight;
+
+        let topY = h * 0.08;
+        let ahuTopY = h * 0.30;
+        let ahuBotY = h * 0.70;
+        let bottomY = h * 0.88;
+
+        let roomLeft = w * 0.72;
+        let roomRight = w * 0.95;
+        let roomMidX = (roomLeft + roomRight) / 2;
+
+        let ahuLeft = w * 0.05;
+        let ahuRight = w * 0.65;
+
+        let sectionW = (ahuRight - ahuLeft) / 5;
+        let oaX = ahuLeft;
+        let filterX = ahuLeft + sectionW;
+        let coolX = ahuLeft + sectionW * 2;
+        let heatX = ahuLeft + sectionW * 3;
+        let fanX = ahuLeft + sectionW * 4;
+
+        // Path segments and their proportional lengths
+        // 0.00-0.05: Room interior (diffuser to return grille) - moving down
+        // 0.05-0.10: Return grille down to return duct
+        // 0.10-0.22: Return duct left across bottom
+        // 0.22-0.27: Up from return duct into AHU (mixed air section)
+        // 0.27-0.40: Through mixed air section right
+        // 0.40-0.52: Through filter bank right
+        // 0.52-0.64: Through cooling coil right
+        // 0.64-0.76: Through heating coil right
+        // 0.76-0.85: Through supply fan right
+        // 0.85-0.88: Up from fan to supply duct
+        // 0.88-0.96: Supply duct right across top
+        // 0.96-1.00: Down from supply duct through diffuser into room
+
+        let x, y, stage;
+
+        if (progress < 0.05) {
+            // In the room, drifting downward
+            let t = progress / 0.05;
+            x = roomMidX;
+            y = lerp(ahuTopY + 15, ahuBotY - 15, t);
+            stage = 'room';
+        } else if (progress < 0.10) {
+            // Return grille, moving down
+            let t = (progress - 0.05) / 0.05;
+            x = roomMidX;
+            y = lerp(ahuBotY, bottomY - h * 0.04, t);
+            stage = 'return';
+        } else if (progress < 0.22) {
+            // Return duct, moving left
+            let t = (progress - 0.10) / 0.12;
+            x = lerp(roomMidX, oaX + sectionW / 2, t);
+            y = bottomY - h * 0.04;
+            stage = 'return';
+        } else if (progress < 0.27) {
+            // Up into AHU mixed air
+            let t = (progress - 0.22) / 0.05;
+            x = oaX + sectionW / 2;
+            y = lerp(bottomY - h * 0.04, (ahuTopY + ahuBotY) / 2, t);
+            stage = 'mixed';
+        } else if (progress < 0.40) {
+            // Through mixed air section
+            let t = (progress - 0.27) / 0.13;
+            x = lerp(oaX, oaX + sectionW, t);
+            y = (ahuTopY + ahuBotY) / 2;
+            stage = 'mixed';
+        } else if (progress < 0.52) {
+            // Through filter
+            let t = (progress - 0.40) / 0.12;
+            x = lerp(filterX, filterX + sectionW, t);
+            y = (ahuTopY + ahuBotY) / 2;
+            stage = 'filter';
+        } else if (progress < 0.64) {
+            // Through cooling coil
+            let t = (progress - 0.52) / 0.12;
+            x = lerp(coolX, coolX + sectionW, t);
+            y = (ahuTopY + ahuBotY) / 2;
+            stage = 'cooling';
+        } else if (progress < 0.76) {
+            // Through heating coil
+            let t = (progress - 0.64) / 0.12;
+            x = lerp(heatX, heatX + sectionW, t);
+            y = (ahuTopY + ahuBotY) / 2;
+            stage = 'heating';
+        } else if (progress < 0.85) {
+            // Through supply fan
+            let t = (progress - 0.76) / 0.09;
+            x = lerp(fanX, fanX + sectionW, t);
+            y = (ahuTopY + ahuBotY) / 2;
+            stage = 'fan';
+        } else if (progress < 0.88) {
+            // Up from fan to supply duct
+            let t = (progress - 0.85) / 0.03;
+            x = fanX + sectionW / 2;
+            y = lerp((ahuTopY + ahuBotY) / 2, topY + h * 0.04, t);
+            stage = 'supply_duct';
+        } else if (progress < 0.96) {
+            // Supply duct, moving right
+            let t = (progress - 0.88) / 0.08;
+            x = lerp(fanX + sectionW / 2, roomMidX, t);
+            y = topY + h * 0.04;
+            stage = 'supply_duct';
+        } else {
+            // Diffuser into room
+            let t = (progress - 0.96) / 0.04;
+            x = roomMidX;
+            y = lerp(topY + h * 0.04, ahuTopY + 15, t);
+            stage = 'diffuser';
+        }
+
+        return { x: x, y: y, stage: stage };
+    }
+
+    function getParticleColor(stage) {
+        if (stage === 'room' || stage === 'return') {
+            return color(150, 150, 160, 180); // Gray - used air
+        } else if (stage === 'mixed') {
+            return color(140, 160, 140, 180); // Slightly green - mixed with outdoor
+        } else if (stage === 'filter') {
+            return color(180, 190, 200, 180); // Lighter gray - cleaner
+        } else if (stage === 'cooling') {
+            if (mode === 'cooling') {
+                return color(80, 140, 220, 180); // Blue - being cooled
+            } else {
+                return color(180, 190, 200, 180); // Unchanged in heating mode
+            }
+        } else if (stage === 'heating') {
+            if (mode === 'heating') {
+                return color(220, 120, 80, 180); // Red tint - being heated
+            } else if (mode === 'cooling') {
+                return color(80, 140, 220, 180); // Still blue in cooling mode
+            }
+            return color(180, 190, 200, 180);
+        } else if (stage === 'fan' || stage === 'supply_duct' || stage === 'diffuser') {
+            if (mode === 'cooling') {
+                return color(70, 130, 210, 180); // Blue - conditioned cool air
+            } else {
+                return color(210, 110, 70, 180); // Red - conditioned warm air
+            }
+        }
+        return color(150, 150, 150, 180);
+    }
+
+    function draw() {
+        background(245, 245, 250);
+
+        // Draw the system
+        drawReturnDuct();
+        drawSupplyDuct();
+        drawAHU();
+        drawRoom();
+        drawOutdoorAirIntake();
+        drawLabels();
+        updateAndDrawParticles();
+        drawButtons();
+
+        // Draw tooltip last (on top)
+        if (showTooltip) {
+            drawTooltip();
+        }
+
+        // Update fan angle
+        fanAngle += 0.08;
+
+        // Update damper
+        if (damperOpen) {
+            damperAngle = lerp(damperAngle, PI / 6, 0.05);
+        } else {
+            damperAngle = lerp(damperAngle, PI / 2 - 0.1, 0.05);
+        }
+    }
+
+    function drawRoom() {
+        let h = drawHeight;
+        let w = canvasWidth;
+
+        let roomLeft = w * 0.72;
+        let roomRight = w * 0.95;
+        let ahuTopY = h * 0.30;
+        let ahuBotY = h * 0.70;
+        let roomMidX = (roomLeft + roomRight) / 2;
+
+        // Room outline
+        push();
+        stroke(80);
+        strokeWeight(2);
+        fill(255, 252, 245);
+        rect(roomLeft, ahuTopY, roomRight - roomLeft, ahuBotY - ahuTopY, 4);
+
+        // Furniture suggestion (desk)
+        fill(180, 160, 130);
+        noStroke();
+        rect(roomLeft + 15, ahuBotY - 40, 50, 20, 3);
+        // Chair
+        fill(100, 100, 110);
+        ellipse(roomLeft + 40, ahuBotY - 50, 20, 20);
+
+        // Person silhouette
+        fill(100, 120, 140);
+        ellipse(roomMidX + 10, ahuBotY - 65, 16, 16); // head
+        rect(roomMidX + 3, ahuBotY - 57, 14, 25, 3); // body
+
+        // Supply diffuser at top of room
+        stroke(60, 60, 200);
+        strokeWeight(2);
+        fill(200, 210, 240);
+        rect(roomMidX - 25, ahuTopY - 3, 50, 8, 2);
+        // Diffuser slats
+        for (let i = -20; i <= 20; i += 10) {
+            line(roomMidX + i, ahuTopY - 1, roomMidX + i, ahuTopY + 4);
+        }
+
+        // Return grille at bottom of room
+        stroke(120);
+        strokeWeight(2);
+        fill(200, 200, 200);
+        rect(roomMidX - 25, ahuBotY - 5, 50, 8, 2);
+        // Grille slats
+        for (let i = -20; i <= 20; i += 8) {
+            line(roomMidX + i, ahuBotY - 3, roomMidX + i, ahuBotY + 2);
+        }
+        pop();
+    }
+
+    function drawReturnDuct() {
+        let h = drawHeight;
+        let w = canvasWidth;
+
+        let bottomY = h * 0.88;
+        let ahuBotY = h * 0.70;
+        let roomMidX = (w * 0.72 + w * 0.95) / 2;
+        let ahuLeft = w * 0.05;
+        let sectionW = (w * 0.65 - ahuLeft) / 5;
+
+        push();
+        stroke(120);
+        strokeWeight(1.5);
+        fill(220, 220, 225);
+
+        // Vertical section down from room
+        rect(roomMidX - 15, ahuBotY, 30, bottomY - ahuBotY - h * 0.04);
+
+        // Horizontal duct along bottom
+        rect(ahuLeft + sectionW / 2 - 15, bottomY - h * 0.08, roomMidX - ahuLeft - sectionW / 2 + 30, h * 0.08, 3);
+
+        // Vertical section up into AHU
+        rect(ahuLeft + sectionW / 2 - 15, (ahuBotY + h * 0.30) / 2 + 20, 30, bottomY - h * 0.08 - (ahuBotY + h * 0.30) / 2 - 20);
+        pop();
+    }
+
+    function drawSupplyDuct() {
+        let h = drawHeight;
+        let w = canvasWidth;
+
+        let topY = h * 0.08;
+        let ahuTopY = h * 0.30;
+        let roomMidX = (w * 0.72 + w * 0.95) / 2;
+        let ahuLeft = w * 0.05;
+        let ahuRight = w * 0.65;
+        let sectionW = (ahuRight - ahuLeft) / 5;
+        let fanX = ahuLeft + sectionW * 4;
+
+        push();
+        stroke(100, 100, 180);
+        strokeWeight(1.5);
+
+        if (mode === 'cooling') {
+            fill(210, 220, 240);
+        } else {
+            fill(240, 215, 210);
+        }
+
+        // Vertical from fan up to duct level
+        rect(fanX + sectionW / 2 - 15, topY + h * 0.04, 30, ahuTopY - topY - h * 0.04 + 20);
+
+        // Horizontal duct across top
+        rect(fanX + sectionW / 2 - 15, topY, roomMidX - fanX - sectionW / 2 + 30, h * 0.08, 3);
+
+        // Vertical from duct into room
+        rect(roomMidX - 15, topY + h * 0.04, 30, ahuTopY - topY - h * 0.04);
+        pop();
+    }
+
+    function drawAHU() {
+        let h = drawHeight;
+        let w = canvasWidth;
+
+        let ahuTopY = h * 0.30;
+        let ahuBotY = h * 0.70;
+        let ahuMidY = (ahuTopY + ahuBotY) / 2;
+        let ahuLeft = w * 0.05;
+        let ahuRight = w * 0.65;
+        let sectionW = (ahuRight - ahuLeft) / 5;
+
+        push();
+        // AHU outer box
+        stroke(60);
+        strokeWeight(2);
+        fill(235, 235, 240);
+        rect(ahuLeft, ahuTopY, ahuRight - ahuLeft, ahuBotY - ahuTopY, 5);
+
+        // Section dividers
+        stroke(100);
+        strokeWeight(1);
+        for (let i = 1; i < 5; i++) {
+            let lx = ahuLeft + sectionW * i;
+            line(lx, ahuTopY, lx, ahuBotY);
+        }
+
+        // --- Mixed Air section (first section) ---
+        let oaX = ahuLeft;
+        // Just label area, mixing happens here
+
+        // --- Filter Bank ---
+        let filterX = ahuLeft + sectionW;
+        drawFilterBank(filterX, ahuTopY, sectionW, ahuBotY - ahuTopY);
+
+        // --- Cooling Coil ---
+        let coolX = ahuLeft + sectionW * 2;
+        drawCoolingCoil(coolX, ahuTopY, sectionW, ahuBotY - ahuTopY);
+
+        // --- Heating Coil ---
+        let heatX = ahuLeft + sectionW * 3;
+        drawHeatingCoil(heatX, ahuTopY, sectionW, ahuBotY - ahuTopY);
+
+        // --- Supply Fan ---
+        let fanX = ahuLeft + sectionW * 4;
+        drawFan(fanX, ahuTopY, sectionW, ahuBotY - ahuTopY);
+
+        pop();
+    }
+
+    function drawFilterBank(x, y, w, h) {
+        push();
+        // Filter pleats
+        stroke(160, 140, 100);
+        strokeWeight(1);
+        fill(230, 220, 190);
+        let numPleats = 8;
+        let pleatW = w / (numPleats + 1);
+        for (let i = 1; i <= numPleats; i++) {
+            let px = x + pleatW * i;
+            // Zigzag pattern for pleated filter
+            beginShape();
+            for (let j = 0; j <= 6; j++) {
+                let py = y + 10 + (h - 20) * j / 6;
+                let offset = (j % 2 === 0) ? -pleatW / 3 : pleatW / 3;
+                vertex(px + offset, py);
+            }
+            endShape();
+        }
+        // Filter frame
+        noFill();
+        stroke(140, 120, 80);
+        strokeWeight(2);
+        rect(x + 5, y + 5, w - 10, h - 10, 2);
+        pop();
+    }
+
+    function drawCoolingCoil(x, y, w, h) {
+        push();
+        let active = (mode === 'cooling');
+        // Coil tubes
+        for (let row = 0; row < 3; row++) {
+            let cx = x + w * 0.25 + row * w * 0.25;
+            for (let i = 0; i < 6; i++) {
+                let cy = y + 15 + i * (h - 30) / 5;
+                // Fin
+                if (active) {
+                    stroke(100, 140, 200);
+                    fill(160, 190, 230, 150);
+                } else {
+                    stroke(160);
+                    fill(200, 200, 200, 100);
+                }
+                strokeWeight(0.5);
+                rect(cx - 8, cy - 4, 16, 8, 1);
+                // Tube
+                if (active) {
+                    fill(60, 100, 180);
+                    stroke(40, 70, 150);
+                } else {
+                    fill(140);
+                    stroke(110);
+                }
+                strokeWeight(1);
+                ellipse(cx, cy, 8, 8);
+            }
+        }
+        // Condensate drip if cooling
+        if (active && frameCount % 40 < 20) {
+            fill(100, 160, 230, 150);
+            noStroke();
+            ellipse(x + w / 2, y + h - 8, 4, 6);
+        }
+        pop();
+    }
+
+    function drawHeatingCoil(x, y, w, h) {
+        push();
+        let active = (mode === 'heating');
+        // Heating elements
+        stroke(active ? color(200, 80, 40) : color(160));
+        strokeWeight(active ? 2.5 : 1.5);
+        noFill();
+        for (let row = 0; row < 2; row++) {
+            let cx = x + w * 0.33 + row * w * 0.33;
+            // Zigzag heating element
+            beginShape();
+            for (let i = 0; i <= 10; i++) {
+                let ey = y + 10 + (h - 20) * i / 10;
+                let offset = (i % 2 === 0) ? -w * 0.12 : w * 0.12;
+                vertex(cx + offset, ey);
+            }
+            endShape();
+        }
+        // Glow effect if active
+        if (active) {
+            noStroke();
+            fill(255, 100, 50, 30);
+            rect(x + 5, y + 5, w - 10, h - 10, 3);
+        }
+        pop();
+    }
+
+    function drawFan(x, y, w, h) {
+        push();
+        let cx = x + w / 2;
+        let cy = y + h / 2;
+        let r = min(w, h) * 0.35;
+
+        // Fan housing
+        stroke(80);
+        strokeWeight(2);
+        fill(220, 220, 230);
+        ellipse(cx, cy, r * 2.2, r * 2.2);
+
+        // Fan blades
+        fill(100, 110, 130);
+        stroke(70, 80, 100);
+        strokeWeight(1);
+        for (let i = 0; i < 6; i++) {
+            let angle = fanAngle + i * TWO_PI / 6;
+            push();
+            translate(cx, cy);
+            rotate(angle);
+            beginShape();
+            vertex(0, 0);
+            vertex(r * 0.15, -r * 0.6);
+            vertex(0, -r * 0.85);
+            vertex(-r * 0.15, -r * 0.6);
+            endShape(CLOSE);
+            pop();
+        }
+
+        // Center hub
+        fill(70, 80, 100);
+        stroke(50);
+        ellipse(cx, cy, r * 0.3, r * 0.3);
+        pop();
+    }
+
+    function drawOutdoorAirIntake() {
+        let h = drawHeight;
+        let w = canvasWidth;
+
+        let ahuTopY = h * 0.30;
+        let ahuLeft = w * 0.05;
+        let sectionW = (w * 0.65 - ahuLeft) / 5;
+        let intakeX = ahuLeft + sectionW / 2;
+
+        push();
+        // Outdoor air duct coming from top
+        stroke(80, 140, 80);
+        strokeWeight(1.5);
+        fill(200, 230, 200);
+        rect(intakeX - 18, h * 0.10, 36, ahuTopY - h * 0.10, 3);
+
+        // Damper blades
+        let damperY = h * 0.18;
+        stroke(80, 100, 80);
+        strokeWeight(2);
+        push();
+        translate(intakeX, damperY);
+        // Draw 3 damper blades
+        for (let i = -1; i <= 1; i++) {
+            push();
+            translate(0, i * 10);
+            rotate(damperAngle);
+            line(-14, 0, 14, 0);
+            pop();
+        }
+        pop();
+
+        // Arrow indicating outside
+        fill(80, 160, 80);
+        noStroke();
+        triangle(intakeX, h * 0.06, intakeX - 8, h * 0.10, intakeX + 8, h * 0.10);
+
+        // "OUTSIDE" label
+        fill(60, 120, 60);
+        noStroke();
+        textSize(max(9, canvasWidth * 0.011));
+        textAlign(CENTER, CENTER);
+        text('OUTSIDE', intakeX, h * 0.04);
+        pop();
+    }
+
+    function drawLabels() {
+        let h = drawHeight;
+        let w = canvasWidth;
+
+        let ahuTopY = h * 0.30;
+        let ahuBotY = h * 0.70;
+        let ahuLeft = w * 0.05;
+        let ahuRight = w * 0.65;
+        let sectionW = (ahuRight - ahuLeft) / 5;
+        let roomMidX = (w * 0.72 + w * 0.95) / 2;
+        let bottomY = h * 0.88;
+        let topY = h * 0.08;
+
+        push();
+        textAlign(CENTER, CENTER);
+        let labelSize = max(8, min(11, canvasWidth * 0.013));
+        textSize(labelSize);
+
+        showTooltip = false;
+
+        // Label each section
+        let labels = [
+            { name: 'Mixed Air', x: ahuLeft + sectionW * 0.5, y: ahuTopY + 15 },
+            { name: 'Filter Bank', x: ahuLeft + sectionW * 1.5, y: ahuTopY + 15 },
+            { name: 'Cooling Coil', x: ahuLeft + sectionW * 2.5, y: ahuTopY + 15 },
+            { name: 'Heating Coil', x: ahuLeft + sectionW * 3.5, y: ahuTopY + 15 },
+            { name: 'Supply Fan', x: ahuLeft + sectionW * 4.5, y: ahuTopY + 15 },
+            { name: 'Outdoor Air Intake', x: ahuLeft + sectionW * 0.5, y: h * 0.14 },
+            { name: 'Return Air', x: (roomMidX + ahuLeft + sectionW / 2) / 2, y: bottomY - h * 0.04 },
+            { name: 'Supply Duct', x: (ahuLeft + sectionW * 4.5 + roomMidX) / 2, y: topY + h * 0.04 },
+            { name: 'Supply Diffuser', x: roomMidX, y: ahuTopY - 12 },
+            { name: 'Occupied Room', x: roomMidX, y: (ahuTopY + ahuBotY) / 2 - 20 }
+        ];
+
+        for (let lbl of labels) {
+            // Check hover
+            let d = dist(mouseX, mouseY, lbl.x, lbl.y);
+            let isHovered = d < 35;
+
+            if (isHovered) {
+                // Highlighted label
+                fill(0, 60, 150);
+                textStyle(BOLD);
+                text(lbl.name, lbl.x, lbl.y);
+                textStyle(NORMAL);
+
+                // Show tooltip
+                showTooltip = true;
+                tooltipText = stageDescriptions[lbl.name] || '';
+                tooltipX = mouseX;
+                tooltipY = mouseY;
+            } else {
+                fill(40, 40, 50);
+                text(lbl.name, lbl.x, lbl.y);
+            }
+        }
+
+        // AHU title
+        textSize(max(10, canvasWidth * 0.015));
+        fill(40, 40, 80);
+        textStyle(BOLD);
+        text('Air Handling Unit (AHU)', (ahuLeft + ahuRight) / 2, ahuBotY + 18);
+        textStyle(NORMAL);
+
+        pop();
+    }
+
+    function drawTooltip() {
+        if (!tooltipText) return;
+
+        push();
+        textSize(max(9, canvasWidth * 0.012));
+        textAlign(LEFT, TOP);
+
+        let tw = min(250, canvasWidth * 0.3);
+        // Word wrap calculation
+        let words = tooltipText.split(' ');
+        let lines = [];
+        let currentLine = '';
+        for (let word of words) {
+            let testLine = currentLine ? currentLine + ' ' + word : word;
+            if (textWidth(testLine) > tw - 16) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = testLine;
+            }
+        }
+        if (currentLine) lines.push(currentLine);
+
+        let lineH = textSize() * 1.4;
+        let boxH = lines.length * lineH + 16;
+        let boxW = tw;
+
+        // Position tooltip so it doesn't go off screen
+        let tx = tooltipX + 15;
+        let ty = tooltipY - boxH - 5;
+        if (tx + boxW > canvasWidth - 5) tx = tooltipX - boxW - 15;
+        if (ty < 5) ty = tooltipY + 20;
+
+        // Box
+        fill(30, 30, 50, 230);
+        stroke(100, 140, 200);
+        strokeWeight(1);
+        rect(tx, ty, boxW, boxH, 5);
+
+        // Text
+        fill(240);
+        noStroke();
+        for (let i = 0; i < lines.length; i++) {
+            text(lines[i], tx + 8, ty + 8 + i * lineH);
+        }
+        pop();
+    }
+
+    function updateAndDrawParticles() {
+        for (let p of particles) {
+            p.progress += p.speed;
+            if (p.progress > 1) {
+                p.progress -= 1;
+            }
+
+            let pos = getParticlePos(p.progress);
+            let col = getParticleColor(pos.stage);
+
+            push();
+            noStroke();
+            fill(col);
+            // Add slight perpendicular offset for visual spread
+            let nx = 0, ny = 0;
+            // Compute approximate direction for offset
+            let pos2 = getParticlePos(min(p.progress + 0.005, 0.999));
+            let dx = pos2.x - pos.x;
+            let dy = pos2.y - pos.y;
+            let len = sqrt(dx * dx + dy * dy);
+            if (len > 0.1) {
+                nx = -dy / len;
+                ny = dx / len;
+            }
+            ellipse(pos.x + nx * p.offset, pos.y + ny * p.offset, p.size, p.size);
+            pop();
+        }
+    }
+
+    function drawButtons() {
+        let cy = drawHeight + controlHeight / 2;
+
+        push();
+        // Mode label
+        textAlign(CENTER, CENTER);
+        textSize(max(10, canvasWidth * 0.014));
+        fill(40);
+        text('Mode:', canvasWidth / 2 - 185, cy);
+
+        // Cooling button
+        if (mode === 'cooling') {
+            fill(60, 120, 200);
+            stroke(40, 80, 160);
+        } else {
+            fill(180, 190, 200);
+            stroke(140, 150, 160);
+        }
+        strokeWeight(1.5);
+        rect(coolBtnX, coolBtnY, coolBtnW, coolBtnH, 5);
+        fill(mode === 'cooling' ? 255 : 60);
+        noStroke();
+        textSize(max(10, canvasWidth * 0.014));
+        textAlign(CENTER, CENTER);
+        text('Cooling', coolBtnX + coolBtnW / 2, coolBtnY + coolBtnH / 2);
+
+        // Heating button
+        if (mode === 'heating') {
+            fill(200, 80, 50);
+            stroke(160, 60, 30);
+        } else {
+            fill(180, 190, 200);
+            stroke(140, 150, 160);
+        }
+        strokeWeight(1.5);
+        rect(heatBtnX, heatBtnY, heatBtnW, heatBtnH, 5);
+        fill(mode === 'heating' ? 255 : 60);
+        noStroke();
+        textSize(max(10, canvasWidth * 0.014));
+        textAlign(CENTER, CENTER);
+        text('Heating', heatBtnX + heatBtnW / 2, heatBtnY + heatBtnH / 2);
+
+        // Damper toggle
+        let dampBtnX = canvasWidth / 2 + 160;
+        let dampBtnW = 140;
+        if (damperOpen) {
+            fill(80, 160, 80);
+            stroke(60, 130, 60);
+        } else {
+            fill(180, 190, 200);
+            stroke(140, 150, 160);
+        }
+        strokeWeight(1.5);
+        rect(dampBtnX, coolBtnY, dampBtnW, coolBtnH, 5);
+        fill(damperOpen ? 255 : 60);
+        noStroke();
+        text(damperOpen ? 'Damper: Open' : 'Damper: Closed', dampBtnX + dampBtnW / 2, coolBtnY + coolBtnH / 2);
+
+        pop();
+    }
+
+    function mousePressed() {
+        // Check cooling button
+        if (mouseX >= coolBtnX && mouseX <= coolBtnX + coolBtnW &&
+            mouseY >= coolBtnY && mouseY <= coolBtnY + coolBtnH) {
+            mode = 'cooling';
+        }
+        // Check heating button
+        if (mouseX >= heatBtnX && mouseX <= heatBtnX + heatBtnW &&
+            mouseY >= heatBtnY && mouseY <= heatBtnY + heatBtnH) {
+            mode = 'heating';
+        }
+        // Check damper button
+        let dampBtnX = canvasWidth / 2 + 160;
+        let dampBtnW = 140;
+        if (mouseX >= dampBtnX && mouseX <= dampBtnX + dampBtnW &&
+            mouseY >= coolBtnY && mouseY <= coolBtnY + coolBtnH) {
+            damperOpen = !damperOpen;
+        }
+    }
+    </script>
+</body>
+</html>

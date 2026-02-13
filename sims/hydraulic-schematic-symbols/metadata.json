@@ -1,0 +1,9 @@
+{
+  "title": "Hydraulic Schematic Symbols Guide",
+  "chapter": 8,
+  "type": "infographic",
+  "bloom_level": "L1",
+  "bloom_verb": ["identify", "recognize"],
+  "learning_objective": "Identify ISO 1219 hydraulic schematic symbols for common components",
+  "technology": "p5.js"
+}

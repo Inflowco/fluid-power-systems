@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vacuum Energy Comparison</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f0f4f8;
+    color: #1a202c;
+    padding: 20px;
+    line-height: 1.5;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #64748b;
+    margin-bottom: 20px;
+  }
+
+  /* Controls Panel */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: center;
+    align-items: flex-end;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 170px;
+  }
+
+  .control-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .control-group input[type="range"] {
+    width: 100%;
+    accent-color: #3b82f6;
+    cursor: pointer;
+  }
+
+  .control-group select {
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  .control-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1e40af;
+    margin-top: 2px;
+    text-align: center;
+  }
+
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: auto;
+  }
+
+  .toggle-group label {
+    margin-bottom: 0;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: 0.25s;
+    border-radius: 24px;
+  }
+
+  .toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.25s;
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background-color: #3b82f6;
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+  }
+
+  /* Section Headers */
+  .section-header {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  /* Two-Panel Layout */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+  }
+
+  .panel {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  /* Pump Type Cards */
+  .pump-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .pump-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    border-left: 4px solid;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .pump-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+
+  .pump-card.rotary-vane { border-left-color: #3b82f6; }
+  .pump-card.diaphragm { border-left-color: #10b981; }
+  .pump-card.scroll { border-left-color: #8b5cf6; }
+  .pump-card.liquid-ring { border-left-color: #f59e0b; }
+
+  .pump-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .pump-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .pump-card.rotary-vane .pump-icon { background: #3b82f6; }
+  .pump-card.diaphragm .pump-icon { background: #10b981; }
+  .pump-card.scroll .pump-icon { background: #8b5cf6; }
+  .pump-card.liquid-ring .pump-icon { background: #f59e0b; }
+
+  .pump-card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .pump-data-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pump-data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .pump-data-row:last-child {
+    border-bottom: none;
+  }
+
+  .pump-data-label {
+    font-size: 0.78rem;
+    color: #64748b;
+  }
+
+  .pump-data-value {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .pump-best-range {
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  .efficiency-bar {
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .efficiency-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .pump-card.rotary-vane .efficiency-fill { background: #3b82f6; }
+  .pump-card.diaphragm .efficiency-fill { background: #10b981; }
+  .pump-card.scroll .efficiency-fill { background: #8b5cf6; }
+  .pump-card.liquid-ring .efficiency-fill { background: #f59e0b; }
+
+  .co2-data {
+    display: none;
+  }
+
+  .co2-data.visible {
+    display: flex;
+  }
+
+  /* Strategy Cards */
+  .strategy-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+  }
+
+  .strategy-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    border-top: 4px solid;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .strategy-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  }
+
+  .strategy-card.constant { border-top-color: #ef4444; }
+  .strategy-card.onoff { border-top-color: #f59e0b; }
+  .strategy-card.vfd { border-top-color: #10b981; }
+
+  .strategy-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin: 0 auto 10px;
+  }
+
+  .strategy-card.constant .strategy-card-icon { background: #fef2f2; color: #dc2626; }
+  .strategy-card.onoff .strategy-card-icon { background: #fffbeb; color: #d97706; }
+  .strategy-card.vfd .strategy-card-icon { background: #ecfdf5; color: #059669; }
+
+  .strategy-card-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+  }
+
+  .strategy-data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .strategy-data-row:last-child {
+    border-bottom: none;
+  }
+
+  .strategy-data-label {
+    font-size: 0.76rem;
+    color: #64748b;
+    text-align: left;
+  }
+
+  .strategy-data-value {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: right;
+  }
+
+  .savings-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .strategy-card.constant .savings-badge { background: #fef2f2; color: #991b1b; }
+  .strategy-card.onoff .savings-badge { background: #fffbeb; color: #92400e; }
+  .strategy-card.vfd .savings-badge { background: #ecfdf5; color: #065f46; }
+
+  /* Chart Section */
+  .chart-section {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  .chart-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  .chart-subtitle {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    margin-bottom: 14px;
+  }
+
+  .chart-wrapper {
+    position: relative;
+    width: 100%;
+    max-height: 380px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .panels {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .pump-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .strategy-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .control-group {
+      min-width: unset;
+    }
+
+    h1 { font-size: 1.3rem; }
+    body { padding: 10px; }
+    .panel { padding: 14px; }
+    .chart-section { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Vacuum Energy Comparison</h1>
+<p class="subtitle">Compare energy consumption across vacuum pump types and operating strategies for a 100 CFM system</p>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="control-group">
+    <label for="systemDemand">System Demand</label>
+    <input type="range" id="systemDemand" min="25" max="100" step="25" value="100">
+    <div class="control-value" id="systemDemandValue">100%</div>
+  </div>
+  <div class="control-group">
+    <label for="elecRate">Electricity Rate</label>
+    <input type="range" id="elecRate" min="0.08" max="0.25" step="0.01" value="0.12">
+    <div class="control-value" id="elecRateValue">$0.12 / kWh</div>
+  </div>
+  <div class="control-group">
+    <label for="opHours">Operating Hours / Day</label>
+    <input type="range" id="opHours" min="8" max="24" step="1" value="16">
+    <div class="control-value" id="opHoursValue">16 hrs/day</div>
+  </div>
+  <div class="control-group">
+    <label for="climateRegion">Climate Region</label>
+    <select id="climateRegion">
+      <option value="hot">Hot (+10% cooling penalty)</option>
+      <option value="temperate" selected>Temperate (baseline)</option>
+      <option value="cold">Cold (-5% cooling benefit)</option>
+    </select>
+  </div>
+  <div class="control-group toggle-group">
+    <label for="showCO2">Show CO2 Impact</label>
+    <div class="toggle-switch">
+      <input type="checkbox" id="showCO2">
+      <span class="toggle-slider"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Two-Panel Layout -->
+<div class="panels">
+  <!-- Left Panel: Pump Type Energy Comparison -->
+  <div class="panel">
+    <div class="section-header">Pump Type Energy Comparison</div>
+    <div class="pump-cards">
+
+      <div class="pump-card rotary-vane">
+        <div class="pump-card-header">
+          <div class="pump-icon">RV</div>
+          <div class="pump-card-title">Rotary Vane</div>
+        </div>
+        <div class="pump-data-rows">
+          <div class="pump-data-row">
+            <span class="pump-data-label">Power</span>
+            <span class="pump-data-value" id="rv-power">7.5 kW</span>
+          </div>
+          <div class="pump-data-row">
+            <span class="pump-data-label">Annual Cost</span>
+            <span class="pump-data-value" id="rv-cost">--</span>
+          </div>
+          <div class="pump-data-row co2-data" id="rv-co2-row">
+            <span class="pump-data-label">CO2 / Year</span>
+            <span class="pump-data-value" id="rv-co2">--</span>
+          </div>
+          <div class="pump-data-row">
+            <span class="pump-data-label">Efficiency</span>
+            <span class="pump-data-value" id="rv-eff">78%</span>
+          </div>
+        </div>
+        <div class="efficiency-bar"><div class="efficiency-fill" id="rv-eff-bar" style="width:78%"></div></div>
+        <div class="pump-best-range">Best for: Continuous duty, medium-to-high vacuum, industrial processes</div>
+      </div>
+
+      <div class="pump-card diaphragm">
+        <div class="pump-card-header">
+          <div class="pump-icon">DI</div>
+          <div class="pump-card-title">Diaphragm</div>
+        </div>
+        <div class="pump-data-rows">
+          <div class="pump-data-row">
+            <span class="pump-data-label">Power</span>
+            <span class="pump-data-value" id="di-power">3.0 kW</span>
+          </div>
+          <div class="pump-data-row">
+            <span class="pump-data-label">Annual Cost</span>
+            <span class="pump-data-value" id="di-cost">--</span>
+          </div>
+          <div class="pump-data-row co2-data" id="di-co2-row">
+            <span class="pump-data-label">CO2 / Year</span>
+            <span class="pump-data-value" id="di-co2">--</span>
+          </div>
+          <div class="pump-data-row">
+            <span class="pump-data-label">Efficiency</span>
+            <span class="pump-data-value" id="di-eff">65%</span>
+          </div>
+        </div>
+        <div class="efficiency-bar"><div class="efficiency-fill" id="di-eff-bar" style="width:65%"></div></div>
+        <div class="pump-best-range">Best for: Clean, oil-free applications, labs, low-flow systems</div>
+      </div>
+
+      <div class="pump-card scroll">
+        <div class="pump-card-header">
+          <div class="pump-icon">SC</div>
+          <div class="pump-card-title">Scroll</div>
+        </div>
+        <div class="pump-data-rows">
+          <div class="pump-data-row">
+            <span class="pump-data-label">Power</span>
+            <span class="pump-data-value" id="sc-power">5.5 kW</span>
+          </div>
+          <div class="pump-data-row">
+            <span class="pump-data-label">Annual Cost</span>
+            <span class="pump-data-value" id="sc-cost">--</span>
+          </div>
+          <div class="pump-data-row co2-data" id="sc-co2-row">
+            <span class="pump-data-label">CO2 / Year</span>
+            <span class="pump-data-value" id="sc-co2">--</span>
+          </div>
+          <div class="pump-data-row">
+            <span class="pump-data-label">Efficiency</span>
+            <span class="pump-data-value" id="sc-eff">82%</span>
+          </div>
+        </div>
+        <div class="efficiency-bar"><div class="efficiency-fill" id="sc-eff-bar" style="width:82%"></div></div>
+        <div class="pump-best-range">Best for: Oil-free, quiet operation, semiconductor &amp; pharma</div>
+      </div>
+
+      <div class="pump-card liquid-ring">
+        <div class="pump-card-header">
+          <div class="pump-icon">LR</div>
+          <div class="pump-card-title">Liquid Ring</div>
+        </div>
+        <div class="pump-data-rows">
+          <div class="pump-data-row">
+            <span class="pump-data-label">Power</span>
+            <span class="pump-data-value" id="lr-power">11.0 kW</span>
+          </div>
+          <div class="pump-data-row">
+            <span class="pump-data-label">Annual Cost</span>
+            <span class="pump-data-value" id="lr-cost">--</span>
+          </div>
+          <div class="pump-data-row co2-data" id="lr-co2-row">
+            <span class="pump-data-label">CO2 / Year</span>
+            <span class="pump-data-value" id="lr-co2">--</span>
+          </div>
+          <div class="pump-data-row">
+            <span class="pump-data-label">Efficiency</span>
+            <span class="pump-data-value" id="lr-eff">60%</span>
+          </div>
+        </div>
+        <div class="efficiency-bar"><div class="efficiency-fill" id="lr-eff-bar" style="width:60%"></div></div>
+        <div class="pump-best-range">Best for: Wet/corrosive gases, chemical processes, high durability needs</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Right Panel: Operating Strategy Comparison -->
+  <div class="panel">
+    <div class="section-header">Operating Strategy Comparison</div>
+    <p style="font-size:0.82rem; color:#64748b; margin-bottom:14px;">Based on the average across all four pump types</p>
+    <div class="strategy-cards">
+
+      <div class="strategy-card constant">
+        <div class="strategy-card-icon">&#9881;</div>
+        <div class="strategy-card-title">Constant Speed</div>
+        <div class="strategy-data-row">
+          <span class="strategy-data-label">Annual Energy</span>
+          <span class="strategy-data-value" id="const-energy">--</span>
+        </div>
+        <div class="strategy-data-row">
+          <span class="strategy-data-label">Annual Cost</span>
+          <span class="strategy-data-value" id="const-cost">--</span>
+        </div>
+        <div class="strategy-data-row co2-data" id="const-co2-row">
+          <span class="strategy-data-label">CO2 Emissions</span>
+          <span class="strategy-data-value" id="const-co2">--</span>
+        </div>
+        <div class="savings-badge" id="const-savings">Baseline</div>
+      </div>
+
+      <div class="strategy-card onoff">
+        <div class="strategy-card-icon">&#9211;</div>
+        <div class="strategy-card-title">On/Off Control</div>
+        <div class="strategy-data-row">
+          <span class="strategy-data-label">Annual Energy</span>
+          <span class="strategy-data-value" id="onoff-energy">--</span>
+        </div>
+        <div class="strategy-data-row">
+          <span class="strategy-data-label">Annual Cost</span>
+          <span class="strategy-data-value" id="onoff-cost">--</span>
+        </div>
+        <div class="strategy-data-row co2-data" id="onoff-co2-row">
+          <span class="strategy-data-label">CO2 Emissions</span>
+          <span class="strategy-data-value" id="onoff-co2">--</span>
+        </div>
+        <div class="savings-badge" id="onoff-savings">--</div>
+      </div>
+
+      <div class="strategy-card vfd">
+        <div class="strategy-card-icon">&#9889;</div>
+        <div class="strategy-card-title">VFD Control</div>
+        <div class="strategy-data-row">
+          <span class="strategy-data-label">Annual Energy</span>
+          <span class="strategy-data-value" id="vfd-energy">--</span>
+        </div>
+        <div class="strategy-data-row">
+          <span class="strategy-data-label">Annual Cost</span>
+          <span class="strategy-data-value" id="vfd-cost">--</span>
+        </div>
+        <div class="strategy-data-row co2-data" id="vfd-co2-row">
+          <span class="strategy-data-label">CO2 Emissions</span>
+          <span class="strategy-data-value" id="vfd-co2">--</span>
+        </div>
+        <div class="savings-badge" id="vfd-savings">--</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Panel: Combined Summary Chart -->
+<div class="chart-section">
+  <div class="chart-title">Combined Energy Consumption: Pump Type x Operating Strategy</div>
+  <div class="chart-subtitle">Grouped bars show annual energy (kWh) by pump type for each strategy; line overlay shows annual cost ($)</div>
+  <div class="chart-wrapper">
+    <canvas id="mainChart"></canvas>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ── Pump base data at 100 CFM, 100% demand ──
+  var pumps = {
+    rv: { name: 'Rotary Vane',  basePower: 7.5,  efficiency: 78, color: 'rgba(59, 130, 246, ALPHA)', border: '#3b82f6' },
+    di: { name: 'Diaphragm',    basePower: 3.0,  efficiency: 65, color: 'rgba(16, 185, 129, ALPHA)', border: '#10b981' },
+    sc: { name: 'Scroll',       basePower: 5.5,  efficiency: 82, color: 'rgba(139, 92, 246, ALPHA)',  border: '#8b5cf6' },
+    lr: { name: 'Liquid Ring',  basePower: 11.0, efficiency: 60, color: 'rgba(245, 158, 11, ALPHA)',  border: '#f59e0b' }
+  };
+
+  var pumpKeys = ['rv', 'di', 'sc', 'lr'];
+
+  // Climate region multipliers
+  var climateMultipliers = {
+    hot: 1.10,
+    temperate: 1.00,
+    cold: 0.95
+  };
+
+  var co2PerKwh = 0.9; // lbs CO2 per kWh
+  var daysPerYear = 365;
+
+  // DOM references
+  var demandSlider = document.getElementById('systemDemand');
+  var rateSlider   = document.getElementById('elecRate');
+  var hoursSlider  = document.getElementById('opHours');
+  var climateSelect = document.getElementById('climateRegion');
+  var co2Toggle    = document.getElementById('showCO2');
+
+  var demandVal = document.getElementById('systemDemandValue');
+  var rateVal   = document.getElementById('elecRateValue');
+  var hoursVal  = document.getElementById('opHoursValue');
+
+  var chart = null;
+
+  function formatNumber(n) {
+    return Math.round(n).toLocaleString('en-US');
+  }
+
+  function formatCurrency(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function formatLbs(n) {
+    return formatNumber(n) + ' lbs';
+  }
+
+  // Strategy multiplier functions
+  // demandFraction is 0.25 to 1.0
+  function constantMultiplier(demandFraction) {
+    // Constant speed always runs at full power regardless of demand
+    return 1.0;
+  }
+
+  function onOffMultiplier(demandFraction) {
+    // On/off saves proportional to (1 - demand) but with cycling losses (10% penalty)
+    var savings = (1 - demandFraction);
+    var cyclingLoss = 0.10 * savings; // cycling penalty proportional to how often it cycles
+    return demandFraction + cyclingLoss;
+  }
+
+  function vfdMultiplier(demandFraction) {
+    // Affinity/cubic law: power proportional to (speed)^3
+    // At 50% demand => ~12.5% power; at 75% => ~42.2%; at 25% => ~1.6%
+    // Add a small floor for VFD losses (minimum ~5% of rated)
+    var cubicPower = Math.pow(demandFraction, 3);
+    return Math.max(cubicPower, 0.05);
+  }
+
+  function compute() {
+    var demandPct = parseInt(demandSlider.value);
+    var demandFraction = demandPct / 100;
+    var rate = parseFloat(rateSlider.value);
+    var hoursPerDay = parseInt(hoursSlider.value);
+    var climate = climateSelect.value;
+    var showCO2 = co2Toggle.checked;
+
+    var climateMult = climateMultipliers[climate];
+    var annualHours = hoursPerDay * daysPerYear;
+
+    // Update display values
+    demandVal.textContent = demandPct + '%';
+    rateVal.textContent = '$' + rate.toFixed(2) + ' / kWh';
+    hoursVal.textContent = hoursPerDay + ' hrs/day';
+
+    // Strategy multipliers for this demand level
+    var constMult = constantMultiplier(demandFraction);
+    var onoffMult = onOffMultiplier(demandFraction);
+    var vfdMult   = vfdMultiplier(demandFraction);
+
+    // Compute per-pump data (for left panel, uses constant speed as the displayed power mode)
+    var pumpResults = {};
+    var avgConstEnergy = 0;
+    var avgOnoffEnergy = 0;
+    var avgVfdEnergy = 0;
+
+    for (var i = 0; i < pumpKeys.length; i++) {
+      var key = pumpKeys[i];
+      var pump = pumps[key];
+      var adjustedPower = pump.basePower * demandFraction * climateMult;
+      var annualEnergy = adjustedPower * annualHours;
+      var annualCost = annualEnergy * rate;
+      var annualCO2 = annualEnergy * co2PerKwh;
+
+      pumpResults[key] = {
+        power: adjustedPower,
+        energy: annualEnergy,
+        cost: annualCost,
+        co2: annualCO2,
+        // Per strategy
+        constEnergy: pump.basePower * constMult * climateMult * annualHours,
+        onoffEnergy: pump.basePower * onoffMult * climateMult * annualHours,
+        vfdEnergy:   pump.basePower * vfdMult   * climateMult * annualHours
+      };
+
+      pumpResults[key].constCost = pumpResults[key].constEnergy * rate;
+      pumpResults[key].onoffCost = pumpResults[key].onoffEnergy * rate;
+      pumpResults[key].vfdCost   = pumpResults[key].vfdEnergy   * rate;
+
+      avgConstEnergy += pumpResults[key].constEnergy;
+      avgOnoffEnergy += pumpResults[key].onoffEnergy;
+      avgVfdEnergy   += pumpResults[key].vfdEnergy;
+
+      // Update pump cards (show demand-adjusted values)
+      document.getElementById(key + '-power').textContent = adjustedPower.toFixed(1) + ' kW';
+      document.getElementById(key + '-cost').textContent = formatCurrency(annualCost);
+      document.getElementById(key + '-co2').textContent = formatLbs(annualCO2);
+    }
+
+    // Average across pump types for strategy cards
+    avgConstEnergy /= 4;
+    avgOnoffEnergy /= 4;
+    avgVfdEnergy   /= 4;
+
+    var avgConstCost = avgConstEnergy * rate;
+    var avgOnoffCost = avgOnoffEnergy * rate;
+    var avgVfdCost   = avgVfdEnergy   * rate;
+
+    var avgConstCO2 = avgConstEnergy * co2PerKwh;
+    var avgOnoffCO2 = avgOnoffEnergy * co2PerKwh;
+    var avgVfdCO2   = avgVfdEnergy   * co2PerKwh;
+
+    var onoffSavings = avgConstEnergy > 0 ? ((avgConstEnergy - avgOnoffEnergy) / avgConstEnergy * 100) : 0;
+    var vfdSavings   = avgConstEnergy > 0 ? ((avgConstEnergy - avgVfdEnergy) / avgConstEnergy * 100) : 0;
+
+    // Update strategy cards
+    document.getElementById('const-energy').textContent = formatNumber(avgConstEnergy) + ' kWh';
+    document.getElementById('const-cost').textContent = formatCurrency(avgConstCost);
+    document.getElementById('const-co2').textContent = formatLbs(avgConstCO2);
+    document.getElementById('const-savings').textContent = 'Baseline';
+
+    document.getElementById('onoff-energy').textContent = formatNumber(avgOnoffEnergy) + ' kWh';
+    document.getElementById('onoff-cost').textContent = formatCurrency(avgOnoffCost);
+    document.getElementById('onoff-co2').textContent = formatLbs(avgOnoffCO2);
+    document.getElementById('onoff-savings').textContent = onoffSavings.toFixed(0) + '% savings vs constant';
+
+    document.getElementById('vfd-energy').textContent = formatNumber(avgVfdEnergy) + ' kWh';
+    document.getElementById('vfd-cost').textContent = formatCurrency(avgVfdCost);
+    document.getElementById('vfd-co2').textContent = formatLbs(avgVfdCO2);
+    document.getElementById('vfd-savings').textContent = vfdSavings.toFixed(0) + '% savings vs constant';
+
+    // CO2 visibility
+    var co2Rows = document.querySelectorAll('.co2-data');
+    for (var j = 0; j < co2Rows.length; j++) {
+      if (showCO2) {
+        co2Rows[j].classList.add('visible');
+      } else {
+        co2Rows[j].classList.remove('visible');
+      }
+    }
+
+    // Build chart
+    updateChart(pumpResults, rate);
+  }
+
+  function updateChart(pumpResults, rate) {
+    var ctx = document.getElementById('mainChart').getContext('2d');
+
+    // Labels: one group per pump type
+    var labels = ['Rotary Vane', 'Diaphragm', 'Scroll', 'Liquid Ring'];
+
+    // 12 bars: 3 strategies x 4 pump types (grouped by pump type)
+    var constData = [];
+    var onoffData = [];
+    var vfdData   = [];
+    var constCostData = [];
+    var onoffCostData = [];
+    var vfdCostData   = [];
+
+    for (var i = 0; i < pumpKeys.length; i++) {
+      var key = pumpKeys[i];
+      var r = pumpResults[key];
+      constData.push(Math.round(r.constEnergy));
+      onoffData.push(Math.round(r.onoffEnergy));
+      vfdData.push(Math.round(r.vfdEnergy));
+      constCostData.push(Math.round(r.constCost));
+      onoffCostData.push(Math.round(r.onoffCost));
+      vfdCostData.push(Math.round(r.vfdCost));
+    }
+
+    var chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Constant Speed (kWh)',
+          data: constData,
+          backgroundColor: 'rgba(239, 68, 68, 0.7)',
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 1,
+          order: 2
+        },
+        {
+          label: 'On/Off Control (kWh)',
+          data: onoffData,
+          backgroundColor: 'rgba(245, 158, 11, 0.7)',
+          borderColor: 'rgba(245, 158, 11, 1)',
+          borderWidth: 1,
+          order: 2
+        },
+        {
+          label: 'VFD Control (kWh)',
+          data: vfdData,
+          backgroundColor: 'rgba(16, 185, 129, 0.7)',
+          borderColor: 'rgba(16, 185, 129, 1)',
+          borderWidth: 1,
+          order: 2
+        },
+        {
+          label: 'Constant Speed Cost ($)',
+          data: constCostData,
+          type: 'line',
+          borderColor: '#dc2626',
+          backgroundColor: 'rgba(220, 38, 38, 0.1)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#dc2626',
+          fill: false,
+          yAxisID: 'y1',
+          order: 1
+        },
+        {
+          label: 'On/Off Control Cost ($)',
+          data: onoffCostData,
+          type: 'line',
+          borderColor: '#d97706',
+          backgroundColor: 'rgba(217, 119, 6, 0.1)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#d97706',
+          fill: false,
+          yAxisID: 'y1',
+          order: 1
+        },
+        {
+          label: 'VFD Control Cost ($)',
+          data: vfdCostData,
+          type: 'line',
+          borderColor: '#059669',
+          backgroundColor: 'rgba(5, 150, 105, 0.1)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#059669',
+          fill: false,
+          yAxisID: 'y1',
+          order: 1
+        }
+      ]
+    };
+
+    var maxEnergy = Math.max.apply(null, constData) * 1.15;
+    var maxCost = Math.max.apply(null, constCostData) * 1.15;
+
+    maxEnergy = Math.ceil(maxEnergy / 5000) * 5000;
+    maxCost = Math.ceil(maxCost / 1000) * 1000;
+
+    if (chart) {
+      chart.data = chartData;
+      chart.options.scales.y.max = maxEnergy;
+      chart.options.scales.y1.max = maxCost;
+      chart.update();
+    } else {
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 14,
+                font: { size: 11 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  var label = context.dataset.label || '';
+                  if (context.dataset.yAxisID === 'y1') {
+                    return label + ': $' + Math.round(context.parsed.y).toLocaleString();
+                  }
+                  return label + ': ' + Math.round(context.parsed.y).toLocaleString() + ' kWh';
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 12, weight: 'bold' } }
+            },
+            y: {
+              position: 'left',
+              beginAtZero: true,
+              max: maxEnergy,
+              title: {
+                display: true,
+                text: 'Annual Energy (kWh)',
+                font: { size: 12, weight: 'bold' }
+              },
+              ticks: {
+                callback: function(v) { return v.toLocaleString(); },
+                font: { size: 11 }
+              }
+            },
+            y1: {
+              position: 'right',
+              beginAtZero: true,
+              max: maxCost,
+              grid: { drawOnChartArea: false },
+              title: {
+                display: true,
+                text: 'Annual Cost ($)',
+                font: { size: 12, weight: 'bold' }
+              },
+              ticks: {
+                callback: function(v) { return '$' + v.toLocaleString(); },
+                font: { size: 11 }
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Event listeners
+  demandSlider.addEventListener('input', compute);
+  rateSlider.addEventListener('input', compute);
+  hoursSlider.addEventListener('input', compute);
+  climateSelect.addEventListener('change', compute);
+  co2Toggle.addEventListener('change', compute);
+
+  // Handle window resize
+  window.addEventListener('resize', function() {
+    if (chart) {
+      chart.resize();
+    }
+  });
+
+  // Initial render
+  compute();
+})();
+</script>
+
+</body>
+</html>

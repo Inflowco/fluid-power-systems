@@ -1,0 +1,47 @@
+{
+  "title": "Compressed Air System Optimizer",
+  "description": "Interactive workflow where students apply energy optimization strategies to a compressed air system — fixing leaks, reducing pressure, installing VFDs, recovering heat, and eliminating misuse — and observe the cumulative impact on energy consumption, cost, and CO2 emissions.",
+  "creator": "Peter Vinck",
+  "date": "2026-02-10",
+  "subject": [
+    "Compressed Air Systems",
+    "Energy Optimization",
+    "Fluid Power Systems",
+    "Industrial Energy Efficiency",
+    "Variable Frequency Drives",
+    "Leak Detection",
+    "Heat Recovery",
+    "CO2 Emissions"
+  ],
+  "type": "Interactive Simulation",
+  "format": "text/html",
+  "language": "en-US",
+  "rights": "CC BY-NC-SA 4.0",
+  "contributor": [
+    "Claude Code"
+  ],
+  "identifier": "https://dmccreary.github.io/fluid-power-systems/sims/compressed-air-system-optimizer/",
+  "publisher": "Fluid Power Systems Intelligent Textbook",
+  "educationalLevel": "Undergraduate, Professional Development",
+  "learningResourceType": "simulation",
+  "audience": "Students, Technicians, Facilities Managers, Educators",
+  "version": "1.0.0",
+  "bloomLevel": [
+    "Apply"
+  ],
+  "concepts": [
+    "Compressed Air Energy Consumption",
+    "Leak Detection and Repair",
+    "Pressure Optimization",
+    "Variable Frequency Drives",
+    "Heat Recovery",
+    "Simple Payback Analysis",
+    "CO2 Emissions Reduction"
+  ],
+  "prerequisites": [
+    "Basic understanding of compressed air systems",
+    "Familiarity with electrical power units (kW, kWh)",
+    "Understanding of operating costs and payback concepts"
+  ],
+  "library": "p5.js"
+}

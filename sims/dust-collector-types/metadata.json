@@ -1,0 +1,9 @@
+{
+  "title": "Dust Collector Types Comparison",
+  "chapter": 7,
+  "type": "diagram",
+  "bloom_level": "L2",
+  "bloom_verb": ["compare", "contrast"],
+  "learning_objective": "Compare four main dust collector types and explain each operating principle",
+  "technology": "p5.js"
+}

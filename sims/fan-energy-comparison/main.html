@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fan Energy Savings Comparison</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f0f4f8;
+    color: #1a202c;
+    padding: 16px 20px;
+    line-height: 1.5;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 16px;
+  }
+
+  /* Main layout: chart left, results right */
+  .main-layout {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 16px;
+  }
+
+  .chart-panel {
+    flex: 0 0 55%;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chart-panel-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+  }
+
+  .chart-panel-subtitle {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+  }
+
+  .canvas-wrapper {
+    flex: 1;
+    position: relative;
+    min-height: 280px;
+  }
+
+  .canvas-wrapper canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Results panel */
+  .results-panel {
+    flex: 0 0 45%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .result-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    border-left: 4px solid #1565C0;
+  }
+
+  .result-card.costs { border-left-color: #1565C0; }
+  .result-card.savings { border-left-color: #FF9800; }
+  .result-card.payback { border-left-color: #4CAF50; }
+  .result-card.co2 { border-left-color: #26A69A; }
+
+  .card-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+  }
+
+  .cost-method {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: #475569;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-damper { background: #E53935; }
+  .dot-vane { background: #FFA726; }
+  .dot-vfd { background: #43A047; }
+
+  .cost-value {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .savings-highlight {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+  }
+
+  .savings-label {
+    font-size: 0.82rem;
+    color: #475569;
+  }
+
+  .savings-amount {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #E65100;
+  }
+
+  .savings-pct {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #FF9800;
+  }
+
+  /* Payback visual */
+  .payback-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .payback-number {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #2E7D32;
+    line-height: 1;
+  }
+
+  .payback-unit {
+    font-size: 0.78rem;
+    color: #64748b;
+  }
+
+  .payback-bar-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .payback-bar-bg {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .payback-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #43A047, #66BB6A);
+    border-radius: 5px;
+    transition: width 0.4s ease;
+  }
+
+  .payback-note {
+    font-size: 0.72rem;
+    color: #94a3b8;
+  }
+
+  .co2-big {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #00897B;
+    line-height: 1.1;
+  }
+
+  .co2-detail {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  /* Controls panel (bottom) */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    align-items: flex-end;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 170px;
+    flex: 1;
+    max-width: 220px;
+  }
+
+  .control-group label {
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .control-group input[type="range"] {
+    width: 100%;
+    accent-color: #1565C0;
+    cursor: pointer;
+  }
+
+  .control-value {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1565C0;
+    margin-top: 2px;
+    text-align: center;
+  }
+
+  /* Legend under chart */
+  .chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .main-layout {
+      flex-direction: column;
+    }
+    .chart-panel, .results-panel {
+      flex: 1 1 auto;
+    }
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .control-group {
+      min-width: unset;
+      max-width: none;
+    }
+    h1 { font-size: 1.25rem; }
+  }
+
+  @media (max-width: 600px) {
+    body { padding: 10px; }
+    .chart-panel { padding: 12px; }
+    .result-card { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Fan Energy Savings Comparison</h1>
+<p class="subtitle">Compare outlet damper, inlet vane, and VFD speed control for fan energy and cost savings</p>
+
+<div class="main-layout">
+  <!-- Left: Stacked bar chart -->
+  <div class="chart-panel">
+    <div class="chart-panel-title">Annual Energy Consumption by Control Method</div>
+    <div class="chart-panel-subtitle">Stacked segments show energy at each load level (100%, 75%, 50%, 25%)</div>
+    <div class="canvas-wrapper">
+      <canvas id="barChart"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#1565C0;"></div>100% Load</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#42A5F5;"></div>75% Load</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#90CAF9;"></div>50% Load</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#BBDEFB;"></div>25% Load</div>
+    </div>
+  </div>
+
+  <!-- Right: Results cards -->
+  <div class="results-panel">
+    <!-- Card 1: Annual Costs -->
+    <div class="result-card costs">
+      <div class="card-label">Annual Energy Cost</div>
+      <div class="cost-row">
+        <span class="cost-method"><span class="dot dot-damper"></span>Outlet Damper</span>
+        <span class="cost-value" id="cost-damper">--</span>
+      </div>
+      <div class="cost-row">
+        <span class="cost-method"><span class="dot dot-vane"></span>Inlet Vane</span>
+        <span class="cost-value" id="cost-vane">--</span>
+      </div>
+      <div class="cost-row">
+        <span class="cost-method"><span class="dot dot-vfd"></span>VFD Speed Control</span>
+        <span class="cost-value" id="cost-vfd">--</span>
+      </div>
+    </div>
+
+    <!-- Card 2: VFD Savings vs Damper -->
+    <div class="result-card savings">
+      <div class="card-label">VFD Savings vs. Outlet Damper</div>
+      <div class="savings-highlight">
+        <span class="savings-label">Annual Dollar Savings</span>
+        <span class="savings-amount" id="savings-dollars">--</span>
+      </div>
+      <div class="savings-highlight">
+        <span class="savings-label">Energy Reduction</span>
+        <span class="savings-pct" id="savings-pct">--</span>
+      </div>
+      <div class="savings-highlight">
+        <span class="savings-label">kWh Saved Per Year</span>
+        <span class="savings-pct" id="savings-kwh">--</span>
+      </div>
+    </div>
+
+    <!-- Card 3: VFD Payback -->
+    <div class="result-card payback">
+      <div class="card-label">VFD Payback Period</div>
+      <div class="payback-container">
+        <div>
+          <div class="payback-number" id="payback-years">--</div>
+          <div class="payback-unit">years</div>
+        </div>
+        <div class="payback-bar-wrapper">
+          <div class="payback-bar-bg">
+            <div class="payback-bar-fill" id="payback-bar" style="width: 0%;"></div>
+          </div>
+          <div class="payback-note">VFD cost: $<span id="vfd-cost-est">--</span> at $150/HP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: CO2 Reduction -->
+    <div class="result-card co2">
+      <div class="card-label">CO&#8322; Reduction (VFD vs. Damper)</div>
+      <div class="co2-big" id="co2-tons">--</div>
+      <div class="co2-detail" id="co2-detail">--</div>
+    </div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="control-group">
+    <label for="motorHP">Fan Motor HP</label>
+    <input type="range" id="motorHP" min="5" max="100" step="1" value="25">
+    <div class="control-value" id="motorHP-val">25 HP</div>
+  </div>
+  <div class="control-group">
+    <label for="opHours">Operating Hours / Year</label>
+    <input type="range" id="opHours" min="2000" max="8760" step="10" value="4380">
+    <div class="control-value" id="opHours-val">4,380 hrs</div>
+  </div>
+  <div class="control-group">
+    <label for="elecRate">Electricity Rate (&cent;/kWh)</label>
+    <input type="range" id="elecRate" min="5" max="25" step="0.5" value="12">
+    <div class="control-value" id="elecRate-val">12.0 &cent;/kWh</div>
+  </div>
+  <div class="control-group">
+    <label for="loadFactor">Average Load Factor</label>
+    <input type="range" id="loadFactor" min="50" max="95" step="1" value="70">
+    <div class="control-value" id="loadFactor-val">70%</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ---- DOM references ----
+  var sliderHP = document.getElementById('motorHP');
+  var sliderHours = document.getElementById('opHours');
+  var sliderRate = document.getElementById('elecRate');
+  var sliderLoad = document.getElementById('loadFactor');
+  var valHP = document.getElementById('motorHP-val');
+  var valHours = document.getElementById('opHours-val');
+  var valRate = document.getElementById('elecRate-val');
+  var valLoad = document.getElementById('loadFactor-val');
+
+  var canvas = document.getElementById('barChart');
+  var ctx = canvas.getContext('2d');
+
+  // HP to kW conversion
+  var HP_TO_KW = 0.7457;
+
+  // CO2 factor: 0.92 lb CO2 per kWh
+  var CO2_LB_PER_KWH = 0.92;
+  var LB_PER_TON = 2000;
+
+  // VFD cost per HP
+  var VFD_COST_PER_HP = 150;
+
+  // Load levels
+  var LOAD_LEVELS = [1.0, 0.75, 0.50, 0.25];
+  var LOAD_LABELS = ['100%', '75%', '50%', '25%'];
+
+  // Segment colors per load level (shared across all bars, darker = higher load)
+  var SEGMENT_COLORS = {
+    damper: ['#C62828', '#E53935', '#EF5350', '#EF9A9A'],
+    vane:   ['#F57F17', '#FFA726', '#FFCC02', '#FFF176'],
+    vfd:    ['#1B5E20', '#43A047', '#66BB6A', '#A5D6A7']
+  };
+
+  // ---- Calculation functions ----
+
+  // Returns power fraction (0-1) relative to full-load HP
+  function damperPower(loadFraction) {
+    // Dampers waste energy: power barely drops
+    return 0.9 + 0.1 * loadFraction;
+  }
+
+  function vanePower(loadFraction) {
+    // Moderate improvement
+    return Math.pow(loadFraction, 1.5);
+  }
+
+  function vfdPower(loadFraction) {
+    // Cube law (affinity laws)
+    return Math.pow(loadFraction, 3);
+  }
+
+  // Compute load distribution from average load factor
+  // Returns array of 4 time fractions summing to 1 (for 100%, 75%, 50%, 25%)
+  function getLoadDistribution(avgLoadPct) {
+    // We model a bell-curve-like distribution centered around the average load
+    // avgLoadPct: 50-95
+    var avg = avgLoadPct / 100;
+
+    // Weights based on distance from average load
+    // For avg=0.70: rough target is 15% @100%, 35% @75%, 35% @50%, 15% @25%
+    var weights = [];
+    for (var i = 0; i < LOAD_LEVELS.length; i++) {
+      var dist = Math.abs(LOAD_LEVELS[i] - avg);
+      weights.push(Math.exp(-dist * 6));
+    }
+    var total = 0;
+    for (var j = 0; j < weights.length; j++) total += weights[j];
+    var fractions = [];
+    for (var k = 0; k < weights.length; k++) fractions.push(weights[k] / total);
+    return fractions;
+  }
+
+  // ---- Main compute ----
+  function compute() {
+    var hp = parseFloat(sliderHP.value);
+    var hours = parseFloat(sliderHours.value);
+    var rateCents = parseFloat(sliderRate.value);
+    var loadPct = parseFloat(sliderLoad.value);
+
+    // Update display values
+    valHP.textContent = hp + ' HP';
+    valHours.textContent = hours.toLocaleString('en-US') + ' hrs';
+    valRate.innerHTML = rateCents.toFixed(1) + ' &cent;/kWh';
+    valLoad.textContent = loadPct + '%';
+
+    var ratePerKwh = rateCents / 100;
+    var fullLoadKW = hp * HP_TO_KW;
+
+    var dist = getLoadDistribution(loadPct);
+
+    // Energy at each load level for each method (kWh)
+    var damperSegments = [];
+    var vaneSegments = [];
+    var vfdSegments = [];
+    var damperTotal = 0, vaneTotal = 0, vfdTotal = 0;
+
+    for (var i = 0; i < LOAD_LEVELS.length; i++) {
+      var load = LOAD_LEVELS[i];
+      var hoursAtLevel = hours * dist[i];
+
+      var dE = fullLoadKW * damperPower(load) * hoursAtLevel;
+      var vE = fullLoadKW * vanePower(load) * hoursAtLevel;
+      var fE = fullLoadKW * vfdPower(load) * hoursAtLevel;
+
+      damperSegments.push(dE);
+      vaneSegments.push(vE);
+      vfdSegments.push(fE);
+
+      damperTotal += dE;
+      vaneTotal += vE;
+      vfdTotal += fE;
+    }
+
+    // Costs
+    var damperCost = damperTotal * ratePerKwh;
+    var vaneCost = vaneTotal * ratePerKwh;
+    var vfdCost = vfdTotal * ratePerKwh;
+
+    // Savings
+    var savingsDollars = damperCost - vfdCost;
+    var savingsKwh = damperTotal - vfdTotal;
+    var savingsPct = (savingsKwh / damperTotal) * 100;
+
+    // VFD payback
+    var vfdEquipCost = hp * VFD_COST_PER_HP;
+    var paybackYears = savingsDollars > 0 ? vfdEquipCost / savingsDollars : 99;
+
+    // CO2 reduction
+    var co2ReductionLbs = savingsKwh * CO2_LB_PER_KWH;
+    var co2ReductionTons = co2ReductionLbs / LB_PER_TON;
+
+    // ---- Update results cards ----
+    document.getElementById('cost-damper').textContent = '$' + Math.round(damperCost).toLocaleString('en-US');
+    document.getElementById('cost-vane').textContent = '$' + Math.round(vaneCost).toLocaleString('en-US');
+    document.getElementById('cost-vfd').textContent = '$' + Math.round(vfdCost).toLocaleString('en-US');
+
+    document.getElementById('savings-dollars').textContent = '$' + Math.round(savingsDollars).toLocaleString('en-US') + '/yr';
+    document.getElementById('savings-pct').textContent = savingsPct.toFixed(1) + '%';
+    document.getElementById('savings-kwh').textContent = Math.round(savingsKwh).toLocaleString('en-US') + ' kWh';
+
+    document.getElementById('payback-years').textContent = paybackYears < 99 ? paybackYears.toFixed(1) : '--';
+    document.getElementById('vfd-cost-est').textContent = Math.round(vfdEquipCost).toLocaleString('en-US');
+    // Payback bar: scale so 1 year = 100%, >10 years = close to 0%
+    var barPct = paybackYears < 99 ? Math.max(0, Math.min(100, (1 - (paybackYears - 0.5) / 10) * 100)) : 0;
+    document.getElementById('payback-bar').style.width = barPct + '%';
+
+    document.getElementById('co2-tons').textContent = co2ReductionTons.toFixed(1) + ' tons/yr';
+    document.getElementById('co2-detail').textContent =
+      Math.round(co2ReductionLbs).toLocaleString('en-US') + ' lbs CO\u2082 avoided at 0.92 lb/kWh';
+
+    // ---- Draw bar chart ----
+    drawChart(damperSegments, vaneSegments, vfdSegments, damperTotal, vaneTotal, vfdTotal);
+  }
+
+  // ---- Canvas chart drawing ----
+  function drawChart(damperSegs, vaneSegs, vfdSegs, damperTotal, vaneTotal, vfdTotal) {
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.parentElement.getBoundingClientRect();
+    var w = rect.width;
+    var h = rect.height;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Chart area
+    var padLeft = 65;
+    var padRight = 20;
+    var padTop = 10;
+    var padBottom = 40;
+    var chartW = w - padLeft - padRight;
+    var chartH = h - padTop - padBottom;
+
+    // Clear
+    ctx.clearRect(0, 0, w, h);
+
+    // Max value for y-axis
+    var maxVal = Math.max(damperTotal, vaneTotal, vfdTotal);
+    var niceMax = Math.ceil(maxVal / 10000) * 10000;
+    if (niceMax < 10000) niceMax = 10000;
+
+    // Bar layout: 3 bars with gaps
+    var barGroups = [
+      { label: 'Outlet\nDamper', segs: damperSegs, total: damperTotal, colors: SEGMENT_COLORS.damper },
+      { label: 'Inlet\nVane', segs: vaneSegs, total: vaneTotal, colors: SEGMENT_COLORS.vane },
+      { label: 'VFD Speed\nControl', segs: vfdSegs, total: vfdTotal, colors: SEGMENT_COLORS.vfd }
+    ];
+
+    var groupWidth = chartW / 3;
+    var barWidth = Math.min(groupWidth * 0.6, 80);
+
+    // Y-axis gridlines and labels
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+
+    var tickCount = 5;
+    for (var t = 0; t <= tickCount; t++) {
+      var yVal = (niceMax / tickCount) * t;
+      var yPos = padTop + chartH - (yVal / niceMax) * chartH;
+      // Gridline
+      ctx.beginPath();
+      ctx.moveTo(padLeft, yPos);
+      ctx.lineTo(padLeft + chartW, yPos);
+      ctx.stroke();
+      // Label
+      var labelText;
+      if (yVal >= 1000) {
+        labelText = (yVal / 1000).toFixed(0) + 'k';
+      } else {
+        labelText = yVal.toFixed(0);
+      }
+      ctx.fillText(labelText, padLeft - 8, yPos);
+    }
+
+    // Y-axis title
+    ctx.save();
+    ctx.translate(14, padTop + chartH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('Annual kWh', 0, 0);
+    ctx.restore();
+
+    // Draw bars
+    for (var b = 0; b < barGroups.length; b++) {
+      var group = barGroups[b];
+      var centerX = padLeft + groupWidth * b + groupWidth / 2;
+      var barX = centerX - barWidth / 2;
+
+      // Draw stacked segments bottom-up
+      var yBottom = padTop + chartH;
+      for (var s = 0; s < group.segs.length; s++) {
+        var segH = (group.segs[s] / niceMax) * chartH;
+        var segY = yBottom - segH;
+
+        // Fill segment
+        ctx.fillStyle = group.colors[s];
+        ctx.beginPath();
+        if (s === 0 && segH > 4) {
+          // Top segment: rounded top corners
+          roundedRectTop(ctx, barX, segY, barWidth, segH, 4);
+        } else {
+          ctx.rect(barX, segY, barWidth, segH);
+        }
+        ctx.fill();
+
+        // Segment divider line
+        if (s > 0 && segH > 2) {
+          ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(barX, yBottom);
+          ctx.lineTo(barX + barWidth, yBottom);
+          ctx.stroke();
+        }
+
+        yBottom = segY;
+      }
+
+      // Total label above bar
+      var totalBarH = (group.total / niceMax) * chartH;
+      var labelY = padTop + chartH - totalBarH - 8;
+      ctx.fillStyle = '#1e293b';
+      ctx.font = 'bold 12px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(Math.round(group.total).toLocaleString('en-US') + ' kWh', centerX, labelY);
+
+      // X-axis label (multi-line)
+      ctx.fillStyle = '#475569';
+      ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textBaseline = 'top';
+      var lines = group.label.split('\n');
+      for (var ln = 0; ln < lines.length; ln++) {
+        ctx.fillText(lines[ln], centerX, padTop + chartH + 6 + ln * 14);
+      }
+    }
+
+    // Baseline axis line
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(padLeft, padTop + chartH);
+    ctx.lineTo(padLeft + chartW, padTop + chartH);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(padLeft, padTop);
+    ctx.lineTo(padLeft, padTop + chartH);
+    ctx.stroke();
+  }
+
+  function roundedRectTop(ctx, x, y, w, h, r) {
+    if (h < r * 2) r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y + h);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h);
+    ctx.closePath();
+  }
+
+  // ---- Event listeners ----
+  sliderHP.addEventListener('input', compute);
+  sliderHours.addEventListener('input', compute);
+  sliderRate.addEventListener('input', compute);
+  sliderLoad.addEventListener('input', compute);
+
+  // Resize handler
+  var resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(compute, 50);
+  });
+
+  // Initial render
+  compute();
+})();
+</script>
+
+</body>
+</html>

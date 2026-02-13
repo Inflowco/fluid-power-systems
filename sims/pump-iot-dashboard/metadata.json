@@ -1,0 +1,8 @@
+{
+  "title": "Pump Monitoring IoT Dashboard",
+  "chapter": 9,
+  "bloom_level": "L4 Analyze",
+  "bloom_verb": "Distinguish",
+  "technology": "p5.js",
+  "learning_objective": "Analyze real-time pump monitoring data to distinguish between normal operation and developing fault conditions"
+}

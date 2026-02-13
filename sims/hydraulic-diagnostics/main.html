@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydraulic System Diagnostic Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        select, button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #2a2a4e;
+            color: #ffffff;
+            border: 1px solid #00d4ff;
+            transition: all 0.3s ease;
+        }
+
+        select:hover, button:hover {
+            background-color: #3a3a5e;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        button.diagnose {
+            background-color: #00a86b;
+            border-color: #00d46b;
+        }
+
+        button.diagnose:hover {
+            background-color: #00c876;
+        }
+
+        .score-display {
+            font-size: 14px;
+            color: #00d4ff;
+            padding: 10px 15px;
+            background-color: #2a2a4e;
+            border-radius: 4px;
+            min-width: 150px;
+        }
+
+        .quiz-label {
+            font-size: 14px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        #canvas-container {
+            background-color: #252540;
+            border: 1px solid #00d4ff;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .diagnosis-panel {
+            background-color: #2a2a4e;
+            border: 1px solid #00d4ff;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .diagnosis-panel.active {
+            display: block;
+        }
+
+        .diagnosis-panel h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .diagnosis-panel p {
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .multiple-choice {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .mc-option {
+            padding: 10px;
+            background-color: #1a1a2e;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mc-option:hover {
+            border-color: #00d4ff;
+            background-color: #2a2a4e;
+        }
+
+        .mc-option input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .mc-option label {
+            cursor: pointer;
+        }
+
+        .submit-answer {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #ff6b6b;
+            border-color: #ff9999;
+        }
+
+        .submit-answer:hover {
+            background-color: #ff8787;
+        }
+
+        .legend {
+            font-size: 12px;
+            margin-top: 10px;
+            color: #b0b0b0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">Hydraulic System Diagnostic Dashboard</div>
+
+            <div class="controls">
+                <select id="scenarioSelect">
+                    <option value="0">Normal Operation</option>
+                    <option value="1">Pump Wear</option>
+                    <option value="2">Relief Valve Stuck Open</option>
+                    <option value="3">Internal Cylinder Leak</option>
+                    <option value="4">Contaminated Fluid</option>
+                </select>
+
+                <label class="quiz-label">
+                    <input type="checkbox" id="quizMode">
+                    Quiz Mode
+                </label>
+
+                <button class="diagnose" id="diagnoseBtn">Diagnose</button>
+
+                <div class="score-display">
+                    Score: <span id="scoreValue">0/0</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #00d46b;"></div>
+                    <span>Normal</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ffd700;"></div>
+                    <span>Warning</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ff4757;"></div>
+                    <span>Fault</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ff4444;"></div>
+                    <span>Pressure</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #4488ff;"></div>
+                    <span>Return</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="canvas-container"></div>
+
+        <div id="diagnosisPanel" class="diagnosis-panel">
+            <h3 id="diagnosisTitle">Diagnosis Results</h3>
+            <div id="diagnosisContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // Scenario definitions
+        const scenarios = [
+            {
+                id: 0,
+                name: "Normal Operation",
+                pressure: 2500,
+                flow: 20,
+                temp: 120,
+                particleCode: "16/14/11",
+                cylinderDrift: 0,
+                status: "normal"
+            },
+            {
+                id: 1,
+                name: "Pump Wear",
+                pressure: 2200,
+                flow: 15,
+                temp: 155,
+                particleCode: "18/16/13",
+                cylinderDrift: 0.1,
+                status: "wear",
+                diagnosis: "Pump wear detected",
+                explanation: "System pressure is lower than normal (2200 psi vs 2500 psi) and pump flow has decreased to 15 GPM from the expected 20 GPM. Fluid temperature is elevated to 155°F indicating increased friction. These readings together indicate internal wear in the pump, reducing its displacement and increasing internal leakage."
+            },
+            {
+                id: 2,
+                name: "Relief Valve Stuck Open",
+                pressure: 1800,
+                flow: 25,
+                temp: 170,
+                particleCode: "17/15/12",
+                cylinderDrift: 0,
+                status: "relief",
+                diagnosis: "Relief valve malfunction",
+                explanation: "System pressure is capped at 1800 psi, well below the normal 2500 psi setpoint. Flow to tank is excessive at 25 GPM. Fluid temperature has risen to 170°F due to continuous bypass through the relief valve. A stuck-open relief valve allows excess pressure to bypass to tank without doing useful work, wasting energy as heat."
+            },
+            {
+                id: 3,
+                name: "Internal Cylinder Leak",
+                pressure: 2450,
+                flow: 20,
+                temp: 150,
+                particleCode: "16/14/11",
+                cylinderDrift: 0.5,
+                status: "leak",
+                diagnosis: "Cylinder internal leakage",
+                explanation: "While system pressure and flow appear nearly normal, the cylinder is drifting at 0.5 inches per minute with no load applied. This drift indicates internal leakage across the cylinder's piston seal. Fluid temperature is slightly elevated at 150°F. The leak allows pressure to bypass internally within the cylinder rather than maintaining load."
+            },
+            {
+                id: 4,
+                name: "Contaminated Fluid",
+                pressure: 2300,
+                flow: 18,
+                temp: 165,
+                particleCode: "22/20/17",
+                cylinderDrift: 0,
+                status: "contamination",
+                diagnosis: "Fluid contamination detected",
+                explanation: "The particle count shows ISO code 22/20/17, indicating excessive contamination above the recommended level of 16/14/11. Flow is beginning to decrease (18 GPM), system pressure is dropping (2300 psi), and temperature is elevated (165°F). Particulate contamination causes increased friction, premature component wear, and reduced efficiency. Immediate fluid analysis and possibly a fluid change is needed."
+            }
+        ];
+
+        let currentScenario = 0;
+        let quizMode = false;
+        let score = { correct: 0, total: 0 };
+        let showingDiagnosis = false;
+        let selectedAnswer = null;
+
+        // P5.js setup
+        let sketchWidth = 800;
+        let sketchHeight = 500;
+
+        function sketch(p) {
+            p.setup = function() {
+                let container = document.getElementById('canvas-container');
+                let width = Math.min(container.clientWidth - 40, 1200);
+                let height = 500;
+                let canvas = p.createCanvas(width, height);
+                canvas.parent('canvas-container');
+                sketchWidth = width;
+                sketchHeight = height;
+            };
+
+            p.windowResized = function() {
+                if (document.getElementById('canvas-container')) {
+                    let container = document.getElementById('canvas-container');
+                    let width = Math.min(container.clientWidth - 40, 1200);
+                    p.resizeCanvas(width, sketchHeight);
+                    sketchWidth = width;
+                }
+            };
+
+            p.draw = function() {
+                p.background(37, 37, 64);
+
+                let scenario = scenarios[currentScenario];
+
+                // Draw schematic (top 55%)
+                let schematicHeight = sketchHeight * 0.55;
+                drawSchematic(p, scenario, 20, 20, sketchWidth - 40, schematicHeight - 40);
+
+                // Draw sensor panels (bottom 45%)
+                let panelStartY = schematicHeight + 10;
+                drawSensorPanels(p, scenario, 20, panelStartY, sketchWidth - 40, sketchHeight - panelStartY - 20);
+            };
+
+            function drawSchematic(p, scenario, x, y, w, h) {
+                // Draw schematic title
+                p.fill(0, 212, 255);
+                p.textSize(14);
+                p.textAlign(p.LEFT, p.TOP);
+                p.text("Hydraulic Circuit Schematic", x + 10, y + 5);
+
+                // Scale schematic
+                let schX = x + 20;
+                let schY = y + 30;
+                let schW = w - 40;
+                let schH = h - 50;
+
+                // Get component colors
+                let reservoirColor = getComponentColor(scenario, "reservoir");
+                let pumpColor = getComponentColor(scenario, "pump");
+                let reliefColor = getComponentColor(scenario, "relief");
+                let valveColor = getComponentColor(scenario, "valve");
+                let cylinderColor = getComponentColor(scenario, "cylinder");
+                let filterColor = getComponentColor(scenario, "filter");
+
+                // Draw reservoir (bottom center)
+                p.fill(reservoirColor);
+                p.stroke(200);
+                p.strokeWeight(2);
+                let resX = schX + schW / 2 - 40;
+                let resY = schY + schH - 50;
+                p.rect(resX, resY, 80, 40, 3);
+                p.fill(0, 100, 150);
+                p.text("Reservoir", resX + 5, resY + 12);
+
+                // Draw pump (left side, mid-height)
+                p.fill(pumpColor);
+                let pumpX = schX + 40;
+                let pumpY = schY + schH / 2 - 20;
+                p.circle(pumpX, pumpY, 30);
+                p.fill(100);
+                p.textSize(10);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.text("P", pumpX, pumpY);
+
+                // Draw relief valve (top left branch)
+                p.fill(reliefColor);
+                p.stroke(200);
+                p.strokeWeight(2);
+                let reliefX = schX + 120;
+                let reliefY = schY + 20;
+                p.rect(reliefX, reliefY, 35, 25, 2);
+                p.fill(100);
+                p.textSize(9);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.text("RV", reliefX + 17, reliefY + 12);
+
+                // Draw directional control valve (center top)
+                p.fill(valveColor);
+                let valveX = schX + schW / 2 - 30;
+                let valveY = schY + 25;
+                p.rect(valveX, valveY, 60, 30, 2);
+                p.fill(100);
+                p.textSize(9);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.text("4/3 Valve", valveX + 30, valveY + 15);
+
+                // Draw double-acting cylinder (right side)
+                p.fill(cylinderColor);
+                p.stroke(200);
+                p.strokeWeight(2);
+                let cylX = schX + schW - 80;
+                let cylY = schY + schH / 2 - 25;
+                p.rect(cylX, cylY, 50, 50, 3);
+                p.fill(100);
+                p.textSize(9);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.text("CYL", cylX + 25, cylY + 25);
+
+                // Draw return filter (bottom right)
+                p.fill(filterColor);
+                p.stroke(200);
+                p.strokeWeight(2);
+                let filterX = schX + schW - 80;
+                let filterY = schY + schH - 50;
+                p.rect(filterX, filterY, 50, 40, 2);
+                p.fill(100);
+                p.textSize(9);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.text("Filter", filterX + 25, filterY + 20);
+
+                // Draw flow lines (pressure = red, return = blue)
+                p.strokeWeight(3);
+
+                // Pump to relief valve
+                p.stroke(255, 68, 68); // Red
+                p.line(pumpX + 15, pumpY, reliefX, reliefY + 12);
+
+                // Pump to directional valve
+                p.line(pumpX + 15, pumpY, valveX, valveY + 15);
+
+                // Directional valve to cylinder
+                p.line(valveX + 60, valveY + 15, cylX, cylY + 25);
+
+                // Cylinder to return filter
+                p.line(cylX, cylY + 25, filterX, filterY + 20);
+
+                // Return filter to reservoir
+                p.line(filterX + 25, filterY + 40, resX + 40, resY);
+
+                // Relief bypass to reservoir
+                p.stroke(68, 136, 255); // Blue
+                p.line(reliefX + 17, reliefY + 25, resX + 60, resY);
+
+                // Add simulation info
+                p.fill(0, 212, 255);
+                p.textSize(11);
+                p.textAlign(p.LEFT, p.TOP);
+                if (!quizMode) {
+                    p.text("Scenario: " + scenario.name, x + 10, h + y - 15);
+                }
+            }
+
+            function drawSensorPanels(p, scenario, x, y, w, h) {
+                p.fill(0, 212, 255);
+                p.textSize(14);
+                p.textAlign(p.LEFT, p.TOP);
+                p.text("Sensor Readings", x + 10, y + 5);
+
+                let panelWidth = (w - 60) / 5;
+                let panelHeight = h - 40;
+                let startX = x + 20;
+                let startY = y + 30;
+
+                // Panel 1: System Pressure
+                drawGaugePressure(p, scenario.pressure, startX, startY, panelWidth);
+
+                // Panel 2: Pump Flow
+                drawGaugeFlow(p, scenario.flow, startX + panelWidth + 10, startY, panelWidth);
+
+                // Panel 3: Fluid Temperature
+                drawGaugeTemp(p, scenario.temp, startX + (panelWidth + 10) * 2, startY, panelWidth);
+
+                // Panel 4: Particle Count
+                drawGaugeParticles(p, scenario.particleCode, startX + (panelWidth + 10) * 3, startY, panelWidth);
+
+                // Panel 5: Cylinder Position & Drift
+                drawGaugeDrift(p, scenario.cylinderDrift, startX + (panelWidth + 10) * 4, startY, panelWidth);
+            }
+
+            function drawGaugePressure(p, pressure, x, y, w) {
+                p.fill(255);
+                p.textSize(11);
+                p.textAlign(p.CENTER);
+                p.text("System Pressure", x + w / 2, y);
+
+                let status = pressure < 1500 ? "fault" : (pressure < 2000 || pressure > 3500 ? "warning" : "normal");
+                let color = getColorByStatus(status);
+
+                // Draw semicircle gauge
+                p.fill(50);
+                p.stroke(color);
+                p.strokeWeight(3);
+                p.arc(x + w / 2, y + 50, w - 20, w - 20, p.PI, p.TWO_PI * 2);
+
+                // Draw needle
+                let angle = p.PI + (pressure / 5000) * p.PI;
+                let needleX = x + w / 2 + Math.cos(angle) * (w / 2 - 15);
+                let needleY = y + 50 + Math.sin(angle) * (w / 2 - 15);
+                p.stroke(color);
+                p.strokeWeight(2);
+                p.line(x + w / 2, y + 50, needleX, needleY);
+
+                // Draw center circle
+                p.fill(color);
+                p.noStroke();
+                p.circle(x + w / 2, y + 50, 8);
+
+                // Value and units
+                p.fill(255);
+                p.textSize(10);
+                p.text(Math.round(pressure) + " psi", x + w / 2, y + 80);
+
+                // Normal range indicator
+                p.fill(0, 212, 107);
+                p.textSize(8);
+                p.text("Norm: 1500-3000", x + w / 2, y + 95);
+            }
+
+            function drawGaugeFlow(p, flow, x, y, w) {
+                p.fill(255);
+                p.textSize(11);
+                p.textAlign(p.CENTER);
+                p.text("Pump Flow", x + w / 2, y);
+
+                let status = flow < 12 || flow > 28 ? "fault" : (flow < 18 || flow > 22 ? "warning" : "normal");
+                let color = getColorByStatus(status);
+
+                // Draw gauge background
+                p.fill(50);
+                p.stroke(color);
+                p.strokeWeight(3);
+                p.arc(x + w / 2, y + 50, w - 20, w - 20, p.PI, p.TWO_PI * 2);
+
+                // Draw needle
+                let angle = p.PI + (flow / 30) * p.PI;
+                let needleX = x + w / 2 + Math.cos(angle) * (w / 2 - 15);
+                let needleY = y + 50 + Math.sin(angle) * (w / 2 - 15);
+                p.stroke(color);
+                p.strokeWeight(2);
+                p.line(x + w / 2, y + 50, needleX, needleY);
+
+                // Draw center circle
+                p.fill(color);
+                p.noStroke();
+                p.circle(x + w / 2, y + 50, 8);
+
+                // Value and units
+                p.fill(255);
+                p.textSize(10);
+                p.text(flow.toFixed(1) + " GPM", x + w / 2, y + 80);
+
+                // Normal range indicator
+                p.fill(0, 212, 107);
+                p.textSize(8);
+                p.text("Norm: 18-22", x + w / 2, y + 95);
+            }
+
+            function drawGaugeTemp(p, temp, x, y, w) {
+                p.fill(255);
+                p.textSize(11);
+                p.textAlign(p.CENTER);
+                p.text("Fluid Temp", x + w / 2, y);
+
+                let status = temp < 80 || temp > 180 ? "fault" : (temp < 100 || temp > 140 ? "warning" : "normal");
+                let color = getColorByStatus(status);
+
+                // Draw thermometer
+                p.stroke(color);
+                p.strokeWeight(2);
+                p.fill(50);
+                p.rect(x + w / 2 - 8, y + 25, 16, 50, 3);
+
+                // Fill thermometer based on temp
+                let fillHeight = ((temp - 80) / 120) * 50;
+                p.fill(color);
+                p.noStroke();
+                p.rect(x + w / 2 - 6, y + 25 + 50 - fillHeight, 12, fillHeight, 2);
+
+                // Bulb
+                p.fill(color);
+                p.circle(x + w / 2, y + 80, 10);
+
+                // Value and units
+                p.fill(255);
+                p.textSize(10);
+                p.text(Math.round(temp) + "°F", x + w / 2, y + 100);
+
+                // Normal range indicator
+                p.fill(0, 212, 107);
+                p.textSize(8);
+                p.text("Norm: 100-140", x + w / 2, y + 113);
+            }
+
+            function drawGaugeParticles(p, isoCode, x, y, w) {
+                p.fill(255);
+                p.textSize(11);
+                p.textAlign(p.CENTER);
+                p.text("Particle Count", x + w / 2, y);
+
+                // Determine status based on ISO code
+                let status = "normal";
+                let parts = isoCode.split('/').map(Number);
+                if (parts[0] > 18 || parts[1] > 16 || parts[2] > 13) {
+                    status = parts[0] > 20 || parts[1] > 18 || parts[2] > 15 ? "fault" : "warning";
+                }
+                let color = getColorByStatus(status);
+
+                // Draw box
+                p.stroke(color);
+                p.strokeWeight(2);
+                p.fill(50);
+                p.rect(x + 5, y + 25, w - 10, 50, 3);
+
+                // ISO code display
+                p.fill(color);
+                p.textSize(24);
+                p.textAlign(p.CENTER, p.CENTER);
+                p.text("ISO", x + w / 2, y + 35);
+
+                p.fill(255);
+                p.textSize(16);
+                p.text(isoCode, x + w / 2, y + 60);
+
+                // Health indicator
+                p.fill(255);
+                p.textSize(8);
+                p.text(status.toUpperCase(), x + w / 2, y + 78);
+            }
+
+            function drawGaugeDrift(p, drift, x, y, w) {
+                p.fill(255);
+                p.textSize(11);
+                p.textAlign(p.CENTER);
+                p.text("Cylinder Drift", x + w / 2, y);
+
+                let status = drift > 0.3 ? "fault" : (drift > 0.1 ? "warning" : "normal");
+                let color = getColorByStatus(status);
+
+                // Draw drift bar
+                p.stroke(color);
+                p.strokeWeight(2);
+                p.fill(50);
+                p.rect(x + 10, y + 40, w - 20, 20, 3);
+
+                // Fill based on drift rate
+                let fillWidth = (drift / 1) * (w - 20);
+                p.fill(color);
+                p.noStroke();
+                p.rect(x + 10, y + 40, fillWidth, 20, 2);
+
+                // Value and units
+                p.fill(255);
+                p.textSize(10);
+                p.text(drift.toFixed(2) + " in/min", x + w / 2, y + 75);
+
+                // Normal range indicator
+                p.fill(0, 212, 107);
+                p.textSize(8);
+                p.text("Normal: <0.1", x + w / 2, y + 90);
+            }
+
+            function getComponentColor(scenario, component) {
+                let baseColors = {
+                    normal: [0, 212, 107],
+                    warning: [255, 215, 0],
+                    fault: [255, 71, 87]
+                };
+
+                // Map scenario status to component colors
+                if (component === "pump" && scenario.status === "wear") {
+                    return baseColors.warning;
+                } else if (component === "relief" && scenario.status === "relief") {
+                    return baseColors.fault;
+                } else if (component === "cylinder" && scenario.status === "leak") {
+                    return baseColors.fault;
+                } else if (component === "filter" && scenario.status === "contamination") {
+                    return baseColors.warning;
+                }
+                return baseColors.normal;
+            }
+
+            function getColorByStatus(status) {
+                if (status === "normal") return [0, 212, 107];
+                if (status === "warning") return [255, 215, 0];
+                return [255, 71, 87];
+            }
+        }
+
+        // Initialize p5.js
+        new p5(sketch);
+
+        // UI Event Handlers
+        document.getElementById('scenarioSelect').addEventListener('change', function(e) {
+            currentScenario = parseInt(e.target.value);
+            showingDiagnosis = false;
+            selectedAnswer = null;
+            hideDiagnosisPanel();
+        });
+
+        document.getElementById('quizMode').addEventListener('change', function(e) {
+            quizMode = e.target.checked;
+            showingDiagnosis = false;
+            selectedAnswer = null;
+            hideDiagnosisPanel();
+        });
+
+        document.getElementById('diagnoseBtn').addEventListener('click', function() {
+            if (quizMode && !showingDiagnosis) {
+                showQuizMode();
+            } else {
+                showDiagnosis();
+            }
+        });
+
+        function showQuizMode() {
+            showingDiagnosis = true;
+            let scenario = scenarios[currentScenario];
+            let panel = document.getElementById('diagnosisPanel');
+            let title = document.getElementById('diagnosisTitle');
+            let content = document.getElementById('diagnosisContent');
+
+            title.textContent = "What is causing this fault?";
+
+            let options = generateWrongAnswers(scenario);
+            let html = '<div class="multiple-choice">';
+
+            options.forEach((option, index) => {
+                html += `
+                    <div class="mc-option">
+                        <input type="radio" name="diagnosis" value="${index}" id="opt${index}">
+                        <label for="opt${index}">${option}</label>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            html += '<button class="submit-answer">Submit Answer</button>';
+
+            content.innerHTML = html;
+
+            document.querySelectorAll('input[name="diagnosis"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    selectedAnswer = parseInt(this.value);
+                });
+            });
+
+            document.querySelector('.submit-answer').addEventListener('click', checkAnswer);
+
+            panel.classList.add('active');
+        }
+
+        function generateWrongAnswers(scenario) {
+            let answers = [scenario.diagnosis];
+
+            let wrongAnswers = [
+                "Pump cavitation",
+                "Filter bypass valve open",
+                "Hose rupture",
+                "Actuator overload",
+                "Hydraulic fluid oxidation",
+                "Control valve spool jamming",
+                "Accumulator failure",
+                "Pressure transducer failure"
+            ];
+
+            // Filter out the correct answer if it's in the wrong answers list
+            wrongAnswers = wrongAnswers.filter(a => a !== scenario.diagnosis);
+
+            // Shuffle and pick 3 random wrong answers
+            wrongAnswers.sort(() => 0.5 - Math.random());
+            answers.push(wrongAnswers[0], wrongAnswers[1], wrongAnswers[2]);
+
+            // Shuffle all answers
+            answers.sort(() => 0.5 - Math.random());
+
+            return answers;
+        }
+
+        function checkAnswer() {
+            if (selectedAnswer === null) {
+                alert("Please select an answer");
+                return;
+            }
+
+            let options = document.querySelectorAll('.mc-option');
+            let scenario = scenarios[currentScenario];
+            let isCorrect = options[selectedAnswer].querySelector('label').textContent === scenario.diagnosis;
+
+            if (isCorrect) {
+                score.correct++;
+                options[selectedAnswer].style.borderColor = '#00d46b';
+                options[selectedAnswer].style.backgroundColor = '#1a3a2e';
+            } else {
+                options[selectedAnswer].style.borderColor = '#ff4757';
+                options[selectedAnswer].style.backgroundColor = '#3a1a2e';
+            }
+
+            score.total++;
+            document.getElementById('scoreValue').textContent = score.correct + "/" + score.total;
+
+            // Show correct answer explanation
+            let panel = document.getElementById('diagnosisPanel');
+            let content = document.getElementById('diagnosisContent');
+
+            content.innerHTML += `
+                <div style="margin-top: 20px; padding: 10px; background-color: #1a1a2e; border-left: 3px solid #00d4ff; border-radius: 3px;">
+                    <strong>Correct Answer: ${scenario.diagnosis}</strong>
+                    <p style="margin-top: 10px;">${scenario.explanation}</p>
+                </div>
+            `;
+
+            document.querySelector('.submit-answer').textContent = 'Next Scenario';
+            document.querySelector('.submit-answer').onclick = nextScenario;
+        }
+
+        function showDiagnosis() {
+            showingDiagnosis = true;
+            let scenario = scenarios[currentScenario];
+            let panel = document.getElementById('diagnosisPanel');
+            let title = document.getElementById('diagnosisTitle');
+            let content = document.getElementById('diagnosisContent');
+
+            if (!scenario.diagnosis) {
+                title.textContent = "Analysis: Normal Operation";
+                content.innerHTML = `
+                    <p>All systems are operating within normal parameters. The hydraulic circuit is functioning as designed with no faults detected.</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                        <li>System pressure: 2500 psi (normal)</li>
+                        <li>Pump flow: 20 GPM (normal)</li>
+                        <li>Fluid temperature: 120°F (normal)</li>
+                        <li>Fluid cleanliness: ISO 16/14/11 (acceptable)</li>
+                        <li>Cylinder position: steady (no drift)</li>
+                    </ul>
+                `;
+            } else {
+                title.textContent = "Diagnosis: " + scenario.diagnosis;
+                content.innerHTML = `
+                    <p>${scenario.explanation}</p>
+                    <h4 style="color: #ffd700; margin-top: 15px; font-size: 14px;">Recommended Actions:</h4>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                `;
+
+                if (scenario.status === "wear") {
+                    content.innerHTML += `
+                        <li>Inspect pump for internal wear</li>
+                        <li>Check pump displacement and flow rate</li>
+                        <li>Monitor pressure drop under load</li>
+                        <li>Consider pump rebuild or replacement</li>
+                    `;
+                } else if (scenario.status === "relief") {
+                    content.innerHTML += `
+                        <li>Inspect relief valve spool for stiction</li>
+                        <li>Check for contamination in valve</li>
+                        <li>Clean or replace relief valve</li>
+                        <li>Verify valve setpoint</li>
+                    `;
+                } else if (scenario.status === "leak") {
+                    content.innerHTML += `
+                        <li>Inspect cylinder seals and piston rod</li>
+                        <li>Check for external leakage</li>
+                        <li>Measure load-holding capability</li>
+                        <li>Repair or replace cylinder as needed</li>
+                    `;
+                } else if (scenario.status === "contamination") {
+                    content.innerHTML += `
+                        <li>Perform immediate fluid sampling and analysis</li>
+                        <li>Change hydraulic fluid</li>
+                        <li>Flush and refill system</li>
+                        <li>Inspect and replace filters</li>
+                        <li>Implement condition monitoring program</li>
+                    `;
+                }
+
+                content.innerHTML += '</ul>';
+            }
+
+            panel.classList.add('active');
+        }
+
+        function hideDiagnosisPanel() {
+            document.getElementById('diagnosisPanel').classList.remove('active');
+        }
+
+        function nextScenario() {
+            // Move to next scenario or restart
+            hideDiagnosisPanel();
+            showingDiagnosis = false;
+            selectedAnswer = null;
+
+            let nextIdx = (currentScenario + 1) % scenarios.length;
+            document.getElementById('scenarioSelect').value = nextIdx;
+            currentScenario = nextIdx;
+        }
+
+        // Initialize
+        document.getElementById('scoreValue').textContent = "0/0";
+    </script>
+</body>
+</html>

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pump Monitoring IoT Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; background: #1a1d23; color: #e0e0e0; }
+
+  #dashboard { display: flex; flex-direction: column; height: 100vh; }
+
+  /* Top control bar */
+  #top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(135deg, #1e3a5f, #2a5298);
+    padding: 6px 16px; min-height: 40px; flex-shrink: 0;
+    border-bottom: 2px solid #3a7bd5; flex-wrap: wrap; gap: 6px;
+  }
+  #top-bar .title { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.5px; white-space: nowrap; }
+  #top-bar .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .ctrl-label { font-size: 11px; color: #c8ddf0; }
+  .ctrl-select {
+    background: #1a2a44; color: #c8ddf0; border: 1px solid #3a7bd5; border-radius: 4px;
+    padding: 3px 8px; font-size: 11px; cursor: pointer; outline: none;
+  }
+  .ctrl-select:hover { border-color: #5a9bf5; }
+  .ctrl-btn {
+    background: #2a5298; color: #fff; border: 1px solid #3a7bd5; border-radius: 4px;
+    padding: 4px 12px; font-size: 11px; cursor: pointer; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .ctrl-btn:hover { background: #3a7bd5; }
+  .ctrl-btn:active { background: #1e3a5f; }
+  #time-display { font-size: 11px; color: #c8ddf0; white-space: nowrap; }
+
+  /* Gauge grid area */
+  #gauge-area {
+    display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto auto;
+    gap: 4px; padding: 6px 8px; flex-shrink: 0;
+  }
+  .gauge-panel {
+    background: #22252d; border-radius: 6px; padding: 4px; text-align: center;
+    border: 2px solid transparent; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 0;
+  }
+  .gauge-panel:hover { border-color: #5a9bf5; box-shadow: 0 0 8px rgba(90,155,245,0.3); }
+  .gauge-panel.selected { border-color: #4fc3f7; box-shadow: 0 0 12px rgba(79,195,247,0.4); }
+  .gauge-label { font-size: 10px; font-weight: 600; color: #8ab4f8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1px; }
+  .gauge-canvas-wrap { position: relative; width: 100%; }
+  .gauge-value { font-size: 13px; font-weight: 700; color: #fff; margin-top: 1px; }
+  .gauge-unit { font-size: 9px; color: #888; }
+
+  /* Status bar */
+  #status-bar {
+    padding: 5px 16px; text-align: center; font-size: 13px; font-weight: 700;
+    letter-spacing: 1px; flex-shrink: 0; transition: background 0.3s;
+  }
+  .status-normal { background: #1b5e20; color: #a5d6a7; }
+  .status-warning { background: #e65100; color: #ffe0b2; animation: pulse-warn 1.5s infinite; }
+  .status-alarm { background: #b71c1c; color: #ffcdd2; animation: pulse-alarm 0.8s infinite; }
+  @keyframes pulse-warn { 0%,100%{opacity:1;} 50%{opacity:0.85;} }
+  @keyframes pulse-alarm { 0%,100%{opacity:1;} 50%{opacity:0.65;} }
+
+  /* AI Recommendation */
+  #ai-panel {
+    padding: 5px 16px; background: #1a2a44; border-top: 1px solid #2a3a55;
+    border-bottom: 1px solid #2a3a55; flex-shrink: 0;
+  }
+  #ai-panel .ai-label { font-size: 10px; font-weight: 600; color: #5a9bf5; text-transform: uppercase; letter-spacing: 0.5px; }
+  #ai-panel .ai-text { font-size: 12px; color: #c8ddf0; margin-top: 2px; line-height: 1.4; }
+
+  /* Trend chart */
+  #trend-panel {
+    flex: 1; min-height: 100px; padding: 4px 12px 8px 12px; display: flex; flex-direction: column;
+  }
+  #trend-header { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  #trend-title { font-size: 11px; font-weight: 600; color: #8ab4f8; text-transform: uppercase; letter-spacing: 0.5px; }
+  #trend-canvas-wrap { flex: 1; position: relative; min-height: 0; }
+  #trend-canvas { width: 100%; height: 100%; }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    #gauge-area { grid-template-columns: repeat(2, 1fr); }
+    #top-bar { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div id="dashboard">
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <div class="title">Pump Monitoring IoT Dashboard</div>
+    <div class="controls">
+      <span id="time-display"></span>
+      <span class="ctrl-label">Scenario:</span>
+      <select id="scenario-sel" class="ctrl-select">
+        <option value="normal">Normal Operation</option>
+        <option value="bearing">Bearing Failure Developing</option>
+        <option value="cavitation">Cavitation Active</option>
+        <option value="misalignment">Shaft Misalignment</option>
+        <option value="strainer">Clogged Strainer</option>
+        <option value="impeller">Worn Impeller</option>
+      </select>
+      <button id="advance-btn" class="ctrl-btn">Advance Time &#9654;</button>
+    </div>
+  </div>
+
+  <!-- Gauge Grid -->
+  <div id="gauge-area">
+    <div class="gauge-panel" id="gp-0" data-idx="0">
+      <div class="gauge-label">Vibration</div>
+      <div class="gauge-canvas-wrap"><canvas id="gc-0"></canvas></div>
+      <div class="gauge-value" id="gv-0">0.08</div>
+      <div class="gauge-unit">in/s</div>
+    </div>
+    <div class="gauge-panel" id="gp-1" data-idx="1">
+      <div class="gauge-label">Motor Temp</div>
+      <div class="gauge-canvas-wrap"><canvas id="gc-1"></canvas></div>
+      <div class="gauge-value" id="gv-1">165</div>
+      <div class="gauge-unit">&deg;F</div>
+    </div>
+    <div class="gauge-panel" id="gp-2" data-idx="2">
+      <div class="gauge-label">Suction Pressure</div>
+      <div class="gauge-canvas-wrap"><canvas id="gc-2"></canvas></div>
+      <div class="gauge-value" id="gv-2">18.0</div>
+      <div class="gauge-unit">psi</div>
+    </div>
+    <div class="gauge-panel" id="gp-3" data-idx="3">
+      <div class="gauge-label">Discharge Pressure</div>
+      <div class="gauge-canvas-wrap"><canvas id="gc-3"></canvas></div>
+      <div class="gauge-value" id="gv-3">75.0</div>
+      <div class="gauge-unit">psi</div>
+    </div>
+    <div class="gauge-panel" id="gp-4" data-idx="4">
+      <div class="gauge-label">Flow Rate</div>
+      <div class="gauge-canvas-wrap"><canvas id="gc-4"></canvas></div>
+      <div class="gauge-value" id="gv-4">300</div>
+      <div class="gauge-unit">GPM</div>
+    </div>
+    <div class="gauge-panel" id="gp-5" data-idx="5">
+      <div class="gauge-label">Power</div>
+      <div class="gauge-canvas-wrap"><canvas id="gc-5"></canvas></div>
+      <div class="gauge-value" id="gv-5">12.0</div>
+      <div class="gauge-unit">kW</div>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div id="status-bar" class="status-normal">SYSTEM STATUS: NORMAL</div>
+
+  <!-- AI Recommendation -->
+  <div id="ai-panel">
+    <div class="ai-label">AI Recommendation</div>
+    <div class="ai-text" id="ai-text">All parameters within normal limits. Next scheduled maintenance: 45 days.</div>
+  </div>
+
+  <!-- Trend Chart -->
+  <div id="trend-panel">
+    <div id="trend-header">
+      <div id="trend-title">24-Hour Trend: Vibration (in/s)</div>
+    </div>
+    <div id="trend-canvas-wrap">
+      <canvas id="trend-canvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================================================
+// Pump Monitoring IoT Dashboard - Simulation Engine
+// ==========================================================================
+
+// ---- Gauge configuration ----
+const gaugeConfig = [
+  { name: 'Vibration',           unit: 'in/s', min: 0,  max: 0.5, decimals: 2,
+    zones: [ {lo:0,hi:0.15,color:'#4caf50'}, {lo:0.15,hi:0.3,color:'#ff9800'}, {lo:0.3,hi:0.5,color:'#f44336'} ] },
+  { name: 'Motor Temp',          unit: '\u00B0F', min: 100, max: 250, decimals: 0,
+    zones: [ {lo:100,hi:180,color:'#4caf50'}, {lo:180,hi:220,color:'#ff9800'}, {lo:220,hi:250,color:'#f44336'} ] },
+  { name: 'Suction Pressure',    unit: 'psi', min: -5, max: 30, decimals: 1,
+    zones: [ {lo:-5,hi:5,color:'#f44336'}, {lo:5,hi:10,color:'#ff9800'}, {lo:10,hi:30,color:'#4caf50'} ] },
+  { name: 'Discharge Pressure',  unit: 'psi', min: 0, max: 150, decimals: 0,
+    zones: [ {lo:0,hi:20,color:'#f44336'}, {lo:20,hi:40,color:'#ff9800'}, {lo:40,hi:100,color:'#4caf50'}, {lo:100,hi:120,color:'#ff9800'}, {lo:120,hi:150,color:'#f44336'} ] },
+  { name: 'Flow Rate',           unit: 'GPM', min: 0, max: 500, decimals: 0,
+    zones: [ {lo:0,hi:150,color:'#f44336'}, {lo:150,hi:250,color:'#ff9800'}, {lo:250,hi:350,color:'#4caf50'}, {lo:350,hi:420,color:'#ff9800'}, {lo:420,hi:500,color:'#f44336'} ] },
+  { name: 'Power',               unit: 'kW', min: 0, max: 25, decimals: 1,
+    zones: [ {lo:0,hi:15,color:'#4caf50'}, {lo:15,hi:20,color:'#ff9800'}, {lo:20,hi:25,color:'#f44336'} ] }
+];
+
+// ---- Scenario definitions ----
+// Each scenario defines base values and per-step degradation
+const scenarios = {
+  normal: {
+    label: 'Normal Operation',
+    statusLevel: 'normal',
+    base:   [0.08, 165, 18, 75, 300, 12],
+    perStep:[0,    0,   0,  0,  0,   0 ],
+    ai: 'All parameters within normal limits. Next scheduled maintenance: 45 days.',
+    stepAI: null
+  },
+  bearing: {
+    label: 'Bearing Failure Developing',
+    statusLevel: 'warning',
+    base:   [0.12, 175, 18, 75, 298, 12.5],
+    perStep:[0.025, 4,  0,  0, -2,   0.3 ],
+    ai: 'ALERT: Vibration trend increasing 0.02 in/s per week. Bearing replacement recommended within 14 days. Schedule vibration analysis and order replacement bearings.',
+    stepAI: [
+      'Vibration trending upward. Monitor closely. Review bearing lubrication records.',
+      'ALERT: Vibration exceeding 0.15 in/s threshold. Motor temperature rising. Inspect bearing housing for heat.',
+      'WARNING: Vibration approaching 0.20 in/s. Bearing temperature elevated. Order replacement bearings and schedule downtime.',
+      'CRITICAL: Vibration at 0.22 in/s. Bearing failure imminent within 7 days. Expedite maintenance window.',
+      'CRITICAL: Vibration exceeding 0.25 in/s, motor temp above 190\u00B0F. Bearing replacement required within 48 hours.',
+      'ALARM: Vibration above 0.28 in/s. Motor overheating. Risk of catastrophic bearing failure. Shut down for immediate repair.',
+      'ALARM: Vibration at 0.30+ in/s. Motor temp above 205\u00B0F. IMMEDIATE SHUTDOWN RECOMMENDED to prevent secondary damage.',
+      'EMERGENCY: All thresholds exceeded. Pump must be taken offline immediately to prevent shaft damage.'
+    ]
+  },
+  cavitation: {
+    label: 'Cavitation Active',
+    statusLevel: 'alarm',
+    base:   [0.10, 170, 12, 70, 290, 13],
+    perStep:[0.03, 1.5, -1.2, -2, -15, 0.2],
+    ai: 'WARNING: Low suction pressure causing cavitation. Check suction strainer and verify liquid level in supply tank. Inspect for air leaks in suction piping.',
+    stepAI: [
+      'Suction pressure declining. Flow becoming unstable. Check NPSH available vs. required.',
+      'WARNING: Suction pressure below 10 psi. Cavitation noise likely audible. Vibration increasing from bubble collapse.',
+      'ALERT: Severe cavitation detected. Flow rate dropping significantly. Check suction line for blockage or air entrainment.',
+      'CRITICAL: Suction pressure below 6 psi. Impeller damage occurring. Reduce pump speed or increase supply head immediately.',
+      'ALARM: Suction pressure critically low. Flow rate erratic. Pump is vapor-locking intermittently. Shut down and investigate suction source.',
+      'EMERGENCY: Suction pressure near zero. Pump running dry risk. IMMEDIATE SHUTDOWN required to prevent seal and impeller damage.',
+      'EMERGENCY: Complete loss of suction. Pump must be stopped immediately. Verify liquid supply, check foot valve and strainer.',
+      'EMERGENCY: Extended dry-run condition. Mechanical seal damage likely. Full inspection required before restart.'
+    ]
+  },
+  misalignment: {
+    label: 'Shaft Misalignment',
+    statusLevel: 'warning',
+    base:   [0.10, 170, 18, 74, 295, 13],
+    perStep:[0.018, 2.5, 0, -0.5, -3, 0.5],
+    ai: 'NOTICE: Vibration signature indicates possible shaft misalignment. 2x running speed component elevated. Schedule laser alignment check.',
+    stepAI: [
+      'Vibration slightly elevated at 2x running speed. Monitor coupling condition.',
+      'Vibration increasing with dominant 2x component. Coupling wear likely. Check coupling alignment.',
+      'WARNING: Vibration at 0.14 in/s. Power consumption increasing from friction. Laser alignment recommended.',
+      'ALERT: Misalignment worsening. Motor temperature rising due to increased bearing load. Schedule alignment correction.',
+      'ALERT: Vibration approaching 0.18 in/s. Coupling flexible element may be degraded. Plan shutdown for alignment and coupling replacement.',
+      'WARNING: Vibration at 0.20 in/s. Elevated power draw indicates significant mechanical losses. Maintenance overdue.',
+      'CRITICAL: Severe misalignment causing accelerated bearing and seal wear. Schedule immediate corrective maintenance.',
+      'CRITICAL: Risk of coupling failure. Shut down at next opportunity for full alignment and coupling replacement.'
+    ]
+  },
+  strainer: {
+    label: 'Clogged Strainer',
+    statusLevel: 'warning',
+    base:   [0.09, 168, 15, 72, 280, 12.8],
+    perStep:[0.005, 0.8, -1.5, -1.5, -18, 0.1],
+    ai: 'NOTICE: Suction pressure declining gradually. Strainer differential pressure increasing. Schedule strainer cleaning or basket replacement.',
+    stepAI: [
+      'Suction pressure trending down. Flow rate decreasing slightly. Monitor strainer differential.',
+      'WARNING: Suction pressure below 12 psi. Flow reduced by 10%. Strainer basket likely 50% blocked.',
+      'ALERT: Suction pressure dropping. Flow rate significantly reduced. Clean or replace strainer basket within 48 hours.',
+      'ALERT: Suction approaching cavitation threshold. Flow rate down 25%. Strainer critically clogged. Urgent cleaning required.',
+      'CRITICAL: Suction pressure below 8 psi. Cavitation beginning. Shut down to clean strainer before impeller damage occurs.',
+      'ALARM: Suction pressure critically low. Pump starving for fluid. IMMEDIATE strainer cleaning required.',
+      'EMERGENCY: Near-total strainer blockage. Pump at risk of dry running. Shut down immediately.',
+      'EMERGENCY: Complete strainer blockage. Pump must be stopped. Replace strainer basket and inspect impeller for cavitation damage.'
+    ]
+  },
+  impeller: {
+    label: 'Worn Impeller',
+    statusLevel: 'warning',
+    base:   [0.09, 168, 17, 70, 275, 13.5],
+    perStep:[0.005, 0.5, 0, -3, -20, 0.6],
+    ai: 'NOTICE: Pump efficiency declining. Flow rate below expected for current head. Impeller wear or internal recirculation suspected. Plan inspection at next outage.',
+    stepAI: [
+      'Flow rate trending below design point. Discharge pressure declining. Monitor pump efficiency.',
+      'WARNING: Pump delivering 15% less flow at same speed. Efficiency dropping. Wear ring clearance may be excessive.',
+      'ALERT: Significant performance degradation. Power increasing as pump moves off best efficiency point. Plan impeller inspection.',
+      'ALERT: Pump operating at 65% of rated capacity. Internal recirculation increasing power demand. Replace impeller and wear rings.',
+      'CRITICAL: Pump cannot maintain required flow. Discharge pressure well below design. Impeller replacement required.',
+      'CRITICAL: Severe performance loss. Power demand 30% above normal for reduced output. System demand not being met.',
+      'ALARM: Pump functionally degraded. Cannot meet process requirements. Backup pump recommended while repair is scheduled.',
+      'ALARM: Pump output critically low. Motor overloaded. Take offline for complete overhaul: impeller, wear rings, and shaft sleeve.'
+    ]
+  }
+};
+
+// ---- State ----
+let currentScenario = 'normal';
+let timeStep = 0;
+let selectedGauge = 0;
+let gaugeValues = [0.08, 165, 18, 75, 300, 12];
+
+// Simulated time
+let simHour = 8; // start at 8 AM
+
+// Trend data: 24 hours of history at 1-hour resolution = 24 points per gauge, plus current
+const TREND_POINTS = 24;
+let trendData = [];
+
+// ---- Initialize ----
+function initState() {
+  let sc = scenarios[currentScenario];
+  timeStep = 0;
+  gaugeValues = sc.base.slice();
+  simHour = 8;
+  initTrends();
+}
+
+function initTrends() {
+  trendData = [];
+  for (let g = 0; g < 6; g++) {
+    trendData[g] = [];
+    let base = gaugeValues[g];
+    for (let t = 0; t < TREND_POINTS; t++) {
+      let noise = (Math.random() - 0.5) * getNoiseAmp(g);
+      trendData[g].push(base + noise);
+    }
+  }
+}
+
+function getNoiseAmp(g) {
+  return [0.02, 3, 1.0, 2, 10, 0.5][g];
+}
+
+// ---- Advance simulation ----
+function advanceTime() {
+  let sc = scenarios[currentScenario];
+  timeStep++;
+  simHour = (8 + timeStep) % 24;
+
+  for (let g = 0; g < 6; g++) {
+    gaugeValues[g] = sc.base[g] + sc.perStep[g] * timeStep + (Math.random() - 0.5) * getNoiseAmp(g);
+    // Clamp to gauge range
+    gaugeValues[g] = Math.max(gaugeConfig[g].min, Math.min(gaugeConfig[g].max, gaugeValues[g]));
+    // Push to trend
+    trendData[g].push(gaugeValues[g]);
+    if (trendData[g].length > TREND_POINTS * 3) {
+      trendData[g].shift();
+    }
+  }
+
+  updateAll();
+}
+
+// ---- Determine system status ----
+function getSystemStatus() {
+  let maxLevel = 0; // 0=normal, 1=warning, 2=alarm
+  for (let g = 0; g < 6; g++) {
+    let v = gaugeValues[g];
+    let cfg = gaugeConfig[g];
+    for (let z of cfg.zones) {
+      if (v >= z.lo && v < z.hi) {
+        if (z.color === '#ff9800') maxLevel = Math.max(maxLevel, 1);
+        if (z.color === '#f44336') maxLevel = Math.max(maxLevel, 2);
+      }
+    }
+    // Check edges
+    if (v >= cfg.zones[cfg.zones.length - 1].hi) {
+      maxLevel = 2;
+    }
+  }
+  return maxLevel;
+}
+
+// ---- Get AI text ----
+function getAIText() {
+  let sc = scenarios[currentScenario];
+  if (timeStep === 0 || !sc.stepAI) return sc.ai;
+  let idx = Math.min(timeStep - 1, sc.stepAI.length - 1);
+  return sc.stepAI[idx];
+}
+
+// ---- Drawing: Gauges on canvas ----
+function drawGauge(canvasId, gaugeIdx) {
+  let canvas = document.getElementById(canvasId);
+  let wrap = canvas.parentElement;
+  let size = Math.min(wrap.clientWidth, 120);
+  let dpr = window.devicePixelRatio || 1;
+  canvas.width = size * dpr;
+  canvas.height = (size * 0.65) * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = (size * 0.65) + 'px';
+
+  let ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, size, size * 0.65);
+
+  let cfg = gaugeConfig[gaugeIdx];
+  let val = gaugeValues[gaugeIdx];
+  let cx = size / 2;
+  let cy = size * 0.55;
+  let r = size * 0.40;
+  let arcWidth = size * 0.08;
+
+  // Arc angles: from 210 deg to 330 deg (pi-based)
+  let startAngle = Math.PI * 1.167; // 210 degrees
+  let endAngle = Math.PI * 1.833;   // 330 degrees
+  // We want the arc to go from ~7 o'clock to ~5 o'clock (bottom-open semicircle)
+  // Recalculate: 210 deg = 7/6 pi, 330 deg = 11/6 pi
+  startAngle = (7/6) * Math.PI;
+  endAngle = (11/6) * Math.PI;
+  let totalSweep = endAngle - startAngle; // 4/6 pi = 2/3 pi... that's only 120 deg
+  // Better: use 200 deg to 340 deg for a wider arc
+  startAngle = (200 / 180) * Math.PI;
+  endAngle = (340 / 180) * Math.PI;
+  totalSweep = endAngle - startAngle; // 140 deg
+
+  // Even better for a gauge: 225 to 315 (sweep of 270 degrees going clockwise through top)
+  // In canvas: 0 = 3 o'clock, angles go clockwise
+  // We want needle to sweep from 7:30 position to 4:30 position
+  // That is from 225 deg (5/4 pi) going clockwise through 360/0 to 315 deg (-45 deg or 7/4 pi)
+  // But canvas angles: 225 = lower-left, going CW through bottom, right, top to 315
+  // Actually we want the open part at the bottom
+  // Standard gauge: start at ~135 deg (upper-left), sweep CW to ~405 deg (=45 deg, upper-right)
+  // Canvas: 135 deg = 3/4 pi, 405 deg = 9/4 pi
+  startAngle = (3/4) * Math.PI;  // 135 degrees - upper left
+  endAngle = (9/4) * Math.PI;    // 405 degrees (=45 degrees) - upper right
+  totalSweep = endAngle - startAngle; // 270 degrees
+
+  // Draw zone arcs
+  for (let z of cfg.zones) {
+    let zStart = startAngle + ((z.lo - cfg.min) / (cfg.max - cfg.min)) * totalSweep;
+    let zEnd = startAngle + ((z.hi - cfg.min) / (cfg.max - cfg.min)) * totalSweep;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, zStart, zEnd);
+    ctx.lineWidth = arcWidth;
+    ctx.strokeStyle = z.color;
+    ctx.globalAlpha = 0.35;
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+  }
+
+  // Outer arc border
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + arcWidth / 2, startAngle, endAngle);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#555';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r - arcWidth / 2, startAngle, endAngle);
+  ctx.stroke();
+
+  // Tick marks
+  let numTicks = 5;
+  for (let t = 0; t <= numTicks; t++) {
+    let frac = t / numTicks;
+    let angle = startAngle + frac * totalSweep;
+    let tickVal = cfg.min + frac * (cfg.max - cfg.min);
+    let outerR = r + arcWidth / 2 + 2;
+    let innerR = r - arcWidth / 2 - 2;
+    let tx1 = cx + Math.cos(angle) * outerR;
+    let ty1 = cy + Math.sin(angle) * outerR;
+    let tx2 = cx + Math.cos(angle) * (outerR + 4);
+    let ty2 = cy + Math.sin(angle) * (outerR + 4);
+    ctx.beginPath();
+    ctx.moveTo(tx1, ty1);
+    ctx.lineTo(tx2, ty2);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#888';
+    ctx.stroke();
+
+    // Tick label
+    let labelR = outerR + 10;
+    let lx = cx + Math.cos(angle) * labelR;
+    let ly = cy + Math.sin(angle) * labelR;
+    ctx.fillStyle = '#888';
+    ctx.font = (size < 90 ? '7' : '8') + 'px Segoe UI, Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    let labelText = cfg.decimals === 0 ? Math.round(tickVal).toString() : tickVal.toFixed(cfg.decimals > 1 ? 1 : cfg.decimals);
+    ctx.fillText(labelText, lx, ly);
+  }
+
+  // Needle
+  let valFrac = (val - cfg.min) / (cfg.max - cfg.min);
+  valFrac = Math.max(0, Math.min(1, valFrac));
+  let needleAngle = startAngle + valFrac * totalSweep;
+  let needleLen = r - arcWidth / 2 - 6;
+  let nx = cx + Math.cos(needleAngle) * needleLen;
+  let ny = cy + Math.sin(needleAngle) * needleLen;
+
+  // Determine needle color based on current zone
+  let needleColor = '#fff';
+  for (let z of cfg.zones) {
+    if (val >= z.lo && val <= z.hi) {
+      needleColor = z.color;
+      break;
+    }
+  }
+  if (val > cfg.zones[cfg.zones.length - 1].hi) needleColor = cfg.zones[cfg.zones.length - 1].color;
+  if (val < cfg.zones[0].lo) needleColor = cfg.zones[0].color;
+
+  // Draw needle
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(nx, ny);
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = needleColor;
+  ctx.stroke();
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#aaa';
+  ctx.fill();
+}
+
+// ---- Drawing: Trend chart ----
+function drawTrend() {
+  let canvas = document.getElementById('trend-canvas');
+  let wrap = document.getElementById('trend-canvas-wrap');
+  let cw = wrap.clientWidth;
+  let ch = wrap.clientHeight;
+  if (cw < 10 || ch < 10) return;
+  let dpr = window.devicePixelRatio || 1;
+  canvas.width = cw * dpr;
+  canvas.height = ch * dpr;
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+
+  let ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cw, ch);
+
+  let g = selectedGauge;
+  let cfg = gaugeConfig[g];
+  let data = trendData[g];
+  if (!data || data.length === 0) return;
+
+  let padL = 48, padR = 10, padT = 8, padB = 22;
+  let gw = cw - padL - padR;
+  let gh = ch - padT - padB;
+
+  // Y range
+  let validData = data.filter(v => v !== null && !isNaN(v));
+  if (validData.length === 0) return;
+  let minVal = Math.min(...validData, cfg.min);
+  let maxVal = Math.max(...validData, cfg.max);
+  let range = maxVal - minVal;
+  if (range < 1) range = 1;
+  minVal -= range * 0.05;
+  maxVal += range * 0.05;
+  range = maxVal - minVal;
+
+  function xPos(i) { return padL + (i / Math.max(1, data.length - 1)) * gw; }
+  function yPos(v) { return padT + gh - ((v - minVal) / range) * gh; }
+
+  // Background
+  ctx.fillStyle = '#1a1d23';
+  ctx.fillRect(0, 0, cw, ch);
+
+  // Draw zone bands
+  for (let z of cfg.zones) {
+    let y1 = yPos(Math.min(z.hi, maxVal));
+    let y2 = yPos(Math.max(z.lo, minVal));
+    ctx.fillStyle = z.color === '#4caf50' ? 'rgba(76,175,80,0.06)' :
+                    z.color === '#ff9800' ? 'rgba(255,152,0,0.06)' :
+                    'rgba(244,67,54,0.06)';
+    ctx.fillRect(padL, y1, gw, y2 - y1);
+  }
+
+  // Grid lines
+  ctx.strokeStyle = '#2a2d35';
+  ctx.lineWidth = 1;
+  let yTicks = 5;
+  for (let t = 0; t <= yTicks; t++) {
+    let v = minVal + (t / yTicks) * range;
+    let y = yPos(v);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(cw - padR, y); ctx.stroke();
+    ctx.fillStyle = '#888';
+    ctx.font = '9px Segoe UI, Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(cfg.decimals), padL - 4, y + 3);
+  }
+
+  // X axis time labels
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#888';
+  ctx.font = '9px Segoe UI, Arial';
+  let numXLabels = Math.min(data.length, 8);
+  let step = Math.max(1, Math.floor(data.length / numXLabels));
+  for (let i = 0; i < data.length; i += step) {
+    let x = xPos(i);
+    let hour = (simHour - (data.length - 1 - i) + 240) % 24;
+    let ampm = hour >= 12 ? 'PM' : 'AM';
+    let h12 = hour % 12;
+    if (h12 === 0) h12 = 12;
+    ctx.fillText(h12 + ampm, x, ch - 5);
+    ctx.strokeStyle = '#2a2d35';
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT + gh); ctx.stroke();
+  }
+
+  // Zone threshold lines
+  for (let z of cfg.zones) {
+    // Draw boundary between zones as dashed lines
+    if (z.lo > minVal && z.lo < maxVal) {
+      let yLine = yPos(z.lo);
+      ctx.strokeStyle = z.color;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(padL, yLine); ctx.lineTo(cw - padR, yLine); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1.0;
+    }
+  }
+
+  // Data line
+  ctx.strokeStyle = '#4fc3f7';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  let started = false;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] === null || isNaN(data[i])) { started = false; continue; }
+    let x = xPos(i);
+    let y = yPos(data[i]);
+    if (!started) { ctx.moveTo(x, y); started = true; }
+    else { ctx.lineTo(x, y); }
+  }
+  ctx.stroke();
+
+  // Current value dot
+  let lastVal = data[data.length - 1];
+  if (lastVal !== null && !isNaN(lastVal)) {
+    let lx = xPos(data.length - 1);
+    let ly = yPos(lastVal);
+
+    // Determine dot color
+    let dotColor = '#4fc3f7';
+    for (let z of cfg.zones) {
+      if (lastVal >= z.lo && lastVal <= z.hi) { dotColor = z.color; break; }
+    }
+
+    ctx.fillStyle = dotColor;
+    ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px Segoe UI, Arial';
+    ctx.textAlign = 'right';
+    let dispVal = cfg.decimals === 0 ? Math.round(lastVal) : lastVal.toFixed(cfg.decimals);
+    ctx.fillText(dispVal + ' ' + cfg.unit, lx - 8, ly - 6);
+  }
+
+  // NOW marker
+  let nowX = xPos(data.length - 1);
+  ctx.strokeStyle = '#fff';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(nowX, padT); ctx.lineTo(nowX, padT + gh); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#fff';
+  ctx.font = '8px Segoe UI, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('NOW', nowX, padT + gh + 14);
+
+  // Unit label
+  ctx.fillStyle = '#666';
+  ctx.font = '9px Segoe UI, Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText(cfg.unit, padL + 2, padT + 10);
+}
+
+// ---- Update display ----
+function updateAll() {
+  // Time display
+  let h12 = simHour % 12;
+  if (h12 === 0) h12 = 12;
+  let ampm = simHour >= 12 ? 'PM' : 'AM';
+  document.getElementById('time-display').textContent = 'Day ' + (Math.floor(timeStep / 24) + 1) + ', ' + h12 + ':00 ' + ampm + ' | Step ' + timeStep;
+
+  // Update gauge values display
+  for (let g = 0; g < 6; g++) {
+    let cfg = gaugeConfig[g];
+    let v = gaugeValues[g];
+    let dispVal = cfg.decimals === 0 ? Math.round(v).toString() : v.toFixed(cfg.decimals);
+    document.getElementById('gv-' + g).textContent = dispVal;
+
+    // Color the value based on zone
+    let color = '#fff';
+    for (let z of cfg.zones) {
+      if (v >= z.lo && v <= z.hi) { color = z.color; break; }
+    }
+    if (v > cfg.zones[cfg.zones.length - 1].hi) color = cfg.zones[cfg.zones.length - 1].color;
+    document.getElementById('gv-' + g).style.color = color;
+
+    // Highlight selected
+    let panel = document.getElementById('gp-' + g);
+    panel.classList.toggle('selected', g === selectedGauge);
+
+    // Draw gauge
+    drawGauge('gc-' + g, g);
+  }
+
+  // Status bar
+  let status = getSystemStatus();
+  let statusBar = document.getElementById('status-bar');
+  if (status === 0) {
+    statusBar.className = 'status-normal';
+    statusBar.textContent = 'SYSTEM STATUS: NORMAL';
+  } else if (status === 1) {
+    statusBar.className = 'status-warning';
+    statusBar.textContent = 'SYSTEM STATUS: WARNING';
+  } else {
+    statusBar.className = 'status-alarm';
+    statusBar.textContent = 'SYSTEM STATUS: ALARM';
+  }
+
+  // AI text
+  document.getElementById('ai-text').textContent = getAIText();
+
+  // Trend title
+  document.getElementById('trend-title').textContent = '24-Hour Trend: ' + gaugeConfig[selectedGauge].name + ' (' + gaugeConfig[selectedGauge].unit + ')';
+
+  // Draw trend
+  drawTrend();
+}
+
+// ---- Event handlers ----
+function setupEvents() {
+  document.getElementById('scenario-sel').addEventListener('change', function() {
+    currentScenario = this.value;
+    initState();
+    updateAll();
+  });
+
+  document.getElementById('advance-btn').addEventListener('click', function() {
+    advanceTime();
+  });
+
+  // Gauge panel clicks
+  for (let g = 0; g < 6; g++) {
+    document.getElementById('gp-' + g).addEventListener('click', function() {
+      selectedGauge = parseInt(this.dataset.idx);
+      updateAll();
+    });
+  }
+
+  window.addEventListener('resize', function() {
+    updateAll();
+  });
+
+  // Keyboard shortcut: spacebar advances time
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && e.target.tagName !== 'SELECT') {
+      e.preventDefault();
+      advanceTime();
+    }
+  });
+}
+
+// ---- Auto-tick: gentle noise even without advancing ----
+let autoTickCounter = 0;
+function autoTick() {
+  autoTickCounter++;
+  // Add small noise to readings every second for liveliness
+  let sc = scenarios[currentScenario];
+  for (let g = 0; g < 6; g++) {
+    let baseVal = sc.base[g] + sc.perStep[g] * timeStep;
+    let noise = (Math.random() - 0.5) * getNoiseAmp(g);
+    gaugeValues[g] = Math.max(gaugeConfig[g].min, Math.min(gaugeConfig[g].max, baseVal + noise));
+  }
+
+  // Update gauge visuals (but not trend)
+  for (let g = 0; g < 6; g++) {
+    let cfg = gaugeConfig[g];
+    let v = gaugeValues[g];
+    let dispVal = cfg.decimals === 0 ? Math.round(v).toString() : v.toFixed(cfg.decimals);
+    document.getElementById('gv-' + g).textContent = dispVal;
+
+    let color = '#fff';
+    for (let z of cfg.zones) {
+      if (v >= z.lo && v <= z.hi) { color = z.color; break; }
+    }
+    if (v > cfg.zones[cfg.zones.length - 1].hi) color = cfg.zones[cfg.zones.length - 1].color;
+    document.getElementById('gv-' + g).style.color = color;
+
+    drawGauge('gc-' + g, g);
+  }
+
+  // Update status bar with live values
+  let status = getSystemStatus();
+  let statusBar = document.getElementById('status-bar');
+  if (status === 0) {
+    statusBar.className = 'status-normal';
+    statusBar.textContent = 'SYSTEM STATUS: NORMAL';
+  } else if (status === 1) {
+    statusBar.className = 'status-warning';
+    statusBar.textContent = 'SYSTEM STATUS: WARNING';
+  } else {
+    statusBar.className = 'status-alarm';
+    statusBar.textContent = 'SYSTEM STATUS: ALARM';
+  }
+}
+
+// ---- Initialize and start ----
+initState();
+setupEvents();
+updateAll();
+
+setInterval(autoTick, 1000);
+
+</script>
+</body>
+</html>

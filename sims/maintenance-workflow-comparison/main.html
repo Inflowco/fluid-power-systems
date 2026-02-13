@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maintenance Workflow Comparison</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    text-align: center;
+    padding: 18px 12px 4px;
+    font-size: 1.3rem;
+    color: #2c3e50;
+    letter-spacing: -0.3px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    margin-bottom: 10px;
+  }
+
+  #canvas-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 8px 16px;
+  }
+
+  svg.flowchart {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* tooltip */
+  #tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    max-width: 270px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+  }
+  #tooltip.visible { opacity: 1; }
+
+  /* callout panel for comparison arrow clicks */
+  #callout-panel {
+    position: absolute;
+    background: #eafaf1;
+    border: 2px solid #27ae60;
+    border-radius: 8px;
+    padding: 12px 16px 12px 14px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    max-width: 320px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.14);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 110;
+  }
+  #callout-panel.visible { opacity: 1; pointer-events: auto; }
+  #callout-panel .close-btn {
+    position: absolute; top: 4px; right: 8px;
+    background: none; border: none; font-size: 1.05rem;
+    cursor: pointer; color: #555; line-height: 1;
+  }
+  #callout-panel .callout-title {
+    font-weight: 700; color: #1e8449; margin-bottom: 4px; font-size: 0.84rem;
+  }
+
+  .node-group { cursor: default; }
+  .comp-arrow { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>Traditional vs. IoT-Enabled Maintenance Workflow</h1>
+<p class="subtitle">Hover over steps for details &mdash; Click green arrows for benefit descriptions</p>
+
+<div id="canvas-wrap">
+  <svg class="flowchart" id="svg-main" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="tooltip"></div>
+  <div id="callout-panel">
+    <button class="close-btn" aria-label="Close">&times;</button>
+    <div class="callout-title"></div>
+    <div class="callout-body"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ===================== DATA ===================== */
+  var tradSteps = [
+    { id:"t1", type:"start",    label:"Calendar trigger\n(e.g., every Tuesday)",    hover:"Maintenance is scheduled by date regardless of equipment condition" },
+    { id:"t2", type:"process",  label:"Technician walks\nto equipment",             hover:"Physical presence required at each check point" },
+    { id:"t3", type:"process",  label:"Manual readings\n(gauges, clipboard)",        hover:"Temperature, pressure, vibration readings recorded by hand" },
+    { id:"t4", type:"decision", label:"Readings out\nof range?",                    hover:"Technician compares readings to known limits" },
+    { id:"t5a",type:"process",  label:"Submit work order\nfor repair",               hover:"Paper or CMMS work order created",       branch:"yes" },
+    { id:"t5b",type:"process",  label:"Log \u201COK\u201D, move to\nnext equipment", hover:"95% of checks typically find no issues",  branch:"no" },
+    { id:"t6", type:"end",      label:"Repeat next\nscheduled period",               hover:"" }
+  ];
+
+  var iotSteps = [
+    { id:"i1", type:"start",    label:"IoT sensors stream\ndata continuously",      hover:"Wireless sensors report temperature, vibration, pressure every 1\u20135 minutes" },
+    { id:"i2", type:"process",  label:"Data transmitted to\ncloud / edge platform",  hover:"Data stored and processed automatically 24/7" },
+    { id:"i3", type:"process",  label:"AI / analytics engine\ncompares to baselines", hover:"Software detects trends, anomalies, and threshold violations" },
+    { id:"i4", type:"decision", label:"Anomaly or trend\ndetected?",                hover:"System identifies changes before they become failures" },
+    { id:"i5a",type:"process",  label:"Automated alert sent\nto technician",         hover:"Push notification to phone/tablet with specific issue and location", branch:"yes" },
+    { id:"i5b",type:"process",  label:"Data logged,\ntrends updated",               hover:"Historical record builds for long-term analysis",                    branch:"no" },
+    { id:"i6", type:"end",      label:"Continuous monitoring\ncontinues",             hover:"" }
+  ];
+
+  var comparisons = [
+    { fromId:"t2", toId:"i1", title:"Eliminates routine walk-around inspections",
+      detail:"IoT sensors replace manual walk-around inspections, freeing technicians to focus on actual repairs and improvements rather than routine data collection." },
+    { fromId:"t4", toId:"i3", title:"Catches issues between scheduled checks",
+      detail:"Continuous AI analytics detect anomalies 24/7, catching problems that would otherwise go unnoticed until the next scheduled maintenance window\u2014potentially days or weeks later." },
+    { fromId:"t5b",toId:"i5b", title:"Builds historical data automatically",
+      detail:"Instead of relying on handwritten logs that may be incomplete or inconsistent, IoT systems automatically build comprehensive historical datasets enabling long-term trend analysis and predictive modeling." }
+  ];
+
+  /* ===================== SVG HELPERS ===================== */
+  var NS = "http://www.w3.org/2000/svg";
+
+  function svgEl(tag, attrs) {
+    var e = document.createElementNS(NS, tag);
+    if (attrs) { for (var k in attrs) { if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]); } }
+    return e;
+  }
+
+  function addText(parent, text, x, y, size, fill, anchor, weight) {
+    var t = svgEl("text", {
+      x: x, y: y,
+      "text-anchor": anchor || "middle",
+      "dominant-baseline": "central",
+      "font-size": size,
+      "font-weight": weight || "normal",
+      fill: fill || "#333",
+      "font-family": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+    });
+    t.textContent = text;
+    parent.appendChild(t);
+    return t;
+  }
+
+  function addMultiline(parent, label, cx, cy, size, fill) {
+    var lines = label.split("\n");
+    var lh = size * 1.3;
+    var startY = cy - ((lines.length - 1) * lh) / 2;
+    for (var i = 0; i < lines.length; i++) {
+      addText(parent, lines[i], cx, startY + i * lh, size, fill);
+    }
+  }
+
+  /* Ensure a <defs> element exists */
+  function ensureDefs(svg) {
+    var d = svg.querySelector("defs");
+    if (!d) { d = svgEl("defs"); svg.insertBefore(d, svg.firstChild); }
+    return d;
+  }
+
+  /* Create or reuse an arrowhead marker */
+  function ensureMarker(svg, id, color) {
+    if (svg.querySelector("#" + id)) return;
+    var defs = ensureDefs(svg);
+    var m = svgEl("marker", { id: id, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" });
+    m.appendChild(svgEl("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: color }));
+    defs.appendChild(m);
+  }
+
+  function drawArrow(svg, x1, y1, x2, y2, color, dashed) {
+    var mid = dashed ? "d" : "s";
+    var markerId = "mh-" + color.replace("#", "") + mid;
+    ensureMarker(svg, markerId, color);
+    var attrs = { x1: x1, y1: y1, x2: x2, y2: y2, stroke: color, "stroke-width": 2, "marker-end": "url(#" + markerId + ")" };
+    if (dashed) attrs["stroke-dasharray"] = "7,4";
+    var ln = svgEl("line", attrs);
+    svg.appendChild(ln);
+    return ln;
+  }
+
+  /* Polyline arrow (with bends) */
+  function drawPolyArrow(svg, points, color) {
+    var markerId = "mh-" + color.replace("#", "") + "s";
+    ensureMarker(svg, markerId, color);
+    var pl = svgEl("polyline", {
+      points: points.map(function(p){ return p[0]+","+p[1]; }).join(" "),
+      fill: "none", stroke: color, "stroke-width": 2,
+      "marker-end": "url(#" + markerId + ")"
+    });
+    svg.appendChild(pl);
+  }
+
+  /* ===================== TOOLTIP ===================== */
+  var tooltipEl = document.getElementById("tooltip");
+
+  function showTooltip(e, text) {
+    tooltipEl.textContent = text;
+    tooltipEl.classList.add("visible");
+    positionTooltip(e);
+  }
+  function positionTooltip(e) {
+    var wr = document.getElementById("canvas-wrap").getBoundingClientRect();
+    var x = e.clientX - wr.left + 14;
+    var y = e.clientY - wr.top + 14;
+    if (x + 280 > wr.width) x = x - 295;
+    if (y + 60 > wr.height) y = y - 60;
+    tooltipEl.style.left = x + "px";
+    tooltipEl.style.top  = y + "px";
+  }
+  function hideTooltip() { tooltipEl.classList.remove("visible"); }
+
+  /* ===================== CALLOUT PANEL ===================== */
+  var calloutEl = document.getElementById("callout-panel");
+  calloutEl.querySelector(".close-btn").addEventListener("click", function(ev) {
+    ev.stopPropagation();
+    calloutEl.classList.remove("visible");
+  });
+
+  function showCallout(e, title, body) {
+    calloutEl.querySelector(".callout-title").textContent = title;
+    calloutEl.querySelector(".callout-body").textContent = body;
+    calloutEl.classList.add("visible");
+    var wr = document.getElementById("canvas-wrap").getBoundingClientRect();
+    var x = e.clientX - wr.left + 12;
+    var y = e.clientY - wr.top - 30;
+    if (x + 330 > wr.width) x = wr.width - 340;
+    if (x < 8) x = 8;
+    if (y < 8) y = 8;
+    calloutEl.style.left = x + "px";
+    calloutEl.style.top  = y + "px";
+  }
+
+  /* close on outside click */
+  document.addEventListener("click", function() { calloutEl.classList.remove("visible"); });
+
+  /* ===================== LAYOUT ===================== */
+  function computeLayout() {
+    var wide = window.innerWidth >= 768;
+    var svgW = Math.min(1100, window.innerWidth - 20);
+    var nodeW = wide ? 180 : Math.min(155, svgW * 0.38);
+    var nodeH = 56;
+    var diaSize = wide ? 100 : 80; /* diamond half-width/half-height */
+    var vGap = wide ? 30 : 24;
+    var branchW = wide ? 150 : Math.min(130, svgW * 0.32); /* width of branch boxes */
+    var branchGap = wide ? 24 : 14; /* horizontal gap between the two branch boxes */
+
+    var colW = Math.max(nodeW, branchW * 2 + branchGap) + 20;
+    var gap = wide ? 100 : 30; /* gap between columns */
+    var totalW = colW * 2 + gap;
+    if (totalW > svgW) { /* scale down */
+      var scale = svgW / totalW;
+      nodeW *= scale; branchW *= scale; branchGap *= scale; colW *= scale; gap *= scale; diaSize *= scale; nodeH *= scale; vGap *= scale;
+    }
+
+    var leftCx  = svgW / 2 - gap / 2 - colW / 2;
+    var rightCx = svgW / 2 + gap / 2 + colW / 2;
+
+    return {
+      wide: wide, svgW: svgW,
+      nodeW: nodeW, nodeH: nodeH,
+      diaSize: diaSize, vGap: vGap,
+      branchW: branchW, branchGap: branchGap,
+      colW: colW, gap: gap,
+      leftCx: leftCx, rightCx: rightCx
+    };
+  }
+
+  /* Position all steps in one column.
+     Returns { positions: { id: {cx,cy,w,h} }, totalH } */
+  function layoutColumn(steps, cx, C) {
+    var pos = {};
+    var y = 50;
+    for (var i = 0; i < steps.length; i++) {
+      var s = steps[i];
+      if (s.branch) continue; /* handled with decision */
+
+      if (s.type === "decision") {
+        /* diamond */
+        var dHalf = C.diaSize / 2;
+        pos[s.id] = { cx: cx, cy: y + dHalf, w: C.diaSize, h: C.diaSize, type: "decision" };
+        y += C.diaSize + C.vGap;
+
+        /* find yes/no branches */
+        var yesStep = steps[i + 1];
+        var noStep  = steps[i + 2];
+        var bw = C.branchW;
+        var bh = C.nodeH;
+        var halfSpan = (bw + C.branchGap / 2);
+        pos[yesStep.id] = { cx: cx - halfSpan + bw / 2, cy: y + bh / 2, w: bw, h: bh, type: "process" };
+        pos[noStep.id]  = { cx: cx + halfSpan - bw / 2, cy: y + bh / 2, w: bw, h: bh, type: "process" };
+        y += bh + C.vGap;
+        continue;
+      }
+
+      var h = C.nodeH;
+      var w = C.nodeW;
+      pos[s.id] = { cx: cx, cy: y + h / 2, w: w, h: h, type: s.type };
+      y += h + C.vGap;
+    }
+    return { positions: pos, totalH: y + 10 };
+  }
+
+  /* ===================== DRAW ===================== */
+  function drawShape(svg, step, p, palette) {
+    var g = svgEl("g", { "class": "node-group" });
+
+    var shape;
+    if (step.type === "start" || step.type === "end") {
+      shape = svgEl("rect", {
+        x: p.cx - p.w / 2, y: p.cy - p.h / 2,
+        width: p.w, height: p.h,
+        rx: p.h / 2, ry: p.h / 2,
+        fill: palette.terminal, stroke: palette.border, "stroke-width": 2,
+        filter: "url(#shadow)"
+      });
+    } else if (step.type === "decision") {
+      var half = p.w / 2;
+      var pts = [
+        p.cx, p.cy - half,
+        p.cx + half, p.cy,
+        p.cx, p.cy + half,
+        p.cx - half, p.cy
+      ].join(",");
+      shape = svgEl("polygon", {
+        points: pts,
+        fill: "#fff9c4", stroke: "#f9a825", "stroke-width": 2,
+        filter: "url(#shadow)"
+      });
+    } else {
+      shape = svgEl("rect", {
+        x: p.cx - p.w / 2, y: p.cy - p.h / 2,
+        width: p.w, height: p.h,
+        rx: 6, ry: 6,
+        fill: palette.process, stroke: palette.border, "stroke-width": 2,
+        filter: "url(#shadow)"
+      });
+    }
+    g.appendChild(shape);
+
+    var fontSize = p.w < 140 ? 9.5 : (p.w < 160 ? 10.5 : 11.5);
+    addMultiline(g, step.label, p.cx, p.cy, fontSize, palette.text);
+
+    /* hover tooltip */
+    if (step.hover) {
+      g.addEventListener("mouseenter", function(e) { showTooltip(e, step.hover); });
+      g.addEventListener("mousemove",  function(e) { positionTooltip(e); });
+      g.addEventListener("mouseleave", hideTooltip);
+    }
+
+    svg.appendChild(g);
+  }
+
+  function drawColumnConnectors(svg, steps, pos, color, C) {
+    for (var i = 0; i < steps.length; i++) {
+      var s = steps[i];
+      if (s.branch) continue;
+
+      var cur = pos[s.id];
+
+      /* find next non-branch step */
+      var nextIdx = i + 1;
+      while (nextIdx < steps.length && steps[nextIdx].branch) nextIdx++;
+      if (nextIdx >= steps.length) continue;
+
+      var nextS = steps[nextIdx];
+
+      if (s.type === "decision") {
+        /* decision -> yes (bottom-left), decision -> no (bottom-right) */
+        var yesS = steps[i + 1]; /* branch yes */
+        var noS  = steps[i + 2]; /* branch no */
+        var yp = pos[yesS.id];
+        var np = pos[noS.id];
+        var dp = pos[s.id];
+        var dHalf = dp.w / 2;
+
+        /* Left arrow: diamond bottom-left -> yes box top */
+        drawPolyArrow(svg, [
+          [dp.cx - dHalf, dp.cy],
+          [yp.cx, dp.cy],
+          [yp.cx, yp.cy - yp.h / 2]
+        ], color);
+        addText(svg, "Yes", dp.cx - dHalf - 2, dp.cy - 8, 9.5, "#388e3c", "end", "bold");
+
+        /* Right arrow: diamond bottom-right -> no box top */
+        drawPolyArrow(svg, [
+          [dp.cx + dHalf, dp.cy],
+          [np.cx, dp.cy],
+          [np.cx, np.cy - np.h / 2]
+        ], color);
+        addText(svg, "No", dp.cx + dHalf + 2, dp.cy - 8, 9.5, "#c62828", "start", "bold");
+
+        /* yes box bottom -> end, no box bottom -> end */
+        var endS = steps[nextIdx];
+        var ep = pos[endS.id];
+        drawPolyArrow(svg, [
+          [yp.cx, yp.cy + yp.h / 2],
+          [yp.cx, ep.cy - ep.h / 2 - 10],
+          [ep.cx, ep.cy - ep.h / 2 - 10],
+          [ep.cx, ep.cy - ep.h / 2]
+        ], color);
+        drawPolyArrow(svg, [
+          [np.cx, np.cy + np.h / 2],
+          [np.cx, ep.cy - ep.h / 2 - 10],
+          [ep.cx, ep.cy - ep.h / 2 - 10],
+          [ep.cx, ep.cy - ep.h / 2]
+        ], color);
+        continue;
+      }
+
+      /* Normal vertical connector */
+      var nxt = pos[nextS.id];
+      drawArrow(svg, cur.cx, cur.cy + cur.h / 2, nxt.cx, nxt.cy - nxt.h / 2, color, false);
+    }
+  }
+
+  /* ===================== RENDER ===================== */
+  function render() {
+    var C = computeLayout();
+    var svg = document.getElementById("svg-main");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    calloutEl.classList.remove("visible");
+
+    var tradLayout = layoutColumn(tradSteps, C.leftCx, C);
+    var iotLayout  = layoutColumn(iotSteps,  C.rightCx, C);
+    var totalH = Math.max(tradLayout.totalH, iotLayout.totalH) + 20;
+
+    svg.setAttribute("viewBox", "0 0 " + C.svgW + " " + totalH);
+
+    /* Drop shadow filter */
+    var defs = ensureDefs(svg);
+    var filter = svgEl("filter", { id: "shadow", x: "-4%", y: "-4%", width: "108%", height: "116%" });
+    var feDS = svgEl("feDropShadow", { dx: "0", dy: "2", stdDeviation: "3", "flood-color": "rgba(0,0,0,0.1)" });
+    filter.appendChild(feDS);
+    defs.appendChild(filter);
+
+    /* Palettes */
+    var tradPal = { terminal: "#ffe0b2", process: "#fff3e0", border: "#e65100", text: "#4e342e" };
+    var iotPal  = { terminal: "#b2ebf2", process: "#e0f7fa", border: "#00695c", text: "#1a3636" };
+
+    /* Column headers */
+    var hdrSize = C.wide ? 14 : 11;
+    addText(svg, "Traditional Time-Based", C.leftCx, 22, hdrSize, "#bf360c", "middle", "bold");
+    addText(svg, "IoT Condition-Based", C.rightCx, 22, hdrSize, "#00695c", "middle", "bold");
+
+    /* Divider line */
+    var divX = C.svgW / 2;
+    svg.appendChild(svgEl("line", { x1: divX, y1: 38, x2: divX, y2: totalH - 10, stroke: "#ddd", "stroke-width": 1, "stroke-dasharray": "4,4" }));
+
+    /* Draw nodes */
+    var tPos = tradLayout.positions;
+    var iPos = iotLayout.positions;
+    tradSteps.forEach(function(s) { drawShape(svg, s, tPos[s.id], tradPal); });
+    iotSteps.forEach(function(s)  { drawShape(svg, s, iPos[s.id], iotPal);  });
+
+    /* Draw connectors */
+    drawColumnConnectors(svg, tradSteps, tPos, "#e65100", C);
+    drawColumnConnectors(svg, iotSteps,  iPos, "#00695c", C);
+
+    /* Draw comparison arrows (green dashed) */
+    comparisons.forEach(function(comp) {
+      var fp = tPos[comp.fromId];
+      var tp = iPos[comp.toId];
+      if (!fp || !tp) return;
+
+      var x1 = fp.cx + fp.w / 2 + 6;
+      var y1 = fp.cy;
+      var x2 = tp.cx - tp.w / 2 - 6;
+      var y2 = tp.cy;
+
+      var g = svgEl("g", { "class": "comp-arrow" });
+
+      /* green dashed line */
+      var markerId = "mh-comp";
+      ensureMarker(svg, markerId, "#27ae60");
+      var ln = svgEl("line", {
+        x1: x1, y1: y1, x2: x2, y2: y2,
+        stroke: "#27ae60", "stroke-width": 2,
+        "stroke-dasharray": "7,4",
+        "marker-end": "url(#" + markerId + ")"
+      });
+      g.appendChild(ln);
+
+      /* wider invisible hit area */
+      g.appendChild(svgEl("line", {
+        x1: x1, y1: y1, x2: x2, y2: y2,
+        stroke: "transparent", "stroke-width": 18
+      }));
+
+      /* small green pill at midpoint */
+      var mx = (x1 + x2) / 2;
+      var my = (y1 + y2) / 2;
+      g.appendChild(svgEl("rect", {
+        x: mx - 5, y: my - 7, width: 10, height: 14, rx: 5, fill: "#27ae60"
+      }));
+      addText(g, "\u2194", mx, my, 9, "#fff", "middle", "bold");
+
+      /* hover: show short label */
+      g.addEventListener("mouseenter", function(e) { showTooltip(e, comp.title); });
+      g.addEventListener("mousemove",  function(e) { positionTooltip(e); });
+      g.addEventListener("mouseleave", hideTooltip);
+
+      /* click: show detailed callout */
+      g.addEventListener("click", function(e) {
+        e.stopPropagation();
+        hideTooltip();
+        showCallout(e, comp.title, comp.detail);
+        /* brief highlight */
+        ln.setAttribute("stroke-width", "4");
+        ln.setAttribute("stroke", "#1e8449");
+        setTimeout(function() {
+          ln.setAttribute("stroke-width", "2");
+          ln.setAttribute("stroke", "#27ae60");
+        }, 1200);
+      });
+
+      svg.appendChild(g);
+    });
+  }
+
+  /* Initial render */
+  render();
+
+  /* Responsive: re-render on resize */
+  var resizeTimer;
+  window.addEventListener("resize", function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(render, 150);
+  });
+})();
+</script>
+</body>
+</html>

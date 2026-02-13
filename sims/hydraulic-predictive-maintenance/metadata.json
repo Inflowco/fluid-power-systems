@@ -1,0 +1,9 @@
+{
+  "title": "Hydraulic Predictive Maintenance Dashboard",
+  "chapter": 8,
+  "type": "microsim",
+  "bloom_level": "L5",
+  "bloom_verb": ["assess", "prioritize"],
+  "learning_objective": "Evaluate component health and prioritize maintenance actions based on AI recommendations",
+  "technology": "p5.js"
+}

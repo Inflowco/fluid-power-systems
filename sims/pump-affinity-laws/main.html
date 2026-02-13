@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affinity Laws Energy Calculator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f0f4f8;
+    overflow-x: hidden;
+  }
+  #canvas-container {
+    display: flex;
+    justify-content: center;
+  }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<script>
+// ── Affinity Laws Energy Calculator ──
+// Design point: 500 GPM @ 100 ft head, 20 BHP, 82% efficiency
+
+let sliderFlow, sliderCost, sliderHours;
+let canvasW, canvasH;
+
+// Design parameters
+const Q1 = 500;    // GPM design flow
+const H1 = 100;    // ft design head
+const P1 = 20;     // BHP design power
+const EFF = 0.82;  // efficiency at BEP
+const H_static = 20; // ft static head for system curve
+
+// Derived: system curve coefficient k such that H_system = H_static + k*Q^2
+// At design: 100 = 20 + k*500^2 => k = 80/250000
+const k_sys = (H1 - H_static) / (Q1 * Q1);
+
+function setup() {
+  canvasW = min(windowWidth, 1100);
+  canvasH = max(880, 500);
+  let cnv = createCanvas(canvasW, canvasH);
+  cnv.parent('canvas-container');
+  textFont('Arial');
+
+  // Sliders will be drawn manually (p5 native sliders for reliability)
+  sliderFlow = createSlider(50, 100, 75, 1);
+  sliderFlow.parent('canvas-container');
+  sliderFlow.style('width', '200px');
+  sliderFlow.style('accent-color', '#3b82f6');
+  sliderFlow.position(0, 0); // repositioned in draw
+
+  sliderCost = createSlider(5, 25, 12, 1); // cents
+  sliderCost.parent('canvas-container');
+  sliderCost.style('width', '200px');
+  sliderCost.style('accent-color', '#3b82f6');
+  sliderCost.position(0, 0);
+
+  sliderHours = createSlider(2000, 8760, 6000, 100);
+  sliderHours.parent('canvas-container');
+  sliderHours.style('width', '200px');
+  sliderHours.style('accent-color', '#3b82f6');
+  sliderHours.position(0, 0);
+
+  noLoop();
+  sliderFlow.input(redraw);
+  sliderCost.input(redraw);
+  sliderHours.input(redraw);
+}
+
+function windowResized() {
+  canvasW = min(windowWidth, 1100);
+  resizeCanvas(canvasW, canvasH);
+  redraw();
+}
+
+function draw() {
+  background(240, 244, 248);
+
+  // ── Read slider values ──
+  let flowPct = sliderFlow.value();       // 50-100%
+  let costPerKwh = sliderCost.value() / 100; // $/kWh
+  let hoursPerYear = sliderHours.value();
+
+  // ── Affinity law calculations ──
+  let speedRatio = flowPct / 100;         // N2/N1
+  let Q2 = Q1 * speedRatio;              // reduced flow
+  let H2 = H1 * speedRatio * speedRatio; // reduced head
+  let P2 = P1 * pow(speedRatio, 3);      // reduced power (VFD)
+
+  // Full speed + throttle: pump delivers Q2 at full speed
+  // At full speed, pump head at flow Q2: H_pump_full(Q2) = H1 * (1 - 0.6*(Q2/Q1)^2)
+  // This gives a reasonable pump curve shape
+  let H_pump_full_atQ2 = H1 * (1 - 0.6 * pow(Q2 / Q1, 2));
+  // System needs H_sys at Q2
+  let H_sys_atQ2 = H_static + k_sys * Q2 * Q2;
+  // Power at full speed delivering Q2 (approximation using affinity from efficiency)
+  // BHP = Q * H / (3960 * eff)
+  let P_throttled = (Q2 * H_pump_full_atQ2) / (3960 * EFF);
+
+  // Energy calculations
+  let kW_throttled = P_throttled * 0.7457; // BHP to kW
+  let kW_vfd = P2 * 0.7457;
+  let annualCost_throttled = kW_throttled * hoursPerYear * costPerKwh;
+  let annualCost_vfd = kW_vfd * hoursPerYear * costPerKwh;
+  let annualSavings = annualCost_throttled - annualCost_vfd;
+  let savingsPct = (annualSavings / annualCost_throttled) * 100;
+  let co2_reduction = (kW_throttled - kW_vfd) * hoursPerYear * 0.9 / 2000; // tons
+
+  // ── Layout constants ──
+  let margin = 20;
+  let chartTop = 50;
+  let chartH = canvasH * 0.38;
+  let chartW = (canvasW - margin * 3) / 2;
+  let chartLeft1 = margin;
+  let chartLeft2 = margin * 2 + chartW;
+  let controlsTop = chartTop + chartH + 30;
+
+  // ── Title ──
+  fill(26, 32, 44);
+  noStroke();
+  textAlign(CENTER, TOP);
+  textSize(20);
+  textStyle(BOLD);
+  text('Affinity Laws Energy Calculator', canvasW / 2, 12);
+
+  // ════════════════════════════════════
+  // LEFT CHART: Head vs. Flow
+  // ════════════════════════════════════
+  drawHeadFlowChart(chartLeft1, chartTop, chartW, chartH, speedRatio, Q2, H2, H_sys_atQ2, H_pump_full_atQ2);
+
+  // ════════════════════════════════════
+  // RIGHT CHART: Energy Comparison Bars
+  // ════════════════════════════════════
+  drawEnergyBars(chartLeft2, chartTop, chartW, chartH, P_throttled, P2);
+
+  // ════════════════════════════════════
+  // BOTTOM: Controls & Results
+  // ════════════════════════════════════
+  drawControlsAndResults(margin, controlsTop, canvasW - margin * 2,
+    flowPct, costPerKwh, hoursPerYear,
+    speedRatio, Q2, H2, P2,
+    P_throttled, kW_throttled, kW_vfd,
+    annualCost_throttled, annualCost_vfd, annualSavings, savingsPct, co2_reduction);
+}
+
+// ════════════════════════════════════════════
+// Head vs. Flow Chart
+// ════════════════════════════════════════════
+function drawHeadFlowChart(cx, cy, cw, ch, speedRatio, Q2, H2, H_sys_atQ2, H_pump_full_atQ2) {
+  let plotL = cx + 55;
+  let plotR = cx + cw - 15;
+  let plotT = cy + 25;
+  let plotB = cy + ch - 30;
+  let plotW = plotR - plotL;
+  let plotH = plotB - plotT;
+
+  // Background
+  fill(255);
+  stroke(200);
+  strokeWeight(1);
+  rect(cx, cy, cw, ch, 10);
+
+  // Title
+  noStroke();
+  fill(30, 41, 59);
+  textAlign(CENTER, TOP);
+  textSize(13);
+  textStyle(BOLD);
+  text('Head vs. Flow', cx + cw / 2, cy + 6);
+
+  // Axes
+  stroke(150);
+  strokeWeight(1);
+  line(plotL, plotB, plotR, plotB);
+  line(plotL, plotB, plotL, plotT);
+
+  // Axis labels
+  noStroke();
+  fill(100);
+  textSize(10);
+  textStyle(NORMAL);
+  textAlign(CENTER, TOP);
+  text('Flow (GPM)', (plotL + plotR) / 2, plotB + 6);
+
+  push();
+  translate(cx + 12, (plotT + plotB) / 2);
+  rotate(-HALF_PI);
+  textAlign(CENTER, BOTTOM);
+  text('Head (ft)', 0, 0);
+  pop();
+
+  // Axis ticks
+  let maxQ = 500;
+  let maxH = 140;
+  textSize(9);
+  fill(120);
+  textAlign(CENTER, TOP);
+  for (let q = 0; q <= maxQ; q += 100) {
+    let x = plotL + (q / maxQ) * plotW;
+    stroke(230);
+    strokeWeight(0.5);
+    line(x, plotT, x, plotB);
+    noStroke();
+    text(q, x, plotB + 2);
+  }
+  textAlign(RIGHT, CENTER);
+  for (let h = 0; h <= maxH; h += 20) {
+    let y = plotB - (h / maxH) * plotH;
+    stroke(230);
+    strokeWeight(0.5);
+    line(plotL, y, plotR, y);
+    noStroke();
+    text(h, plotL - 4, y);
+  }
+
+  function qToX(q) { return plotL + (q / maxQ) * plotW; }
+  function hToY(h) { return plotB - (h / maxH) * plotH; }
+
+  // Pump curve at a given speed ratio: H = H1*s^2 * (1 - 0.6*(Q/(Q1*s))^2)
+  function pumpHead(q, s) {
+    let qRatio = q / (Q1 * s);
+    if (qRatio > 1.15) return -1; // beyond curve
+    return H1 * s * s * (1 - 0.6 * qRatio * qRatio);
+  }
+
+  // System curve: H = H_static + k_sys * q^2
+  function sysHead(q) {
+    return H_static + k_sys * q * q;
+  }
+
+  // Draw pump curves at 100%, 80%, 60%
+  let speeds = [1.0, 0.8, 0.6];
+  let speedColors = [
+    [59, 130, 246],   // blue 100%
+    [139, 92, 246],   // purple 80%
+    [236, 72, 153]    // pink 60%
+  ];
+  let speedLabels = ['100%', '80%', '60%'];
+
+  for (let si = 0; si < speeds.length; si++) {
+    let s = speeds[si];
+    let col = speedColors[si];
+    stroke(col[0], col[1], col[2]);
+    strokeWeight(2);
+    noFill();
+    beginShape();
+    for (let q = 0; q <= Q1 * s * 1.1; q += 2) {
+      let h = pumpHead(q, s);
+      if (h < 0) break;
+      vertex(qToX(q), hToY(h));
+    }
+    endShape();
+
+    // Label
+    let labelQ = Q1 * s * 0.3;
+    let labelH = pumpHead(labelQ, s);
+    noStroke();
+    fill(col[0], col[1], col[2]);
+    textSize(9);
+    textStyle(BOLD);
+    textAlign(LEFT, BOTTOM);
+    text(speedLabels[si], qToX(labelQ) + 3, hToY(labelH) - 2);
+  }
+
+  // Draw the pump curve at the actual VFD speed ratio
+  if (speedRatio !== 1.0 && speedRatio !== 0.8 && speedRatio !== 0.6) {
+    stroke(34, 197, 94);
+    strokeWeight(2.5);
+    noFill();
+    beginShape();
+    for (let q = 0; q <= Q1 * speedRatio * 1.1; q += 2) {
+      let h = pumpHead(q, speedRatio);
+      if (h < 0) break;
+      vertex(qToX(q), hToY(h));
+    }
+    endShape();
+
+    let labelQ2 = Q1 * speedRatio * 0.35;
+    let labelH2 = pumpHead(labelQ2, speedRatio);
+    noStroke();
+    fill(34, 197, 94);
+    textSize(9);
+    textStyle(BOLD);
+    textAlign(LEFT, BOTTOM);
+    text(nf(speedRatio * 100, 0, 0) + '% VFD', qToX(labelQ2) + 3, hToY(labelH2) - 2);
+  }
+
+  // System curve (gray dashed)
+  stroke(150);
+  strokeWeight(1.5);
+  drawingContext.setLineDash([6, 4]);
+  noFill();
+  beginShape();
+  for (let q = 0; q <= maxQ; q += 2) {
+    let h = sysHead(q);
+    if (h > maxH) break;
+    vertex(qToX(q), hToY(h));
+  }
+  endShape();
+  drawingContext.setLineDash([]);
+
+  // Label system curve
+  noStroke();
+  fill(130);
+  textSize(9);
+  textStyle(ITALIC);
+  textAlign(LEFT, TOP);
+  text('System Curve', qToX(350) + 4, hToY(sysHead(350)) - 14);
+
+  // Operating point at FULL SPEED + throttle (Q2 on full speed curve)
+  let opFullX = qToX(Q2);
+  let opFullY = hToY(H_pump_full_atQ2);
+  fill(239, 68, 68);
+  stroke(239, 68, 68);
+  strokeWeight(1);
+  ellipse(opFullX, opFullY, 10, 10);
+  noStroke();
+  textSize(8);
+  textStyle(BOLD);
+  textAlign(LEFT, BOTTOM);
+  fill(220, 38, 38);
+  text('Throttled', opFullX + 6, opFullY - 2);
+
+  // Operating point on system curve at VFD speed (Q2, H_sys)
+  let opVfdX = qToX(Q2);
+  let opVfdY = hToY(H_sys_atQ2);
+  fill(34, 197, 94);
+  stroke(34, 197, 94);
+  strokeWeight(1);
+  ellipse(opVfdX, opVfdY, 10, 10);
+  noStroke();
+  fill(22, 163, 74);
+  textSize(8);
+  textStyle(BOLD);
+  textAlign(LEFT, TOP);
+  text('VFD', opVfdX + 6, opVfdY + 3);
+
+  // Draw throttle drop arrow between the two points
+  if (abs(opFullY - opVfdY) > 8) {
+    stroke(239, 68, 68, 180);
+    strokeWeight(1.5);
+    drawingContext.setLineDash([3, 3]);
+    line(opFullX, opFullY + 6, opFullX, opVfdY - 6);
+    drawingContext.setLineDash([]);
+    // small arrowhead
+    fill(239, 68, 68, 180);
+    noStroke();
+    triangle(opFullX - 3, opVfdY - 6, opFullX + 3, opVfdY - 6, opFullX, opVfdY - 1);
+    // label
+    textSize(7);
+    textStyle(NORMAL);
+    fill(200, 50, 50);
+    textAlign(RIGHT, CENTER);
+    text('Valve loss', opFullX - 5, (opFullY + opVfdY) / 2);
+  }
+
+  // Legend box
+  let legX = plotR - 95;
+  let legY = plotT + 5;
+  fill(255, 255, 255, 220);
+  stroke(220);
+  strokeWeight(0.5);
+  rect(legX, legY, 90, 50, 4);
+  noStroke();
+  textSize(8);
+  textStyle(NORMAL);
+  textAlign(LEFT, CENTER);
+  for (let si = 0; si < speeds.length; si++) {
+    let col = speedColors[si];
+    fill(col[0], col[1], col[2]);
+    rect(legX + 5, legY + 8 + si * 14, 12, 3);
+    fill(80);
+    text(speedLabels[si] + ' speed', legX + 22, legY + 10 + si * 14);
+  }
+}
+
+// ════════════════════════════════════════════
+// Energy Comparison Bar Chart
+// ════════════════════════════════════════════
+function drawEnergyBars(cx, cy, cw, ch, P_throttled, P_vfd) {
+  let plotL = cx + 55;
+  let plotR = cx + cw - 25;
+  let plotT = cy + 25;
+  let plotB = cy + ch - 30;
+  let plotW = plotR - plotL;
+  let plotH = plotB - plotT;
+
+  // Background
+  fill(255);
+  stroke(200);
+  strokeWeight(1);
+  rect(cx, cy, cw, ch, 10);
+
+  // Title
+  noStroke();
+  fill(30, 41, 59);
+  textAlign(CENTER, TOP);
+  textSize(13);
+  textStyle(BOLD);
+  text('Energy Comparison', cx + cw / 2, cy + 6);
+
+  // Axes
+  stroke(150);
+  strokeWeight(1);
+  line(plotL, plotB, plotR, plotB);
+  line(plotL, plotB, plotL, plotT);
+
+  // Y-axis label
+  noStroke();
+  fill(100);
+  textSize(10);
+  textStyle(NORMAL);
+  push();
+  translate(cx + 12, (plotT + plotB) / 2);
+  rotate(-HALF_PI);
+  textAlign(CENTER, BOTTOM);
+  text('Power (BHP)', 0, 0);
+  pop();
+
+  // Y-axis scale
+  let maxP = ceil(max(P_throttled, P1) / 5) * 5 + 5;
+  textSize(9);
+  fill(120);
+  textAlign(RIGHT, CENTER);
+  for (let p = 0; p <= maxP; p += 5) {
+    let y = plotB - (p / maxP) * plotH;
+    stroke(230);
+    strokeWeight(0.5);
+    line(plotL, y, plotR, y);
+    noStroke();
+    fill(120);
+    text(nf(p, 0, 1), plotL - 4, y);
+  }
+
+  // Bar positions
+  let barW = plotW * 0.25;
+  let gap = plotW * 0.15;
+  let bar1X = plotL + gap;
+  let bar2X = plotL + gap + barW + gap;
+
+  // Bar 1: Throttled (red/orange)
+  let bar1H = (P_throttled / maxP) * plotH;
+  fill(239, 100, 60);
+  noStroke();
+  rect(bar1X, plotB - bar1H, barW, bar1H, 4, 4, 0, 0);
+  // Value on bar
+  fill(255);
+  textSize(11);
+  textStyle(BOLD);
+  textAlign(CENTER, BOTTOM);
+  if (bar1H > 30) {
+    text(nf(P_throttled, 0, 1) + ' BHP', bar1X + barW / 2, plotB - bar1H + 20);
+  }
+  // Label below
+  fill(80);
+  textSize(9);
+  textStyle(NORMAL);
+  textAlign(CENTER, TOP);
+  text('Full Speed', bar1X + barW / 2, plotB + 3);
+  text('+ Throttle', bar1X + barW / 2, plotB + 14);
+
+  // Bar 2: VFD (green)
+  let bar2H = (P_vfd / maxP) * plotH;
+  fill(34, 197, 94);
+  noStroke();
+  rect(bar2X, plotB - bar2H, barW, bar2H, 4, 4, 0, 0);
+  // Value on bar
+  fill(255);
+  textSize(11);
+  textStyle(BOLD);
+  textAlign(CENTER, BOTTOM);
+  if (bar2H > 30) {
+    text(nf(P_vfd, 0, 1) + ' BHP', bar2X + barW / 2, plotB - bar2H + 20);
+  }
+  // Label below
+  fill(80);
+  textSize(9);
+  textStyle(NORMAL);
+  textAlign(CENTER, TOP);
+  text('VFD at', bar2X + barW / 2, plotB + 3);
+  text('Reduced Speed', bar2X + barW / 2, plotB + 14);
+
+  // Savings arrow between bars
+  let savingsBHP = P_throttled - P_vfd;
+  if (savingsBHP > 0.1) {
+    let arrowX = bar2X + barW + gap * 0.5;
+    let arrowTopY = plotB - bar1H;
+    let arrowBotY = plotB - bar2H;
+    stroke(34, 150, 80);
+    strokeWeight(2);
+    line(arrowX, arrowTopY, arrowX, arrowBotY);
+    // Arrowheads
+    fill(34, 150, 80);
+    noStroke();
+    triangle(arrowX - 4, arrowTopY + 6, arrowX + 4, arrowTopY + 6, arrowX, arrowTopY);
+    triangle(arrowX - 4, arrowBotY - 6, arrowX + 4, arrowBotY - 6, arrowX, arrowBotY);
+    // Savings label
+    fill(22, 128, 61);
+    textSize(11);
+    textStyle(BOLD);
+    textAlign(LEFT, CENTER);
+    text(nf(savingsBHP, 0, 1) + ' BHP', arrowX + 6, (arrowTopY + arrowBotY) / 2 - 7);
+    textSize(9);
+    text('saved', arrowX + 6, (arrowTopY + arrowBotY) / 2 + 7);
+  }
+}
+
+// ════════════════════════════════════════════
+// Controls and Results Panel
+// ════════════════════════════════════════════
+function drawControlsAndResults(px, py, pw,
+  flowPct, costPerKwh, hoursPerYear,
+  speedRatio, Q2, H2, P2,
+  P_throttled, kW_throttled, kW_vfd,
+  annualCost_throttled, annualCost_vfd, annualSavings, savingsPct, co2_reduction) {
+
+  // Panel background
+  fill(255);
+  stroke(200);
+  strokeWeight(1);
+  rect(px, py, pw, canvasH - py - 15, 10);
+
+  let innerPad = 20;
+  let leftCol = px + innerPad;
+  let colW = (pw - innerPad * 3) / 2;
+  let rightCol = leftCol + colW + innerPad;
+  let yStart = py + 15;
+
+  // ── Left Column: Controls ──
+  noStroke();
+  fill(30, 41, 59);
+  textSize(13);
+  textStyle(BOLD);
+  textAlign(LEFT, TOP);
+  text('Controls', leftCol, yStart);
+
+  let slY = yStart + 22;
+
+  // Required Flow slider
+  fill(71, 85, 105);
+  textSize(10);
+  textStyle(BOLD);
+  text('Required Flow: ' + flowPct + '% (' + nf(Q2, 0, 0) + ' GPM)', leftCol, slY);
+  slY += 16;
+  let sliderX = leftCol;
+  let sliderYAbs = slY;
+  sliderFlow.position(sliderX, sliderYAbs);
+  slY += 30;
+
+  // Electricity Cost slider
+  fill(71, 85, 105);
+  text('Electricity Cost: $' + nf(costPerKwh, 0, 2) + '/kWh', leftCol, slY);
+  slY += 16;
+  sliderCost.position(sliderX, slY);
+  slY += 30;
+
+  // Operating Hours slider
+  fill(71, 85, 105);
+  text('Operating Hours/Year: ' + nf(hoursPerYear, 0, 0), leftCol, slY);
+  slY += 16;
+  sliderHours.position(sliderX, slY);
+  slY += 35;
+
+  // ── Affinity Law Equations ──
+  fill(30, 41, 59);
+  textSize(13);
+  textStyle(BOLD);
+  text('Affinity Law Equations', leftCol, slY);
+  slY += 20;
+
+  textSize(10);
+  textStyle(NORMAL);
+  fill(55, 65, 81);
+  let eqLineH = 18;
+
+  // Flow equation
+  fill(59, 130, 246);
+  textStyle(BOLD);
+  text('Flow:', leftCol, slY);
+  textStyle(NORMAL);
+  fill(55, 65, 81);
+  text('Q2/Q1 = N2/N1', leftCol + 40, slY);
+  slY += eqLineH;
+  fill(30, 64, 175);
+  textStyle(BOLD);
+  text('Q2 = ' + nf(Q1, 0, 0) + ' x ' + nf(speedRatio, 0, 2) + ' = ' + nf(Q2, 0, 0) + ' GPM', leftCol + 20, slY);
+  slY += eqLineH + 4;
+
+  // Head equation
+  fill(139, 92, 246);
+  textStyle(BOLD);
+  text('Head:', leftCol, slY);
+  textStyle(NORMAL);
+  fill(55, 65, 81);
+  text('H2/H1 = (N2/N1)^2', leftCol + 40, slY);
+  slY += eqLineH;
+  fill(109, 40, 217);
+  textStyle(BOLD);
+  text('H2 = ' + nf(H1, 0, 0) + ' x ' + nf(speedRatio * speedRatio, 0, 3) + ' = ' + nf(H2, 0, 1) + ' ft', leftCol + 20, slY);
+  slY += eqLineH + 4;
+
+  // Power equation
+  fill(236, 72, 153);
+  textStyle(BOLD);
+  text('Power:', leftCol, slY);
+  textStyle(NORMAL);
+  fill(55, 65, 81);
+  text('P2/P1 = (N2/N1)^3', leftCol + 45, slY);
+  slY += eqLineH;
+  fill(190, 24, 93);
+  textStyle(BOLD);
+  text('P2 = ' + nf(P1, 0, 0) + ' x ' + nf(pow(speedRatio, 3), 0, 4) + ' = ' + nf(P2, 0, 1) + ' BHP', leftCol + 20, slY);
+
+  // ── Right Column: Results ──
+  let rY = yStart;
+  noStroke();
+  fill(30, 41, 59);
+  textSize(13);
+  textStyle(BOLD);
+  textAlign(LEFT, TOP);
+  text('Results', rightCol, rY);
+  rY += 24;
+
+  let rowH = 22;
+
+  function resultRow(label, value, labelColor, valueColor, isBold) {
+    fill(labelColor || color(100, 116, 139));
+    textSize(10);
+    textStyle(NORMAL);
+    textAlign(LEFT, TOP);
+    text(label, rightCol, rY);
+    fill(valueColor || color(30, 41, 59));
+    textStyle(isBold ? BOLD : NORMAL);
+    textSize(isBold ? 12 : 10);
+    textAlign(RIGHT, TOP);
+    text(value, rightCol + colW, rY);
+    rY += rowH;
+  }
+
+  // Divider helper
+  function divider() {
+    stroke(226, 232, 240);
+    strokeWeight(0.5);
+    line(rightCol, rY - 5, rightCol + colW, rY - 5);
+    noStroke();
+    rY += 2;
+  }
+
+  resultRow('Required VFD Speed:', nf(flowPct, 0, 0) + '%');
+  divider();
+  resultRow('Power at Full Speed (throttled):', nf(P_throttled, 0, 1) + ' BHP');
+  resultRow('Power at VFD Speed:', nf(P2, 0, 1) + ' BHP');
+  divider();
+
+  resultRow('Annual Cost (throttled):',
+    '$' + formatNum(annualCost_throttled),
+    color(180, 60, 40), color(220, 38, 38), true);
+  resultRow('Annual Cost (VFD):',
+    '$' + formatNum(annualCost_vfd),
+    color(22, 128, 61), color(22, 163, 74), true);
+  divider();
+
+  // Savings highlight
+  fill(236, 253, 245);
+  noStroke();
+  rect(rightCol - 5, rY - 3, colW + 10, rowH * 2 + 10, 6);
+
+  fill(6, 95, 70);
+  textSize(11);
+  textStyle(BOLD);
+  textAlign(LEFT, TOP);
+  text('Annual Savings:', rightCol, rY + 2);
+  textAlign(RIGHT, TOP);
+  textSize(13);
+  text('$' + formatNum(annualSavings) + ' (' + nf(savingsPct, 0, 1) + '%)', rightCol + colW, rY + 2);
+  rY += rowH;
+  fill(6, 95, 70);
+  textSize(10);
+  textStyle(NORMAL);
+  textAlign(LEFT, TOP);
+  text('CO\u2082 Reduction:', rightCol, rY + 2);
+  textAlign(RIGHT, TOP);
+  textStyle(BOLD);
+  text(nf(co2_reduction, 0, 1) + ' tons/year', rightCol + colW, rY + 2);
+  rY += rowH + 12;
+
+  // Small note
+  fill(148, 163, 184);
+  textSize(8);
+  textStyle(ITALIC);
+  textAlign(LEFT, TOP);
+  text('CO\u2082 calculated at 0.9 lb CO\u2082/kWh (US avg. grid emission factor)', rightCol, rY);
+}
+
+function formatNum(n) {
+  return nfc(round(n), 0);
+}
+</script>
+</body>
+</html>

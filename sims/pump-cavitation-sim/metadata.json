@@ -1,0 +1,8 @@
+{
+  "title": "Cavitation Diagnosis Simulator",
+  "chapter": 9,
+  "bloom_level": "L4 Analyze",
+  "bloom_verb": "Examine",
+  "technology": "p5.js",
+  "learning_objective": "Analyze system conditions to determine whether cavitation will occur by comparing NPSHa to NPSHr"
+}

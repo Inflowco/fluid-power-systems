@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustainability Metrics Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ========== Reset & Base ========== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.5;
+            min-width: 800px;
+        }
+
+        /* ========== Header ========== */
+        .header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 20px 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        /* ========== Main Container ========== */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px 24px;
+        }
+
+        /* ========== Card ========== */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1a237e;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+
+        /* ========== Input Grid ========== */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+        }
+
+        .input-column h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #37474f;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .input-column h3 .icon {
+            font-size: 1.1rem;
+        }
+
+        .field {
+            margin-bottom: 12px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #546e7a;
+            margin-bottom: 4px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1.5px solid #cfd8dc;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #333;
+            background: #fafafa;
+            transition: border-color 0.2s;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: #1a237e;
+            background: #fff;
+        }
+
+        .field .unit {
+            font-size: 0.75rem;
+            color: #90a4ae;
+            margin-top: 2px;
+        }
+
+        /* ========== Buttons ========== */
+        .button-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2e7d32, #43a047);
+            color: white;
+            box-shadow: 0 3px 8px rgba(46,125,50,0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 12px rgba(46,125,50,0.45);
+        }
+
+        .btn-secondary {
+            background: #eceff1;
+            color: #546e7a;
+        }
+
+        .btn-secondary:hover {
+            background: #cfd8dc;
+        }
+
+        /* ========== Gauges Grid ========== */
+        .gauges-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .gauge-card {
+            text-align: center;
+            padding: 16px 12px;
+            background: #fafbfc;
+            border-radius: 8px;
+            border: 1px solid #e8eaf6;
+        }
+
+        .gauge-card h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #37474f;
+            margin-bottom: 8px;
+        }
+
+        .gauge-canvas-wrap {
+            position: relative;
+            width: 160px;
+            height: 100px;
+            margin: 0 auto;
+        }
+
+        .gauge-canvas-wrap canvas {
+            width: 160px !important;
+            height: 100px !important;
+        }
+
+        .gauge-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .gauge-label {
+            font-size: 0.75rem;
+            color: #78909c;
+        }
+
+        .gauge-status {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .status-green { background: #e8f5e9; color: #2e7d32; }
+        .status-yellow { background: #fff8e1; color: #f57f17; }
+        .status-red { background: #ffebee; color: #c62828; }
+
+        .gauge-detail {
+            font-size: 0.72rem;
+            color: #90a4ae;
+            margin-top: 4px;
+        }
+
+        /* ========== Benchmark Section ========== */
+        .benchmark-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .benchmark-header h2 {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+            flex-shrink: 0;
+        }
+
+        .benchmark-header .field {
+            margin-bottom: 0;
+            min-width: 180px;
+        }
+
+        .benchmark-chart-wrap {
+            height: 200px;
+        }
+
+        /* ========== What-If Section ========== */
+        .whatif-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .slider-group {
+            margin-bottom: 16px;
+        }
+
+        .slider-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #37474f;
+            margin-bottom: 6px;
+        }
+
+        .slider-group label span {
+            color: #1a237e;
+            font-weight: 700;
+        }
+
+        .slider-group input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+        }
+
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1a237e;
+            cursor: pointer;
+        }
+
+        .slider-group input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #1a237e;
+            cursor: pointer;
+            border: none;
+        }
+
+        .savings-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .savings-box {
+            text-align: center;
+            padding: 16px 12px;
+            border-radius: 8px;
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+        }
+
+        .savings-box .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+
+        .savings-box .label {
+            font-size: 0.75rem;
+            color: #546e7a;
+            margin-top: 2px;
+        }
+
+        /* ========== Recommendations ========== */
+        .recommendations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rec-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .rec-item.high {
+            background: #ffebee;
+            border-color: #e53935;
+        }
+
+        .rec-item.medium {
+            background: #fff8e1;
+            border-color: #ffb300;
+        }
+
+        .rec-item.low {
+            background: #e8f5e9;
+            border-color: #43a047;
+        }
+
+        .rec-rank {
+            font-size: 1.1rem;
+            font-weight: 700;
+            min-width: 24px;
+        }
+
+        .rec-item.high .rec-rank { color: #e53935; }
+        .rec-item.medium .rec-rank { color: #ffb300; }
+        .rec-item.low .rec-rank { color: #43a047; }
+
+        .rec-text {
+            flex: 1;
+        }
+
+        .rec-text strong {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .rec-text p {
+            font-size: 0.8rem;
+            color: #546e7a;
+            margin: 0;
+        }
+
+        /* ========== Hidden state ========== */
+        .results-area {
+            display: none;
+        }
+
+        .results-area.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Sustainability Metrics Calculator</h1>
+    <p>Calculate EUI, WUI, carbon footprint, and benchmark your facility</p>
+</div>
+
+<div class="container">
+
+    <!-- ===== Input Section ===== -->
+    <div class="card">
+        <h2>Facility Data Input</h2>
+        <div class="input-grid">
+
+            <!-- Column 1: Energy Data -->
+            <div class="input-column">
+                <h3><span class="icon">&#9889;</span> Energy Data</h3>
+                <div class="field">
+                    <label for="electricity">Annual Electricity</label>
+                    <input type="number" id="electricity" value="2400000" min="0" step="1000">
+                    <div class="unit">kWh</div>
+                </div>
+                <div class="field">
+                    <label for="naturalGas">Natural Gas</label>
+                    <input type="number" id="naturalGas" value="50000" min="0" step="100">
+                    <div class="unit">therms</div>
+                </div>
+                <div class="field">
+                    <label for="buildingArea">Building Area</label>
+                    <input type="number" id="buildingArea" value="100000" min="1" step="100">
+                    <div class="unit">sq ft</div>
+                </div>
+                <div class="field">
+                    <label for="elecCost">Electricity Cost</label>
+                    <input type="number" id="elecCost" value="0.12" min="0" step="0.01">
+                    <div class="unit">$/kWh</div>
+                </div>
+            </div>
+
+            <!-- Column 2: Water Data -->
+            <div class="input-column">
+                <h3><span class="icon">&#128167;</span> Water Data</h3>
+                <div class="field">
+                    <label for="waterUse">Annual Water Use</label>
+                    <input type="number" id="waterUse" value="3000000" min="0" step="1000">
+                    <div class="unit">gallons</div>
+                </div>
+                <div class="field">
+                    <label for="waterCost">Water Cost</label>
+                    <input type="number" id="waterCost" value="8.50" min="0" step="0.10">
+                    <div class="unit">$/1,000 gal</div>
+                </div>
+            </div>
+
+            <!-- Column 3: Emissions Data -->
+            <div class="input-column">
+                <h3><span class="icon">&#127811;</span> Emissions Data</h3>
+                <div class="field">
+                    <label for="refrigerantType">Refrigerant Type</label>
+                    <select id="refrigerantType">
+                        <option value="2088">R-410A (GWP 2,088)</option>
+                        <option value="1430">R-134a (GWP 1,430)</option>
+                        <option value="675">R-32 (GWP 675)</option>
+                        <option value="3">R-290 (GWP 3)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="refrigerantLoss">Refrigerant Losses</label>
+                    <input type="number" id="refrigerantLoss" value="25" min="0" step="1">
+                    <div class="unit">lbs</div>
+                </div>
+                <div class="field">
+                    <label for="region">Grid Region</label>
+                    <select id="region">
+                        <option value="0.386">US Average (0.386 t CO2e/MWh)</option>
+                        <option value="0.234">Northeast (0.234)</option>
+                        <option value="0.414">Southeast (0.414)</option>
+                        <option value="0.545">Midwest (0.545)</option>
+                        <option value="0.280">West (0.280)</option>
+                        <option value="0.394">Southwest (0.394)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button class="btn btn-primary" id="btnCalculate">Calculate Metrics</button>
+            <button class="btn btn-secondary" id="btnReset">Reset to Defaults</button>
+        </div>
+    </div>
+
+    <!-- ===== Results Area (hidden until Calculate is clicked) ===== -->
+    <div class="results-area" id="resultsArea">
+
+        <!-- Gauges -->
+        <div class="card">
+            <h2>Results Dashboard</h2>
+            <div class="gauges-grid">
+
+                <div class="gauge-card">
+                    <h3>Energy Use Intensity (EUI)</h3>
+                    <div class="gauge-canvas-wrap">
+                        <canvas id="gaugeEUI"></canvas>
+                    </div>
+                    <div class="gauge-value" id="valEUI">--</div>
+                    <div class="gauge-label">kBtu/ft&sup2;/year</div>
+                    <div class="gauge-status" id="statusEUI"></div>
+                    <div class="gauge-detail" id="detailEUI"></div>
+                </div>
+
+                <div class="gauge-card">
+                    <h3>Water Use Intensity (WUI)</h3>
+                    <div class="gauge-canvas-wrap">
+                        <canvas id="gaugeWUI"></canvas>
+                    </div>
+                    <div class="gauge-value" id="valWUI">--</div>
+                    <div class="gauge-label">gal/ft&sup2;/year</div>
+                    <div class="gauge-status" id="statusWUI"></div>
+                    <div class="gauge-detail" id="detailWUI"></div>
+                </div>
+
+                <div class="gauge-card">
+                    <h3>Carbon Footprint</h3>
+                    <div class="gauge-canvas-wrap">
+                        <canvas id="gaugeCO2"></canvas>
+                    </div>
+                    <div class="gauge-value" id="valCO2">--</div>
+                    <div class="gauge-label">metric tons CO2e/year</div>
+                    <div class="gauge-status" id="statusCO2"></div>
+                    <div class="gauge-detail" id="detailCO2"></div>
+                </div>
+
+                <div class="gauge-card">
+                    <h3>Annual Cost</h3>
+                    <div class="gauge-canvas-wrap">
+                        <canvas id="gaugeCost"></canvas>
+                    </div>
+                    <div class="gauge-value" id="valCost">--</div>
+                    <div class="gauge-label">USD/year</div>
+                    <div class="gauge-status" id="statusCost"></div>
+                    <div class="gauge-detail" id="detailCost"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benchmark Comparison -->
+        <div class="card">
+            <div class="benchmark-header">
+                <h2>Benchmark Comparison (EUI)</h2>
+                <div class="field">
+                    <select id="buildingType">
+                        <option value="Manufacturing">Manufacturing</option>
+                        <option value="Office">Office</option>
+                        <option value="Hospital">Hospital</option>
+                        <option value="School">School</option>
+                        <option value="Data Center">Data Center</option>
+                    </select>
+                </div>
+            </div>
+            <div class="benchmark-chart-wrap">
+                <canvas id="benchmarkChart"></canvas>
+            </div>
+        </div>
+
+        <!-- What-If Scenario Analysis -->
+        <div class="card">
+            <h2>What-If Scenario Analysis</h2>
+            <div class="whatif-grid">
+                <div>
+                    <div class="slider-group">
+                        <label>Reduce compressor energy by: <span id="lblCompressor">0%</span></label>
+                        <input type="range" id="sliderCompressor" min="0" max="50" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <label>Reduce cooling water by: <span id="lblWater">0%</span></label>
+                        <input type="range" id="sliderWater" min="0" max="50" value="0">
+                    </div>
+                    <div class="slider-group">
+                        <label>Fix compressed air leaks: <span id="lblLeaks">0% savings</span></label>
+                        <input type="range" id="sliderLeaks" min="0" max="30" value="0">
+                    </div>
+                </div>
+                <div>
+                    <div class="savings-summary">
+                        <div class="savings-box">
+                            <div class="value" id="savDollars">$0</div>
+                            <div class="label">Projected Annual Savings</div>
+                        </div>
+                        <div class="savings-box">
+                            <div class="value" id="savCO2">0 t</div>
+                            <div class="label">CO2 Reduction (tons)</div>
+                        </div>
+                        <div class="savings-box">
+                            <div class="value" id="savPayback">-- yrs</div>
+                            <div class="label">Simple Payback</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card">
+            <h2>Ranked Recommendations</h2>
+            <div class="recommendations-list" id="recommendations"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ================================================================
+   Sustainability Metrics Calculator
+   All formulas and constants are defined here for clarity.
+   ================================================================ */
+
+// ===== Benchmark data: EUI (kBtu/ft2/year) =====
+const BENCHMARKS = {
+    'Manufacturing': { avg: 200, best: 120 },
+    'Office':        { avg: 90,  best: 55 },
+    'Hospital':      { avg: 250, best: 160 },
+    'School':        { avg: 75,  best: 45 },
+    'Data Center':   { avg: 400, best: 250 }
+};
+
+// ===== Chart instances (so we can destroy and recreate) =====
+let chartEUI = null;
+let chartWUI = null;
+let chartCO2 = null;
+let chartCost = null;
+let chartBenchmark = null;
+
+// ===== Cached calculation results for what-if sliders =====
+let calcResults = null;
+
+// ===== DOM helpers =====
+const $ = (id) => document.getElementById(id);
+const num = (id) => {
+    const v = parseFloat($(id).value);
+    return isNaN(v) || v < 0 ? 0 : v;
+};
+
+// ===== Input validation =====
+function validateInputs() {
+    const area = num('buildingArea');
+    if (area <= 0) {
+        alert('Building area must be greater than zero.');
+        return false;
+    }
+    return true;
+}
+
+// ===== Core Calculations =====
+function calculate() {
+    if (!validateInputs()) return;
+
+    const electricity = num('electricity');        // kWh
+    const naturalGas = num('naturalGas');           // therms
+    const area = num('buildingArea');               // sq ft
+    const elecCostRate = num('elecCost');           // $/kWh
+    const water = num('waterUse');                  // gallons
+    const waterCostRate = num('waterCost');         // $/1000 gal
+    const gwp = parseFloat($('refrigerantType').value);
+    const refrigerantLbs = num('refrigerantLoss'); // lbs
+    const emissionFactor = parseFloat($('region').value); // tons CO2e per MWh
+
+    // --- EUI (Energy Use Intensity) ---
+    // Convert electricity to BTU: kWh * 3.412 BTU/Wh * 1000 Wh/kWh = kWh * 3412 BTU
+    // Convert therms to BTU: therms * 100,000 BTU/therm
+    // EUI = total BTU / area, expressed in kBtu/ft2/year
+    const totalBtu = electricity * 3.412 * 1000 + naturalGas * 100000;
+    const eui = totalBtu / area / 1000; // kBtu/ft2/year
+
+    // --- WUI (Water Use Intensity) ---
+    const wui = water / area; // gal/ft2/year
+
+    // --- Carbon Footprint ---
+    // Scope 1: natural gas combustion + refrigerant leakage
+    //   Natural gas: therms * 0.005302 metric tons CO2 per therm
+    //   Refrigerant: lbs * 0.000453592 (kg per lb) * GWP / 1000 (to metric tons)
+    const scope1Gas = naturalGas * 0.005302;
+    const scope1Ref = refrigerantLbs * 0.000453592 * gwp / 1000;
+    const scope1 = scope1Gas + scope1Ref;
+
+    // Scope 2: purchased electricity
+    //   kWh / 1000 = MWh, * emission factor (tons CO2e / MWh)
+    const scope2 = (electricity / 1000) * emissionFactor;
+
+    const totalCO2 = scope1 + scope2;
+
+    // --- Annual Cost ---
+    const elecCost = electricity * elecCostRate;
+    const gasCost = naturalGas * 1.20; // $1.20 per therm
+    const waterCost = (water / 1000) * waterCostRate;
+    const totalCost = elecCost + gasCost + waterCost;
+    const costPerSqFt = totalCost / area;
+
+    // Store for what-if sliders
+    calcResults = {
+        electricity, naturalGas, area, elecCostRate, water, waterCostRate,
+        eui, wui, scope1, scope2, totalCO2, totalCost, costPerSqFt,
+        elecCost, gasCost, waterCost, emissionFactor
+    };
+
+    // Show results
+    $('resultsArea').classList.add('visible');
+
+    // Render gauges
+    renderGaugeEUI(eui);
+    renderGaugeWUI(wui);
+    renderGaugeCO2(totalCO2, scope1, scope2);
+    renderGaugeCost(totalCost, costPerSqFt, elecCost, gasCost, waterCost);
+
+    // Render benchmark chart
+    renderBenchmark(eui);
+
+    // Reset sliders and recompute what-if
+    $('sliderCompressor').value = 0;
+    $('sliderWater').value = 0;
+    $('sliderLeaks').value = 0;
+    updateWhatIf();
+
+    // Render recommendations
+    renderRecommendations(eui, wui, totalCO2, scope2, scope1);
+}
+
+// ===== Gauge Rendering =====
+// Creates a half-doughnut gauge with green/yellow/red zones.
+function createGauge(canvasId, value, maxVal, thresholds, existingChart) {
+    if (existingChart) existingChart.destroy();
+
+    const ctx = $(canvasId).getContext('2d');
+
+    // thresholds = { green: upperBound, yellow: upperBound } — rest is red
+    const greenEnd = thresholds.green / maxVal;
+    const yellowEnd = thresholds.yellow / maxVal;
+    const needle = Math.min(value / maxVal, 1);
+
+    // Build segments for background arc
+    const segments = [
+        thresholds.green,
+        thresholds.yellow - thresholds.green,
+        maxVal - thresholds.yellow
+    ];
+
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: segments,
+                backgroundColor: ['#4caf50', '#ffca28', '#ef5350'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: false,
+            rotation: -90,
+            circumference: 180,
+            cutout: '72%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            }
+        },
+        plugins: [{
+            id: 'needlePlugin',
+            afterDraw(chart) {
+                const { ctx, chartArea } = chart;
+                const cx = (chartArea.left + chartArea.right) / 2;
+                const cy = chartArea.bottom - 4;
+                const outerRadius = (chartArea.right - chartArea.left) / 2;
+                const needleLen = outerRadius * 0.78;
+
+                // needle angle: -PI (left) to 0 (right)
+                const angle = Math.PI + Math.PI * needle;
+
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(angle);
+                ctx.beginPath();
+                ctx.moveTo(0, -3);
+                ctx.lineTo(needleLen, 0);
+                ctx.lineTo(0, 3);
+                ctx.fillStyle = '#37474f';
+                ctx.fill();
+                // center dot
+                ctx.beginPath();
+                ctx.arc(0, 0, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#37474f';
+                ctx.fill();
+                ctx.restore();
+            }
+        }]
+    });
+
+    return chart;
+}
+
+function getStatusHtml(value, thresholds) {
+    if (value <= thresholds.green) return ['Good', 'status-green'];
+    if (value <= thresholds.yellow) return ['Caution', 'status-yellow'];
+    return ['Poor', 'status-red'];
+}
+
+function renderGaugeEUI(eui) {
+    const thresholds = { green: 80, yellow: 150 };
+    chartEUI = createGauge('gaugeEUI', eui, 300, thresholds, chartEUI);
+    $('valEUI').textContent = eui.toFixed(1);
+    const [label, cls] = getStatusHtml(eui, thresholds);
+    $('statusEUI').textContent = label;
+    $('statusEUI').className = 'gauge-status ' + cls;
+    $('detailEUI').textContent = 'Green <80 | Yellow 80-150 | Red >150';
+}
+
+function renderGaugeWUI(wui) {
+    const thresholds = { green: 20, yellow: 40 };
+    chartWUI = createGauge('gaugeWUI', wui, 80, thresholds, chartWUI);
+    $('valWUI').textContent = wui.toFixed(1);
+    const [label, cls] = getStatusHtml(wui, thresholds);
+    $('statusWUI').textContent = label;
+    $('statusWUI').className = 'gauge-status ' + cls;
+    $('detailWUI').textContent = 'Green <20 | Yellow 20-40 | Red >40';
+}
+
+function renderGaugeCO2(total, scope1, scope2) {
+    const thresholds = { green: 500, yellow: 1500 };
+    chartCO2 = createGauge('gaugeCO2', total, 3000, thresholds, chartCO2);
+    $('valCO2').textContent = total.toFixed(1);
+    const [label, cls] = getStatusHtml(total, thresholds);
+    $('statusCO2').textContent = label;
+    $('statusCO2').className = 'gauge-status ' + cls;
+    $('detailCO2').textContent = `Scope 1: ${scope1.toFixed(1)}t | Scope 2: ${scope2.toFixed(1)}t`;
+}
+
+function renderGaugeCost(total, perSqFt, elec, gas, water) {
+    const thresholds = { green: 200000, yellow: 500000 };
+    chartCost = createGauge('gaugeCost', total, 1000000, thresholds, chartCost);
+    $('valCost').textContent = '$' + total.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const [label, cls] = getStatusHtml(total, thresholds);
+    $('statusCost').textContent = '$' + perSqFt.toFixed(2) + '/ft\u00B2';
+    $('statusCost').className = 'gauge-status ' + cls;
+    $('detailCost').textContent = `Elec $${(elec/1000).toFixed(0)}k | Gas $${(gas/1000).toFixed(0)}k | Water $${(water/1000).toFixed(0)}k`;
+}
+
+// ===== Benchmark Chart =====
+function renderBenchmark(eui) {
+    if (chartBenchmark) chartBenchmark.destroy();
+
+    const type = $('buildingType').value;
+    const bm = BENCHMARKS[type];
+
+    const ctx = $('benchmarkChart').getContext('2d');
+    chartBenchmark = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Best-in-Class (Top 25%)', 'This Facility', 'Industry Average'],
+            datasets: [{
+                label: 'EUI (kBtu/ft\u00B2/year)',
+                data: [bm.best, eui, bm.avg],
+                backgroundColor: [
+                    '#43a047',   // best = green
+                    '#1a237e',   // this facility = navy
+                    '#ef5350'    // average = red
+                ],
+                borderRadius: 4,
+                barThickness: 32
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => ctx.parsed.x.toFixed(1) + ' kBtu/ft\u00B2/yr'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'EUI (kBtu/ft\u00B2/year)', font: { size: 12 } },
+                    grid: { color: '#eeeeee' }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+// ===== What-If Scenario =====
+function updateWhatIf() {
+    if (!calcResults) return;
+
+    const compPct = parseInt($('sliderCompressor').value) / 100;
+    const waterPct = parseInt($('sliderWater').value) / 100;
+    const leakPct = parseInt($('sliderLeaks').value) / 100;
+
+    $('lblCompressor').textContent = Math.round(compPct * 100) + '%';
+    $('lblWater').textContent = Math.round(waterPct * 100) + '%';
+    $('lblLeaks').textContent = Math.round(leakPct * 100) + '% savings';
+
+    // Compressor energy savings (applied to electricity cost)
+    const elecSavings = calcResults.elecCost * compPct;
+
+    // Compressed air leak savings (applied to electricity cost)
+    const leakSavings = calcResults.elecCost * leakPct;
+
+    // Water savings
+    const waterSavings = calcResults.waterCost * waterPct;
+
+    const totalSavings = elecSavings + leakSavings + waterSavings;
+
+    // CO2 reduction: reduced electricity * emission factor
+    const elecKwhSaved = calcResults.electricity * (compPct + leakPct);
+    const co2Reduction = (elecKwhSaved / 1000) * calcResults.emissionFactor;
+
+    // Simple payback: implementation cost = savings * 2
+    const implCost = totalSavings * 2;
+    const payback = totalSavings > 0 ? implCost / totalSavings : 0; // years
+
+    $('savDollars').textContent = '$' + totalSavings.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    $('savCO2').textContent = co2Reduction.toFixed(1) + ' t';
+    $('savPayback').textContent = totalSavings > 0 ? payback.toFixed(1) + ' yrs' : '-- yrs';
+}
+
+// ===== Recommendations =====
+function renderRecommendations(eui, wui, totalCO2, scope2, scope1) {
+    const recs = [];
+    const type = $('buildingType').value;
+    const bm = BENCHMARKS[type];
+
+    // Evaluate conditions and build recommendations with priority scores
+    if (eui > bm.avg) {
+        const pctOver = ((eui - bm.avg) / bm.avg * 100).toFixed(0);
+        recs.push({
+            priority: 'high',
+            title: 'Reduce Energy Consumption',
+            desc: `Your EUI of ${eui.toFixed(1)} is ${pctOver}% above the ${type} industry average (${bm.avg}). Install VFDs on compressors and pumps, optimize system controls, and improve insulation to lower energy use.`,
+            savings: `Potential savings: ~$${(calcResults.elecCost * 0.15).toLocaleString('en-US', {maximumFractionDigits: 0})}/year with 15% efficiency gain.`
+        });
+    }
+
+    if (wui > 30) {
+        recs.push({
+            priority: 'high',
+            title: 'Reduce Water Consumption',
+            desc: `Your WUI of ${wui.toFixed(1)} gal/ft\u00B2 exceeds the 30 gal/ft\u00B2 threshold. Implement cooling tower blowdown recycling, repair leaks, and install water-efficient equipment.`,
+            savings: `Potential savings: ~$${(calcResults.waterCost * 0.20).toLocaleString('en-US', {maximumFractionDigits: 0})}/year with 20% water reduction.`
+        });
+    }
+
+    if (totalCO2 > 1000) {
+        const scope2Pct = (scope2 / totalCO2 * 100).toFixed(0);
+        recs.push({
+            priority: 'high',
+            title: 'Reduce Carbon Emissions',
+            desc: `Total carbon footprint is ${totalCO2.toFixed(0)} metric tons CO2e. Scope 2 (electricity) accounts for ${scope2Pct}% — focus on electricity reduction, renewable energy procurement, or on-site generation.`,
+            savings: `Potential reduction: ~${(scope2 * 0.15).toFixed(0)} tons CO2e/year with 15% electricity savings.`
+        });
+    }
+
+    // Always add general best-practice recommendations
+    if (eui <= bm.avg) {
+        recs.push({
+            priority: 'low',
+            title: 'Maintain Energy Efficiency',
+            desc: `Your EUI of ${eui.toFixed(1)} is at or below the industry average (${bm.avg}). Continue monitoring and maintain current efficiency practices. Target best-in-class (${bm.best}) for further improvement.`,
+            savings: `Potential savings reaching best-in-class: ~$${(calcResults.elecCost * ((eui - bm.best) / eui)).toLocaleString('en-US', {maximumFractionDigits: 0})}/year.`
+        });
+    }
+
+    if (wui <= 30) {
+        recs.push({
+            priority: 'low',
+            title: 'Water Use is Within Acceptable Range',
+            desc: `Your WUI of ${wui.toFixed(1)} gal/ft\u00B2 is within a reasonable range. Consider sub-metering to identify further savings opportunities.`,
+            savings: ''
+        });
+    }
+
+    recs.push({
+        priority: 'medium',
+        title: 'Implement Compressed Air Leak Detection Program',
+        desc: 'Compressed air leaks typically account for 20-30% of system energy. Implement an ultrasonic leak detection program for immediate cost reduction.',
+        savings: `Potential savings: ~$${(calcResults.elecCost * 0.10).toLocaleString('en-US', {maximumFractionDigits: 0})}/year (estimated 10% of electricity cost).`
+    });
+
+    // Sort: high first, then medium, then low — take top 3
+    const order = { high: 0, medium: 1, low: 2 };
+    recs.sort((a, b) => order[a.priority] - order[b.priority]);
+    const top3 = recs.slice(0, 3);
+
+    const container = $('recommendations');
+    container.innerHTML = '';
+    top3.forEach((rec, i) => {
+        const div = document.createElement('div');
+        div.className = 'rec-item ' + rec.priority;
+        div.innerHTML = `
+            <div class="rec-rank">#${i + 1}</div>
+            <div class="rec-text">
+                <strong>${rec.title}</strong>
+                <p>${rec.desc}</p>
+                ${rec.savings ? '<p style="margin-top:4px;font-weight:600;color:#2e7d32;">' + rec.savings + '</p>' : ''}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// ===== Event Listeners =====
+
+$('btnCalculate').addEventListener('click', calculate);
+
+$('btnReset').addEventListener('click', function() {
+    $('electricity').value = 2400000;
+    $('naturalGas').value = 50000;
+    $('buildingArea').value = 100000;
+    $('elecCost').value = 0.12;
+    $('waterUse').value = 3000000;
+    $('waterCost').value = 8.50;
+    $('refrigerantType').value = '2088';
+    $('refrigerantLoss').value = 25;
+    $('region').value = '0.386';
+    $('buildingType').value = 'Manufacturing';
+    $('resultsArea').classList.remove('visible');
+    calcResults = null;
+});
+
+// Building type change -> re-render benchmark and recommendations
+$('buildingType').addEventListener('change', function() {
+    if (calcResults) {
+        renderBenchmark(calcResults.eui);
+        renderRecommendations(
+            calcResults.eui, calcResults.wui, calcResults.totalCO2,
+            calcResults.scope2, calcResults.scope1
+        );
+    }
+});
+
+// What-if sliders -> real-time update
+$('sliderCompressor').addEventListener('input', updateWhatIf);
+$('sliderWater').addEventListener('input', updateWhatIf);
+$('sliderLeaks').addEventListener('input', updateWhatIf);
+
+// Run calculation on page load with defaults
+window.addEventListener('DOMContentLoaded', function() {
+    calculate();
+});
+</script>
+</body>
+</html>

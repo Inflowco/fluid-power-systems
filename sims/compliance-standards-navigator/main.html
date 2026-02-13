@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compliance Standards Navigator</title>
+<style>
+/* ============================================================
+   CSS Reset & Base Styles
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+               Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  background: #f5f7fa;
+  padding: 16px;
+}
+
+/* ============================================================
+   Header & Mode Toggle
+   ============================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.mode-toggle {
+  display: flex;
+  background: #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mode-btn {
+  padding: 8px 20px;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.25s, color 0.25s;
+}
+
+.mode-btn.active {
+  background: #455a64;
+  color: #fff;
+}
+
+.mode-btn:hover:not(.active) {
+  background: #cfd8dc;
+}
+
+/* ============================================================
+   Explorer Mode — Category Card Grid
+   ============================================================ */
+.explorer-view {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 560px) {
+  .explorer-view {
+    grid-template-columns: 1fr;
+  }
+}
+
+.category-card {
+  border-radius: 12px;
+  padding: 28px 24px;
+  color: #fff;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.category-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+}
+
+.category-card h2 {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+
+.category-card p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.card-osha   { background: #2196F3; }
+.card-nfpa   { background: #F44336; }
+.card-ashrae { background: #4CAF50; }
+.card-iso    { background: #9C27B0; }
+
+/* ============================================================
+   Explorer Mode — Detail Panel (standards list)
+   ============================================================ */
+.detail-panel {
+  display: none;
+  animation: fadeSlideIn 0.3s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.detail-header .badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.back-btn {
+  padding: 7px 16px;
+  border: 2px solid #bbb;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.back-btn:hover {
+  background: #eceff1;
+  border-color: #888;
+}
+
+/* Standards list items */
+.standard-item {
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+
+.standard-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.standard-summary {
+  padding: 14px 18px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.standard-summary .code {
+  font-weight: 700;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.standard-summary .desc {
+  flex: 1;
+  color: #555;
+}
+
+.standard-summary .chevron {
+  font-size: 1.1rem;
+  color: #999;
+  transition: transform 0.25s;
+  margin-left: 8px;
+}
+
+.standard-summary .chevron.open {
+  transform: rotate(90deg);
+}
+
+.standard-examples {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  padding: 0 18px;
+  background: #fafafa;
+  border-top: 1px solid transparent;
+}
+
+.standard-examples.open {
+  max-height: 300px;
+  padding: 12px 18px;
+  border-top: 1px solid #eee;
+}
+
+.standard-examples ul {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+.standard-examples li {
+  margin-bottom: 4px;
+  font-size: 0.92rem;
+  color: #555;
+}
+
+/* Color accent bar on the left of each standard item */
+.standard-item.accent-osha   { border-left: 4px solid #2196F3; }
+.standard-item.accent-nfpa   { border-left: 4px solid #F44336; }
+.standard-item.accent-ashrae { border-left: 4px solid #4CAF50; }
+.standard-item.accent-iso    { border-left: 4px solid #9C27B0; }
+
+/* ============================================================
+   Quiz Mode
+   ============================================================ */
+.quiz-view {
+  display: none;
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.quiz-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.quiz-progress .score {
+  font-weight: 700;
+}
+
+/* Progress bar */
+.progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #455a64;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.scenario-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 16px;
+}
+
+.scenario-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.scenario-text {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* Answer choices */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 500px) {
+  .choices {
+    grid-template-columns: 1fr;
+  }
+}
+
+.choice-btn {
+  padding: 14px 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  color: #333;
+  line-height: 1.35;
+}
+
+.choice-btn:hover:not(:disabled) {
+  border-color: #999;
+  transform: translateY(-1px);
+}
+
+.choice-btn.selected {
+  border-color: #455a64;
+  background: #eceff1;
+}
+
+.choice-btn:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.choice-btn.correct {
+  border-color: #4CAF50;
+  background: #e8f5e9;
+}
+
+.choice-btn.incorrect {
+  border-color: #F44336;
+  background: #ffebee;
+}
+
+/* Feedback area */
+.quiz-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.check-btn, .next-btn, .restart-btn {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.check-btn {
+  background: #455a64;
+  color: #fff;
+}
+
+.check-btn:hover:not(:disabled) {
+  background: #37474f;
+  transform: translateY(-1px);
+}
+
+.check-btn:disabled {
+  background: #b0bec5;
+  cursor: default;
+}
+
+.next-btn {
+  background: #2196F3;
+  color: #fff;
+  display: none;
+}
+
+.next-btn:hover {
+  background: #1976D2;
+  transform: translateY(-1px);
+}
+
+.restart-btn {
+  background: #9C27B0;
+  color: #fff;
+  display: none;
+}
+
+.restart-btn:hover {
+  background: #7B1FA2;
+  transform: translateY(-1px);
+}
+
+.feedback {
+  margin-top: 14px;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-size: 0.93rem;
+  line-height: 1.5;
+  display: none;
+}
+
+.feedback.correct {
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  color: #2e7d32;
+}
+
+.feedback.incorrect {
+  background: #ffebee;
+  border: 1px solid #ef9a9a;
+  color: #c62828;
+}
+
+/* Final results card */
+.results-card {
+  display: none;
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.results-card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.results-card .big-score {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #455a64;
+  margin-bottom: 10px;
+}
+
+.results-card p {
+  color: #666;
+  margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Header with mode toggle
+     ============================================================ -->
+<div class="header">
+  <h1>Compliance Standards Navigator</h1>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btnExplorer" onclick="switchMode('explorer')">Explorer</button>
+    <button class="mode-btn" id="btnQuiz" onclick="switchMode('quiz')">Quiz</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     Explorer Mode — Card Grid
+     ============================================================ -->
+<div id="explorerGrid" class="explorer-view">
+  <div class="category-card card-osha" onclick="showDetail('osha')">
+    <h2>OSHA</h2>
+    <p>Workplace Safety Standards</p>
+  </div>
+  <div class="category-card card-nfpa" onclick="showDetail('nfpa')">
+    <h2>NFPA</h2>
+    <p>Fire &amp; Electrical Codes</p>
+  </div>
+  <div class="category-card card-ashrae" onclick="showDetail('ashrae')">
+    <h2>ASHRAE</h2>
+    <p>HVAC &amp; Energy Standards</p>
+  </div>
+  <div class="category-card card-iso" onclick="showDetail('iso')">
+    <h2>ISO</h2>
+    <p>Management System Standards</p>
+  </div>
+</div>
+
+<!-- ============================================================
+     Explorer Mode — Detail Panel (populated by JS)
+     ============================================================ -->
+<div id="detailPanel" class="detail-panel"></div>
+
+<!-- ============================================================
+     Quiz Mode
+     ============================================================ -->
+<div id="quizView" class="quiz-view">
+  <div class="quiz-progress">
+    <span id="quizCounter">Scenario 1 of 6</span>
+    <span class="score">Score: <span id="quizScore">0</span>/6</span>
+  </div>
+  <div class="progress-bar-track">
+    <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+
+  <!-- Active scenario card -->
+  <div id="scenarioCard" class="scenario-card">
+    <div class="scenario-label">Scenario</div>
+    <div class="scenario-text" id="scenarioText"></div>
+    <div class="choices" id="choicesContainer"></div>
+    <div class="quiz-actions">
+      <button class="check-btn" id="checkBtn" onclick="checkAnswer()" disabled>Check Answer</button>
+      <button class="next-btn" id="nextBtn" onclick="nextScenario()">Next Scenario</button>
+      <button class="restart-btn" id="restartBtn" onclick="restartQuiz()">Try Again</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <!-- Results card (shown after all scenarios) -->
+  <div class="results-card" id="resultsCard">
+    <h2>Quiz Complete!</h2>
+    <div class="big-score" id="finalScore"></div>
+    <p id="resultsMsg"></p>
+    <button class="restart-btn" style="display:inline-block" onclick="restartQuiz()">Try Again</button>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   DATA — Standards organized by category
+   ================================================================ */
+const standardsData = {
+  osha: {
+    label: "OSHA",
+    fullName: "Workplace Safety Standards",
+    color: "#2196F3",
+    accent: "accent-osha",
+    standards: [
+      {
+        code: "29 CFR 1910.147",
+        title: "Lockout/Tagout (LOTO)",
+        desc: "Required for servicing pumps, fans, compressors, hydraulic systems",
+        examples: [
+          "Locking out a hydraulic press before replacing a cylinder seal",
+          "Applying tagout procedures on a centrifugal pump before impeller maintenance",
+          "De-energizing a compressor motor and verifying zero energy before belt replacement"
+        ]
+      },
+      {
+        code: "29 CFR 1910.146",
+        title: "Confined Spaces",
+        desc: "Cooling towers, tanks, large duct systems",
+        examples: [
+          "Entering a cooling tower basin for sediment removal and inspection",
+          "Working inside a large air-handling unit plenum for coil cleaning",
+          "Descending into an underground hydraulic fluid storage tank for maintenance"
+        ]
+      },
+      {
+        code: "29 CFR 1910.95",
+        title: "Noise Exposure",
+        desc: "Fan rooms, compressor rooms, pneumatic tools",
+        examples: [
+          "Requiring hearing protection in compressor rooms exceeding 85 dBA",
+          "Conducting audiometric testing for workers operating pneumatic impact wrenches",
+          "Installing sound-attenuating enclosures around large centrifugal fans"
+        ]
+      },
+      {
+        code: "29 CFR 1910.134",
+        title: "Respiratory Protection",
+        desc: "Dust collection service, refrigerant handling",
+        examples: [
+          "Wearing an N95 respirator when replacing dust collector filter bags",
+          "Using a self-contained breathing apparatus during refrigerant leak response",
+          "Fit-testing maintenance staff who service woodshop dust collection ductwork"
+        ]
+      },
+      {
+        code: "29 CFR 1910.132-138",
+        title: "Personal Protective Equipment (PPE)",
+        desc: "All fluid power maintenance activities",
+        examples: [
+          "Requiring safety glasses and gloves when handling hydraulic fluid",
+          "Wearing face shields during high-pressure fitting connections",
+          "Using steel-toed boots and hard hats in mechanical rooms with overhead piping"
+        ]
+      },
+      {
+        code: "29 CFR 1910.303-308",
+        title: "Electrical Safety",
+        desc: "VFDs, control panels, motor starters",
+        examples: [
+          "Verifying proper grounding on VFD installations for fan motors",
+          "Ensuring motor control center enclosures meet NEMA ratings",
+          "Using insulated tools when troubleshooting live control panel circuits"
+        ]
+      }
+    ]
+  },
+  nfpa: {
+    label: "NFPA",
+    fullName: "Fire & Electrical Codes",
+    color: "#F44336",
+    accent: "accent-nfpa",
+    standards: [
+      {
+        code: "NFPA 70",
+        title: "National Electrical Code (NEC)",
+        desc: "Motor wiring, VFDs, control panels",
+        examples: [
+          "Sizing wire and conduit for a 50 HP compressor motor installation",
+          "Selecting proper disconnect switches for rooftop air-handling units",
+          "Ensuring VFD output wiring uses shielded cable to reduce electromagnetic interference"
+        ]
+      },
+      {
+        code: "NFPA 70E",
+        title: "Electrical Safety in the Workplace",
+        desc: "Arc flash protection, energized work",
+        examples: [
+          "Performing arc flash hazard analysis on motor control centers",
+          "Wearing arc-rated PPE when racking in a chiller circuit breaker",
+          "Establishing an approach boundary before testing a live VFD"
+        ]
+      },
+      {
+        code: "NFPA 652",
+        title: "Combustible Dust Fundamentals",
+        desc: "Dust collection systems",
+        examples: [
+          "Conducting a Dust Hazard Analysis (DHA) for a furniture manufacturing facility",
+          "Classifying dust explosibility using Kst and Pmax test data",
+          "Selecting explosion venting for dust collector housings based on DHA findings"
+        ]
+      },
+      {
+        code: "NFPA 654",
+        title: "Prevention of Dust Explosions in Manufacturing",
+        desc: "Manufacturing dust hazards",
+        examples: [
+          "Designing ductwork velocities to prevent dust accumulation in conveying lines",
+          "Locating dust collectors outside the building to minimize explosion risk",
+          "Installing spark detection and suppression systems in dust collection ductwork"
+        ]
+      },
+      {
+        code: "NFPA 30",
+        title: "Flammable and Combustible Liquids Code",
+        desc: "Hydraulic fluid storage",
+        examples: [
+          "Storing petroleum-based hydraulic fluid in approved flammable storage cabinets",
+          "Installing secondary containment around bulk hydraulic oil tanks",
+          "Determining fire-resistant hydraulic fluid alternatives for high-risk areas"
+        ]
+      },
+      {
+        code: "NFPA 90A",
+        title: "Installation of Air-Conditioning and Ventilating Systems",
+        desc: "HVAC ductwork",
+        examples: [
+          "Selecting fire-rated duct materials for supply air plenums above ceilings",
+          "Installing fire/smoke dampers at duct penetrations through fire-rated walls",
+          "Ensuring HVAC unit filters meet flame-spread and smoke-development limits"
+        ]
+      }
+    ]
+  },
+  ashrae: {
+    label: "ASHRAE",
+    fullName: "HVAC & Energy Standards",
+    color: "#4CAF50",
+    accent: "accent-ashrae",
+    standards: [
+      {
+        code: "ASHRAE 90.1",
+        title: "Energy Standard for Buildings",
+        desc: "HVAC efficiency minimums",
+        examples: [
+          "Selecting chillers that meet minimum COP requirements for the climate zone",
+          "Verifying fan system power limitations for new air-handling units",
+          "Specifying economizer controls that comply with energy budgets"
+        ]
+      },
+      {
+        code: "ASHRAE 62.1",
+        title: "Ventilation for Acceptable Indoor Air Quality",
+        desc: "Indoor air quality requirements",
+        examples: [
+          "Calculating required outdoor air rates for an office building HVAC system",
+          "Designing demand-controlled ventilation using CO2 sensors",
+          "Selecting air filtration to meet minimum MERV ratings for recirculated air"
+        ]
+      },
+      {
+        code: "ASHRAE 55",
+        title: "Thermal Environmental Conditions for Human Occupancy",
+        desc: "Temperature and humidity standards",
+        examples: [
+          "Verifying that cooling system setpoints fall within the comfort envelope",
+          "Measuring operative temperature and air speed in occupied zones",
+          "Adjusting humidity control in a chilled-water system to meet comfort criteria"
+        ]
+      },
+      {
+        code: "ASHRAE 188",
+        title: "Legionellosis: Risk Management for Building Water Systems",
+        desc: "Cooling tower water management",
+        examples: [
+          "Creating a water management program for open recirculating cooling towers",
+          "Setting biocide treatment schedules to control Legionella in condenser water",
+          "Documenting temperature monitoring and flushing procedures for cooling systems"
+        ]
+      },
+      {
+        code: "ASHRAE Guideline 36",
+        title: "High-Performance Sequences of Operation for HVAC Systems",
+        desc: "Control optimization",
+        examples: [
+          "Implementing trim-and-respond logic for supply air temperature reset",
+          "Programming optimal start sequences to reduce morning pull-down energy",
+          "Configuring chilled-water differential pressure setpoint reset based on valve positions"
+        ]
+      }
+    ]
+  },
+  iso: {
+    label: "ISO",
+    fullName: "Management System Standards",
+    color: "#9C27B0",
+    accent: "accent-iso",
+    standards: [
+      {
+        code: "ISO 14001",
+        title: "Environmental Management Systems",
+        desc: "Systematic environmental improvement",
+        examples: [
+          "Tracking refrigerant usage and leak rates as an environmental performance indicator",
+          "Setting annual targets for reducing cooling water chemical discharge",
+          "Conducting environmental impact assessments for new compressor installations"
+        ]
+      },
+      {
+        code: "ISO 50001",
+        title: "Energy Management Systems",
+        desc: "Continuous energy performance improvement",
+        examples: [
+          "Establishing energy baselines for compressed air systems and tracking improvement",
+          "Conducting energy reviews of pumping systems to identify optimization opportunities",
+          "Setting energy performance indicators (EnPIs) for chiller plant efficiency"
+        ]
+      },
+      {
+        code: "ISO 45001",
+        title: "Occupational Health and Safety Management",
+        desc: "Worker safety management",
+        examples: [
+          "Integrating hazard identification for high-pressure hydraulic line work",
+          "Conducting management reviews of safety incidents involving fluid power equipment",
+          "Establishing consultation processes with workers on dust collection system hazards"
+        ]
+      },
+      {
+        code: "ISO 9001",
+        title: "Quality Management Systems",
+        desc: "Process quality assurance",
+        examples: [
+          "Documenting standard operating procedures for preventive maintenance on chillers",
+          "Implementing calibration tracking for pressure gauges on hydraulic test stands",
+          "Conducting internal audits of compressed air system maintenance records"
+        ]
+      }
+    ]
+  }
+};
+
+/* ================================================================
+   DATA — Quiz scenarios
+   ================================================================ */
+const quizScenarios = [
+  {
+    text: "A technician needs to replace a seal on a running hydraulic pump. What standard primarily governs the safety procedure required before this work begins?",
+    correctCategory: "osha",
+    correctCode: "29 CFR 1910.147",
+    choices: [
+      { category: "osha",   code: "29 CFR 1910.147", label: "OSHA 1910.147 \u2014 Lockout/Tagout" },
+      { category: "nfpa",   code: "NFPA 70",          label: "NFPA 70 \u2014 National Electrical Code" },
+      { category: "ashrae", code: "ASHRAE 90.1",      label: "ASHRAE 90.1 \u2014 Energy Standard" },
+      { category: "iso",    code: "ISO 45001",        label: "ISO 45001 \u2014 OH&S Management" }
+    ],
+    explanation: "Before servicing any equipment with hazardous energy (mechanical, hydraulic, electrical), OSHA 1910.147 requires lockout/tagout procedures to ensure the pump is fully de-energized and cannot restart unexpectedly."
+  },
+  {
+    text: "The facility is installing new Variable Frequency Drives (VFDs) on all fan motors. Which standard governs the electrical wiring requirements for this installation?",
+    correctCategory: "nfpa",
+    correctCode: "NFPA 70",
+    choices: [
+      { category: "osha",   code: "29 CFR 1910.303-308", label: "OSHA 1910.303-308 \u2014 Electrical Safety" },
+      { category: "nfpa",   code: "NFPA 70",              label: "NFPA 70 \u2014 National Electrical Code" },
+      { category: "ashrae", code: "ASHRAE Guideline 36",  label: "ASHRAE 36 \u2014 HVAC Sequences" },
+      { category: "iso",    code: "ISO 50001",            label: "ISO 50001 \u2014 Energy Management" }
+    ],
+    explanation: "NFPA 70 (the National Electrical Code) establishes the wiring methods, conductor sizing, disconnects, and installation requirements for motor circuits including VFDs. It is the primary code for electrical installation."
+  },
+  {
+    text: "Workers in the compressor room are complaining of hearing difficulty after their shifts. Which standard addresses the permissible noise exposure levels and required protections?",
+    correctCategory: "osha",
+    correctCode: "29 CFR 1910.95",
+    choices: [
+      { category: "osha",   code: "29 CFR 1910.95", label: "OSHA 1910.95 \u2014 Noise Exposure" },
+      { category: "nfpa",   code: "NFPA 70E",       label: "NFPA 70E \u2014 Electrical Safety" },
+      { category: "ashrae", code: "ASHRAE 55",       label: "ASHRAE 55 \u2014 Thermal Comfort" },
+      { category: "iso",    code: "ISO 9001",        label: "ISO 9001 \u2014 Quality Management" }
+    ],
+    explanation: "OSHA 1910.95 sets permissible exposure limits for occupational noise (85 dBA TWA over 8 hours) and requires hearing conservation programs, audiometric testing, and hearing protection in noisy environments like compressor rooms."
+  },
+  {
+    text: "A woodworking shop needs to design its dust collection system to prevent combustible dust hazards. Which standard provides the foundational requirements?",
+    correctCategory: "nfpa",
+    correctCode: "NFPA 652",
+    choices: [
+      { category: "osha",   code: "29 CFR 1910.134", label: "OSHA 1910.134 \u2014 Respiratory Protection" },
+      { category: "nfpa",   code: "NFPA 652",         label: "NFPA 652 \u2014 Combustible Dust Fundamentals" },
+      { category: "ashrae", code: "ASHRAE 62.1",      label: "ASHRAE 62.1 \u2014 Ventilation" },
+      { category: "iso",    code: "ISO 14001",        label: "ISO 14001 \u2014 Environmental Management" }
+    ],
+    explanation: "NFPA 652 is the overarching standard for combustible dust hazards. It requires a Dust Hazard Analysis (DHA) and establishes fundamental requirements for managing fire and explosion risks in dust collection systems."
+  },
+  {
+    text: "The building owner wants to reduce HVAC energy consumption by 20%. Which standard provides the baseline efficiency requirements against which improvements should be measured?",
+    correctCategory: "ashrae",
+    correctCode: "ASHRAE 90.1",
+    choices: [
+      { category: "osha",   code: "29 CFR 1910.132-138", label: "OSHA 1910.132-138 \u2014 PPE" },
+      { category: "nfpa",   code: "NFPA 90A",             label: "NFPA 90A \u2014 Air Conditioning Systems" },
+      { category: "ashrae", code: "ASHRAE 90.1",          label: "ASHRAE 90.1 \u2014 Energy Standard" },
+      { category: "iso",    code: "ISO 50001",            label: "ISO 50001 \u2014 Energy Management" }
+    ],
+    explanation: "ASHRAE 90.1 establishes minimum energy efficiency requirements for building HVAC, lighting, and envelope systems. It serves as the benchmark for measuring energy performance improvements and is referenced by most building energy codes."
+  },
+  {
+    text: "The company wants to certify its environmental management practices to demonstrate commitment to reducing its ecological footprint. Which standard provides the framework for this certification?",
+    correctCategory: "iso",
+    correctCode: "ISO 14001",
+    choices: [
+      { category: "osha",   code: "29 CFR 1910.146",  label: "OSHA 1910.146 \u2014 Confined Spaces" },
+      { category: "nfpa",   code: "NFPA 30",           label: "NFPA 30 \u2014 Flammable Liquids" },
+      { category: "ashrae", code: "ASHRAE 188",        label: "ASHRAE 188 \u2014 Legionella Risk" },
+      { category: "iso",    code: "ISO 14001",         label: "ISO 14001 \u2014 Environmental Management" }
+    ],
+    explanation: "ISO 14001 provides the internationally recognized framework for environmental management systems (EMS). Organizations can achieve third-party certification to demonstrate systematic control and continuous improvement of their environmental impact."
+  }
+];
+
+/* ================================================================
+   STATE
+   ================================================================ */
+let currentMode = "explorer";       // "explorer" | "quiz"
+let currentQuizIndex = 0;
+let quizScore = 0;
+let selectedChoiceIndex = null;
+let answered = false;
+
+/* ================================================================
+   MODE SWITCHING
+   ================================================================ */
+function switchMode(mode) {
+  currentMode = mode;
+
+  // Toggle button styles
+  document.getElementById("btnExplorer").classList.toggle("active", mode === "explorer");
+  document.getElementById("btnQuiz").classList.toggle("active", mode === "quiz");
+
+  // Show/hide views
+  document.getElementById("explorerGrid").style.display = (mode === "explorer") ? "grid" : "none";
+  document.getElementById("detailPanel").style.display = "none";
+  document.getElementById("quizView").style.display = (mode === "quiz") ? "block" : "none";
+
+  if (mode === "quiz") {
+    renderScenario();
+  }
+}
+
+/* ================================================================
+   EXPLORER — Show detail panel for a category
+   ================================================================ */
+function showDetail(categoryKey) {
+  const cat = standardsData[categoryKey];
+  const panel = document.getElementById("detailPanel");
+
+  // Hide grid, show panel
+  document.getElementById("explorerGrid").style.display = "none";
+  panel.style.display = "block";
+
+  // Build HTML
+  let html = `
+    <div class="detail-header">
+      <button class="back-btn" onclick="backToGrid()">&larr; Back</button>
+      <span class="badge" style="background:${cat.color}">${cat.label}</span>
+      <span style="font-weight:600;color:#444">${cat.fullName}</span>
+    </div>
+  `;
+
+  cat.standards.forEach((std, i) => {
+    const examplesHtml = std.examples.map(ex => `<li>${ex}</li>`).join("");
+    html += `
+      <div class="standard-item ${cat.accent}">
+        <div class="standard-summary" onclick="toggleExamples('ex-${categoryKey}-${i}', this)">
+          <span><span class="code">${std.code}</span> &mdash; ${std.title}</span>
+          <span class="chevron">&#9654;</span>
+        </div>
+        <div class="standard-examples" id="ex-${categoryKey}-${i}">
+          <p style="font-size:0.88rem;color:#777;margin-bottom:6px">${std.desc}</p>
+          <ul>${examplesHtml}</ul>
+        </div>
+      </div>
+    `;
+  });
+
+  panel.innerHTML = html;
+}
+
+/* Toggle examples open/closed */
+function toggleExamples(id, summaryEl) {
+  const el = document.getElementById(id);
+  const chevron = summaryEl.querySelector(".chevron");
+  const isOpen = el.classList.contains("open");
+
+  el.classList.toggle("open");
+  chevron.classList.toggle("open");
+}
+
+/* Return to the four-card grid */
+function backToGrid() {
+  document.getElementById("detailPanel").style.display = "none";
+  document.getElementById("explorerGrid").style.display = "grid";
+}
+
+/* ================================================================
+   QUIZ — Render current scenario
+   ================================================================ */
+function renderScenario() {
+  const scenarioCard = document.getElementById("scenarioCard");
+  const resultsCard = document.getElementById("resultsCard");
+
+  // Reset state
+  selectedChoiceIndex = null;
+  answered = false;
+
+  // If all scenarios done, show results
+  if (currentQuizIndex >= quizScenarios.length) {
+    scenarioCard.style.display = "none";
+    resultsCard.style.display = "block";
+    document.getElementById("finalScore").textContent = quizScore + " / " + quizScenarios.length;
+
+    const pct = Math.round((quizScore / quizScenarios.length) * 100);
+    let msg = "";
+    if (pct === 100) msg = "Perfect score! You have an excellent grasp of compliance standards.";
+    else if (pct >= 67) msg = "Good work! Review the standards you missed in Explorer mode.";
+    else msg = "Keep studying! Use Explorer mode to review standards and their applications.";
+    document.getElementById("resultsMsg").textContent = msg;
+    return;
+  }
+
+  scenarioCard.style.display = "block";
+  resultsCard.style.display = "none";
+
+  const scenario = quizScenarios[currentQuizIndex];
+
+  // Update progress indicators
+  document.getElementById("quizCounter").textContent =
+    "Scenario " + (currentQuizIndex + 1) + " of " + quizScenarios.length;
+  document.getElementById("quizScore").textContent = quizScore;
+  document.getElementById("progressFill").style.width =
+    ((currentQuizIndex / quizScenarios.length) * 100) + "%";
+
+  // Scenario text
+  document.getElementById("scenarioText").textContent = scenario.text;
+
+  // Build choice buttons (shuffle copy of choices)
+  const shuffled = [...scenario.choices].sort(() => Math.random() - 0.5);
+  const container = document.getElementById("choicesContainer");
+  container.innerHTML = "";
+
+  shuffled.forEach((choice, i) => {
+    const btn = document.createElement("button");
+    btn.className = "choice-btn";
+    btn.textContent = choice.label;
+    btn.dataset.code = choice.code;
+    btn.dataset.category = choice.category;
+    btn.onclick = () => selectChoice(i);
+    container.appendChild(btn);
+  });
+
+  // Reset buttons & feedback
+  document.getElementById("checkBtn").disabled = true;
+  document.getElementById("checkBtn").style.display = "inline-block";
+  document.getElementById("nextBtn").style.display = "none";
+  document.getElementById("restartBtn").style.display = "none";
+  document.getElementById("feedback").style.display = "none";
+  document.getElementById("feedback").className = "feedback";
+}
+
+/* Select a choice (before checking) */
+function selectChoice(index) {
+  if (answered) return;
+  selectedChoiceIndex = index;
+
+  const buttons = document.querySelectorAll("#choicesContainer .choice-btn");
+  buttons.forEach((btn, i) => {
+    btn.classList.toggle("selected", i === index);
+  });
+
+  document.getElementById("checkBtn").disabled = false;
+}
+
+/* Check the selected answer */
+function checkAnswer() {
+  if (selectedChoiceIndex === null || answered) return;
+  answered = true;
+
+  const scenario = quizScenarios[currentQuizIndex];
+  const buttons = document.querySelectorAll("#choicesContainer .choice-btn");
+  const selectedBtn = buttons[selectedChoiceIndex];
+  const isCorrect = selectedBtn.dataset.code === scenario.correctCode;
+
+  if (isCorrect) quizScore++;
+
+  // Highlight buttons
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    if (btn.dataset.code === scenario.correctCode) {
+      btn.classList.add("correct");
+    }
+    if (btn === selectedBtn && !isCorrect) {
+      btn.classList.add("incorrect");
+    }
+  });
+
+  // Show feedback
+  const feedback = document.getElementById("feedback");
+  feedback.style.display = "block";
+  feedback.className = "feedback " + (isCorrect ? "correct" : "incorrect");
+  feedback.innerHTML = isCorrect
+    ? "<strong>Correct!</strong> " + scenario.explanation
+    : "<strong>Incorrect.</strong> " + scenario.explanation;
+
+  // Update score display
+  document.getElementById("quizScore").textContent = quizScore;
+
+  // Show next/restart buttons
+  document.getElementById("checkBtn").style.display = "none";
+  if (currentQuizIndex < quizScenarios.length - 1) {
+    document.getElementById("nextBtn").style.display = "inline-block";
+  } else {
+    document.getElementById("nextBtn").style.display = "inline-block";
+    document.getElementById("nextBtn").textContent = "See Results";
+  }
+}
+
+/* Advance to next scenario */
+function nextScenario() {
+  currentQuizIndex++;
+  renderScenario();
+}
+
+/* Restart the quiz */
+function restartQuiz() {
+  currentQuizIndex = 0;
+  quizScore = 0;
+  document.getElementById("nextBtn").textContent = "Next Scenario";
+  renderScenario();
+}
+</script>
+</body>
+</html>

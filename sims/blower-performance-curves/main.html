@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blower Performance Curve Explorer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+        main { display: flex; justify-content: center; }
+        #controls {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 8px 16px 12px 16px;
+            background: #fff;
+            border-top: 1px solid #ddd;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            align-items: flex-start;
+        }
+        .ctrl-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .ctrl-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+        .ctrl-group input[type="range"] {
+            width: 160px;
+            cursor: pointer;
+        }
+        .ctrl-group select {
+            padding: 4px 8px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .ctrl-group .val {
+            font-size: 11px;
+            color: #555;
+            min-width: 80px;
+        }
+        .cb-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .cb-group span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .cb-group label {
+            font-size: 11px;
+            color: #444;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #readouts {
+            background: #f0f4f8;
+            border: 1px solid #d0d8e0;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #333;
+            line-height: 1.6;
+            min-width: 180px;
+        }
+        #readouts b { color: #111; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <div id="controls">
+        <div class="ctrl-group">
+            <label>Blower Type</label>
+            <select id="blowerType" onchange="changeBlowerType()">
+                <option value="pd">PD (Roots) Blower</option>
+                <option value="centrifugal" selected>Centrifugal Blower</option>
+                <option value="turbo">High-Speed Turbo</option>
+            </select>
+        </div>
+        <div class="ctrl-group">
+            <label>Flow Rate (CFM)</label>
+            <input type="range" id="flowSlider" min="0" max="3000" value="1800" step="10">
+            <div class="val" id="flowVal">1,800 CFM</div>
+        </div>
+        <div class="ctrl-group">
+            <label>Blower Speed</label>
+            <input type="range" id="speedSlider" min="50" max="100" value="100" step="1">
+            <div class="val" id="speedVal">100%</div>
+        </div>
+        <div class="cb-group">
+            <span>Show Curves</span>
+            <label><input type="checkbox" id="cbPressure" checked> Pressure (psi)</label>
+            <label><input type="checkbox" id="cbEff" checked> Efficiency (%)</label>
+            <label><input type="checkbox" id="cbPower" checked> Power (BHP)</label>
+            <label><input type="checkbox" id="cbSys" checked> System Curve</label>
+        </div>
+        <div id="readouts">
+            <b>Operating Point</b><br>
+            <span id="rFlow">Flow: 1,800 CFM</span><br>
+            <span id="rPressure">Pressure: -- psi</span><br>
+            <span id="rEff">Efficiency: -- %</span><br>
+            <span id="rPower">Power: -- BHP</span><br>
+            <span id="rType">Type: Centrifugal</span>
+        </div>
+    </div>
+
+    <script>
+    // ── Blower Performance Curve Explorer ──
+
+    let canvasW, canvasH;
+    const GRAPH_PAD_LEFT = 70;
+    const GRAPH_PAD_RIGHT = 70;
+    const GRAPH_PAD_TOP = 50;
+    const GRAPH_PAD_BOTTOM = 50;
+    let graphX, graphY, graphW, graphH;
+
+    // --- Curve parameters ---
+    const Q_MAX = 3000; // CFM
+    let blowerType = 'centrifugal';
+
+    // Centrifugal blower parameters (at 100% speed)
+    const CENT_P0 = 10;     // shut-off pressure (psi)
+    const CENT_Pa = (CENT_P0 - 1) / (Q_MAX * Q_MAX);
+    const CENT_EFF_PEAK = 82;
+    const CENT_EFF_Q_PEAK = 1800;
+    const CENT_EFF_SIGMA = 900;
+
+    // PD blower parameters
+    const PD_P_MAX = 15;
+    const PD_FLOW_RATED = 2000; // rated CFM at 100%
+    const PD_EFF_BASE = 58;
+
+    // Turbo blower parameters
+    const TURBO_P0 = 12;
+    const TURBO_Pa = (TURBO_P0 - 0.5) / (Q_MAX * Q_MAX);
+    const TURBO_EFF_PEAK = 78;
+    const TURBO_EFF_Q_PEAK = 1600;
+    const TURBO_EFF_SIGMA = 850;
+
+    // System curve
+    const SYS_P_STATIC = 2;
+    const SYS_K = (7 - SYS_P_STATIC) / (2200 * 2200);
+
+    // Y-axis ranges
+    const PRESSURE_MAX = 16;
+    const EFF_MAX = 100;
+    const POWER_MAX = 80;
+
+    // State
+    let flowRate = 1800;
+    let blowerSpeed = 100;
+    let showPressure = true;
+    let showEff = true;
+    let showPower = true;
+    let showSys = true;
+
+    // ── Curve functions ──
+
+    // CENTRIFUGAL
+    function centPressure(Q, spd) {
+        let ratio = spd / 100;
+        let Qr = Q / ratio;
+        if (Qr > Q_MAX) return null;
+        let P = CENT_P0 - CENT_Pa * Qr * Qr;
+        return max(0, P * ratio * ratio);
+    }
+
+    function centEff(Q, spd) {
+        let ratio = spd / 100;
+        let Qr = Q / ratio;
+        if (Qr > Q_MAX || Qr < 0) return null;
+        let penalty = 1 - 0.06 * (1 - ratio);
+        return max(0, CENT_EFF_PEAK * penalty * Math.exp(-0.5 * pow((Qr - CENT_EFF_Q_PEAK) / CENT_EFF_SIGMA, 2)));
+    }
+
+    function centPower(Q, spd) {
+        let P = centPressure(Q, spd);
+        let eff = centEff(Q, spd);
+        if (P === null || eff === null || eff < 1) return null;
+        // BHP = (Q * deltaP_inWG) / (6356 * eff/100)
+        let deltaP_wg = P * 27.7;
+        return (Q * deltaP_wg) / (6356 * (eff / 100));
+    }
+
+    // PD BLOWER (constant volume)
+    function pdPressure(Q, spd) {
+        let ratio = spd / 100;
+        let ratedFlow = PD_FLOW_RATED * ratio;
+        // PD blower: nearly vertical line at rated flow
+        // Pressure is whatever the system demands (up to max)
+        if (abs(Q - ratedFlow) < 80) return null; // not a function of Q really
+        return null;
+    }
+
+    function pdFlow(spd) {
+        return PD_FLOW_RATED * (spd / 100);
+    }
+
+    function pdEff(P, spd) {
+        // PD efficiency drops at higher pressure ratios
+        let baseEff = PD_EFF_BASE;
+        let pressurePenalty = P / PD_P_MAX * 8;
+        return max(35, baseEff - pressurePenalty);
+    }
+
+    function pdPower(P, spd) {
+        let Q = pdFlow(spd);
+        let eff = pdEff(P, spd);
+        let deltaP_wg = P * 27.7;
+        return (Q * deltaP_wg) / (6356 * (eff / 100));
+    }
+
+    // TURBO
+    function turboPressure(Q, spd) {
+        let ratio = spd / 100;
+        let Qr = Q / ratio;
+        if (Qr > Q_MAX) return null;
+        let P = TURBO_P0 - TURBO_Pa * Qr * Qr;
+        return max(0, P * ratio * ratio);
+    }
+
+    function turboEff(Q, spd) {
+        let ratio = spd / 100;
+        let Qr = Q / ratio;
+        if (Qr > Q_MAX || Qr < 0) return null;
+        let penalty = 1 - 0.05 * (1 - ratio);
+        return max(0, TURBO_EFF_PEAK * penalty * Math.exp(-0.5 * pow((Qr - TURBO_EFF_Q_PEAK) / TURBO_EFF_SIGMA, 2)));
+    }
+
+    function turboPower(Q, spd) {
+        let P = turboPressure(Q, spd);
+        let eff = turboEff(Q, spd);
+        if (P === null || eff === null || eff < 1) return null;
+        let deltaP_wg = P * 27.7;
+        return (Q * deltaP_wg) / (6356 * (eff / 100));
+    }
+
+    // SYSTEM CURVE
+    function sysCurve(Q) {
+        return SYS_P_STATIC + SYS_K * Q * Q;
+    }
+
+    // Generic dispatchers
+    function getPressure(Q, spd) {
+        if (blowerType === 'pd') return null; // handled separately
+        if (blowerType === 'turbo') return turboPressure(Q, spd);
+        return centPressure(Q, spd);
+    }
+
+    function getEff(Q, spd) {
+        if (blowerType === 'pd') return null;
+        if (blowerType === 'turbo') return turboEff(Q, spd);
+        return centEff(Q, spd);
+    }
+
+    function getPower(Q, spd) {
+        if (blowerType === 'pd') return null;
+        if (blowerType === 'turbo') return turboPower(Q, spd);
+        return centPower(Q, spd);
+    }
+
+    // ── Coordinate helpers ──
+    function qToX(q) { return graphX + (q / Q_MAX) * graphW; }
+    function valToY(val, vMax) { return graphY + graphH - (val / vMax) * graphH; }
+
+    // ── Setup ──
+    function setup() {
+        canvasW = Math.min(920, windowWidth - 10);
+        canvasH = 470;
+        const canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+        computeGraphBounds();
+        bindControls();
+        textFont('Arial');
+    }
+
+    function computeGraphBounds() {
+        graphX = GRAPH_PAD_LEFT;
+        graphY = GRAPH_PAD_TOP;
+        graphW = canvasW - GRAPH_PAD_LEFT - GRAPH_PAD_RIGHT;
+        graphH = canvasH - GRAPH_PAD_TOP - GRAPH_PAD_BOTTOM;
+    }
+
+    function bindControls() {
+        document.getElementById('flowSlider').addEventListener('input', function() {
+            flowRate = parseInt(this.value);
+            document.getElementById('flowVal').textContent = flowRate.toLocaleString() + ' CFM';
+        });
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            blowerSpeed = parseInt(this.value);
+            document.getElementById('speedVal').textContent = blowerSpeed + '%';
+        });
+        document.getElementById('cbPressure').addEventListener('change', function() { showPressure = this.checked; });
+        document.getElementById('cbEff').addEventListener('change', function() { showEff = this.checked; });
+        document.getElementById('cbPower').addEventListener('change', function() { showPower = this.checked; });
+        document.getElementById('cbSys').addEventListener('change', function() { showSys = this.checked; });
+    }
+
+    function changeBlowerType() {
+        blowerType = document.getElementById('blowerType').value;
+    }
+
+    // ── Draw ──
+    function draw() {
+        background(255);
+        drawTitle();
+        drawGrid();
+        drawAxes();
+
+        if (blowerType === 'pd') {
+            drawPDCurves();
+        } else {
+            drawDynamicCurves();
+        }
+
+        drawOperatingLine();
+        drawLegend();
+        updateReadouts();
+    }
+
+    function drawTitle() {
+        fill(30);
+        noStroke();
+        textSize(16);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        let typeNames = { pd: 'PD (Roots) Blower', centrifugal: 'Centrifugal Blower', turbo: 'High-Speed Turbo Blower' };
+        text('Blower Performance Curves — ' + typeNames[blowerType], canvasW / 2, 8);
+        textStyle(NORMAL);
+        textSize(11);
+        fill(100);
+        let subtitle = blowerType === 'pd' ?
+            'Constant Volume  |  Speed: ' + blowerSpeed + '%  |  Flow varies linearly with speed' :
+            'Variable Flow  |  Speed: ' + blowerSpeed + '%  |  Power varies with speed\u00B3';
+        text(subtitle, canvasW / 2, 28);
+    }
+
+    function drawGrid() {
+        stroke(235);
+        strokeWeight(0.5);
+        for (let q = 0; q <= Q_MAX; q += 300) {
+            let x = qToX(q);
+            line(x, graphY, x, graphY + graphH);
+        }
+        for (let i = 0; i <= 8; i++) {
+            let y = graphY + (i / 8) * graphH;
+            line(graphX, y, graphX + graphW, y);
+        }
+    }
+
+    function drawAxes() {
+        stroke(80);
+        strokeWeight(1.5);
+        noFill();
+        rect(graphX, graphY, graphW, graphH);
+
+        // X-axis: Flow (CFM)
+        fill(50);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, TOP);
+        for (let q = 0; q <= Q_MAX; q += 300) {
+            text(q.toLocaleString(), qToX(q), graphY + graphH + 5);
+        }
+        textSize(12);
+        textStyle(BOLD);
+        text('Flow Rate (CFM)', graphX + graphW / 2, graphY + graphH + 22);
+        textStyle(NORMAL);
+
+        // Left Y-axis: Pressure (psi)
+        push();
+        fill(40, 100, 200);
+        textSize(10);
+        textAlign(RIGHT, CENTER);
+        for (let v = 0; v <= PRESSURE_MAX; v += 2) {
+            let y = valToY(v, PRESSURE_MAX);
+            text(v, graphX - 6, y);
+            stroke(40, 100, 200);
+            strokeWeight(1);
+            line(graphX - 3, y, graphX, y);
+            noStroke();
+        }
+        push();
+        translate(graphX - 45, graphY + graphH / 2);
+        rotate(-HALF_PI);
+        textSize(11);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        fill(40, 100, 200);
+        text('Pressure (psi)', 0, 0);
+        textStyle(NORMAL);
+        pop();
+        pop();
+
+        // Right Y-axis: Efficiency (%)
+        push();
+        fill(30, 150, 50);
+        textSize(10);
+        textAlign(LEFT, CENTER);
+        for (let v = 0; v <= EFF_MAX; v += 20) {
+            let y = valToY(v, EFF_MAX);
+            text(v, graphX + graphW + 6, y);
+            stroke(30, 150, 50);
+            strokeWeight(1);
+            line(graphX + graphW, y, graphX + graphW + 3, y);
+            noStroke();
+        }
+        push();
+        translate(graphX + graphW + 40, graphY + graphH / 2);
+        rotate(HALF_PI);
+        textSize(11);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        fill(30, 150, 50);
+        text('Efficiency (%)', 0, 0);
+        textStyle(NORMAL);
+        pop();
+        pop();
+    }
+
+    // ── Draw dynamic blower curves (centrifugal, turbo) ──
+    function drawDynamicCurves() {
+        let maxQ = Q_MAX * (blowerSpeed / 100);
+        let step = 5;
+
+        // Ghost curves at 100% if speed reduced
+        if (blowerSpeed < 100) {
+            let ghostAlpha = 50;
+            if (showPressure) {
+                stroke(40, 100, 200, ghostAlpha);
+                strokeWeight(1);
+                noFill();
+                drawingContext.setLineDash([4, 4]);
+                beginShape();
+                for (let q = 0; q <= Q_MAX; q += step) {
+                    let p = getPressure(q, 100);
+                    if (p !== null && p >= 0) vertex(qToX(q), valToY(p, PRESSURE_MAX));
+                }
+                endShape();
+                drawingContext.setLineDash([]);
+            }
+            if (showEff) {
+                stroke(30, 150, 50, ghostAlpha);
+                strokeWeight(1);
+                noFill();
+                drawingContext.setLineDash([4, 4]);
+                beginShape();
+                for (let q = 0; q <= Q_MAX; q += step) {
+                    let e = getEff(q, 100);
+                    if (e !== null) vertex(qToX(q), valToY(e, EFF_MAX));
+                }
+                endShape();
+                drawingContext.setLineDash([]);
+            }
+        }
+
+        // Pressure curve
+        if (showPressure) {
+            stroke(40, 100, 200);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let q = 0; q <= maxQ; q += step) {
+                let p = getPressure(q, blowerSpeed);
+                if (p !== null && p >= 0) vertex(qToX(q), valToY(p, PRESSURE_MAX));
+            }
+            endShape();
+
+            // Surge line region for centrifugal/turbo
+            let surgeQ = maxQ * 0.15;
+            fill(255, 200, 200, 40);
+            noStroke();
+            rect(graphX, graphY, qToX(surgeQ) - graphX, graphH);
+            fill(200, 40, 40, 180);
+            textSize(9);
+            textAlign(CENTER, TOP);
+            text('SURGE', qToX(surgeQ / 2), graphY + 5);
+            text('ZONE', qToX(surgeQ / 2), graphY + 16);
+        }
+
+        // Efficiency curve
+        if (showEff) {
+            stroke(30, 150, 50);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let q = 0; q <= maxQ; q += step) {
+                let e = getEff(q, blowerSpeed);
+                if (e !== null) vertex(qToX(q), valToY(e, EFF_MAX));
+            }
+            endShape();
+
+            // BEP marker
+            let bestQ = 0, bestEff = 0;
+            for (let q = 0; q <= maxQ; q += 5) {
+                let e = getEff(q, blowerSpeed);
+                if (e !== null && e > bestEff) { bestEff = e; bestQ = q; }
+            }
+            if (bestEff > 0) {
+                let bepX = qToX(bestQ);
+                let bepY = valToY(bestEff, EFF_MAX);
+                fill(255, 200, 0);
+                stroke(80);
+                strokeWeight(1);
+                drawStar(bepX, bepY, 5, 10, 5);
+                noStroke();
+                fill(60);
+                textSize(9);
+                textAlign(LEFT, CENTER);
+                text('BEP', bepX + 12, bepY);
+            }
+        }
+
+        // Power curve
+        if (showPower) {
+            stroke(200, 40, 40);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let q = 0; q <= maxQ; q += step) {
+                let pw = getPower(q, blowerSpeed);
+                if (pw !== null && pw >= 0) vertex(qToX(q), valToY(pw, POWER_MAX));
+            }
+            endShape();
+        }
+
+        // System curve
+        if (showSys) {
+            stroke(130);
+            strokeWeight(1.8);
+            noFill();
+            drawingContext.setLineDash([8, 5]);
+            beginShape();
+            for (let q = 0; q <= Q_MAX; q += step) {
+                let ps = sysCurve(q);
+                if (ps <= PRESSURE_MAX) vertex(qToX(q), valToY(ps, PRESSURE_MAX));
+            }
+            endShape();
+            drawingContext.setLineDash([]);
+        }
+    }
+
+    // ── Draw PD blower curves (constant volume — vertical lines) ──
+    function drawPDCurves() {
+        let ratedQ = pdFlow(blowerSpeed);
+        let step = 0.2;
+
+        // Ghost at 100% speed
+        if (blowerSpeed < 100) {
+            let fullQ = pdFlow(100);
+            let x100 = qToX(fullQ);
+            if (showPressure) {
+                stroke(40, 100, 200, 50);
+                strokeWeight(1);
+                drawingContext.setLineDash([4, 4]);
+                line(x100, valToY(0, PRESSURE_MAX), x100, valToY(PD_P_MAX, PRESSURE_MAX));
+                drawingContext.setLineDash([]);
+            }
+        }
+
+        // Vertical pressure line at rated flow
+        if (showPressure) {
+            let x = qToX(ratedQ);
+            stroke(40, 100, 200);
+            strokeWeight(2.5);
+            line(x, valToY(0, PRESSURE_MAX), x, valToY(PD_P_MAX, PRESSURE_MAX));
+
+            // Max pressure label
+            noStroke();
+            fill(40, 100, 200);
+            textSize(9);
+            textAlign(LEFT, CENTER);
+            text(PD_P_MAX + ' psi max', x + 6, valToY(PD_P_MAX, PRESSURE_MAX));
+
+            // Constant volume annotation
+            fill(40, 100, 200, 120);
+            textSize(10);
+            textAlign(CENTER, BOTTOM);
+            text('Constant Volume', x, valToY(PD_P_MAX, PRESSURE_MAX) - 8);
+            text(ratedQ.toLocaleString() + ' CFM', x, valToY(PD_P_MAX, PRESSURE_MAX) + 12);
+        }
+
+        // Efficiency (horizontal band — relatively flat for PD)
+        if (showEff) {
+            stroke(30, 150, 50);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let p = 0; p <= PD_P_MAX; p += step) {
+                let eff = pdEff(p, blowerSpeed);
+                let y = valToY(p, PRESSURE_MAX);
+                // Map efficiency to right axis — draw as horizontal bars at the rated flow X
+                // Actually draw as a curve of eff vs Q for the rated flow
+            }
+            endShape();
+
+            // Draw efficiency as a function of pressure (shown as a line at the rated flow point)
+            // For PD, efficiency is roughly constant (~55-60%) with slight drop at high pressure
+            let effLow = pdEff(PD_P_MAX, blowerSpeed);
+            let effHigh = pdEff(0, blowerSpeed);
+            let qx = qToX(ratedQ);
+
+            // Draw eff range indicator
+            noStroke();
+            fill(30, 150, 50, 60);
+            rect(qx - 30, valToY(effHigh, EFF_MAX), 60, valToY(effLow, EFF_MAX) - valToY(effHigh, EFF_MAX));
+            fill(30, 150, 50);
+            textSize(9);
+            textAlign(CENTER, CENTER);
+            text(Math.round(effLow) + '-' + Math.round(effHigh) + '%', qx, valToY((effLow + effHigh) / 2, EFF_MAX));
+        }
+
+        // Power curve (linear with pressure for PD)
+        if (showPower) {
+            stroke(200, 40, 40);
+            strokeWeight(2.5);
+            noFill();
+            beginShape();
+            for (let p = 0; p <= PD_P_MAX; p += step) {
+                let pw = pdPower(p, blowerSpeed);
+                // Map: x-axis is flow (fixed at rated), y shows power at this pressure
+                // Better: show power vs system pressure at the rated flow
+                // Draw as a line at x = ratedQ, showing power increasing with pressure
+            }
+            endShape();
+
+            // Draw power line at rated Q
+            let qx = qToX(ratedQ);
+            stroke(200, 40, 40);
+            strokeWeight(2);
+            let pw0 = pdPower(2, blowerSpeed);
+            let pw15 = pdPower(PD_P_MAX, blowerSpeed);
+            // Show power values
+            noStroke();
+            fill(200, 40, 40);
+            textSize(9);
+            textAlign(LEFT, CENTER);
+            let sysPressure = sysCurve(ratedQ);
+            if (sysPressure <= PD_P_MAX) {
+                let pwAtSys = pdPower(sysPressure, blowerSpeed);
+                text(Math.round(pwAtSys) + ' BHP', qx + 35, valToY(pwAtSys, POWER_MAX));
+                // Draw power dot
+                fill(200, 40, 40);
+                noStroke();
+                ellipse(qx, valToY(pwAtSys, POWER_MAX), 8, 8);
+            }
+        }
+
+        // System curve
+        if (showSys) {
+            stroke(130);
+            strokeWeight(1.8);
+            noFill();
+            drawingContext.setLineDash([8, 5]);
+            beginShape();
+            for (let q = 0; q <= Q_MAX; q += 5) {
+                let ps = sysCurve(q);
+                if (ps <= PRESSURE_MAX) vertex(qToX(q), valToY(ps, PRESSURE_MAX));
+            }
+            endShape();
+            drawingContext.setLineDash([]);
+
+            // Operating point where PD vertical line meets system curve
+            let sysPressureAtQ = sysCurve(ratedQ);
+            if (sysPressureAtQ <= PD_P_MAX) {
+                let opX = qToX(ratedQ);
+                let opY = valToY(sysPressureAtQ, PRESSURE_MAX);
+
+                // Operating point marker
+                fill(255, 100, 0);
+                stroke(80);
+                strokeWeight(1.5);
+                ellipse(opX, opY, 12, 12);
+
+                noStroke();
+                fill(60);
+                textSize(10);
+                textStyle(BOLD);
+                textAlign(LEFT, CENTER);
+                text('Operating Point', opX + 10, opY - 2);
+                textStyle(NORMAL);
+                textSize(9);
+                fill(100);
+                text(ratedQ.toLocaleString() + ' CFM @ ' + sysPressureAtQ.toFixed(1) + ' psi', opX + 10, opY + 12);
+            }
+        }
+    }
+
+    function drawOperatingLine() {
+        if (blowerType === 'pd') return; // handled in drawPDCurves
+
+        let x = qToX(flowRate);
+        if (x < graphX || x > graphX + graphW) return;
+
+        stroke(80, 80, 80, 180);
+        strokeWeight(1.2);
+        drawingContext.setLineDash([5, 4]);
+        line(x, graphY, x, graphY + graphH);
+        drawingContext.setLineDash([]);
+
+        noStroke();
+        fill(80);
+        textSize(9);
+        textAlign(CENTER, BOTTOM);
+        text(flowRate.toLocaleString() + ' CFM', x, graphY - 3);
+
+        // Intersection dots
+        let dotR = 7;
+        let p = getPressure(flowRate, blowerSpeed);
+        let e = getEff(flowRate, blowerSpeed);
+        let pw = getPower(flowRate, blowerSpeed);
+
+        if (showPressure && p !== null && p >= 0) {
+            fill(40, 100, 200);
+            noStroke();
+            ellipse(x, valToY(p, PRESSURE_MAX), dotR, dotR);
+        }
+        if (showEff && e !== null) {
+            fill(30, 150, 50);
+            noStroke();
+            ellipse(x, valToY(e, EFF_MAX), dotR, dotR);
+        }
+        if (showPower && pw !== null && pw >= 0 && pw <= POWER_MAX) {
+            fill(200, 40, 40);
+            noStroke();
+            ellipse(x, valToY(pw, POWER_MAX), dotR, dotR);
+        }
+        if (showSys) {
+            let ps = sysCurve(flowRate);
+            if (ps <= PRESSURE_MAX) {
+                fill(130);
+                noStroke();
+                ellipse(x, valToY(ps, PRESSURE_MAX), dotR, dotR);
+            }
+        }
+
+        // Operating point where pressure curve meets system curve
+        if (showPressure && showSys && p !== null) {
+            let ps = sysCurve(flowRate);
+            if (abs(p - ps) < 0.5) {
+                fill(255, 100, 0);
+                stroke(80);
+                strokeWeight(1.5);
+                ellipse(x, valToY(ps, PRESSURE_MAX), 12, 12);
+                noStroke();
+                fill(60);
+                textSize(10);
+                textStyle(BOLD);
+                textAlign(LEFT, CENTER);
+                text('Operating Point', x + 10, valToY(ps, PRESSURE_MAX));
+                textStyle(NORMAL);
+            }
+        }
+    }
+
+    function drawStar(x, y, r1, r2, npoints) {
+        let angle = TWO_PI / npoints;
+        let halfAngle = angle / 2.0;
+        beginShape();
+        for (let a = -HALF_PI; a < TWO_PI - HALF_PI; a += angle) {
+            vertex(x + cos(a) * r2, y + sin(a) * r2);
+            vertex(x + cos(a + halfAngle) * r1, y + sin(a + halfAngle) * r1);
+        }
+        endShape(CLOSE);
+    }
+
+    function drawLegend() {
+        let lx = graphX + 10;
+        let ly = graphY + 10;
+        if (blowerType === 'pd') ly = graphY + 40; // below surge zone text
+        let lineLen = 22;
+        let lineH = 16;
+        let items = [];
+
+        if (showPressure) items.push({ label: blowerType === 'pd' ? 'Pressure (max)' : 'Pressure (psi)', col: [40, 100, 200], dash: false });
+        if (showEff) items.push({ label: 'Efficiency (%)', col: [30, 150, 50], dash: false });
+        if (showPower) items.push({ label: 'Power (BHP)', col: [200, 40, 40], dash: false });
+        if (showSys) items.push({ label: 'System Curve', col: [130, 130, 130], dash: true });
+        if (items.length === 0) return;
+
+        let boxW = 130;
+        let boxH = items.length * lineH + 10;
+        fill(255, 255, 255, 220);
+        stroke(200);
+        strokeWeight(0.5);
+        rect(lx, ly, boxW, boxH, 4);
+
+        for (let i = 0; i < items.length; i++) {
+            let yy = ly + 8 + i * lineH;
+            let it = items[i];
+            stroke(it.col[0], it.col[1], it.col[2]);
+            strokeWeight(2.5);
+            if (it.dash) drawingContext.setLineDash([5, 3]);
+            line(lx + 6, yy + 4, lx + 6 + lineLen, yy + 4);
+            drawingContext.setLineDash([]);
+            noStroke();
+            fill(50);
+            textSize(10);
+            textAlign(LEFT, CENTER);
+            text(it.label, lx + 6 + lineLen + 5, yy + 4);
+        }
+    }
+
+    function updateReadouts() {
+        let typeNames = { pd: 'PD (Roots)', centrifugal: 'Centrifugal', turbo: 'High-Speed Turbo' };
+        document.getElementById('rType').textContent = 'Type: ' + typeNames[blowerType];
+
+        if (blowerType === 'pd') {
+            let q = pdFlow(blowerSpeed);
+            let sysP = sysCurve(q);
+            let eff = pdEff(sysP, blowerSpeed);
+            let pw = pdPower(sysP, blowerSpeed);
+            document.getElementById('rFlow').textContent = 'Flow: ' + Math.round(q).toLocaleString() + ' CFM';
+            document.getElementById('rPressure').textContent = 'Pressure: ' + sysP.toFixed(1) + ' psi (system)';
+            document.getElementById('rEff').textContent = 'Efficiency: ' + eff.toFixed(1) + ' %';
+            document.getElementById('rPower').textContent = 'Power: ' + pw.toFixed(1) + ' BHP';
+        } else {
+            let p = getPressure(flowRate, blowerSpeed);
+            let e = getEff(flowRate, blowerSpeed);
+            let pw = getPower(flowRate, blowerSpeed);
+            document.getElementById('rFlow').textContent = 'Flow: ' + flowRate.toLocaleString() + ' CFM';
+            document.getElementById('rPressure').textContent = 'Pressure: ' + (p !== null && p >= 0 ? p.toFixed(1) : '--') + ' psi';
+            document.getElementById('rEff').textContent = 'Efficiency: ' + (e !== null ? e.toFixed(1) : '--') + ' %';
+            document.getElementById('rPower').textContent = 'Power: ' + (pw !== null && pw >= 0 ? pw.toFixed(1) : '--') + ' BHP';
+        }
+    }
+
+    function windowResized() {
+        canvasW = Math.min(920, windowWidth - 10);
+        canvasH = 470;
+        resizeCanvas(canvasW, canvasH);
+        computeGraphBounds();
+    }
+    </script>
+</body>
+</html>

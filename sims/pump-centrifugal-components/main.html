@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centrifugal Pump Components</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+        #canvas-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+        #diagram-area {
+            flex: 3;
+            position: relative;
+        }
+        #detail-panel {
+            flex: 1;
+            min-width: 220px;
+            max-width: 320px;
+            background: #ffffff;
+            border-left: 2px solid #ccc;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        #detail-panel h2 {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #2196F3;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        #detail-panel h3 {
+            font-size: 16px;
+            color: #1565C0;
+            margin-bottom: 6px;
+        }
+        #detail-panel p {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #444;
+            margin-bottom: 10px;
+        }
+        #detail-panel .category-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        .cat-rotating { background: #1976D2; }
+        .cat-stationary { background: #616161; }
+        .cat-sealing { background: #E65100; }
+        #legend {
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid #ddd;
+        }
+        #legend h4 {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #555;
+        }
+        .legend-swatch {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 8px;
+            border: 1px solid #aaa;
+        }
+        #placeholder-msg {
+            color: #999;
+            font-size: 13px;
+            font-style: italic;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <div id="diagram-area"></div>
+        <div id="detail-panel">
+            <h2>Component Details</h2>
+            <div id="detail-content">
+                <p id="placeholder-msg">Hover over a component to see its name. Click to view details.</p>
+            </div>
+            <div id="legend">
+                <h4>Color Legend</h4>
+                <div class="legend-item">
+                    <div class="legend-swatch" style="background:#5C9BD4;"></div>
+                    Rotating Parts
+                </div>
+                <div class="legend-item">
+                    <div class="legend-swatch" style="background:#A0A0A0;"></div>
+                    Stationary Parts
+                </div>
+                <div class="legend-item">
+                    <div class="legend-swatch" style="background:#E8873A;"></div>
+                    Sealing Elements
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ── Component data ─────────────────────────────────────────────────
+    const components = [
+        {
+            id: 'volute',
+            name: 'Volute Casing',
+            category: 'stationary',
+            brief: 'Spiral-shaped outer housing that converts velocity to pressure.',
+            detail: 'The volute casing is the stationary outer shell of the pump with a characteristic spiral shape that gradually increases in cross-sectional area toward the discharge port. As fluid exits the impeller at high velocity, the expanding volute passage converts kinetic energy into pressure energy (per Bernoulli\'s principle). The volute also collects fluid from around the entire impeller circumference and directs it toward the single discharge opening. Volutes are typically cast from iron, steel, or stainless steel depending on the application.',
+        },
+        {
+            id: 'impeller',
+            name: 'Impeller',
+            category: 'rotating',
+            brief: 'Rotating disk with curved vanes that accelerates fluid outward.',
+            detail: 'The impeller is the primary rotating component and the heart of the centrifugal pump. It consists of a hub mounted on the shaft with curved vanes (blades) that extend radially. When the impeller spins, fluid enters at the center (suction eye) and is accelerated outward by centrifugal force along the vane passages. The vane curvature is carefully designed to maximize energy transfer to the fluid while minimizing turbulence and recirculation losses. Impellers may be open, semi-open, or closed (shrouded) depending on the application. Typical materials include bronze, stainless steel, or cast iron.',
+        },
+        {
+            id: 'shaft',
+            name: 'Shaft',
+            category: 'rotating',
+            brief: 'Transmits rotational power from motor to impeller.',
+            detail: 'The pump shaft transmits torque from the motor (via coupling) to the impeller. It must be rigid enough to maintain precise impeller alignment under load while withstanding bending forces from hydraulic radial loads, the weight of rotating components, and axial thrust. Shafts are typically machined from high-strength steel (such as AISI 4140) and are precision-ground at bearing and seal contact surfaces. Shaft deflection must be minimized to prevent premature seal and bearing wear.',
+        },
+        {
+            id: 'mechanical_seal',
+            name: 'Mechanical Seal',
+            category: 'sealing',
+            brief: 'Prevents fluid leakage where the shaft exits the casing.',
+            detail: 'The mechanical seal is a critical sealing device located where the rotating shaft passes through the stationary casing. It consists of two precision-lapped faces: one rotating with the shaft (usually carbon or silicon carbide) and one stationary in the casing (typically ceramic or tungsten carbide). A thin fluid film between the faces provides both lubrication and sealing. Springs maintain face contact. Mechanical seals have largely replaced traditional packing glands because they provide near-zero leakage, longer life, reduced friction losses, and lower maintenance requirements.',
+        },
+        {
+            id: 'wear_ring_front',
+            name: 'Front Wear Ring',
+            category: 'sealing',
+            brief: 'Replaceable ring minimizing internal leakage at impeller front.',
+            detail: 'Wear rings are replaceable, close-clearance rings installed at the gap between the rotating impeller rim and the stationary casing. They form a controlled leakage path (running clearance) that minimizes recirculation of high-pressure discharge fluid back to the low-pressure suction eye. Without wear rings, this internal leakage would severely reduce pump efficiency. As the name implies, wear rings are designed to be sacrificial — they are cheaper and easier to replace than the impeller or casing when erosion increases the clearance beyond acceptable limits. Typical clearances are 0.2-0.5 mm per side.',
+        },
+        {
+            id: 'wear_ring_back',
+            name: 'Back Wear Ring',
+            category: 'sealing',
+            brief: 'Replaceable ring minimizing internal leakage at impeller back.',
+            detail: 'The back wear ring functions identically to the front wear ring but is located at the rear shroud of the impeller. Together, the front and back wear rings control internal recirculation and help balance axial hydraulic thrust on the impeller. In some pump designs, the back wear ring works in conjunction with balance holes drilled through the impeller hub to equalize pressure on both sides of the impeller, reducing the net axial thrust that must be absorbed by the thrust bearing.',
+        },
+        {
+            id: 'bearing_drive',
+            name: 'Drive-End Bearing',
+            category: 'stationary',
+            brief: 'Supports the shaft on the motor (drive) side.',
+            detail: 'The drive-end bearing (also called the inboard bearing) supports the shaft near the motor coupling. It is typically a deep-groove ball bearing or angular contact bearing that handles both radial loads from shaft weight and hydraulic forces, and axial thrust loads from the impeller. Bearings are housed in a precision-machined bearing frame with oil or grease lubrication. Proper bearing selection, installation, and lubrication are critical to pump reliability — bearing failure is one of the most common causes of pump downtime.',
+        },
+        {
+            id: 'bearing_free',
+            name: 'Free-End Bearing',
+            category: 'stationary',
+            brief: 'Supports the shaft on the opposite side from the motor.',
+            detail: 'The free-end bearing (also called the outboard or thrust-end bearing) supports the shaft at the end closest to the impeller. In many pump designs, this bearing is designed to handle the primary axial thrust load generated by the pressure differential across the impeller. It is often an angular contact ball bearing or matched pair arranged to absorb thrust in both directions. The "free" designation means this bearing housing typically allows slight axial float to accommodate thermal expansion of the shaft during operation.',
+        },
+        {
+            id: 'suction_eye',
+            name: 'Suction Eye (Inlet)',
+            category: 'stationary',
+            brief: 'Central opening where fluid enters the impeller.',
+            detail: 'The suction eye is the central inlet opening of the pump where fluid enters the impeller. In an end-suction pump, it is aligned axially with the shaft. The diameter of the suction eye is a critical design parameter: too small restricts flow capacity, while too large increases the required NPSH (Net Positive Suction Head) at the impeller vane tips due to higher peripheral velocity. Fluid enters the suction eye at relatively low velocity and pressure, then is redirected 90 degrees into the radial impeller vane passages. The suction nozzle connects to the piping system via a flanged or threaded connection.',
+        },
+        {
+            id: 'discharge',
+            name: 'Discharge Port',
+            category: 'stationary',
+            brief: 'Outlet where high-pressure fluid exits the volute.',
+            detail: 'The discharge port (or discharge nozzle) is located at the widest point of the volute casing where the collected high-pressure fluid exits the pump. The discharge is typically oriented tangentially to the volute spiral and may point upward, horizontally, or at various angles depending on the pump model and installation requirements. A diffuser section at the discharge further converts remaining velocity energy into pressure. The discharge nozzle includes a flanged or threaded connection for joining to the system piping. Discharge pressure is the sum of suction pressure plus the head added by the pump.',
+        },
+        {
+            id: 'coupling',
+            name: 'Motor Coupling',
+            category: 'rotating',
+            brief: 'Connects the pump shaft to the motor shaft.',
+            detail: 'The motor coupling is the mechanical connection between the pump shaft and the electric motor shaft. Common types include flexible jaw couplings, disc couplings, and grid couplings. Flexible couplings are preferred because they accommodate minor angular, parallel, and axial misalignment between the pump and motor shafts while transmitting torque. However, couplings are NOT designed to compensate for gross misalignment — precise shaft alignment during installation is critical for pump reliability. A coupling guard must always be installed for safety. The coupling is typically keyed to both shafts and secured with set screws or locking nuts.',
+        }
+    ];
+
+    // ── Color palette ──────────────────────────────────────────────────
+    const COLORS = {
+        rotating:       { base: [92, 155, 212],  highlight: [66, 133, 200],  stroke: [40, 90, 150] },
+        stationary:     { base: [160, 160, 160], highlight: [130, 130, 130], stroke: [80, 80, 80] },
+        sealing:        { base: [232, 135, 58],  highlight: [210, 110, 35],  stroke: [170, 80, 20] },
+        background:     [245, 245, 245],
+        grid:           [225, 225, 225],
+        text:           [50, 50, 50],
+        titleBar:       [33, 150, 243],
+    };
+
+    // ── State ──────────────────────────────────────────────────────────
+    let hoveredComponent = null;
+    let selectedComponent = null;
+    let canvasW, canvasH;
+    let cx, cy, pumpScale;
+    let impellerAngle = 0;
+    let hitAreas = [];
+
+    // ── p5 Setup ───────────────────────────────────────────────────────
+    function setup() {
+        let container = document.getElementById('diagram-area');
+        canvasW = container.clientWidth;
+        canvasH = container.clientHeight;
+        let cnv = createCanvas(canvasW, canvasH);
+        cnv.parent('diagram-area');
+        textFont('Arial');
+        calcLayout();
+    }
+
+    function windowResized() {
+        let container = document.getElementById('diagram-area');
+        canvasW = container.clientWidth;
+        canvasH = container.clientHeight;
+        resizeCanvas(canvasW, canvasH);
+        calcLayout();
+    }
+
+    function calcLayout() {
+        // Pump center: offset left to leave room for labels
+        cx = canvasW * 0.48;
+        cy = canvasH * 0.52;
+        pumpScale = min(canvasW * 0.42, canvasH * 0.40);
+    }
+
+    // ── Hit-test helper ────────────────────────────────────────────────
+    function buildHitAreas() {
+        hitAreas = [];
+        let s = pumpScale;
+
+        // Volute casing — outer ring region
+        hitAreas.push({ id: 'volute', type: 'ring', cx: cx, cy: cy, rInner: s * 0.55, rOuter: s * 0.95 });
+        // Impeller — central disk
+        hitAreas.push({ id: 'impeller', type: 'circle', cx: cx, cy: cy, r: s * 0.50 });
+        // Shaft — horizontal bar through center
+        hitAreas.push({ id: 'shaft', type: 'rect', x: cx - s * 1.15, y: cy - s * 0.06, w: s * 1.30, h: s * 0.12 });
+        // Mechanical seal
+        hitAreas.push({ id: 'mechanical_seal', type: 'rect', x: cx - s * 0.72, y: cy - s * 0.14, w: s * 0.10, h: s * 0.28 });
+        // Front wear ring
+        hitAreas.push({ id: 'wear_ring_front', type: 'ring_arc', cx: cx, cy: cy, rInner: s * 0.46, rOuter: s * 0.54, angleStart: -0.6, angleEnd: 0.6 });
+        // Back wear ring
+        hitAreas.push({ id: 'wear_ring_back', type: 'rect', x: cx - s * 0.58, y: cy - s * 0.20, w: s * 0.06, h: s * 0.40 });
+        // Drive-end bearing
+        hitAreas.push({ id: 'bearing_drive', type: 'rect', x: cx - s * 0.98, y: cy - s * 0.15, w: s * 0.14, h: s * 0.30 });
+        // Free-end bearing — not present in this single-stage end-suction layout
+        // We place it conceptually near the impeller side
+        hitAreas.push({ id: 'bearing_free', type: 'rect', x: cx + s * 0.60, y: cy - s * 0.15, w: s * 0.12, h: s * 0.30 });
+        // Suction eye
+        hitAreas.push({ id: 'suction_eye', type: 'circle', cx: cx + s * 0.78, cy: cy, r: s * 0.20 });
+        // Discharge port
+        hitAreas.push({ id: 'discharge', type: 'rect', x: cx - s * 0.16, y: cy - s * 1.08, w: s * 0.32, h: s * 0.22 });
+        // Motor coupling
+        hitAreas.push({ id: 'coupling', type: 'rect', x: cx - s * 1.25, y: cy - s * 0.12, w: s * 0.14, h: s * 0.24 });
+    }
+
+    function pointInHitArea(px, py) {
+        // Check from last to first so smaller/foreground areas are tested first
+        // But we want priority: specific small areas before large areas
+        // Order: coupling, bearing_drive, mechanical_seal, wear_ring_back, wear_ring_front, shaft,
+        //        suction_eye, discharge, bearing_free, impeller, volute
+        let priorityOrder = ['coupling', 'bearing_drive', 'mechanical_seal', 'wear_ring_back',
+                             'discharge', 'bearing_free', 'suction_eye', 'wear_ring_front',
+                             'shaft', 'impeller', 'volute'];
+        for (let pid of priorityOrder) {
+            let area = hitAreas.find(a => a.id === pid);
+            if (!area) continue;
+            if (area.type === 'circle') {
+                let d = dist(px, py, area.cx, area.cy);
+                if (d <= area.r) return area.id;
+            } else if (area.type === 'rect') {
+                if (px >= area.x && px <= area.x + area.w && py >= area.y && py <= area.y + area.h) return area.id;
+            } else if (area.type === 'ring') {
+                let d = dist(px, py, area.cx, area.cy);
+                if (d >= area.rInner && d <= area.rOuter) return area.id;
+            } else if (area.type === 'ring_arc') {
+                let d = dist(px, py, area.cx, area.cy);
+                let angle = atan2(py - area.cy, px - area.cx);
+                if (d >= area.rInner && d <= area.rOuter && angle >= area.angleStart && angle <= area.angleEnd) return area.id;
+            }
+        }
+        return null;
+    }
+
+    // ── Draw ───────────────────────────────────────────────────────────
+    function draw() {
+        background(COLORS.background);
+        buildHitAreas();
+
+        // Detect hover
+        hoveredComponent = pointInHitArea(mouseX, mouseY);
+
+        impellerAngle += 0.008;
+
+        drawTitle();
+        drawPumpCrossSection();
+        drawLabels();
+        drawTooltip();
+    }
+
+    function drawTitle() {
+        noStroke();
+        fill(COLORS.titleBar);
+        rect(0, 0, canvasW, 32, 0);
+        fill(255);
+        textAlign(LEFT, CENTER);
+        textSize(14);
+        textStyle(BOLD);
+        text('Centrifugal Pump — Cross-Section Cutaway', 12, 16);
+        textStyle(NORMAL);
+    }
+
+    function getColor(category, isHovered, isSelected) {
+        let c = COLORS[category];
+        if (isSelected) return c.stroke;
+        if (isHovered) return c.highlight;
+        return c.base;
+    }
+
+    function drawPumpCrossSection() {
+        let s = pumpScale;
+
+        // ── Bearing housing / pedestal ─────────────────────────────
+        push();
+        // Bearing frame rectangle
+        fill(180);
+        stroke(100);
+        strokeWeight(1.5);
+        rectMode(CENTER);
+        // Bearing housing block
+        rect(cx - s * 0.78, cy, s * 0.55, s * 0.34, 4);
+        // Base/foot
+        fill(150);
+        rect(cx - s * 0.78, cy + s * 0.28, s * 0.70, s * 0.10, 2);
+        rect(cx, cy + s * 0.75, s * 1.2, s * 0.08, 3);
+        // Support legs
+        fill(140);
+        rect(cx - s * 0.45, cy + s * 0.52, s * 0.06, s * 0.48, 2);
+        rect(cx + s * 0.35, cy + s * 0.52, s * 0.06, s * 0.48, 2);
+        pop();
+
+        // ── Volute casing ─────────────────────────────────────────
+        push();
+        let volCol = getColor('stationary', hoveredComponent === 'volute', selectedComponent === 'volute');
+        fill(volCol);
+        stroke(COLORS.stationary.stroke);
+        strokeWeight(2);
+        // Draw volute as a spiral-ish shape
+        beginShape();
+        // Outer volute profile — expanding spiral from suction side around to discharge
+        let nPts = 80;
+        for (let i = 0; i <= nPts; i++) {
+            let t = i / nPts;
+            let angle = -PI * 0.35 + t * TWO_PI * 1.05;
+            // Radius expands as we go around (spiral effect)
+            let rBase = s * 0.62;
+            let rExpansion = s * 0.15 * t;
+            let r = rBase + rExpansion;
+            // Flatten slightly at top for discharge
+            if (angle > -PI * 0.6 && angle < -PI * 0.15) {
+                r += s * 0.08;
+            }
+            vertex(cx + cos(angle) * r, cy + sin(angle) * r);
+        }
+        // Close back with the discharge cutoff area
+        endShape(CLOSE);
+        // Inner volute wall (passage)
+        fill(COLORS.background);
+        stroke(COLORS.stationary.stroke);
+        strokeWeight(1.5);
+        ellipse(cx, cy, s * 1.14, s * 1.14);
+        pop();
+
+        // ── Discharge port ────────────────────────────────────────
+        push();
+        let disCol = getColor('stationary', hoveredComponent === 'discharge', selectedComponent === 'discharge');
+        fill(disCol);
+        stroke(COLORS.stationary.stroke);
+        strokeWeight(2);
+        // Discharge nozzle going upward
+        rectMode(CORNER);
+        rect(cx - s * 0.14, cy - s * 1.05, s * 0.28, s * 0.30, 3);
+        // Flange at top
+        fill(disCol[0] - 20, disCol[1] - 20, disCol[2] - 20);
+        rect(cx - s * 0.20, cy - s * 1.08, s * 0.40, s * 0.06, 2);
+        // Flange bolts
+        fill(90);
+        noStroke();
+        circle(cx - s * 0.16, cy - s * 1.05, s * 0.035);
+        circle(cx + s * 0.16, cy - s * 1.05, s * 0.035);
+        // Inner passage
+        fill(220, 235, 255);
+        noStroke();
+        rect(cx - s * 0.08, cy - s * 0.96, s * 0.16, s * 0.22);
+        // Flow arrow in discharge
+        fill(COLORS.titleBar);
+        noStroke();
+        triangle(cx, cy - s * 1.00, cx - s * 0.05, cy - s * 0.92, cx + s * 0.05, cy - s * 0.92);
+        pop();
+
+        // ── Suction eye / inlet nozzle ────────────────────────────
+        push();
+        let sucCol = getColor('stationary', hoveredComponent === 'suction_eye', selectedComponent === 'suction_eye');
+        fill(sucCol);
+        stroke(COLORS.stationary.stroke);
+        strokeWeight(2);
+        rectMode(CORNER);
+        // Suction pipe extending to the right
+        rect(cx + s * 0.55, cy - s * 0.18, s * 0.38, s * 0.36, 3);
+        // Flange
+        fill(sucCol[0] - 20, sucCol[1] - 20, sucCol[2] - 20);
+        rect(cx + s * 0.88, cy - s * 0.22, s * 0.06, s * 0.44, 2);
+        // Flange bolts
+        fill(90);
+        noStroke();
+        circle(cx + s * 0.91, cy - s * 0.16, s * 0.035);
+        circle(cx + s * 0.91, cy + s * 0.16, s * 0.035);
+        // Inner passage
+        fill(220, 235, 255);
+        noStroke();
+        rect(cx + s * 0.56, cy - s * 0.10, s * 0.34, s * 0.20);
+        // Flow arrow
+        fill(COLORS.titleBar);
+        noStroke();
+        triangle(cx + s * 0.62, cy, cx + s * 0.72, cy - s * 0.045, cx + s * 0.72, cy + s * 0.045);
+        pop();
+
+        // ── Impeller ──────────────────────────────────────────────
+        push();
+        translate(cx, cy);
+        let impCol = getColor('rotating', hoveredComponent === 'impeller', selectedComponent === 'impeller');
+
+        // Impeller back shroud
+        fill(impCol[0], impCol[1], impCol[2], 180);
+        stroke(COLORS.rotating.stroke);
+        strokeWeight(1.5);
+        ellipse(0, 0, s * 1.02, s * 1.02);
+
+        // Vanes
+        let nVanes = 6;
+        for (let i = 0; i < nVanes; i++) {
+            let a = impellerAngle + (TWO_PI / nVanes) * i;
+            push();
+            rotate(a);
+            stroke(COLORS.rotating.stroke);
+            strokeWeight(2.5);
+            noFill();
+            // Curved vane from hub to rim
+            beginShape();
+            for (let t = 0; t <= 1; t += 0.05) {
+                let r = s * 0.10 + t * s * 0.40;
+                let vaneAngle = t * 0.65; // backward-curved vane
+                vertex(cos(vaneAngle) * r, sin(vaneAngle) * r);
+            }
+            endShape();
+            pop();
+        }
+
+        // Impeller hub
+        fill(impCol[0] - 15, impCol[1] - 15, impCol[2] - 15);
+        stroke(COLORS.rotating.stroke);
+        strokeWeight(1.5);
+        ellipse(0, 0, s * 0.22, s * 0.22);
+
+        // Suction eye opening
+        fill(220, 235, 255);
+        noStroke();
+        ellipse(0, 0, s * 0.16, s * 0.16);
+        pop();
+
+        // ── Back plate / rear casing wall ─────────────────────────
+        push();
+        stroke(COLORS.stationary.stroke);
+        strokeWeight(2);
+        noFill();
+        // Rear casing wall
+        line(cx - s * 0.53, cy - s * 0.45, cx - s * 0.53, cy + s * 0.45);
+        // Small flange lines
+        line(cx - s * 0.56, cy - s * 0.45, cx - s * 0.50, cy - s * 0.45);
+        line(cx - s * 0.56, cy + s * 0.45, cx - s * 0.50, cy + s * 0.45);
+        pop();
+
+        // ── Wear rings ───────────────────────────────────────────
+        // Front wear ring (at impeller eye / front shroud)
+        push();
+        let fwrCol = getColor('sealing', hoveredComponent === 'wear_ring_front', selectedComponent === 'wear_ring_front');
+        stroke(fwrCol);
+        strokeWeight(4);
+        noFill();
+        arc(cx, cy, s * 1.02, s * 1.02, -0.55, 0.55);
+        pop();
+
+        // Back wear ring (at impeller back shroud, near casing wall)
+        push();
+        let bwrCol = getColor('sealing', hoveredComponent === 'wear_ring_back', selectedComponent === 'wear_ring_back');
+        fill(bwrCol);
+        stroke(COLORS.sealing.stroke);
+        strokeWeight(1);
+        rectMode(CENTER);
+        rect(cx - s * 0.54, cy, s * 0.05, s * 0.38, 1);
+        pop();
+
+        // ── Shaft ─────────────────────────────────────────────────
+        push();
+        let shaftCol = getColor('rotating', hoveredComponent === 'shaft', selectedComponent === 'shaft');
+        fill(shaftCol);
+        stroke(COLORS.rotating.stroke);
+        strokeWeight(1.5);
+        rectMode(CORNER);
+        rect(cx - s * 1.12, cy - s * 0.045, s * 1.25, s * 0.09, 2);
+        // Shaft keyway at coupling end
+        fill(shaftCol[0] - 30, shaftCol[1] - 30, shaftCol[2] - 30);
+        rect(cx - s * 1.12, cy - s * 0.02, s * 0.08, s * 0.04);
+        pop();
+
+        // ── Mechanical seal ───────────────────────────────────────
+        push();
+        let msCol = getColor('sealing', hoveredComponent === 'mechanical_seal', selectedComponent === 'mechanical_seal');
+        fill(msCol);
+        stroke(COLORS.sealing.stroke);
+        strokeWeight(1.5);
+        rectMode(CENTER);
+        // Seal housing
+        rect(cx - s * 0.66, cy, s * 0.09, s * 0.26, 2);
+        // Rotating face
+        fill(msCol[0] + 30, msCol[1] + 30, msCol[2] + 30);
+        rect(cx - s * 0.62, cy, s * 0.03, s * 0.18, 1);
+        // Stationary face
+        fill(msCol[0] - 20, msCol[1] - 20, msCol[2] - 20);
+        rect(cx - s * 0.69, cy, s * 0.03, s * 0.18, 1);
+        // Spring indication
+        stroke(COLORS.sealing.stroke);
+        strokeWeight(1);
+        noFill();
+        for (let i = 0; i < 4; i++) {
+            let yy = cy - s * 0.07 + i * s * 0.045;
+            line(cx - s * 0.64, yy, cx - s * 0.60, yy + s * 0.02);
+            line(cx - s * 0.60, yy + s * 0.02, cx - s * 0.64, yy + s * 0.04);
+        }
+        pop();
+
+        // ── Drive-end bearing ─────────────────────────────────────
+        push();
+        let dbCol = getColor('stationary', hoveredComponent === 'bearing_drive', selectedComponent === 'bearing_drive');
+        fill(dbCol);
+        stroke(COLORS.stationary.stroke);
+        strokeWeight(1.5);
+        rectMode(CENTER);
+        rect(cx - s * 0.90, cy, s * 0.12, s * 0.28, 3);
+        // Bearing balls indication
+        fill(220);
+        stroke(100);
+        strokeWeight(1);
+        let nBalls = 5;
+        for (let i = 0; i < nBalls; i++) {
+            let yy = cy - s * 0.10 + i * s * 0.05;
+            circle(cx - s * 0.90, yy, s * 0.035);
+        }
+        pop();
+
+        // ── Free-end bearing (near impeller side) ─────────────────
+        // In an overhung design, this would be between seal and drive bearing
+        // We show it near the pump side of the bearing housing
+        push();
+        let fbCol = getColor('stationary', hoveredComponent === 'bearing_free', selectedComponent === 'bearing_free');
+        fill(fbCol);
+        stroke(COLORS.stationary.stroke);
+        strokeWeight(1.5);
+        rectMode(CENTER);
+        // Bearing bracket on impeller side
+        // Position it inside the bearing frame area
+        rect(cx - s * 0.78 + s * 0.19, cy, s * 0.10, s * 0.28, 3);
+        // Bearing balls
+        fill(220);
+        stroke(100);
+        strokeWeight(1);
+        for (let i = 0; i < nBalls; i++) {
+            let yy = cy - s * 0.10 + i * s * 0.05;
+            circle(cx - s * 0.78 + s * 0.19, yy, s * 0.03);
+        }
+        pop();
+
+        // ── Motor coupling ────────────────────────────────────────
+        push();
+        let cpCol = getColor('rotating', hoveredComponent === 'coupling', selectedComponent === 'coupling');
+        fill(cpCol);
+        stroke(COLORS.rotating.stroke);
+        strokeWeight(1.5);
+        rectMode(CENTER);
+        // Coupling hub (pump side)
+        rect(cx - s * 1.15, cy, s * 0.08, s * 0.22, 2);
+        // Coupling hub (motor side)
+        rect(cx - s * 1.25, cy, s * 0.08, s * 0.22, 2);
+        // Coupling element (flexible insert)
+        fill(cpCol[0] + 40, cpCol[1] + 40, cpCol[2] + 40);
+        rect(cx - s * 1.20, cy, s * 0.06, s * 0.18, 2);
+        // Coupling guard outline (dashed)
+        noFill();
+        stroke(100);
+        strokeWeight(1);
+        drawingContext.setLineDash([4, 4]);
+        rect(cx - s * 1.20, cy, s * 0.24, s * 0.30, 4);
+        drawingContext.setLineDash([]);
+        pop();
+    }
+
+    // ── Labels with leader lines ──────────────────────────────────────
+    function drawLabels() {
+        let s = pumpScale;
+        textAlign(LEFT, CENTER);
+        textSize(max(10, s * 0.065));
+
+        let labels = [
+            { id: 'discharge',       text: 'Discharge',       px: cx,              py: cy - s * 1.08, lx: cx + s * 0.28, ly: cy - s * 1.02 },
+            { id: 'volute',          text: 'Volute',          px: cx + s * 0.50,   py: cy - s * 0.55, lx: cx + s * 0.62, ly: cy - s * 0.65 },
+            { id: 'impeller',        text: 'Impeller',        px: cx + s * 0.28,   py: cy + s * 0.28, lx: cx + s * 0.38, ly: cy + s * 0.38 },
+            { id: 'suction_eye',     text: 'Suction Eye',     px: cx + s * 0.78,   py: cy + s * 0.26, lx: cx + s * 0.62, ly: cy + s * 0.50 },
+            { id: 'shaft',           text: 'Shaft',           px: cx - s * 0.40,   py: cy + s * 0.05, lx: cx - s * 0.40, ly: cy + s * 0.26 },
+            { id: 'mechanical_seal', text: 'Mech. Seal',      px: cx - s * 0.66,   py: cy - s * 0.14, lx: cx - s * 0.58, ly: cy - s * 0.35 },
+            { id: 'bearing_drive',   text: 'Drive Bearing',   px: cx - s * 0.90,   py: cy - s * 0.15, lx: cx - s * 1.05, ly: cy - s * 0.38 },
+            { id: 'bearing_free',    text: 'Free Bearing',    px: cx - s * 0.59,   py: cy - s * 0.15, lx: cx - s * 0.44, ly: cy - s * 0.44 },
+            { id: 'coupling',        text: 'Coupling',        px: cx - s * 1.20,   py: cy - s * 0.16, lx: cx - s * 1.20, ly: cy - s * 0.42 },
+            { id: 'wear_ring_front', text: 'Front Wear Ring', px: cx + s * 0.50,   py: cy + s * 0.04, lx: cx + s * 0.56, ly: cy + s * 0.20 },
+            { id: 'wear_ring_back',  text: 'Back Wear Ring',  px: cx - s * 0.54,   py: cy + s * 0.20, lx: cx - s * 0.54, ly: cy + s * 0.48 },
+        ];
+
+        for (let lb of labels) {
+            let comp = components.find(c => c.id === lb.id);
+            let isHov = hoveredComponent === lb.id;
+            let isSel = selectedComponent === lb.id;
+
+            // Leader line
+            stroke(isHov || isSel ? 50 : 150);
+            strokeWeight(isHov || isSel ? 1.5 : 0.8);
+            line(lb.px, lb.py, lb.lx, lb.ly);
+            // Dot at component
+            fill(isHov || isSel ? COLORS.titleBar : color(120));
+            noStroke();
+            circle(lb.px, lb.py, 4);
+
+            // Label text
+            fill(isHov || isSel ? COLORS.titleBar : COLORS.text);
+            noStroke();
+            textStyle(isHov || isSel ? BOLD : NORMAL);
+            let labelSize = max(9, s * 0.058);
+            textSize(labelSize);
+            text(lb.text, lb.lx + 4, lb.ly);
+        }
+        textStyle(NORMAL);
+    }
+
+    // ── Tooltip on hover ──────────────────────────────────────────────
+    function drawTooltip() {
+        if (!hoveredComponent) return;
+        let comp = components.find(c => c.id === hoveredComponent);
+        if (!comp) return;
+
+        let tipW = 220;
+        let tipH = 52;
+        let tx = mouseX + 16;
+        let ty = mouseY - 10;
+
+        // Keep on screen
+        if (tx + tipW > canvasW) tx = mouseX - tipW - 10;
+        if (ty + tipH > canvasH) ty = canvasH - tipH - 4;
+        if (ty < 36) ty = 36;
+
+        // Background
+        fill(30, 30, 30, 220);
+        noStroke();
+        rect(tx, ty, tipW, tipH, 5);
+
+        // Category color bar
+        let catCol = COLORS[comp.category].base;
+        fill(catCol);
+        rect(tx, ty, 4, tipH, 5, 0, 0, 5);
+
+        // Name
+        fill(255);
+        textAlign(LEFT, TOP);
+        textSize(12);
+        textStyle(BOLD);
+        text(comp.name, tx + 10, ty + 6);
+
+        // Brief
+        textStyle(NORMAL);
+        textSize(10);
+        fill(200);
+        text(comp.brief, tx + 10, ty + 22, tipW - 16, tipH - 26);
+        textAlign(LEFT, CENTER);
+    }
+
+    // ── Mouse click → select and update detail panel ──────────────────
+    function mousePressed() {
+        let hit = pointInHitArea(mouseX, mouseY);
+        if (hit) {
+            selectedComponent = hit;
+            updateDetailPanel(hit);
+        }
+    }
+
+    function updateDetailPanel(compId) {
+        let comp = components.find(c => c.id === compId);
+        if (!comp) return;
+
+        let catLabel = comp.category.charAt(0).toUpperCase() + comp.category.slice(1);
+        let catClass = 'cat-' + comp.category;
+
+        let html = '<h3>' + comp.name + '</h3>';
+        html += '<span class="category-tag ' + catClass + '">' + catLabel + ' Part</span>';
+        html += '<p>' + comp.detail + '</p>';
+
+        document.getElementById('detail-content').innerHTML = html;
+    }
+
+    // ── Cursor style ──────────────────────────────────────────────────
+    function mouseMoved() {
+        let hit = pointInHitArea(mouseX, mouseY);
+        if (hit) {
+            cursor(HAND);
+        } else {
+            cursor(ARROW);
+        }
+    }
+    </script>
+</body>
+</html>

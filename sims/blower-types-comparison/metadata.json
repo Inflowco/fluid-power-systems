@@ -1,0 +1,13 @@
+{
+    "name": "Blower Types Comparison",
+    "chapter": 5,
+    "section": "5.2",
+    "type": "diagram",
+    "bloom_level": "Understand",
+    "bloom_number": 2,
+    "description": "Interactive comparison of five blower types (PD Roots, Rotary Screw, Centrifugal, Regenerative, High-Speed Turbo) with animated cross-section diagrams, efficiency badges, hover tooltips, and full comparison table.",
+    "library": "p5.js",
+    "difficulty": "beginner",
+    "ui_complexity": "moderate",
+    "concepts": ["blower types", "positive displacement", "centrifugal blower", "regenerative blower", "turbo blower", "rotary screw blower"]
+}

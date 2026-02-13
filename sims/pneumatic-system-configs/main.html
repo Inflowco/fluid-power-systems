@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pneumatic Conveying System Configurations</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            overflow: hidden;
+        }
+
+        #container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background-color: #fff;
+            border-bottom: 2px solid #ddd;
+            align-items: center;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            background-color: #e0e0e0;
+            color: #333;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #d0d0d0;
+        }
+
+        button.active {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .controls-right {
+            margin-left: auto;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .checkbox-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        #canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-popup {
+            position: absolute;
+            background: white;
+            border: 2px solid #2196F3;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 13px;
+            max-width: 250px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .info-popup h4 {
+            color: #2196F3;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .info-popup p {
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div class="controls">
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="0">Pressure System</button>
+                <button class="tab-btn" data-tab="1">Vacuum System</button>
+                <button class="tab-btn" data-tab="2">Combined System</button>
+            </div>
+            <div class="controls-right">
+                <label>
+                    <input type="checkbox" id="animate-checkbox" checked> Animate Flow
+                </label>
+                <label>
+                    <input type="checkbox" id="labels-checkbox" checked> Show Labels
+                </label>
+            </div>
+        </div>
+        <div id="canvas-container"></div>
+    </div>
+
+    <script>
+        let currentTab = 0;
+        let animateFlow = true;
+        let showLabels = true;
+        let particles = [];
+        let hoveredComponent = null;
+        let infoPopup = null;
+
+        const systems = [
+            {
+                name: 'Pressure System',
+                description: 'Positive pressure system for conveying material from a source hopper through pipelines to multiple destinations.'
+            },
+            {
+                name: 'Vacuum System',
+                description: 'Vacuum system drawing material from multiple pickup points to a central collection point.'
+            },
+            {
+                name: 'Combined System',
+                description: 'Hybrid system combining vacuum pickup and pressure conveying for long-distance transfer.'
+            }
+        ];
+
+        class Particle {
+            constructor(startX, startY, endX, endY, duration) {
+                this.startX = startX;
+                this.startY = startY;
+                this.endX = endX;
+                this.endY = endY;
+                this.duration = duration;
+                this.elapsed = 0;
+                this.size = 4;
+                this.color = color(139, 69, 19); // Brown
+            }
+
+            update() {
+                this.elapsed += 1;
+                if (this.elapsed > this.duration) {
+                    this.elapsed = 0;
+                }
+            }
+
+            display() {
+                const progress = this.elapsed / this.duration;
+                const currentX = lerp(this.startX, this.endX, progress);
+                const currentY = lerp(this.startY, this.endY, progress);
+                fill(this.color);
+                noStroke();
+                ellipse(currentX, currentY, this.size);
+            }
+
+            isActive() {
+                return true;
+            }
+        }
+
+        class Component {
+            constructor(x, y, width, height, label, type, info) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.label = label;
+                this.type = type; // 'pump', 'valve', 'pipe', 'filter', 'hopper', 'motor', 'nozzle', 'pneumatic'
+                this.info = info;
+                this.isHovered = false;
+            }
+
+            contains(px, py) {
+                return px > this.x - this.width/2 && px < this.x + this.width/2 &&
+                       py > this.y - this.height/2 && py < this.y + this.height/2;
+            }
+
+            display() {
+                push();
+
+                if (this.isHovered) {
+                    strokeWeight(3);
+                    stroke(255, 200, 0);
+                } else {
+                    strokeWeight(2);
+                    stroke(100);
+                }
+
+                switch(this.type) {
+                    case 'pump':
+                    case 'motor':
+                        fill(220, 80, 80);
+                        rect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 4);
+                        fill(255);
+                        textAlign(CENTER, CENTER);
+                        textSize(10);
+                        text(this.type === 'pump' ? 'PUMP' : 'MOTOR', this.x, this.y);
+                        break;
+
+                    case 'valve':
+                        fill(100, 150, 200);
+                        rect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 4);
+                        fill(255);
+                        textAlign(CENTER, CENTER);
+                        textSize(9);
+                        text('VALVE', this.x, this.y);
+                        break;
+
+                    case 'filter':
+                        fill(180, 180, 180);
+                        rect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 4);
+                        fill(255);
+                        textAlign(CENTER, CENTER);
+                        textSize(9);
+                        text('FILTER', this.x, this.y);
+                        break;
+
+                    case 'hopper':
+                        fill(200, 150, 100);
+                        triangle(this.x - this.width/2, this.y - this.height/2,
+                                 this.x + this.width/2, this.y - this.height/2,
+                                 this.x, this.y + this.height/2);
+                        fill(255);
+                        textAlign(CENTER, CENTER);
+                        textSize(9);
+                        text('HOPPER', this.x, this.y - 5);
+                        break;
+
+                    case 'nozzle':
+                        fill(100, 150, 200);
+                        circle(this.x, this.y, this.width);
+                        fill(255);
+                        textAlign(CENTER, CENTER);
+                        textSize(8);
+                        text('N', this.x, this.y);
+                        break;
+
+                    case 'pneumatic':
+                        fill(150, 150, 200);
+                        rect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 4);
+                        fill(255);
+                        textAlign(CENTER, CENTER);
+                        textSize(9);
+                        text('AIRLOCK', this.x, this.y);
+                        break;
+
+                    default:
+                        fill(200, 200, 200);
+                        rect(this.x - this.width/2, this.y - this.height/2, this.width, this.height, 4);
+                }
+
+                pop();
+            }
+        }
+
+        function drawPressureSystem() {
+            // Title
+            fill(0);
+            textAlign(LEFT);
+            textSize(18);
+            textStyle(BOLD);
+            text('Pressure System Configuration', 40, 30);
+
+            // Blower with motor (left side)
+            const blowerX = 80, blowerY = height / 2;
+            const motor = new Component(blowerX, blowerY, 50, 40, 'Motor', 'motor', 'Electric motor drives the blower');
+            motor.display();
+
+            // Airlock valve with hopper (source)
+            const alockX = 160, alockY = blowerY;
+            const alock = new Component(alockX, alockY, 45, 35, 'Airlock Valve', 'pneumatic', 'Rotary airlock feeds material into system');
+            alock.display();
+
+            // Hopper above airlock
+            const hopperX = alockX, hopperY = alockY - 60;
+            const hopper = new Component(hopperX, hopperY, 50, 40, 'Source Hopper', 'hopper', 'Material storage and feed source');
+            hopper.display();
+
+            // Horizontal pipe with arrows
+            drawArrow(alockX + 30, alockY, alockX + 80, alockY, 'Pipeline A', 'Pressurized air flow');
+
+            // Vertical bend (up)
+            const bendX = alockX + 110, bendY = alockY - 40;
+            arc(bendX, bendY, 50, 50, 0, PI/2, OPEN);
+            stroke(100); strokeWeight(3);
+            line(bendX - 25, bendY, bendX, bendY);
+            line(bendX, bendY - 25, bendX, bendY);
+
+            // Vertical pipe (up)
+            line(bendX, bendY - 25, bendX, bendY - 100);
+
+            // Diverter valve at top
+            const diverterX = bendX, diverterY = bendY - 120;
+            const diverter = new Component(diverterX, diverterY, 45, 40, 'Diverter Valve', 'valve', 'Splits flow to two destinations');
+            diverter.display();
+
+            // Right branch to first filter (top)
+            const filter1X = diverterX + 100, filter1Y = diverterY - 60;
+            drawArrow(diverterX + 25, diverterY, filter1X - 30, filter1Y, 'To Filter 1', 'Air with material');
+            const filter1 = new Component(filter1X, filter1Y, 50, 45, 'Filter Receiver 1', 'filter', 'Separates material from air');
+            filter1.display();
+
+            // Discharge hopper below filter 1
+            const dischargHopper1X = filter1X, dischargHopper1Y = filter1Y + 70;
+            const discharge1 = new Component(dischargHopper1X, dischargHopper1Y, 50, 40, 'Discharge 1', 'hopper', 'Collected material output');
+            discharge1.display();
+            line(filter1X, filter1Y + 22, dischargHopper1X, dischargHopper1Y - 20);
+
+            // Left branch to second filter (bottom)
+            const filter2X = diverterX - 120, filter2Y = diverterY + 60;
+            drawArrow(diverterX - 25, diverterY + 20, filter2X + 30, filter2Y, 'To Filter 2', 'Air with material');
+            const filter2 = new Component(filter2X, filter2Y, 50, 45, 'Filter Receiver 2', 'filter', 'Separates material from air');
+            filter2.display();
+
+            // Discharge hopper below filter 2
+            const dischargHopper2X = filter2X, dischargHopper2Y = filter2Y + 70;
+            const discharge2 = new Component(dischargHopper2X, dischargHopper2Y, 50, 40, 'Discharge 2', 'hopper', 'Collected material output');
+            discharge2.display();
+            line(filter2X, filter2Y + 22, dischargHopper2X, dischargHopper2Y - 20);
+
+            // Pipe from blower to airlock
+            line(blowerX + 25, blowerY, alockX - 25, alockY);
+
+            // Pipe from hopper to airlock
+            line(hopperX, hopperY + 20, alockX, alockY - 20);
+
+            // Particle paths for animation
+            if (animateFlow) {
+                for (let i = 0; i < 3; i++) {
+                    const phasedElapsed = (frameCount * 2 + i * 20) % 120;
+                    const progress = phasedElapsed / 120;
+
+                    if (progress < 0.25) { // Hopper to airlock
+                        const p = progress / 0.25;
+                        const px = lerp(hopperX, alockX, p);
+                        const py = lerp(hopperY + 20, alockY - 20, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (progress < 0.45) { // Airlock to bend
+                        const p = (progress - 0.25) / 0.2;
+                        const px = lerp(alockX + 30, bendX - 25, p);
+                        const py = lerp(alockY, bendY, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (progress < 0.65) { // Bend to diverter
+                        const p = (progress - 0.45) / 0.2;
+                        const px = bendX;
+                        const py = lerp(bendY - 25, diverterY - 20, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (i % 2 === 0 && progress < 0.85) { // To filter 1
+                        const p = (progress - 0.65) / 0.2;
+                        const startX = diverterX + 25;
+                        const startY = diverterY;
+                        const px = lerp(startX, filter1X - 30, p);
+                        const py = lerp(startY, filter1Y, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (i % 2 === 1 && progress < 0.85) { // To filter 2
+                        const p = (progress - 0.65) / 0.2;
+                        const startX = diverterX - 25;
+                        const startY = diverterY + 20;
+                        const px = lerp(startX, filter2X + 30, p);
+                        const py = lerp(startY, filter2Y, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    }
+                }
+            }
+
+            // Collect components for hover detection
+            let components = [motor, alock, hopper, diverter, filter1, filter2, discharge1, discharge2];
+            return components;
+        }
+
+        function drawVacuumSystem() {
+            // Title
+            fill(0);
+            textAlign(LEFT);
+            textSize(18);
+            textStyle(BOLD);
+            text('Vacuum System Configuration', 40, 30);
+
+            // Pickup nozzles (multiple sources - left side)
+            const nozzle1X = 70, nozzle1Y = 120;
+            const nozzle2X = 70, nozzle2Y = 200;
+            const nozzle3X = 70, nozzle3Y = 280;
+
+            const n1 = new Component(nozzle1X, nozzle1Y, 20, 20, 'Pickup 1', 'nozzle', 'First material pickup point');
+            const n2 = new Component(nozzle2X, nozzle2Y, 20, 20, 'Pickup 2', 'nozzle', 'Second material pickup point');
+            const n3 = new Component(nozzle3X, nozzle3Y, 20, 20, 'Pickup 3', 'nozzle', 'Third material pickup point');
+            n1.display();
+            n2.display();
+            n3.display();
+
+            // Material source labels
+            fill(80);
+            textAlign(LEFT);
+            textSize(11);
+            text('Source 1', nozzle1X + 35, nozzle1Y + 4);
+            text('Source 2', nozzle2X + 35, nozzle2Y + 4);
+            text('Source 3', nozzle3X + 35, nozzle3Y + 4);
+
+            // Pipelines converging
+            stroke(100);
+            strokeWeight(2);
+            line(nozzle1X + 10, nozzle1Y, 130, nozzle1Y);
+            line(nozzle2X + 10, nozzle2Y, 130, nozzle2Y);
+            line(nozzle3X + 10, nozzle3Y, 130, nozzle3Y);
+
+            // Converging junction
+            line(130, nozzle1Y, 160, 200);
+            line(130, nozzle2Y, 160, 200);
+            line(130, nozzle3Y, 160, 200);
+
+            // Main conveying line
+            line(160, 200, 280, 200);
+
+            // Filter receiver (middle)
+            const filterX = 280, filterY = 200;
+            const filter = new Component(filterX, filterY, 50, 45, 'Filter Receiver', 'filter', 'Collects material from vacuum line');
+            filter.display();
+
+            // Discharge hopper
+            const dischargeX = filterX, dischargeY = filterY + 70;
+            const discharge = new Component(dischargeX, dischargeY, 50, 40, 'Discharge Hopper', 'hopper', 'Material collection output');
+            discharge.display();
+            line(filterX, filterY + 22, dischargeX, dischargeY - 20);
+
+            // Vacuum pump (right side)
+            const pumpX = width - 100, pumpY = 200;
+            const pump = new Component(pumpX, pumpY, 50, 40, 'Vacuum Pump', 'pump', 'Creates vacuum to draw material');
+            pump.display();
+
+            // Connection from filter to pump
+            line(filterX + 25, filterY, pumpX - 25, pumpY);
+
+            // Animated particles flowing toward filter
+            if (animateFlow) {
+                for (let i = 0; i < 4; i++) {
+                    const phasedElapsed = (frameCount * 2 + i * 30) % 180;
+                    const progress = phasedElapsed / 180;
+
+                    let sourceX, sourceY, targetX = filterX, targetY = filterY;
+
+                    if (i % 3 === 0) {
+                        sourceX = nozzle1X + 10;
+                        sourceY = nozzle1Y;
+                    } else if (i % 3 === 1) {
+                        sourceX = nozzle2X + 10;
+                        sourceY = nozzle2Y;
+                    } else {
+                        sourceX = nozzle3X + 10;
+                        sourceY = nozzle3Y;
+                    }
+
+                    // First stage: to junction
+                    if (progress < 0.4) {
+                        const p = progress / 0.4;
+                        const px = lerp(sourceX, 160, p);
+                        const py = lerp(sourceY, 200, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (progress < 0.8) { // Second stage: to filter
+                        const p = (progress - 0.4) / 0.4;
+                        const px = lerp(160, targetX, p);
+                        const py = 200;
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    }
+                }
+            }
+
+            let components = [n1, n2, n3, filter, discharge, pump];
+            return components;
+        }
+
+        function drawCombinedSystem() {
+            // Title
+            fill(0);
+            textAlign(LEFT);
+            textSize(18);
+            textStyle(BOLD);
+            text('Combined System Configuration', 40, 30);
+
+            // LEFT SECTION: VACUUM PICKUP
+            fill(0);
+            textAlign(LEFT);
+            textSize(12);
+            textStyle(BOLD);
+            text('Vacuum Zone', 50, 70);
+
+            // Railcar with pickup nozzles
+            const railcarX = 80, railcarY = 150;
+            fill(150, 100, 100);
+            stroke(80);
+            strokeWeight(2);
+            rect(railcarX - 40, railcarY - 30, 80, 60);
+            fill(255);
+            textAlign(CENTER, CENTER);
+            textSize(10);
+            text('Railcar', railcarX, railcarY);
+
+            // Two pickup nozzles on railcar
+            const pickup1X = railcarX - 30, pickup1Y = railcarY - 40;
+            const pickup2X = railcarX + 30, pickup2Y = railcarY - 40;
+            const p1 = new Component(pickup1X, pickup1Y, 15, 15, 'Pickup 1', 'nozzle', 'Primary material pickup');
+            const p2 = new Component(pickup2X, pickup2Y, 15, 15, 'Pickup 2', 'nozzle', 'Secondary material pickup');
+            p1.display();
+            p2.display();
+
+            // Pipes from nozzles to convergence point
+            stroke(100);
+            strokeWeight(2);
+            line(pickup1X, pickup1Y + 8, pickup1X, 100);
+            line(pickup2X, pickup2Y + 8, pickup2X, 100);
+            line(pickup1X, 100, 150, 100);
+            line(pickup2X, 100, 150, 100);
+
+            // Vacuum pump
+            const vacPumpX = 150, vacPumpY = 80;
+            const vacPump = new Component(vacPumpX, vacPumpY, 50, 40, 'Vacuum Pump', 'pump', 'Creates vacuum draw for pickup');
+            vacPump.display();
+            line(150, 100, vacPumpX, vacPumpY - 20);
+
+            // MIDDLE SECTION: TRANSFER HOPPER
+            fill(0);
+            textAlign(CENTER);
+            textSize(12);
+            textStyle(BOLD);
+            text('Transfer Hopper', width / 2, 70);
+
+            const hopperX = width / 2, hopperY = 150;
+            const transferHopper = new Component(hopperX, hopperY, 55, 50, 'Transfer Hopper', 'hopper', 'Temporary material storage during transfer');
+            transferHopper.display();
+
+            // Pipe from vacuum zone to transfer hopper
+            line(150, 100, hopperX - 30, hopperY - 20);
+
+            // RIGHT SECTION: PRESSURE SYSTEM
+            fill(0);
+            textAlign(LEFT);
+            textSize(12);
+            textStyle(BOLD);
+            text('Pressure Zone', width - 150, 70);
+
+            // Pressure blower
+            const blowerX = width - 100, blowerY = 150;
+            const blower = new Component(blowerX, blowerY, 50, 40, 'Blower', 'motor', 'Pressurizes air for conveying');
+            blower.display();
+
+            // Pipe from transfer hopper to blower inlet
+            line(hopperX + 30, hopperY - 20, blowerX - 25, blowerY);
+
+            // Long horizontal conveying line
+            line(blowerX + 25, blowerY, width - 40, blowerY + 60);
+
+            // Storage silo (far right)
+            const siloX = width - 60, siloY = 200;
+            fill(180, 150, 100);
+            stroke(80);
+            strokeWeight(2);
+            // Draw silo (circle on top of rectangle)
+            circle(siloX, siloY - 30, 30);
+            rect(siloX - 20, siloY - 30, 40, 60);
+            fill(255);
+            textAlign(CENTER, CENTER);
+            textSize(9);
+            text('SILO', siloX, siloY + 10);
+
+            // Filter at silo
+            const filterX = siloX - 50, filterY = siloY + 10;
+            const filter = new Component(filterX, filterY, 45, 40, 'Filter', 'filter', 'Final separation before storage');
+            filter.display();
+
+            // Connection from conveying line to filter to silo
+            line(width - 40, blowerY + 60, filterX + 25, filterY);
+            line(filterX, filterY, siloX - 20, siloY);
+
+            // Animated particles: vacuum zone pickup
+            if (animateFlow) {
+                for (let i = 0; i < 3; i++) {
+                    const phasedElapsed = (frameCount * 2 + i * 40) % 200;
+                    const progress = phasedElapsed / 200;
+
+                    if (progress < 0.15) {
+                        // From railcar nozzles to convergence
+                        const p = progress / 0.15;
+                        let px, py;
+                        if (i % 2 === 0) {
+                            px = lerp(pickup1X, pickup1X, p);
+                            py = lerp(pickup1Y + 8, 100, p);
+                        } else {
+                            px = lerp(pickup2X, pickup2X, p);
+                            py = lerp(pickup2Y + 8, 100, p);
+                        }
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (progress < 0.3) {
+                        // To vacuum pump
+                        const p = (progress - 0.15) / 0.15;
+                        const px = lerp(150, vacPumpX, p);
+                        const py = lerp(100, vacPumpY - 20, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (progress < 0.5) {
+                        // To transfer hopper
+                        const p = (progress - 0.3) / 0.2;
+                        const px = lerp(150, hopperX - 30, p);
+                        const py = lerp(100, hopperY - 20, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (progress < 0.7) {
+                        // From hopper to blower
+                        const p = (progress - 0.5) / 0.2;
+                        const px = lerp(hopperX + 30, blowerX - 25, p);
+                        const py = lerp(hopperY - 20, blowerY, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    } else if (progress < 0.9) {
+                        // Through pressure zone to filter
+                        const p = (progress - 0.7) / 0.2;
+                        const px = lerp(blowerX + 25, filterX + 25, p);
+                        const py = lerp(blowerY, filterY, p);
+                        fill(139, 69, 19);
+                        noStroke();
+                        circle(px, py, 4);
+                    }
+                }
+            }
+
+            let components = [p1, p2, vacPump, transferHopper, blower, filter];
+            return components;
+        }
+
+        function drawArrow(x1, y1, x2, y2, label, description) {
+            stroke(100);
+            strokeWeight(2);
+            line(x1, y1, x2, y2);
+
+            // Arrowhead
+            const angle = atan2(y2 - y1, x2 - x1);
+            const arrowSize = 8;
+            line(x2, y2, x2 - arrowSize * cos(angle - PI/6), y2 - arrowSize * sin(angle - PI/6));
+            line(x2, y2, x2 - arrowSize * cos(angle + PI/6), y2 - arrowSize * sin(angle + PI/6));
+
+            if (showLabels) {
+                fill(80);
+                textAlign(CENTER);
+                textSize(10);
+                const midX = (x1 + x2) / 2;
+                const midY = (y1 + y2) / 2;
+                text(label, midX + 15, midY - 10);
+            }
+        }
+
+        let sketch = (p) => {
+            p.setup = function() {
+                const container = document.getElementById('canvas-container');
+                const w = container.offsetWidth;
+                const h = container.offsetHeight - 5;
+                const canvas = p.createCanvas(w, h);
+                canvas.parent('canvas-container');
+                p.smooth();
+                p.noLoop();
+                p.redraw();
+            };
+
+            p.draw = function() {
+                background(245, 247, 250);
+
+                // Draw grid background for reference
+                stroke(220);
+                strokeWeight(1);
+                for (let i = 0; i < p.width; i += 50) {
+                    line(i, 0, i, p.height);
+                }
+                for (let i = 0; i < p.height; i += 50) {
+                    line(0, i, p.width, i);
+                }
+
+                let components = [];
+
+                switch(currentTab) {
+                    case 0:
+                        components = drawPressureSystem();
+                        break;
+                    case 1:
+                        components = drawVacuumSystem();
+                        break;
+                    case 2:
+                        components = drawCombinedSystem();
+                        break;
+                }
+
+                // Check for hover and display info
+                let hoveredFound = false;
+                for (let comp of components) {
+                    comp.isHovered = comp.contains(p.mouseX, p.mouseY);
+                    if (comp.isHovered) {
+                        hoveredFound = true;
+                        infoPopup = comp;
+                    }
+                }
+
+                if (!hoveredFound) {
+                    infoPopup = null;
+                }
+
+                // Display info popup
+                if (infoPopup && infoPopup.info) {
+                    displayInfoPopup(infoPopup);
+                }
+
+                // Draw legend
+                drawLegend();
+            };
+
+            p.windowResized = function() {
+                const container = document.getElementById('canvas-container');
+                if (container) {
+                    const w = container.offsetWidth;
+                    const h = container.offsetHeight - 5;
+                    p.resizeCanvas(w, h);
+                }
+            };
+
+            p.mouseMoved = function() {
+                p.redraw();
+            };
+        };
+
+        function displayInfoPopup(component) {
+            const popup = document.querySelector('.info-popup');
+            if (popup) {
+                popup.remove();
+            }
+
+            const div = document.createElement('div');
+            div.className = 'info-popup';
+            div.innerHTML = `<h4>${component.label}</h4><p>${component.info}</p>`;
+            div.style.left = (p.mouseX + 15) + 'px';
+            div.style.top = (p.mouseY - 15) + 'px';
+            document.getElementById('canvas-container').appendChild(div);
+        }
+
+        function drawLegend() {
+            push();
+            fill(255);
+            stroke(200);
+            strokeWeight(1);
+            rect(width - 180, height - 110, 165, 95, 4);
+
+            fill(0);
+            noStroke();
+            textAlign(LEFT);
+            textSize(11);
+            textStyle(BOLD);
+            text('Legend:', width - 170, height - 95);
+
+            textSize(10);
+            textStyle(NORMAL);
+
+            // Motor
+            fill(220, 80, 80);
+            rect(width - 170, height - 80, 12, 12);
+            fill(0);
+            text('Motor/Pump', width - 150, height - 72);
+
+            // Valve
+            fill(100, 150, 200);
+            rect(width - 170, height - 60, 12, 12);
+            fill(0);
+            text('Valve', width - 150, height - 52);
+
+            // Filter
+            fill(180, 180, 180);
+            rect(width - 170, height - 40, 12, 12);
+            fill(0);
+            text('Filter', width - 150, height - 32);
+
+            // Material particles
+            fill(139, 69, 19);
+            circle(width - 164, height - 20, 4);
+            fill(0);
+            text('Material Flow', width - 150, height - 12);
+
+            pop();
+        }
+
+        new p5(sketch);
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTab = parseInt(this.dataset.tab);
+                redraw();
+            });
+        });
+
+        // Checkbox handlers
+        document.getElementById('animate-checkbox').addEventListener('change', function() {
+            animateFlow = this.checked;
+            redraw();
+        });
+
+        document.getElementById('labels-checkbox').addEventListener('change', function() {
+            showLabels = this.checked;
+            redraw();
+        });
+
+        // Expose redraw globally
+        window.redraw = function() {
+            const sketch = window.p5instance || (window.p5instance = new p5(sketch));
+            if (sketch.redraw) sketch.redraw();
+        };
+    </script>
+</body>
+</html>

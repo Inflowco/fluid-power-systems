@@ -1,0 +1,4450 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Water pump types, performance curves, installation procedures, cavitation and water hammer prevention, VFD technology, IoT-based monitoring, AI-optimized pump speed, and energy-efficient operation">
+      
+      
+        <meta name="author" content="Peter Vinck, Inflow Corp.">
+      
+      
+        <link rel="canonical" href="https://dmccreary.github.io/fluid-power-systems/chapters/11-pumping/">
+      
+      
+        <link rel="prev" href="../10-hydraulic/">
+      
+      
+        <link rel="next" href="../12-fan/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Chapter 11 - Pumping Systems and Real-Time Controls - Fluid Power Systems</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-H81SZL21DT"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-H81SZL21DT",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-H81SZL21DT",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Chapter 11 - Pumping Systems and Real-Time Controls - Fluid Power Systems" />
+<meta property="og:description" content="Water pump types, performance curves, installation procedures, cavitation and water hammer prevention, VFD technology, IoT-based monitoring, AI-optimized pump speed, and energy-efficient operation" />
+<meta property="og:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/11-pumping/index.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="https://dmccreary.github.io/fluid-power-systems/chapters/11-pumping/" />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Chapter 11 - Pumping Systems and Real-Time Controls - Fluid Power Systems" />
+<meta property="twitter:description" content="Water pump types, performance curves, installation procedures, cavitation and water hammer prevention, VFD technology, IoT-based monitoring, AI-optimized pump speed, and energy-efficient operation" />
+<meta property="twitter:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/11-pumping/index.png" />
+</head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#chapter-11-pumping-systems-and-real-time-controls" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fluid Power Systems" class="md-header__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fluid Power Systems
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Chapter 11 - Pumping Systems and Real-Time Controls
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fluid Power Systems" class="md-nav__button md-logo" aria-label="Fluid Power Systems" data-md-component="logo">
+      
+  <img src="../../img/icon.png" alt="logo">
+
+    </a>
+    Fluid Power Systems
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dmccreary/fluid-power-systems" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub Repo
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../course-description/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course Description
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Chapters
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Chapters
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1. Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-components-and-controls/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Components and Controls
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-hvac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    3. HVAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-vacuum/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    4. Vacuum
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05-blowers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    5. Blowers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../06-compressed-air/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    6. Compressed Air
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../07-cooling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    7. Cooling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../08-steam/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    8. Steam Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../09-dust-collection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    9. Dust Collection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10-hydraulic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10. Hydraulic Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Pumping Systems
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11. Pumping Systems
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#111-pumping-system-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Pumping System Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.1 Pumping System Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-pumps-move-fluid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Pumps Move Fluid
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#centrifugal-pump-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centrifugal Pump Operation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Centrifugal Pump Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-centrifugal-pump-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Centrifugal Pump Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#positive-displacement-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Positive Displacement Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#112-pump-performance-curves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Pump Performance Curves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.2 Pump Performance Curves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-the-pump-curve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding the Pump Curve
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding the Pump Curve">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-pump-performance-curve-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Pump Performance Curve Explorer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-best-efficiency-point-bep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Best Efficiency Point (BEP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-curves-and-operating-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Curves and Operating Points
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pump-brake-horsepower" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pump Brake Horsepower
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pump Brake Horsepower">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-pump-brake-horsepower-and-motor-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Pump Brake Horsepower and Motor Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-system-head-curve-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: System Head Curve Calculation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#113-pump-installation-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Pump Installation Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.3 Pump Installation Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shaft-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shaft Alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#114-cavitation-the-silent-pump-destroyer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Cavitation: The Silent Pump Destroyer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.4 Cavitation: The Silent Pump Destroyer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-cavitation-happens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Cavitation Happens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recognizing-cavitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recognizing Cavitation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#npsh-the-key-to-preventing-cavitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NPSH: The Key to Preventing Cavitation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NPSH: The Key to Preventing Cavitation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-npsh-available-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: NPSH Available Calculation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cavitation-prevention-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cavitation Prevention Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cavitation Prevention Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cavitation-diagnosis-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cavitation Diagnosis Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#115-water-hammer-protecting-pipes-from-pressure-surges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 Water Hammer: Protecting Pipes from Pressure Surges
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.5 Water Hammer: Protecting Pipes from Pressure Surges">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#causes-of-water-hammer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Causes of Water Hammer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pressure-surge-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pressure Surge Calculation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pressure Surge Calculation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-water-hammer-pressure-surge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Water Hammer Pressure Surge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#water-hammer-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Water Hammer Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#116-variable-frequency-drives-vfds-and-the-affinity-laws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.6 Variable Frequency Drives (VFDs) and the Affinity Laws
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.6 Variable Frequency Drives (VFDs) and the Affinity Laws">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-vfds-matter-for-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why VFDs Matter for Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-affinity-laws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Affinity Laws
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Affinity Laws">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-affinity-laws-with-vfd-speed-reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Affinity Laws with VFD Speed Reduction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagram-affinity-laws-energy-calculator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Affinity Laws Energy Calculator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vfd-operating-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VFD Operating Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#117-real-time-pump-monitoring-with-iot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.7 Real-Time Pump Monitoring with IoT
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.7 Real-Time Pump Monitoring with IoT">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-monitoring-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Monitoring Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iot-architecture-for-pump-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IoT Architecture for Pump Monitoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IoT Architecture for Pump Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-pump-monitoring-iot-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Pump Monitoring IoT Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#118-ai-optimized-pump-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.8 AI-Optimized Pump Operation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.8 AI-Optimized Pump Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ai-optimization-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Optimization Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-decision-making-in-pump-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Decision-Making in Pump Systems
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#119-parallel-and-series-pump-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.9 Parallel and Series Pump Configurations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.9 Parallel and Series Pump Configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#series-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Series Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-vs-series-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel vs. Series Quick Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1110-pump-maintenance-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.10 Pump Maintenance Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.10 Pump Maintenance Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#routine-maintenance-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routine Maintenance Checklist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Routine Maintenance Checklist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-pump-maintenance-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Pump Maintenance Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mechanical-seal-replacement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mechanical Seal Replacement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1111-energy-efficient-pump-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.11 Energy-Efficient Pump Operation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.11 Energy-Efficient Pump Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#energy-optimization-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Optimization Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pump-system-energy-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pump System Energy Audit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1112-real-time-controls-and-plc-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.12 Real-Time Controls and PLC Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.12 Real-Time Controls and PLC Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-plc-control-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common PLC Control Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plc-control-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PLC Control Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1113-utility-rebates-incentives-and-building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.13 Utility Rebates, Incentives, and Building the Business Case
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.13 Utility Rebates, Incentives, and Building the Business Case">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-incentive-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Incentive Programs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-find-available-rebates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Find Available Rebates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-pumping-system-upgrades-and-rebate-potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Pumping System Upgrades and Rebate Potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Business Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1114-hands-on-lab-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.14 Hands-On Lab Activity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.14 Hands-On Lab Activity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lab-install-a-pump-and-use-a-control-app-to-adjust-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab: Install a Pump and Use a Control App to Adjust Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../12-fan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    12. Fans
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Systems and Software
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Safety
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../prompts/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prompts
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sims/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MicroSims
+  
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../how-we-built-this-site/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How We Built This Site
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../feedback/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feedback
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    License
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#111-pumping-system-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Pumping System Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.1 Pumping System Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-pumps-move-fluid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Pumps Move Fluid
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#centrifugal-pump-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centrifugal Pump Operation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Centrifugal Pump Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-centrifugal-pump-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Centrifugal Pump Components
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#positive-displacement-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Positive Displacement Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#112-pump-performance-curves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Pump Performance Curves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.2 Pump Performance Curves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-the-pump-curve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Understanding the Pump Curve
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding the Pump Curve">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-pump-performance-curve-explorer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Pump Performance Curve Explorer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-best-efficiency-point-bep" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Best Efficiency Point (BEP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-curves-and-operating-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Curves and Operating Points
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pump-brake-horsepower" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pump Brake Horsepower
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pump Brake Horsepower">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-pump-brake-horsepower-and-motor-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Pump Brake Horsepower and Motor Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-system-head-curve-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: System Head Curve Calculation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#113-pump-installation-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Pump Installation Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.3 Pump Installation Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation Sequence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shaft-alignment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shaft Alignment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#114-cavitation-the-silent-pump-destroyer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Cavitation: The Silent Pump Destroyer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.4 Cavitation: The Silent Pump Destroyer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-cavitation-happens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Cavitation Happens
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recognizing-cavitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recognizing Cavitation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#npsh-the-key-to-preventing-cavitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        NPSH: The Key to Preventing Cavitation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="NPSH: The Key to Preventing Cavitation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-npsh-available-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: NPSH Available Calculation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cavitation-prevention-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cavitation Prevention Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cavitation Prevention Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-cavitation-diagnosis-simulator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Cavitation Diagnosis Simulator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#115-water-hammer-protecting-pipes-from-pressure-surges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 Water Hammer: Protecting Pipes from Pressure Surges
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.5 Water Hammer: Protecting Pipes from Pressure Surges">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#causes-of-water-hammer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Causes of Water Hammer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pressure-surge-calculation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pressure Surge Calculation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pressure Surge Calculation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-water-hammer-pressure-surge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Water Hammer Pressure Surge
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#water-hammer-prevention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Water Hammer Prevention
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#116-variable-frequency-drives-vfds-and-the-affinity-laws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.6 Variable Frequency Drives (VFDs) and the Affinity Laws
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.6 Variable Frequency Drives (VFDs) and the Affinity Laws">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-vfds-matter-for-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why VFDs Matter for Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-affinity-laws" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Affinity Laws
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Affinity Laws">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-affinity-laws-with-vfd-speed-reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Affinity Laws with VFD Speed Reduction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#diagram-affinity-laws-energy-calculator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Affinity Laws Energy Calculator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vfd-operating-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VFD Operating Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#117-real-time-pump-monitoring-with-iot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.7 Real-Time Pump Monitoring with IoT
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.7 Real-Time Pump Monitoring with IoT">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-monitoring-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Monitoring Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#iot-architecture-for-pump-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IoT Architecture for Pump Monitoring
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IoT Architecture for Pump Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-pump-monitoring-iot-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Pump Monitoring IoT Dashboard
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#118-ai-optimized-pump-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.8 AI-Optimized Pump Operation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.8 AI-Optimized Pump Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ai-optimization-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Optimization Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-decision-making-in-pump-systems" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AI Decision-Making in Pump Systems
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#119-parallel-and-series-pump-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.9 Parallel and Series Pump Configurations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.9 Parallel and Series Pump Configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#series-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Series Pumps
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-vs-series-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallel vs. Series Quick Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1110-pump-maintenance-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.10 Pump Maintenance Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.10 Pump Maintenance Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#routine-maintenance-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Routine Maintenance Checklist
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Routine Maintenance Checklist">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-pump-maintenance-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Pump Maintenance Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mechanical-seal-replacement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mechanical Seal Replacement
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1111-energy-efficient-pump-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.11 Energy-Efficient Pump Operation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.11 Energy-Efficient Pump Operation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#energy-optimization-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Energy Optimization Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pump-system-energy-audit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pump System Energy Audit
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1112-real-time-controls-and-plc-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.12 Real-Time Controls and PLC Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.12 Real-Time Controls and PLC Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-plc-control-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common PLC Control Strategies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plc-control-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PLC Control Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1113-utility-rebates-incentives-and-building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.13 Utility Rebates, Incentives, and Building the Business Case
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.13 Utility Rebates, Incentives, and Building the Business Case">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-incentive-programs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Incentive Programs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-find-available-rebates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How to Find Available Rebates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-pumping-system-upgrades-and-rebate-potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Pumping System Upgrades and Rebate Potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#building-the-business-case" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Building the Business Case
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1114-hands-on-lab-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.14 Hands-On Lab Activity
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11.14 Hands-On Lab Activity">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lab-install-a-pump-and-use-a-control-app-to-adjust-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lab: Install a Pump and Use a Control App to Adjust Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="../" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Chapters
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/dmccreary/fluid-power-systems/blob/master/docs/chapters/11-pumping/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="chapter-11-pumping-systems-and-real-time-controls">Chapter 11: Pumping Systems and Real-Time Controls</h1>
+<h2 id="summary">Summary</h2>
+<p>This chapter covers pumping systems used in industrial, commercial, and municipal applications to move water and other process fluids. Students will learn the fundamentals of how pumps convert mechanical energy into fluid motion, including centrifugal (dynamic) and positive displacement pump categories. The chapter examines pump performance curves — head, flow, efficiency, and power — and how to read and interpret them for proper pump selection. Installation procedures including foundation preparation, alignment, piping connections, and startup sequencing are covered in detail. A major focus is placed on two destructive phenomena: cavitation (caused by insufficient suction pressure) and water hammer (caused by sudden flow changes), with practical prevention strategies for each. Students will explore Variable Frequency Drive (VFD) technology and how it enables precise speed control to match pump output to system demand. The chapter advances to real-time pump monitoring using IoT sensors for pressure, flow, temperature, vibration, and power consumption — feeding data to AI systems that optimize pump speed, predict failures, and schedule maintenance. Energy-efficient pump operation strategies including right-sizing, VFD implementation, impeller trimming, and parallel pump staging round out the chapter.</p>
+<h2 id="concepts-covered">Concepts Covered</h2>
+<ol>
+<li>Pumping system fundamentals — how pumps convert mechanical energy to fluid energy</li>
+<li>Centrifugal pump operation — impeller, volute, suction and discharge principles</li>
+<li>Positive displacement pump types — reciprocating, diaphragm, peristaltic, progressive cavity</li>
+<li>Pump performance curves — head vs. flow, efficiency, power, NPSH required</li>
+<li>System curves and operating points — how pump curves intersect system resistance</li>
+<li>Pump installation procedures — foundation, alignment, piping, priming, startup</li>
+<li>Cavitation causes, symptoms, and prevention — NPSH available vs. NPSH required</li>
+<li>Water hammer causes, symptoms, and prevention — surge protection strategies</li>
+<li>Variable Frequency Drive (VFD) technology — motor speed control for pump optimization</li>
+<li>Affinity laws — how speed changes affect flow, head, and power</li>
+<li>IoT-based pump monitoring — sensors for vibration, temperature, pressure, flow, and power</li>
+<li>AI-optimized pump operation — predictive algorithms for speed, staging, and maintenance</li>
+<li>Parallel and series pump configurations — when and how to combine pumps</li>
+<li>Pump maintenance procedures — seal replacement, bearing inspection, impeller checks</li>
+<li>Energy-efficient pump operation — right-sizing, VFD savings, system optimization</li>
+<li>Real-time controls and PLC integration — automated pump control strategies</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li>Chapter 1: Introduction to Fluid Power Systems and AI (understanding of fluid types, basic system concepts, and the role of AI)</li>
+<li>Chapter 2: System Components and Smart Controls (knowledge of pumps, fans, compressors, valves, filters, PLCs, and IoT sensors)</li>
+</ul>
+<hr />
+<h2 id="111-pumping-system-fundamentals">11.1 Pumping System Fundamentals</h2>
+<p>Pumps are the workhorses of fluid power systems. Every time water flows through a building's plumbing, coolant circulates through a chiller, or wastewater moves to a treatment plant, a pump is doing the work. Pumps convert mechanical energy from a motor into fluid energy — creating the pressure and flow needed to push liquid through pipes, fittings, valves, and process equipment.</p>
+<p>Understanding how pumps work is essential for technicians because pumping systems account for nearly <strong>20% of the world's electrical energy demand</strong> and <strong>25–50% of total energy usage</strong> in many industrial facilities. Even small improvements in pump efficiency translate into significant energy and cost savings.</p>
+<h3 id="how-pumps-move-fluid">How Pumps Move Fluid</h3>
+<p>All pumps work by creating a pressure difference. The pump lowers pressure at its inlet (suction side), allowing atmospheric or system pressure to push fluid into the pump. The pump then adds energy to the fluid and pushes it out through the outlet (discharge side) at higher pressure. The two fundamental categories of pumps differ in how they create this pressure difference:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>How It Works</th>
+<th>Flow Characteristic</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Centrifugal (dynamic)</td>
+<td>Spinning impeller adds velocity, volute converts velocity to pressure</td>
+<td>Continuous, variable flow</td>
+<td>High flow, low-to-medium pressure</td>
+</tr>
+<tr>
+<td>Positive displacement</td>
+<td>Traps a fixed volume of fluid and forces it through the discharge</td>
+<td>Pulsating, constant flow per revolution</td>
+<td>Low flow, high pressure, viscous fluids</td>
+</tr>
+</tbody>
+</table>
+<p>In industrial and commercial water systems, <strong>centrifugal pumps</strong> handle about 80% of all pumping applications because they are simple, reliable, and efficient across a wide range of flows.</p>
+<h3 id="centrifugal-pump-operation">Centrifugal Pump Operation</h3>
+<p>A centrifugal pump uses a rotating impeller inside a stationary casing called a <strong>volute</strong>. Fluid enters the pump through the suction eye at the center of the impeller. As the impeller spins (typically at 1,750 or 3,500 RPM), its curved vanes fling the fluid outward by centrifugal force. This action increases the fluid's velocity. The expanding volute casing then gradually slows the fluid down, converting its velocity energy (kinetic) into pressure energy (potential) — this is the key conversion that makes a centrifugal pump work.</p>
+<p>The main components of a centrifugal pump include:</p>
+<ul>
+<li><strong>Impeller</strong> — the rotating element that adds energy to the fluid</li>
+<li><strong>Volute casing</strong> — the stationary shell that collects and directs fluid</li>
+<li><strong>Shaft</strong> — connects the impeller to the motor</li>
+<li><strong>Mechanical seal or packing</strong> — prevents leakage where the shaft passes through the casing</li>
+<li><strong>Wear rings</strong> — replaceable rings that maintain clearance between impeller and casing</li>
+<li><strong>Bearings</strong> — support the shaft and allow smooth rotation</li>
+<li><strong>Suction and discharge flanges</strong> — connection points for piping</li>
+</ul>
+<h4 id="diagram-centrifugal-pump-components">Diagram: Centrifugal Pump Components</h4>
+<iframe src="../../sims/pump-centrifugal-components/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Centrifugal Pump Components Interactive Diagram</summary>
+Type: diagram
+
+Bloom Level: L1 Remember
+Bloom Verb: Identify, label
+Learning Objective: Students will identify and label the major components of a centrifugal pump including impeller, volute, shaft, mechanical seal, wear rings, bearings, suction eye, and discharge port.
+
+Components to show:
+- Cross-section cutaway view of a centrifugal pump
+- Impeller (highlighted in center) with curved vanes visible
+- Volute casing (outer shell) showing expanding spiral shape
+- Shaft running through the center
+- Mechanical seal area where shaft penetrates casing
+- Wear rings at impeller-to-casing clearance points
+- Bearings on either side of the casing
+- Suction eye (inlet) at impeller center
+- Discharge port at volute outlet
+- Motor coupling at shaft end
+
+Interactive elements:
+- Hover over each component to see name and brief description in a tooltip
+- Click a component to highlight it and show a detailed description panel
+- Color coding: rotating parts in blue, stationary parts in gray, sealing elements in orange
+
+Instructional Rationale: Label-the-diagram interaction supports Remember-level objectives by requiring students to associate component names with their physical locations. Hover tooltips provide immediate feedback.
+
+Visual style: Technical cross-section with clean lines and clear labels
+Canvas size: responsive, minimum 700x500px
+Implementation: p5.js with interactive hover/click regions
+</details>
+
+<h3 id="positive-displacement-pumps">Positive Displacement Pumps</h3>
+<p>Positive displacement pumps work differently — they trap a fixed volume of fluid in an enclosed space and mechanically force it from the suction side to the discharge side. Because each revolution (or stroke) moves the same volume regardless of pressure, positive displacement pumps deliver a nearly constant flow rate at any pressure within their design limits.</p>
+<p>Common types of positive displacement pumps used in industrial systems include:</p>
+<ul>
+<li><strong>Reciprocating pumps</strong> — use a piston or plunger moving back and forth in a cylinder; used for high-pressure washing, chemical injection, and hydraulic test pumps</li>
+<li><strong>Diaphragm pumps</strong> — use a flexible membrane that flexes back and forth; ideal for corrosive or abrasive fluids because the fluid never contacts moving metal parts</li>
+<li><strong>Peristaltic (hose) pumps</strong> — squeeze a flexible tube with rotating rollers; used for metering chemicals and handling sensitive fluids</li>
+<li><strong>Progressive cavity pumps</strong> — use a helical rotor turning inside a rubber stator; excellent for thick, viscous, or solids-laden fluids like sludge</li>
+<li><strong>Gear pumps</strong> — use meshing gears to move fluid (covered in detail in Chapter 8 for hydraulic applications)</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">When to Choose Positive Displacement</p>
+<p>Choose a positive displacement pump when you need: (1) constant flow regardless of pressure changes, (2) to handle highly viscous fluids, (3) precise metering or dosing, or (4) self-priming capability in applications where the pump sits above the fluid level.</p>
+</div>
+<hr />
+<h2 id="112-pump-performance-curves">11.2 Pump Performance Curves</h2>
+<p>Every centrifugal pump has a unique set of <strong>performance curves</strong> that describe how it behaves under different operating conditions. Reading these curves is one of the most important skills for a pumping system technician — they tell you exactly what a pump can deliver and where it runs most efficiently.</p>
+<h3 id="understanding-the-pump-curve">Understanding the Pump Curve</h3>
+<p>A pump performance curve plots four key parameters against flow rate (measured in gallons per minute, GPM):</p>
+<ol>
+<li>
+<p><strong>Head (H)</strong> — the height (in feet) the pump can lift fluid, which represents pressure capability. As flow increases, head decreases — this is the characteristic downward-sloping curve of a centrifugal pump.</p>
+</li>
+<li>
+<p><strong>Efficiency (η)</strong> — the percentage of motor power that actually reaches the fluid. Efficiency rises as flow increases from zero, reaches a peak at the <strong>Best Efficiency Point (BEP)</strong>, then falls off at higher flows.</p>
+</li>
+<li>
+<p><strong>Power (BHP)</strong> — the brake horsepower the motor must supply. Power generally increases with flow for most centrifugal pumps.</p>
+</li>
+<li>
+<p><strong>NPSH Required (NPSHr)</strong> — the minimum suction pressure the pump needs to avoid cavitation. NPSHr increases as flow increases.</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Curve</th>
+<th>X-Axis</th>
+<th>Y-Axis</th>
+<th>Shape</th>
+<th>Key Takeaway</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Head</td>
+<td>Flow (GPM)</td>
+<td>Head (ft)</td>
+<td>Downward slope</td>
+<td>More flow = less pressure</td>
+</tr>
+<tr>
+<td>Efficiency</td>
+<td>Flow (GPM)</td>
+<td>Efficiency (%)</td>
+<td>Bell curve</td>
+<td>Peak at BEP</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>Flow (GPM)</td>
+<td>BHP (hp)</td>
+<td>Rising curve</td>
+<td>More flow = more power</td>
+</tr>
+<tr>
+<td>NPSHr</td>
+<td>Flow (GPM)</td>
+<td>NPSHr (ft)</td>
+<td>Rising curve</td>
+<td>More flow = more suction pressure needed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="diagram-pump-performance-curve-explorer">Diagram: Pump Performance Curve Explorer</h4>
+<iframe src="../../sims/pump-performance-curves/main.html" width="100%" height="550px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Pump Performance Curve Explorer</summary>
+Type: microsim
+
+Bloom Level: L2 Understand
+Bloom Verb: Interpret, explain
+Learning Objective: Students will interpret pump performance curves to identify the Best Efficiency Point (BEP), understand how head decreases with increasing flow, and explain the relationship between pump speed and curve shape.
+
+Visual elements:
+- Graph area with four curves plotted on shared x-axis (Flow, GPM):
+  - Head curve (blue, downward sloping from ~120 ft at 0 GPM to ~20 ft at 500 GPM)
+  - Efficiency curve (green, bell shape peaking at ~82% around 300 GPM)
+  - Power curve (red, rising from ~5 BHP to ~25 BHP)
+  - NPSHr curve (orange, rising from ~4 ft to ~20 ft)
+- Vertical dashed line showing current operating point
+- BEP marker (star symbol) at peak efficiency
+- System curve overlay (parabolic, dashed gray) showing operating point intersection
+
+Interactive controls:
+- Slider: "Flow Rate" (0-500 GPM) — moves the operating point indicator
+- Slider: "Pump Speed" (50%-100% of rated speed) — shifts curves using affinity laws
+- Toggle: Show/hide each curve independently
+- Toggle: Show system curve overlay
+- Display panel showing current values: Head, Efficiency, BHP, NPSHr at selected flow
+
+Data Visibility Requirements:
+- Stage 1: Show all four curves with labeled axes and units
+- Stage 2: As user moves flow slider, vertical line tracks and numeric readouts update
+- Stage 3: When speed slider changes, all curves shift according to affinity laws with before/after overlay
+- Stage 4: System curve intersection clearly marked as "Operating Point"
+
+Default parameters:
+- Flow rate: 300 GPM (at BEP)
+- Pump speed: 100%
+- All curves visible
+
+Instructional Rationale: Interactive parameter exploration supports Understand-level objectives by letting students see how changing flow rate affects all four performance parameters simultaneously. The speed slider demonstrates affinity laws with concrete, visible data transformations rather than abstract formulas.
+
+Implementation: p5.js with smooth curve rendering and responsive layout
+Canvas size: responsive, minimum 750x500px
+</details>
+
+<h3 id="the-best-efficiency-point-bep">The Best Efficiency Point (BEP)</h3>
+<p>The <strong>Best Efficiency Point</strong> is where the pump converts the maximum percentage of motor power into useful fluid work. Operating at or near the BEP means:</p>
+<ul>
+<li>Lowest energy cost per gallon pumped</li>
+<li>Minimum vibration and noise</li>
+<li>Longest bearing and seal life</li>
+<li>Least internal recirculation and hydraulic forces</li>
+</ul>
+<p>Industry best practice recommends operating centrifugal pumps within <strong>80–110% of BEP flow</strong>. Operating far from BEP — either at very low flow (throttled) or very high flow (runout) — increases vibration, shortens component life, and wastes energy.</p>
+<h3 id="system-curves-and-operating-points">System Curves and Operating Points</h3>
+<p>A <strong>system curve</strong> represents the resistance that the piping system presents to flow. It combines:</p>
+<ul>
+<li><strong>Static head</strong> — the elevation difference the pump must overcome (constant regardless of flow)</li>
+<li><strong>Friction losses</strong> — resistance from pipes, fittings, and valves (increases with the square of flow)</li>
+</ul>
+<p>The system curve is a parabola that starts at the static head value and rises steeply as flow increases. The point where the pump curve crosses the system curve is the <strong>operating point</strong> — the actual flow and head the pump delivers in that specific system.</p>
+<p>[
+H_{system} = H_{static} + H_{friction}
+]</p>
+<p>Where friction losses follow the relationship:</p>
+<p>[
+H_{friction} = K \times Q^2
+]</p>
+<p>Where ( K ) is the system resistance constant and ( Q ) is the flow rate.</p>
+<h3 id="pump-brake-horsepower">Pump Brake Horsepower</h3>
+<p>The power required to drive a pump is called <strong>Brake Horsepower (BHP)</strong>. It is calculated from the flow rate, total dynamic head, and pump efficiency:</p>
+<p>[
+BHP = \frac{Q \times H}{3{,}960 \times \eta}
+]</p>
+<p>Where ( Q ) is flow in GPM, ( H ) is total dynamic head in feet, ( \eta ) is pump efficiency (decimal), and 3,960 is the conversion constant for GPM × feet to horsepower (for water at standard conditions).</p>
+<h4 id="worked-example-pump-brake-horsepower-and-motor-selection">Worked Example: Pump Brake Horsepower and Motor Selection</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Flow rate: 300 GPM</li>
+<li>Total dynamic head: 120 ft</li>
+<li>Pump efficiency: 78%</li>
+</ul>
+<p><strong>Find:</strong> Brake horsepower and appropriate motor size</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate brake horsepower:</li>
+</ol>
+<p>[
+BHP = \frac{Q \times H}{3{,}960 \times \eta} = \frac{300 \times 120}{3{,}960 \times 0.78} = \frac{36{,}000}{3{,}089} = 11.7 \text{ HP}
+]</p>
+<ol>
+<li>Select the next standard motor size: <strong>15 HP</strong>.</li>
+</ol>
+<p><strong>Answer:</strong> The brake horsepower is <strong>11.7 BHP</strong>; select a <strong>15 HP</strong> motor.</p>
+<blockquote>
+<p><strong>Practical note:</strong> The 25% margin (15 HP vs. 11.7 BHP) covers pump operation slightly off best efficiency point (BEP), specific gravity variations (if not pure water), and system head curve uncertainty.</p>
+</blockquote>
+<h4 id="worked-example-system-head-curve-calculation">Worked Example: System Head Curve Calculation</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Static head: 40 ft (elevation change)</li>
+<li>Friction factor ( K = 0.0008 ) (from pipe sizing tables)</li>
+<li>( H_{friction} = K \times Q^2 )</li>
+</ul>
+<p><strong>Find:</strong> Total system head at 0, 200, and 400 GPM</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>At ( Q = 0 ) GPM (static head only):</li>
+</ol>
+<p>[
+H = 40 + 0.0008 \times 0^2 = 40 \text{ ft}
+]</p>
+<ol>
+<li>At ( Q = 200 ) GPM:</li>
+</ol>
+<p>[
+H = 40 + 0.0008 \times 200^2 = 40 + 32 = 72 \text{ ft}
+]</p>
+<ol>
+<li>At ( Q = 400 ) GPM:</li>
+</ol>
+<p>[
+H = 40 + 0.0008 \times 400^2 = 40 + 128 = 168 \text{ ft}
+]</p>
+<p><strong>Answer:</strong> The total system head is <strong>40 ft</strong> at 0 GPM, <strong>72 ft</strong> at 200 GPM, and <strong>168 ft</strong> at 400 GPM.</p>
+<blockquote>
+<p><strong>Practical note:</strong> The system curve is a parabola starting at 40 ft (static head) and rising steeply with flow. Where this curve intersects the pump curve determines the operating point. If the operating point is far from the pump's BEP (best efficiency point), consider a different impeller size or pump model.</p>
+</blockquote>
+<hr />
+<h2 id="113-pump-installation-procedures">11.3 Pump Installation Procedures</h2>
+<p>Proper pump installation is critical for reliable operation and long equipment life. A poorly installed pump will vibrate, overheat, consume excess energy, and fail prematurely. The installation process follows a specific sequence.</p>
+<h3 id="installation-sequence">Installation Sequence</h3>
+<ol>
+<li><strong>Foundation preparation</strong> — pour a concrete pad that is flat, level, and heavy enough (typically 3–5 times the pump-motor weight) to absorb vibration</li>
+<li><strong>Baseplate mounting</strong> — bolt the pump-motor baseplate to the foundation using anchor bolts and grout underneath for full support</li>
+<li><strong>Rough alignment</strong> — position the pump and motor so their shaft centerlines are approximately aligned</li>
+<li><strong>Piping connections</strong> — connect suction and discharge piping without forcing the pipes to fit (pipe strain damages pump casings and bearings)</li>
+<li><strong>Precision alignment</strong> — use dial indicators or laser alignment tools to align the pump and motor shafts to within manufacturer tolerances (typically 0.002–0.005 inches)</li>
+<li><strong>Priming</strong> — fill the pump casing and suction line completely with liquid (centrifugal pumps cannot pump air)</li>
+<li><strong>Electrical connections</strong> — connect motor wiring and verify rotation direction matches the pump arrow</li>
+<li><strong>Startup sequence</strong> — open the suction valve fully, crack the discharge valve slightly, start the motor, then slowly open the discharge valve to the desired operating point</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Never Run a Centrifugal Pump Dry</p>
+<p>Running a centrifugal pump without liquid inside will destroy the mechanical seal within seconds. The seal faces depend on a thin film of liquid for lubrication and cooling. Always verify the pump is fully primed and the suction valve is open before starting.</p>
+</div>
+<h3 id="shaft-alignment">Shaft Alignment</h3>
+<p>Misalignment is the number one cause of premature pump failure. There are two types of misalignment:</p>
+<ul>
+<li><strong>Angular misalignment</strong> — the shaft centerlines meet at an angle</li>
+<li><strong>Parallel (offset) misalignment</strong> — the shaft centerlines are parallel but not on the same axis</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Alignment Method</th>
+<th>Accuracy</th>
+<th>Speed</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Straight edge and feeler gauges</td>
+<td>± 0.005 in</td>
+<td>Slow</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Dial indicators</td>
+<td>± 0.002 in</td>
+<td>Medium</td>
+<td>Medium</td>
+</tr>
+<tr>
+<td>Laser alignment</td>
+<td>± 0.0005 in</td>
+<td>Fast</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<p>Modern technicians increasingly use <strong>laser alignment tools</strong> because they are faster, more accurate, and provide a graphical display showing exactly which feet to shim and by how much.</p>
+<hr />
+<h2 id="114-cavitation-the-silent-pump-destroyer">11.4 Cavitation: The Silent Pump Destroyer</h2>
+<p>Cavitation is one of the most destructive phenomena in pumping systems. It occurs when the pressure inside the pump drops below the <strong>vapor pressure</strong> of the liquid, causing tiny vapor bubbles to form. When these bubbles reach a higher-pressure zone inside the pump, they collapse violently — releasing shock waves that pit and erode metal surfaces.</p>
+<h3 id="how-cavitation-happens">How Cavitation Happens</h3>
+<p>The sequence of cavitation:</p>
+<ol>
+<li>Fluid enters the suction side of the pump</li>
+<li>The impeller eye (center) has the lowest pressure in the entire system</li>
+<li>If suction pressure is too low, the fluid partially vaporizes — tiny bubbles form</li>
+<li>As the impeller flings the fluid outward, pressure increases</li>
+<li>The vapor bubbles collapse (implode) violently against metal surfaces</li>
+<li>Repeated implosions erode the impeller, creating a pitted, rough surface</li>
+</ol>
+<h3 id="recognizing-cavitation">Recognizing Cavitation</h3>
+<p>Cavitation announces itself through several symptoms that a trained technician can detect:</p>
+<ul>
+<li><strong>Sound</strong> — a distinctive crackling or rattling noise, often described as "pumping gravel"</li>
+<li><strong>Vibration</strong> — increased vibration readings, especially at high frequencies</li>
+<li><strong>Performance drop</strong> — reduced flow and head compared to the pump curve</li>
+<li><strong>Impeller damage</strong> — pitting, erosion, and rough surfaces visible during inspection</li>
+<li><strong>Seal and bearing failures</strong> — caused by the vibration and unstable hydraulic forces</li>
+</ul>
+<h3 id="npsh-the-key-to-preventing-cavitation">NPSH: The Key to Preventing Cavitation</h3>
+<p>The concept of <strong>Net Positive Suction Head</strong> (NPSH) is the tool technicians use to predict and prevent cavitation. There are two values to compare:</p>
+<ul>
+<li><strong>NPSH Available (NPSHa)</strong> — the actual suction pressure at the pump inlet, determined by the system design</li>
+<li><strong>NPSH Required (NPSHr)</strong> — the minimum suction pressure the pump needs, determined by the pump design (from the pump curve)</li>
+</ul>
+<p>The rule is simple:</p>
+<p>[
+NPSH_a &gt; NPSH_r + \text{Safety Margin (typically 2–3 ft)}
+]</p>
+<p>NPSHa is calculated from the system:</p>
+<p>[
+NPSH_a = H_{atm} + H_{static} - H_{friction} - H_{vapor}
+]</p>
+<p>Where:</p>
+<ul>
+<li>( H_{atm} ) = atmospheric pressure head (33.9 ft of water at sea level)</li>
+<li>( H_{static} ) = height of liquid above (+) or below (−) the pump centerline</li>
+<li>( H_{friction} ) = friction losses in the suction piping</li>
+<li>( H_{vapor} ) = vapor pressure of the liquid at the pumping temperature</li>
+</ul>
+<h4 id="worked-example-npsh-available-calculation">Worked Example: NPSH Available Calculation</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Atmospheric pressure: 14.7 psia (sea level) = 33.9 ft of water</li>
+<li>Water temperature: 180°F (vapor pressure = 7.51 psia = 17.35 ft)</li>
+<li>Pump centerline is 10 ft above water source (suction lift)</li>
+<li>Friction losses in suction piping: 3 ft</li>
+</ul>
+<p><strong>Find:</strong> NPSH available, and is it adequate for a pump requiring ( NPSH_r = 8 ) ft?</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Apply the NPSH available formula (note: since the pump is above the water source, static head is negative):</li>
+</ol>
+<p>[
+NPSH_a = H_{atm} - H_{vapor} - H_{static} - H_{friction}
+]</p>
+<ol>
+<li>Substitute values:</li>
+</ol>
+<p>[
+NPSH_a = 33.9 - 17.35 - 10 - 3 = 3.55 \text{ ft}
+]</p>
+<ol>
+<li>Compare to pump requirement: ( NPSH_a = 3.55 \text{ ft} &lt; NPSH_r = 8 \text{ ft} ) — <strong>the pump will cavitate!</strong></li>
+</ol>
+<p><strong>Answer:</strong> The NPSH available is <strong>3.55 ft</strong>, which is insufficient. The pump requires 8 ft and <strong>will cavitate</strong> at these conditions.</p>
+<p>Remedies:</p>
+<ul>
+<li>Lower the pump (reduce static lift from 10 ft to 2 ft): ( NPSH_a = 33.9 - 17.35 - 2 - 3 = 11.55 \text{ ft} ) ✓</li>
+<li>Use cooler water (at 140°F, vapor pressure drops to 6.3 ft): ( NPSH_a = 33.9 - 6.3 - 10 - 3 = 14.6 \text{ ft} ) ✓</li>
+<li>Increase suction pipe diameter (reduce friction loss)</li>
+</ul>
+<blockquote>
+<p><strong>Practical note:</strong> NPSH problems are easier and cheaper to prevent during design than to fix after installation. Always calculate NPSH available at the highest expected fluid temperature and lowest expected liquid level — these are the worst-case conditions.</p>
+</blockquote>
+<h3 id="cavitation-prevention-strategies">Cavitation Prevention Strategies</h3>
+<p>Practical steps to prevent cavitation include:</p>
+<ul>
+<li><strong>Raise the liquid level</strong> — increase the height of fluid above the pump to boost static head</li>
+<li><strong>Lower the pump</strong> — mount the pump below the liquid surface (flooded suction)</li>
+<li><strong>Reduce suction pipe friction</strong> — use larger diameter suction piping, minimize fittings and elbows</li>
+<li><strong>Lower fluid temperature</strong> — cooler liquid has lower vapor pressure</li>
+<li><strong>Reduce pump speed</strong> — lower RPM reduces NPSHr (using a VFD)</li>
+<li><strong>Select a pump with lower NPSHr</strong> — some impeller designs (inducers) have lower NPSH requirements</li>
+</ul>
+<h4 id="diagram-cavitation-diagnosis-simulator">Diagram: Cavitation Diagnosis Simulator</h4>
+<iframe src="../../sims/pump-cavitation-sim/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Cavitation Diagnosis Simulator</summary>
+Type: microsim
+
+Bloom Level: L4 Analyze
+Bloom Verb: Examine, differentiate
+Learning Objective: Students will analyze system conditions to determine whether cavitation will occur by adjusting suction parameters and comparing NPSHa to NPSHr. Students will differentiate between system conditions that cause cavitation and those that prevent it.
+
+Visual elements:
+- Left side: Animated pump cross-section showing fluid flow through impeller
+  - Normal operation: smooth blue fluid flow
+  - Cavitation occurring: visible bubble formation at impeller eye with red warning indicators
+  - Impeller damage indicator (progressive pitting shown over time if cavitation persists)
+- Right side: NPSH comparison bar chart
+  - Green bar: NPSHa (available)
+  - Red bar: NPSHr (required)
+  - Yellow zone: safety margin
+  - Clear visual indicator when NPSHa drops below NPSHr
+
+Interactive controls:
+- Slider: "Liquid Level Above Pump" (−5 ft to +15 ft) — affects static head
+- Slider: "Fluid Temperature" (60°F to 200°F) — affects vapor pressure
+- Slider: "Suction Pipe Length" (10 ft to 100 ft) — affects friction losses
+- Slider: "Pump Speed" (50% to 100%) — affects NPSHr
+- Dropdown: "Suction Pipe Diameter" (2", 3", 4") — affects friction losses
+- Display panel: Shows calculated NPSHa, NPSHr, margin, and status (OK / CAVITATION WARNING / CAVITATION)
+
+Data Visibility Requirements:
+- Show all NPSH calculation values in real-time as sliders change
+- Show the full equation: NPSHa = Hatm + Hstatic - Hfriction - Hvapor with live values
+- Color-code the status: green (OK, margin > 3 ft), yellow (WARNING, margin 0-3 ft), red (CAVITATION, margin < 0)
+- When cavitation occurs, show bubble animation in the pump cross-section
+
+Instructional Rationale: Interactive parameter analysis supports Analyze-level objectives by requiring students to examine how individual system variables contribute to the overall NPSH balance. Students can systematically adjust parameters to find the boundary conditions where cavitation begins.
+
+Implementation: p5.js with animated fluid simulation and real-time calculation display
+Canvas size: responsive, minimum 800x500px
+</details>
+
+<hr />
+<h2 id="115-water-hammer-protecting-pipes-from-pressure-surges">11.5 Water Hammer: Protecting Pipes from Pressure Surges</h2>
+<p><strong>Water hammer</strong> (also called hydraulic shock or surge) occurs when fluid in motion is suddenly stopped or its direction is rapidly changed. The kinetic energy of the moving fluid converts into a pressure wave that slams through the piping system — producing a loud banging noise and pressure spikes that can be several times the normal operating pressure.</p>
+<h3 id="causes-of-water-hammer">Causes of Water Hammer</h3>
+<ul>
+<li><strong>Rapid valve closure</strong> — closing a valve quickly on a flowing line (the most common cause)</li>
+<li><strong>Pump trip (sudden shutdown)</strong> — when a pump stops abruptly, the fluid column reverses and slams back</li>
+<li><strong>Check valve slam</strong> — a swing check valve closing hard when flow reverses</li>
+<li><strong>Air pockets collapsing</strong> — trapped air pockets that suddenly compress or release</li>
+</ul>
+<h3 id="pressure-surge-calculation">Pressure Surge Calculation</h3>
+<p>The magnitude of a water hammer pressure spike can be estimated using the Joukowsky equation:</p>
+<p>[
+\Delta P = \frac{\rho \times c \times \Delta v}{g}
+]</p>
+<p>Where:</p>
+<ul>
+<li>( \Delta P ) = pressure surge (psi)</li>
+<li>( \rho ) = fluid density (lb/ft³)</li>
+<li>( c ) = wave speed in the pipe (typically 3,000–4,500 ft/s for water in steel pipe)</li>
+<li>( \Delta v ) = change in fluid velocity (ft/s)</li>
+<li>( g ) = gravitational constant (32.2 ft/s²)</li>
+</ul>
+<h4 id="worked-example-water-hammer-pressure-surge">Worked Example: Water Hammer Pressure Surge</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Flow velocity: 8 ft/s</li>
+<li>Pipe material: steel (wave speed ( c \approx 4{,}000 ) ft/s)</li>
+<li>Fluid: water (( \rho = 62.4 ) lb/ft³)</li>
+</ul>
+<p><strong>Find:</strong> Pressure surge from sudden valve closure</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Apply the Joukowsky equation with unit conversion to psi:</li>
+</ol>
+<p>[
+\Delta P = \frac{\rho \times c \times \Delta v}{144 \times g}
+]</p>
+<ol>
+<li>Substitute values:</li>
+</ol>
+<p>[
+\Delta P = \frac{62.4 \times 4{,}000 \times 8}{144 \times 32.2} = \frac{1{,}996{,}800}{4{,}636.8} = 431 \text{ psi}
+]</p>
+<p><strong>Answer:</strong> The pressure surge from sudden valve closure is <strong>431 psi</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> A 431 psi pressure spike can burst pipes and destroy fittings. At 8 ft/s, this is a severe case — pipe velocity should be 5 ft/s or less in most systems. Mitigation: install slow-closing valves (10+ seconds), surge tanks, or pressure relief devices. Water hammer is the leading cause of pipe failures in industrial pumping systems.</p>
+</blockquote>
+<p>A water velocity of just 5 ft/s stopped instantly in a steel pipe can produce a pressure spike of over <strong>300 psi</strong> — enough to burst fittings, crack pipe, and destroy equipment.</p>
+<h3 id="water-hammer-prevention">Water Hammer Prevention</h3>
+<ul>
+<li><strong>Slow-closing valves</strong> — use valves with gear operators or actuators that take 5–10 seconds to close</li>
+<li><strong>Surge tanks</strong> — open tanks that absorb pressure surges by allowing fluid to rise</li>
+<li><strong>Pressure relief valves</strong> — open automatically at a set pressure to release the surge</li>
+<li><strong>Air chambers or bladder tanks</strong> — pressurized vessels that compress to absorb the shock wave</li>
+<li><strong>Soft starters and VFDs on pumps</strong> — ramp pump speed up and down gradually instead of instant on/off</li>
+<li><strong>Non-slam check valves</strong> — spring-loaded or nozzle-style check valves that close before flow reverses</li>
+<li><strong>Controlled pump shutdown sequences</strong> — PLC-controlled ramp-down over 10–30 seconds</li>
+</ul>
+<hr />
+<h2 id="116-variable-frequency-drives-vfds-and-the-affinity-laws">11.6 Variable Frequency Drives (VFDs) and the Affinity Laws</h2>
+<p>A <strong>Variable Frequency Drive</strong> (VFD) is an electronic controller that adjusts the speed of an AC motor by varying the frequency and voltage of the electrical power supplied to it. In pumping systems, VFDs are one of the most powerful tools for saving energy and improving control.</p>
+<h3 id="why-vfds-matter-for-pumps">Why VFDs Matter for Pumps</h3>
+<p>Traditionally, pump output was controlled by throttling a discharge valve — essentially wasting energy by creating artificial resistance. A VFD eliminates this waste by slowing the pump motor to match the actual demand. Instead of running a pump at full speed and throttling away excess flow, the VFD runs the pump at exactly the speed needed.</p>
+<h3 id="the-affinity-laws">The Affinity Laws</h3>
+<p>The relationship between pump speed and performance follows three fundamental rules called the <strong>Affinity Laws</strong>:</p>
+<p>[
+\frac{Q_2}{Q_1} = \frac{N_2}{N_1}
+]</p>
+<p>[
+\frac{H_2}{H_1} = \left(\frac{N_2}{N_1}\right)^2
+]</p>
+<p>[
+\frac{P_2}{P_1} = \left(\frac{N_2}{N_1}\right)^3
+]</p>
+<p>Where ( Q ) = flow, ( H ) = head, ( P ) = power, and ( N ) = speed (RPM).</p>
+<h4 id="worked-example-affinity-laws-with-vfd-speed-reduction">Worked Example: Affinity Laws with VFD Speed Reduction</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>Pump running at 1,780 RPM: 400 GPM, 100 ft head, 50 HP</li>
+<li>VFD reduces speed to 1,425 RPM (80% speed)</li>
+</ul>
+<p><strong>Find:</strong> New flow, head, power, and percent energy savings</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate speed ratio:</li>
+</ol>
+<p>[
+\frac{N_2}{N_1} = \frac{1{,}425}{1{,}780} = 0.80
+]</p>
+<ol>
+<li>Apply the flow affinity law:</li>
+</ol>
+<p>[
+Q_2 = Q_1 \times \frac{N_2}{N_1} = 400 \times 0.80 = 320 \text{ GPM}
+]</p>
+<ol>
+<li>Apply the head affinity law:</li>
+</ol>
+<p>[
+H_2 = H_1 \times \left(\frac{N_2}{N_1}\right)^2 = 100 \times 0.80^2 = 100 \times 0.64 = 64 \text{ ft}
+]</p>
+<ol>
+<li>Apply the power affinity law:</li>
+</ol>
+<p>[
+P_2 = P_1 \times \left(\frac{N_2}{N_1}\right)^3 = 50 \times 0.80^3 = 50 \times 0.512 = 25.6 \text{ HP}
+]</p>
+<ol>
+<li>Calculate energy savings:</li>
+</ol>
+<p>[
+\text{Savings} = \frac{P_1 - P_2}{P_1} \times 100 = \frac{50 - 25.6}{50} \times 100 = 48.8\%
+]</p>
+<p><strong>Answer:</strong> At 80% speed, the pump delivers <strong>320 GPM</strong> at <strong>64 ft</strong> head using <strong>25.6 HP</strong> — a <strong>48.8% energy savings</strong>.</p>
+<blockquote>
+<p><strong>Practical note:</strong> A 20% speed reduction saves nearly 49% in energy — this is the cubic relationship that makes VFDs the single most cost-effective upgrade for pumping systems. At $0.10/kWh running 8,760 hr/yr, savings = ( (50 - 25.6) \times 0.746 \times 8{,}760 \times \$0.10 = \$15{,}944 )/year. Typical VFD payback is 6-18 months.</p>
+</blockquote>
+<p>The critical takeaway is the <strong>cube law for power</strong>: reducing pump speed by just 20% (from 100% to 80%) reduces power consumption by nearly <strong>50%</strong>. This is why VFDs deliver such dramatic energy savings.</p>
+<table>
+<thead>
+<tr>
+<th>Speed (% of rated)</th>
+<th>Flow (% of rated)</th>
+<th>Head (% of rated)</th>
+<th>Power (% of rated)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+</tr>
+<tr>
+<td>90%</td>
+<td>90%</td>
+<td>81%</td>
+<td>73%</td>
+</tr>
+<tr>
+<td>80%</td>
+<td>80%</td>
+<td>64%</td>
+<td>51%</td>
+</tr>
+<tr>
+<td>70%</td>
+<td>70%</td>
+<td>49%</td>
+<td>34%</td>
+</tr>
+<tr>
+<td>60%</td>
+<td>60%</td>
+<td>36%</td>
+<td>22%</td>
+</tr>
+<tr>
+<td>50%</td>
+<td>50%</td>
+<td>25%</td>
+<td>13%</td>
+</tr>
+</tbody>
+</table>
+<h4 id="diagram-affinity-laws-energy-calculator">Diagram: Affinity Laws Energy Calculator</h4>
+<iframe src="../../sims/pump-affinity-laws/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Affinity Laws Energy Calculator</summary>
+Type: microsim
+
+Bloom Level: L3 Apply
+Bloom Verb: Calculate, demonstrate
+Learning Objective: Students will apply the affinity laws to calculate how changes in pump speed affect flow, head, and power consumption, and demonstrate the energy savings achievable with VFD speed reduction compared to valve throttling.
+
+Visual elements:
+- Left panel: Two pump curve charts stacked
+  - Top chart: Head vs. Flow curves at multiple speeds (100%, 90%, 80%, 70%, 60%, 50%) with system curve overlay showing operating points
+  - Bottom chart: Power vs. Flow showing energy consumption at each speed
+- Right panel: Energy savings comparison
+  - Bar chart comparing annual energy cost: Full speed + throttle valve vs. VFD at reduced speed
+  - Dollar savings calculation displayed prominently
+  - CO₂ reduction estimate
+
+Interactive controls:
+- Slider: "Required Flow" (50%-100% of design) — sets the target operating condition
+- Slider: "Electricity Cost" ($0.05 - $0.25 per kWh)
+- Slider: "Operating Hours per Year" (2000-8760 hrs)
+- Display: Calculated values for speed, head, power at current and design conditions
+- Display: Annual energy cost comparison (throttled vs. VFD)
+- Display: Simple payback period for VFD installation (assuming $5,000-$15,000 VFD cost based on pump size)
+
+Data Visibility Requirements:
+- Show the affinity law equations with calculated values filled in at each step
+- Show before/after pump curves when speed changes
+- Show operating point migration on the pump curve as speed decreases
+- Show dollar savings and percentage savings prominently
+
+Instructional Rationale: Apply-level calculator lets students use the affinity law formulas with real numbers to solve practical energy savings problems. The comparison between throttling and VFD control demonstrates why this matters in practice.
+
+Implementation: p5.js with Chart.js-style curve rendering
+Canvas size: responsive, minimum 800x550px
+</details>
+
+<h3 id="vfd-operating-considerations">VFD Operating Considerations</h3>
+<p>While VFDs offer tremendous benefits, technicians should be aware of several practical considerations:</p>
+<ul>
+<li><strong>Minimum speed</strong> — most centrifugal pumps should not run below 30–40% speed to maintain adequate cooling of the mechanical seal and prevent internal recirculation</li>
+<li><strong>Motor compatibility</strong> — VFDs produce electrical harmonics that generate extra heat in motors; use inverter-duty rated motors for best results</li>
+<li><strong>Bearing currents</strong> — VFDs can induce electrical currents through motor bearings; shaft grounding rings or insulated bearings may be needed</li>
+<li><strong>Resonance avoidance</strong> — certain speeds may excite natural vibration frequencies in the pump or piping; program the VFD to skip these frequencies</li>
+<li><strong>Commissioning</strong> — VFD parameters (acceleration time, deceleration time, minimum/maximum frequency, PID tuning) must be properly configured for each application</li>
+</ul>
+<hr />
+<h2 id="117-real-time-pump-monitoring-with-iot">11.7 Real-Time Pump Monitoring with IoT</h2>
+<p>Modern pumping systems use <strong>Internet of Things (IoT) sensors</strong> to continuously monitor pump health and performance. Instead of relying on periodic manual checks, these sensors stream data in real time to monitoring platforms where AI algorithms analyze trends and detect problems early.</p>
+<h3 id="key-monitoring-parameters">Key Monitoring Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Sensor Type</th>
+<th>What It Reveals</th>
+<th>Normal Range (typical)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vibration</td>
+<td>Accelerometer</td>
+<td>Bearing wear, misalignment, imbalance, cavitation</td>
+<td>&lt; 0.15 in/s velocity</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>Thermocouple / RTD</td>
+<td>Bearing overheating, seal friction, motor overload</td>
+<td>Motor &lt; 180°F, bearings &lt; 200°F</td>
+</tr>
+<tr>
+<td>Suction pressure</td>
+<td>Pressure transmitter</td>
+<td>Cavitation risk, clogged strainers</td>
+<td>Application-specific</td>
+</tr>
+<tr>
+<td>Discharge pressure</td>
+<td>Pressure transmitter</td>
+<td>System resistance changes, valve position</td>
+<td>Application-specific</td>
+</tr>
+<tr>
+<td>Flow rate</td>
+<td>Magnetic or ultrasonic flowmeter</td>
+<td>Actual output vs. expected, leak detection</td>
+<td>Within 10% of design</td>
+</tr>
+<tr>
+<td>Power consumption</td>
+<td>Current transducer</td>
+<td>Motor loading, efficiency degradation</td>
+<td>&lt; rated amps</td>
+</tr>
+<tr>
+<td>Seal leak rate</td>
+<td>Drip sensor or flow switch</td>
+<td>Seal wear progression</td>
+<td>Zero visible leakage</td>
+</tr>
+</tbody>
+</table>
+<h3 id="iot-architecture-for-pump-monitoring">IoT Architecture for Pump Monitoring</h3>
+<p>A typical IoT pump monitoring system follows this data flow:</p>
+<ol>
+<li><strong>Sensors</strong> mounted on the pump and motor collect data continuously</li>
+<li><strong>Edge gateway</strong> aggregates sensor data locally and performs initial processing</li>
+<li><strong>Cloud platform</strong> receives data via cellular or WiFi for storage and analysis</li>
+<li><strong>AI analytics engine</strong> processes data to detect anomalies, predict failures, and recommend actions</li>
+<li><strong>Dashboard and alerts</strong> present information to technicians and managers via web or mobile app</li>
+<li><strong>CMMS integration</strong> automatically generates work orders when maintenance is needed</li>
+</ol>
+<h4 id="diagram-pump-monitoring-iot-dashboard">Diagram: Pump Monitoring IoT Dashboard</h4>
+<iframe src="../../sims/pump-iot-dashboard/main.html" width="100%" height="550px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Pump Monitoring IoT Dashboard</summary>
+Type: microsim
+
+Bloom Level: L4 Analyze
+Bloom Verb: Examine, distinguish
+Learning Objective: Students will analyze real-time pump monitoring data to distinguish between normal operation, developing faults (bearing wear, cavitation, misalignment), and critical alarm conditions.
+
+Visual elements:
+- Central pump graphic with sensor locations indicated by pulsing dots
+- Six gauge panels surrounding the pump:
+  1. Vibration level (velocity in/s) — gauge with green/yellow/red zones
+  2. Motor temperature (°F) — gauge with zones
+  3. Suction pressure (psi) — gauge with low-pressure alarm zone
+  4. Discharge pressure (psi) — gauge
+  5. Flow rate (GPM) — gauge with design point reference
+  6. Power draw (kW) — gauge with efficiency indicator
+- Trend chart area at bottom showing 24-hour history of selected parameter
+- Alert panel showing current alarms and recommendations
+- Status indicator: NORMAL / WARNING / ALARM
+
+Interactive controls:
+- Dropdown: "Scenario" selector with pre-built scenarios:
+  1. Normal Operation — all values in green
+  2. Developing Bearing Failure — gradually increasing vibration and temperature
+  3. Cavitation Occurring — fluctuating suction pressure, increased vibration at high frequency
+  4. Misalignment — elevated vibration at 1x and 2x running speed
+  5. Clogged Suction Strainer — decreasing suction pressure and flow
+  6. Pump Wear (worn impeller) — reduced head and flow, increased power
+- Button: "Advance Time" — progresses the scenario showing parameter changes over time
+- Click any gauge to see its 24-hour trend in the chart area
+
+Data Visibility Requirements:
+- Show numeric values on all gauges
+- Show trend data with clear time axis
+- Show AI recommendation text explaining what the data pattern indicates
+- Color-code all readings against normal/warning/alarm thresholds
+
+Instructional Rationale: Scenario-based analysis supports Analyze-level objectives by requiring students to examine multiple data streams simultaneously and distinguish between different fault signatures. The progressive time advancement shows how faults develop, training students to detect problems early.
+
+Implementation: p5.js with animated gauges and trend charting
+Canvas size: responsive, minimum 850x550px
+</details>
+
+<hr />
+<h2 id="118-ai-optimized-pump-operation">11.8 AI-Optimized Pump Operation</h2>
+<p>Artificial intelligence takes pump monitoring to the next level by not just detecting problems but actively <strong>optimizing</strong> pump operation in real time. AI algorithms process historical and live data to make intelligent decisions about pump speed, staging, and maintenance timing.</p>
+<h3 id="ai-optimization-strategies">AI Optimization Strategies</h3>
+<p><strong>Speed optimization:</strong> An AI controller continuously adjusts VFD speed to maintain a target process variable (such as discharge pressure or downstream tank level) while minimizing energy consumption. Unlike a simple PID controller that responds only to current error, AI learns the system's patterns — time-of-day demand cycles, seasonal variations, and process correlations — and anticipates changes before they happen.</p>
+<p><strong>Pump staging:</strong> In systems with multiple pumps in parallel, AI determines the optimal combination of pumps and speeds. Instead of running three pumps at 80% speed, AI might determine that two pumps at 95% speed uses less total energy because each pump operates closer to its BEP.</p>
+<p><strong>Predictive maintenance:</strong> AI tracks the rate of change in vibration, temperature, and efficiency trends to predict when components will reach their failure threshold. This enables maintenance to be scheduled during planned shutdowns rather than responding to unexpected failures.</p>
+<h3 id="ai-decision-making-in-pump-systems">AI Decision-Making in Pump Systems</h3>
+<table>
+<thead>
+<tr>
+<th>AI Function</th>
+<th>Input Data</th>
+<th>Decision</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Speed optimization</td>
+<td>Pressure, flow, demand pattern</td>
+<td>Optimal VFD frequency</td>
+<td>15-30% energy savings</td>
+</tr>
+<tr>
+<td>Staging control</td>
+<td>System demand, pump curves, efficiency</td>
+<td>Which pumps to run and at what speed</td>
+<td>10-20% additional savings</td>
+</tr>
+<tr>
+<td>Cavitation prevention</td>
+<td>Suction pressure, temperature, vibration spectrum</td>
+<td>Speed reduction or alarm</td>
+<td>Prevents impeller damage</td>
+</tr>
+<tr>
+<td>Predictive maintenance</td>
+<td>Vibration trend, temperature trend, power factor</td>
+<td>Maintenance scheduling</td>
+<td>25-50% reduction in unplanned downtime</td>
+</tr>
+<tr>
+<td>Leak detection</td>
+<td>Flow balance, pressure drop patterns</td>
+<td>Alert and location estimate</td>
+<td>Reduces water/energy waste</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="119-parallel-and-series-pump-configurations">11.9 Parallel and Series Pump Configurations</h2>
+<p>When a single pump cannot meet the system requirements, pumps can be combined in <strong>parallel</strong> or <strong>series</strong> configurations.</p>
+<h3 id="parallel-pumps">Parallel Pumps</h3>
+<p>Running pumps in parallel means connecting their discharge lines to a common header. The result is <strong>additive flow at the same head</strong> — the combined pump curve is created by adding the flow rates at each head value.</p>
+<p>Use parallel pumps when:</p>
+<ul>
+<li>The system needs more flow than one pump can deliver</li>
+<li>Demand varies widely and you want to stage pumps on/off for energy savings</li>
+<li>Redundancy is needed (one pump can handle partial load if the other fails)</li>
+</ul>
+<h3 id="series-pumps">Series Pumps</h3>
+<p>Running pumps in series means piping the discharge of one pump into the suction of the next. The result is <strong>additive head at the same flow</strong> — the combined pump curve is created by adding the head values at each flow rate.</p>
+<p>Use series pumps when:</p>
+<ul>
+<li>The system needs more pressure (head) than one pump can deliver</li>
+<li>A booster pump is needed to overcome additional elevation or friction</li>
+</ul>
+<h3 id="parallel-vs-series-quick-reference">Parallel vs. Series Quick Reference</h3>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Effect on Flow</th>
+<th>Effect on Head</th>
+<th>Common Application</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Parallel</td>
+<td>Flow adds</td>
+<td>Head stays same</td>
+<td>Variable demand systems, redundancy</td>
+</tr>
+<tr>
+<td>Series</td>
+<td>Flow stays same</td>
+<td>Head adds</td>
+<td>High-rise buildings, booster stations</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1110-pump-maintenance-procedures">11.10 Pump Maintenance Procedures</h2>
+<p>Regular maintenance keeps pumps running reliably and efficiently. A comprehensive pump maintenance program includes both <strong>preventive</strong> (scheduled) and <strong>predictive</strong> (condition-based) activities.</p>
+<h3 id="routine-maintenance-checklist">Routine Maintenance Checklist</h3>
+<ul>
+<li><strong>Daily:</strong> Check for unusual noise or vibration; verify seal leakage is within limits; check suction and discharge pressures; confirm motor amperage is normal</li>
+<li><strong>Weekly:</strong> Inspect packing gland drip rate (if packing is used); check coupling guard condition; verify lube oil level in bearing housings</li>
+<li><strong>Monthly:</strong> Record vibration readings at all bearing locations; measure and record motor current and power; inspect suction strainer and clean if needed</li>
+<li><strong>Quarterly:</strong> Take oil samples from bearing housings for analysis; check alignment and correct if needed; inspect coupling elements for wear</li>
+<li><strong>Annually:</strong> Pull the pump for internal inspection; measure wear ring clearances; inspect impeller for erosion or damage; replace mechanical seal if needed; rebuild or replace bearings</li>
+</ul>
+<h4 id="diagram-pump-maintenance-checklist">Diagram: Pump Maintenance Checklist</h4>
+<iframe src="../../sims/pump-maintenance-checklist/main.html" width="100%" height="450px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Pump Maintenance Checklist Interactive Tracker</summary>
+Type: microsim
+
+Bloom Level: L5 Evaluate
+Bloom Verb: Prioritize, assess
+Learning Objective: Students will evaluate pump maintenance tasks by assessing urgency, prioritizing activities based on pump condition data, and justifying their maintenance decisions.
+
+Visual elements:
+- Maintenance task list organized by frequency (Daily, Weekly, Monthly, Quarterly, Annual)
+- Each task has a checkbox, description, and condition indicator
+- Priority scoring panel showing how condition data affects task urgency
+- Color-coded status: green (completed/OK), yellow (due soon), red (overdue/alarm)
+- Summary panel showing overall pump health score (0-100)
+
+Interactive elements:
+- Check/uncheck maintenance tasks to mark completion
+- Input fields for condition readings (vibration level, bearing temperature, seal drip rate, oil condition)
+- When condition readings are entered, the system recalculates task priorities
+- AI recommendation panel suggests which tasks to prioritize based on entered conditions
+- "Scenario" button that pre-fills condition data for different pump states (healthy, developing fault, near failure)
+
+Instructional Rationale: Evaluate-level checklist requires students to assess condition data, prioritize maintenance tasks based on actual readings, and justify why certain tasks take precedence. This goes beyond simply following a schedule to making professional judgments about maintenance priorities.
+
+Implementation: p5.js with form-style interactive elements
+Canvas size: responsive, minimum 700x450px
+</details>
+
+<h3 id="mechanical-seal-replacement">Mechanical Seal Replacement</h3>
+<p>Mechanical seals are one of the most commonly replaced pump components. Signs that a seal needs replacement include:</p>
+<ul>
+<li>Visible leakage beyond the specified drip rate</li>
+<li>Discolored or crystalized residue around the seal area</li>
+<li>Increased vibration near the seal housing</li>
+<li>Higher-than-normal motor amperage (indicating seal drag)</li>
+</ul>
+<p>The replacement process requires careful attention to cleanliness, proper face flatness, and correct spring compression. Always follow the manufacturer's installation instructions — seal installation tolerances are measured in thousandths of an inch.</p>
+<hr />
+<h2 id="1111-energy-efficient-pump-operation">11.11 Energy-Efficient Pump Operation</h2>
+<p>Pumping systems offer some of the highest energy savings potential in any facility. The U.S. Department of Energy estimates that optimization of pumping systems can reduce energy consumption by <strong>20–50%</strong> in many applications.</p>
+<h3 id="energy-optimization-strategies">Energy Optimization Strategies</h3>
+<p>The most effective strategies, ranked by typical energy savings:</p>
+<ol>
+<li><strong>Install VFDs</strong> (20-50% savings) — eliminate throttle valve losses by matching pump speed to actual demand</li>
+<li><strong>Right-size pumps</strong> (15-25% savings) — replace oversized pumps that operate far from BEP with properly sized equipment</li>
+<li><strong>Reduce system resistance</strong> (10-20% savings) — open unnecessary throttle valves, upsize bottleneck piping, replace high-loss fittings</li>
+<li><strong>Trim or replace impellers</strong> (5-15% savings) — reduce impeller diameter to permanently lower pump output to match actual system needs</li>
+<li><strong>Optimize parallel pump staging</strong> (10-20% savings) — use AI to select the most efficient combination of pumps and speeds</li>
+<li><strong>Maintain pump condition</strong> (5-10% savings) — keep wear rings, seals, and bearings in good condition to prevent efficiency degradation</li>
+<li><strong>Fix leaks and bypasses</strong> (5-15% savings) — eliminate wasted flow through leaking valves, bypasses left open, or damaged pipes</li>
+</ol>
+<h3 id="pump-system-energy-audit">Pump System Energy Audit</h3>
+<p>A pump system energy audit compares actual performance to design performance and identifies savings opportunities:</p>
+<table>
+<thead>
+<tr>
+<th>Audit Item</th>
+<th>What to Measure</th>
+<th>What to Compare Against</th>
+<th>Savings Indicator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pump efficiency</td>
+<td>Flow, head, power (calculate efficiency)</td>
+<td>Manufacturer's pump curve</td>
+<td>&gt; 10% below curve = worn pump</td>
+</tr>
+<tr>
+<td>Throttle valve position</td>
+<td>Valve position or pressure drop</td>
+<td>Fully open</td>
+<td>Partially closed = VFD opportunity</td>
+</tr>
+<tr>
+<td>Operating point</td>
+<td>Actual flow and head</td>
+<td>BEP on pump curve</td>
+<td>Far from BEP = wrong-sized pump</td>
+</tr>
+<tr>
+<td>Motor loading</td>
+<td>Actual amps vs. rated amps</td>
+<td>&gt; 90% loading</td>
+<td>Overloaded or &gt; 70% underloaded</td>
+</tr>
+<tr>
+<td>System pressure</td>
+<td>Actual discharge pressure</td>
+<td>Minimum required pressure</td>
+<td>Excess = throttling waste</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1112-real-time-controls-and-plc-integration">11.12 Real-Time Controls and PLC Integration</h2>
+<p>Modern pump stations use <strong>Programmable Logic Controllers (PLCs)</strong> to automate pump operation based on real-time conditions. PLCs replace manual switching with intelligent, automated control sequences.</p>
+<h3 id="common-plc-control-strategies">Common PLC Control Strategies</h3>
+<ul>
+<li><strong>Constant pressure control</strong> — PLC reads a pressure sensor and adjusts VFD speed to maintain a target discharge pressure (most common in building water supply)</li>
+<li><strong>Level control</strong> — PLC starts and stops pumps based on tank or wet well level (common in wastewater lift stations)</li>
+<li><strong>Flow control</strong> — PLC adjusts pump speed to maintain a target flow rate (common in process applications)</li>
+<li><strong>Lead-lag staging</strong> — PLC automatically starts additional pumps when demand exceeds one pump's capacity, and stops them when demand decreases</li>
+<li><strong>Alternation</strong> — PLC rotates which pump runs as the "lead" pump to equalize run hours and wear across all pumps</li>
+</ul>
+<h3 id="plc-control-loop">PLC Control Loop</h3>
+<p>A typical PLC pump control loop follows this sequence:</p>
+<ol>
+<li><strong>Sensor input</strong> — pressure transmitter sends 4-20 mA signal to PLC analog input</li>
+<li><strong>Signal processing</strong> — PLC scales the raw signal to engineering units (e.g., 0-100 psi)</li>
+<li><strong>PID calculation</strong> — PLC compares actual pressure to setpoint and calculates required output</li>
+<li><strong>VFD output</strong> — PLC sends a 4-20 mA or 0-10V signal to the VFD to set motor speed</li>
+<li><strong>Feedback</strong> — the system responds, pressure changes, and the cycle repeats continuously</li>
+</ol>
+<p>This closed-loop control ensures the pump delivers exactly the pressure or flow needed — no more, no less — automatically adjusting to changes in demand throughout the day.</p>
+<hr />
+<h2 id="1113-utility-rebates-incentives-and-building-the-business-case">11.13 Utility Rebates, Incentives, and Building the Business Case</h2>
+<p>Many of the energy efficiency upgrades discussed in this chapter qualify for <strong>utility rebate programs</strong> and <strong>government incentives</strong> that can dramatically reduce upfront costs and shorten payback periods. Pumping systems are prime targets for incentive programs because they consume such a large share of industrial electricity and offer well-documented savings opportunities.</p>
+<h3 id="available-incentive-programs">Available Incentive Programs</h3>
+<table>
+<thead>
+<tr>
+<th>Program Type</th>
+<th>Examples</th>
+<th>Typical Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Utility prescriptive rebates</td>
+<td>VFD installation on pumps, premium-efficiency motor replacement</td>
+<td>$50–$200 per HP for VFDs; $10–$30 per HP for motors</td>
+</tr>
+<tr>
+<td>Utility custom/calculated rebates</td>
+<td>Pump system optimization studies, right-sizing projects</td>
+<td>$0.03–$0.12 per kWh saved annually</td>
+</tr>
+<tr>
+<td>Federal tax credits (IRA §179D)</td>
+<td>Energy-efficient commercial building systems including pumping</td>
+<td>Up to $1.00/sq ft or 30% of project cost</td>
+</tr>
+<tr>
+<td>State/local programs</td>
+<td>State energy office grants, municipal efficiency funds</td>
+<td>Varies by state — often 10–30% of project cost</td>
+</tr>
+<tr>
+<td>DOE programs</td>
+<td>Better Plants, 50001 Ready, Pump Systems Matter</td>
+<td>Free technical assistance, benchmarking tools, and recognition</td>
+</tr>
+</tbody>
+</table>
+<p>Utility rebates for pump VFDs are among the most widely available incentives in the commercial and industrial sector. Most electric utilities offer a <strong>prescriptive rebate</strong> — a fixed dollar amount per horsepower — for adding a VFD to an existing constant-speed pump. For larger or more complex projects, <strong>custom or calculated rebates</strong> pay a set amount per kilowatt-hour of verified energy savings, which can result in rebates covering 30–50% of the total project cost.</p>
+<p>The <strong>Inflation Reduction Act (IRA)</strong> expanded the §179D Energy Efficient Commercial Buildings Deduction, which now covers pumping system upgrades that contribute to whole-building energy reduction. Facilities that achieve a 25% or greater reduction in energy use intensity may qualify for tax deductions of up to $1.00 per square foot, with bonus provisions for projects meeting prevailing wage and apprenticeship requirements.</p>
+<h3 id="how-to-find-available-rebates">How to Find Available Rebates</h3>
+<ol>
+<li><strong>Check your utility's website</strong> — Search for "[utility name] commercial rebates" or "business energy incentives." Most utilities have downloadable application forms and pre-qualified equipment lists for VFDs and premium-efficiency motors.</li>
+<li><strong>Use the DSIRE database</strong> — The Database of State Incentives for Renewables and Efficiency (<a href="https://www.dsireusa.org">dsireusa.org</a>) catalogs federal, state, and local incentive programs searchable by zip code and technology type.</li>
+<li><strong>Contact your utility account representative</strong> — Large commercial and industrial customers often have dedicated account managers who can identify all applicable programs, including custom rebate tracks for complex pump optimization projects.</li>
+<li><strong>Get pre-approval before starting work</strong> — Many utility programs require a pre-installation application, baseline energy measurements, and approval before equipment is purchased. Starting work before pre-approval can disqualify the project from receiving rebates.</li>
+</ol>
+<h3 id="common-pumping-system-upgrades-and-rebate-potential">Common Pumping System Upgrades and Rebate Potential</h3>
+<table>
+<thead>
+<tr>
+<th>Upgrade</th>
+<th>Typical Cost</th>
+<th>Annual Savings</th>
+<th>Typical Rebate</th>
+<th>Net Payback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VFD on 25 HP centrifugal pump</td>
+<td>$4,000–$6,000</td>
+<td>$2,500–$4,000/yr</td>
+<td>$1,250–$2,500</td>
+<td>0.8–1.5 years</td>
+</tr>
+<tr>
+<td>Premium-efficiency motor (25 HP)</td>
+<td>$1,800–$2,500</td>
+<td>$400–$700/yr</td>
+<td>$250–$750</td>
+<td>1.5–3.0 years</td>
+</tr>
+<tr>
+<td>Pump right-sizing/replacement (25 HP to 15 HP)</td>
+<td>$5,000–$8,000</td>
+<td>$2,000–$3,500/yr</td>
+<td>$1,500–$3,000</td>
+<td>1.0–2.0 years</td>
+</tr>
+<tr>
+<td>Impeller trimming (reduce diameter 10%)</td>
+<td>$500–$1,200</td>
+<td>$800–$1,500/yr</td>
+<td>$300–$600</td>
+<td>0.3–0.5 years</td>
+</tr>
+<tr>
+<td>System curve optimization (valve/pipe changes)</td>
+<td>$2,000–$5,000</td>
+<td>$1,200–$2,500/yr</td>
+<td>$800–$2,000</td>
+<td>0.5–1.5 years</td>
+</tr>
+</tbody>
+</table>
+<h3 id="building-the-business-case">Building the Business Case</h3>
+<p>When presenting a pump efficiency project to management, focus on <strong>total lifecycle cost</strong> rather than just the purchase price. A pump system that costs $5,000 more upfront but saves $3,000 per year in energy will pay for itself in under two years — and continue generating savings for the remaining 15–20 years of its service life. Include the rebate value in the initial cost calculation, because a $6,000 VFD that receives a $2,000 utility rebate effectively costs only $4,000, cutting the simple payback from 2.4 years to 1.6 years.</p>
+<p>Strengthen the business case by quantifying <strong>non-energy benefits</strong> that decision-makers value: reduced maintenance costs from lower vibration and stress on mechanical seals, extended equipment life from operating closer to BEP, reduced water treatment chemical costs from better flow control, and lower carbon emissions that support corporate sustainability goals. The DOE's Pumping System Assessment Tool (PSAT) and the Hydraulic Institute's Pump System Optimization program provide industry-standard frameworks for documenting these benefits.</p>
+<p>Finally, address the <strong>risk of inaction</strong>. Energy costs have historically risen 2–4% per year, meaning today's $3,000 annual waste will become $4,000–$5,000 within a decade. Meanwhile, utility rebate programs are not permanent — program budgets are allocated annually and popular rebates can be reduced or eliminated. Presenting the project as "act now to lock in the rebate before funds are exhausted" creates urgency that helps move projects from the proposal stage to approval.</p>
+<hr />
+<h2 id="1114-hands-on-lab-activity">11.14 Hands-On Lab Activity</h2>
+<h3 id="lab-install-a-pump-and-use-a-control-app-to-adjust-flow">Lab: Install a Pump and Use a Control App to Adjust Flow</h3>
+<p><strong>Objective:</strong> Students will install a small centrifugal pump, verify proper alignment and priming, and use a VFD control application to adjust flow in response to changing system demands.</p>
+<p><strong>Equipment needed:</strong></p>
+<ul>
+<li>Small centrifugal pump (1-2 HP) with motor on baseplate</li>
+<li>VFD with keypad and network connection</li>
+<li>Tablet or laptop with VFD control app</li>
+<li>Pressure gauges (suction and discharge)</li>
+<li>Flow meter (inline or clamp-on ultrasonic)</li>
+<li>Dial indicator set or laser alignment tool</li>
+<li>Basic hand tools and shim stock</li>
+</ul>
+<p><strong>Lab Activities:</strong></p>
+<ol>
+<li>Mount the pump on the test stand and connect suction and discharge piping</li>
+<li>Perform shaft alignment using dial indicators (record before and after readings)</li>
+<li>Prime the pump and verify rotation direction</li>
+<li>Start the pump at minimum speed using the VFD and slowly increase to design speed</li>
+<li>Record suction pressure, discharge pressure, flow rate, and motor amps at five different speeds (50%, 60%, 70%, 80%, 90%, 100%)</li>
+<li>Plot the actual performance data against the manufacturer's pump curve</li>
+<li>Use the control app to set a target discharge pressure and observe the VFD automatically adjusting speed</li>
+<li>Simulate a demand change by partially closing a downstream valve and observe the VFD response</li>
+<li>Calculate energy savings: compare power at full speed + throttle valve vs. VFD at reduced speed for the same flow</li>
+<li>Document all readings and calculate pump efficiency at each operating point</li>
+</ol>
+<hr />
+<h2 id="key-takeaways">Key Takeaways</h2>
+<details class="question">
+<summary>Review: Key Concepts in Pumping Systems — Click to expand</summary>
+<ol>
+<li>
+<p><strong>Centrifugal pumps</strong> use a spinning impeller to convert velocity into pressure; they handle ~80% of industrial pumping applications.</p>
+</li>
+<li>
+<p><strong>Pump performance curves</strong> show head, efficiency, power, and NPSHr vs. flow — always operate within 80-110% of BEP.</p>
+</li>
+<li>
+<p><strong>The operating point</strong> is where the pump curve intersects the system curve — this is the actual flow and head the pump delivers.</p>
+</li>
+<li>
+<p><strong>Cavitation</strong> occurs when NPSHa &lt; NPSHr, causing vapor bubbles that implode and destroy impeller surfaces. Prevention focuses on increasing suction pressure or reducing pump speed.</p>
+</li>
+<li>
+<p><strong>Water hammer</strong> results from sudden flow changes, producing dangerous pressure spikes. Prevention includes slow-closing valves, surge tanks, and VFD-controlled ramp-down.</p>
+</li>
+<li>
+<p><strong>The Affinity Laws</strong> show that power varies with the cube of speed — reducing speed by 20% saves nearly 50% of power.</p>
+</li>
+<li>
+<p><strong>VFDs</strong> are the single most effective tool for pump energy savings, eliminating throttle valve waste by matching pump speed to demand.</p>
+</li>
+<li>
+<p><strong>IoT sensors</strong> enable continuous monitoring of vibration, temperature, pressure, flow, and power — feeding AI systems for predictive maintenance.</p>
+</li>
+<li>
+<p><strong>AI optimization</strong> goes beyond monitoring to actively control pump speed, staging, and maintenance scheduling for maximum efficiency.</p>
+</li>
+<li>
+<p><strong>PLCs</strong> automate pump control through closed-loop feedback, maintaining target pressure, flow, or level without manual intervention.</p>
+</li>
+</ol>
+</details>
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../10-hydraulic/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 10. Hydraulic Systems">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                10. Hydraulic Systems
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../12-fan/" class="md-footer__link md-footer__link--next" aria-label="Next: 12. Fans">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                12. Fans
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "navigation.expand", "navigation.path", "navigation.prune", "navigation.indexes", "toc.follow", "navigation.top", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../js/extra.js"></script>
+      
+    
+  </body>
+</html>

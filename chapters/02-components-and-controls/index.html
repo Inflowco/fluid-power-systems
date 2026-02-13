@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Intelligent textbook on fluid power systems for technicians, integrating advanced AI, controls, data collection, and software deployment to optimize labor use, system efficiency, and sustainability">
+        <meta name="description" content="Pumps, fans, compressors, valves, and filters with introduction to PLCs, IoT sensors, and real-time data collection">
       
       
         <meta name="author" content="Peter Vinck, Inflow Corp.">
@@ -29,7 +29,7 @@
     
     
       
-        <title>2. Components and Controls - Fluid Power Systems</title>
+        <title>Chapter 2 - System Components and Smart Controls - Fluid Power Systems</title>
       
     
     
@@ -73,7 +73,20 @@
 
     
     
-  </head>
+  
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Chapter 2 - System Components and Smart Controls - Fluid Power Systems" />
+<meta property="og:description" content="Pumps, fans, compressors, valves, and filters with introduction to PLCs, IoT sensors, and real-time data collection" />
+<meta property="og:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/02-components-and-controls/index.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="https://dmccreary.github.io/fluid-power-systems/chapters/02-components-and-controls/" />
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Chapter 2 - System Components and Smart Controls - Fluid Power Systems" />
+<meta property="twitter:description" content="Pumps, fans, compressors, valves, and filters with introduction to PLCs, IoT sensors, and real-time data collection" />
+<meta property="twitter:image" content="https://dmccreary.github.io/fluid-power-systems/assets/images/social/chapters/02-components-and-controls/index.png" />
+</head>
   
   
     
@@ -125,7 +138,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              2. Components and Controls
+              Chapter 2 - System Components and Smart Controls
             
           </span>
         </div>
@@ -330,6 +343,10 @@
       
         
       
+        
+      
+        
+      
     
     
     
@@ -425,6 +442,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    2. Components and Controls
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -441,6 +476,588 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#21-the-building-blocks-of-fluid-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 The Building Blocks of Fluid Power
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#22-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Pumps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 Pumps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#221-how-pumps-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2.1 How Pumps Work
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2.1 How Pumps Work">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-pump-types-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Pump Types Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#222-common-pump-types-in-fluid-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2.2 Common Pump Types in Fluid Power
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#223-pump-maintenance-basics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2.3 Pump Maintenance Basics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#23-fans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Fans
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3 Fans">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#231-fan-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3.1 Fan Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#232-fan-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3.2 Fan Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#24-compressors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Compressors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 Compressors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#241-compressor-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4.1 Compressor Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#242-compressor-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4.2 Compressor Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#25-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Valves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5 Valves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#251-valve-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5.1 Valve Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#252-common-valve-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5.2 Common Valve Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5.2 Common Valve Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-valve-types-interactive-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Valve Types Interactive Guide
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#253-valve-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5.3 Valve Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#26-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Filters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6 Filters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#261-filter-types-and-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6.1 Filter Types and Applications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#262-measuring-filter-condition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6.2 Measuring Filter Condition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6.2 Measuring Filter Condition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-filter-differential-pressure-monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Filter Differential Pressure Monitor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#263-filter-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6.3 Filter Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#27-introduction-to-smart-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7 Introduction to Smart Controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7 Introduction to Smart Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#271-programmable-logic-controllers-plcs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7.1 Programmable Logic Controllers (PLCs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7.1 Programmable Logic Controllers (PLCs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-plc-control-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: PLC Control Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#272-iot-sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7.2 IoT Sensors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#273-how-iot-sensors-transform-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7.3 How IoT Sensors Transform Maintenance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7.3 How IoT Sensors Transform Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-traditional-vs-smart-maintenance-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Traditional vs. Smart Maintenance Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#28-real-time-data-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8 Real-Time Data Collection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.8 Real-Time Data Collection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#281-data-collection-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8.1 Data Collection Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#282-what-data-to-collect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8.2 What Data to Collect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#283-from-data-to-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8.3 From Data to Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.8.3 From Data to Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-sensor-data-to-maintenance-decision-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Sensor Data to Maintenance Decision Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#29-connecting-it-all-the-smart-fluid-power-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 Connecting It All: The Smart Fluid Power System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.9 Connecting It All: The Smart Fluid Power System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#electrical-power-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Electrical Power Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Electrical Power Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-single-phase-motor-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Single-Phase Motor Power
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-three-phase-motor-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Three-Phase Motor Power
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-motor-efficiency-and-annual-energy-cost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Motor Efficiency and Annual Energy Cost
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#210-lab-preview-disassemble-a-pump-connect-a-sensor-and-view-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.10 Lab Preview: Disassemble a Pump, Connect a Sensor, and View Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -510,14 +1127,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../05-compressed-air/" class="md-nav__link">
+      <a href="../05-blowers/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    5. Compressed Air
+    5. Blowers
   
 
     
@@ -538,14 +1155,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../06-cooling/" class="md-nav__link">
+      <a href="../06-compressed-air/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    6. Cooling
+    6. Compressed Air
   
 
     
@@ -566,14 +1183,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../07-dust-collection/" class="md-nav__link">
+      <a href="../07-cooling/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    7. Dust Collection
+    7. Cooling
   
 
     
@@ -594,14 +1211,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../08-hydraulic/" class="md-nav__link">
+      <a href="../08-steam/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    8. Hydraulic Systems
+    8. Steam Systems
   
 
     
@@ -622,14 +1239,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../09-pumping/" class="md-nav__link">
+      <a href="../09-dust-collection/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    9. Pumping Systems
+    9. Dust Collection
   
 
     
@@ -650,14 +1267,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../10-fan/" class="md-nav__link">
+      <a href="../10-hydraulic/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    10. Fans
+    10. Hydraulic Systems
   
 
     
@@ -678,14 +1295,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../11-systems/" class="md-nav__link">
+      <a href="../11-pumping/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    11. Systems and Software
+    11. Pumping Systems
   
 
     
@@ -706,14 +1323,70 @@
   
   
     <li class="md-nav__item">
-      <a href="../12-safety/" class="md-nav__link">
+      <a href="../12-fan/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    12. Safety
+    12. Fans
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13-systems/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    13. Systems and Software
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14. Safety
   
 
     
@@ -817,6 +1490,142 @@
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -1073,6 +1882,577 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts-covered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concepts Covered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prerequisites
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#21-the-building-blocks-of-fluid-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 The Building Blocks of Fluid Power
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#22-pumps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Pumps
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 Pumps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#221-how-pumps-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2.1 How Pumps Work
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2.1 How Pumps Work">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-pump-types-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Pump Types Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#222-common-pump-types-in-fluid-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2.2 Common Pump Types in Fluid Power
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#223-pump-maintenance-basics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2.3 Pump Maintenance Basics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#23-fans" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Fans
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3 Fans">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#231-fan-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3.1 Fan Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#232-fan-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3.2 Fan Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#24-compressors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Compressors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.4 Compressors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#241-compressor-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4.1 Compressor Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#242-compressor-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4.2 Compressor Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#25-valves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Valves
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5 Valves">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#251-valve-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5.1 Valve Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#252-common-valve-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5.2 Common Valve Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.5.2 Common Valve Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-valve-types-interactive-guide" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Valve Types Interactive Guide
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#253-valve-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5.3 Valve Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#26-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6 Filters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6 Filters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#261-filter-types-and-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6.1 Filter Types and Applications
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#262-measuring-filter-condition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6.2 Measuring Filter Condition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.6.2 Measuring Filter Condition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-filter-differential-pressure-monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Filter Differential Pressure Monitor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#263-filter-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.6.3 Filter Maintenance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#27-introduction-to-smart-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7 Introduction to Smart Controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7 Introduction to Smart Controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#271-programmable-logic-controllers-plcs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7.1 Programmable Logic Controllers (PLCs)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7.1 Programmable Logic Controllers (PLCs)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-plc-control-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: PLC Control Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#272-iot-sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7.2 IoT Sensors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#273-how-iot-sensors-transform-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.7.3 How IoT Sensors Transform Maintenance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.7.3 How IoT Sensors Transform Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-traditional-vs-smart-maintenance-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Traditional vs. Smart Maintenance Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#28-real-time-data-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8 Real-Time Data Collection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.8 Real-Time Data Collection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#281-data-collection-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8.1 Data Collection Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#282-what-data-to-collect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8.2 What Data to Collect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#283-from-data-to-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.8.3 From Data to Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.8.3 From Data to Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#diagram-sensor-data-to-maintenance-decision-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagram: Sensor Data to Maintenance Decision Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#29-connecting-it-all-the-smart-fluid-power-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.9 Connecting It All: The Smart Fluid Power System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.9 Connecting It All: The Smart Fluid Power System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#electrical-power-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Electrical Power Fundamentals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Electrical Power Fundamentals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-single-phase-motor-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Single-Phase Motor Power
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-three-phase-motor-power" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Three-Phase Motor Power
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worked-example-motor-efficiency-and-annual-energy-cost" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked Example: Motor Efficiency and Annual Energy Cost
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#210-lab-preview-disassemble-a-pump-connect-a-sensor-and-view-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.10 Lab Preview: Disassemble a Pump, Connect a Sensor, and View Data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-takeaways" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Takeaways
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1145,18 +2525,899 @@
 
 
 <h1 id="chapter-2-system-components-and-smart-controls">Chapter 2: System Components and Smart Controls</h1>
+<h2 id="summary">Summary</h2>
+<p>This chapter introduces the core mechanical components found across all fluid power systems—pumps, fans, compressors, valves, and filters—and explains their function, operation, and basic maintenance. It then introduces smart controls including Programmable Logic Controllers (PLCs) and Internet of Things (IoT) sensors, showing how these technologies collect real-time data on component health. Students will learn to connect sensors to components, read live data on tablets or apps, and understand how sensor data supports predictive maintenance decisions.</p>
+<h2 id="concepts-covered">Concepts Covered</h2>
+<ol>
+<li>Pumps — types, function, and maintenance</li>
+<li>Fans — types, function, and maintenance</li>
+<li>Compressors — types, function, and maintenance</li>
+<li>Valves — types, function, and maintenance</li>
+<li>Filters — types, function, and maintenance</li>
+<li>Programmable Logic Controllers (PLCs)</li>
+<li>IoT Sensors — types and applications</li>
+<li>Real-time data collection</li>
+<li>Sensor data for component health monitoring</li>
+<li>Smart controls overview</li>
+<li>Basic component troubleshooting</li>
+<li>Preventive vs. predictive maintenance introduction</li>
+</ol>
+<h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li>Pumps, fans, compressors, valves, and filters: function and maintenance</li>
-<li>Introduction to smart controls (e.g., PLCs, IoT sensors)</li>
-<li>AI &amp; Tech Focus: Using sensors to collect real-time data on component health</li>
-<li><strong>Lab:</strong> Disassemble a pump, connect a sensor, and view data on a tablet/app</li>
+<li>Chapter 1: Introduction to Fluid Power Systems and AI (understanding of fluid types, basic system concepts, and the role of AI)</li>
 </ul>
+<hr />
+<h2 id="21-the-building-blocks-of-fluid-power">2.1 The Building Blocks of Fluid Power</h2>
+<p>Every fluid power system—whether it moves air through a building, pushes hydraulic fluid through a cylinder, or circulates cooling water through a factory—relies on a common set of mechanical components. Understanding these building blocks is the first step toward maintaining, troubleshooting, and optimizing any system you will encounter on the job.</p>
+<p>Think of these components as the "organs" of a fluid power system. Just as the heart pumps blood, the lungs move air, and valves control flow through the circulatory system, the mechanical components in a fluid power system each serve a specific function. When one component fails or degrades, the entire system suffers.</p>
+<p>In this chapter, we will cover five core component categories—pumps, fans, compressors, valves, and filters—then introduce the smart controls and sensors that modern technicians use to monitor these components in real time.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Primary Function</th>
+<th>Working Fluid</th>
+<th>Common Systems</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pumps</td>
+<td>Move liquids through piping</td>
+<td>Water, oil, coolant</td>
+<td>Hydraulic, cooling, pumping</td>
+</tr>
+<tr>
+<td>Fans</td>
+<td>Move air or gas through ducts</td>
+<td>Air, gases</td>
+<td>HVAC, dust collection, ventilation</td>
+</tr>
+<tr>
+<td>Compressors</td>
+<td>Increase gas pressure</td>
+<td>Air, refrigerant</td>
+<td>Compressed air, HVAC (refrigeration)</td>
+</tr>
+<tr>
+<td>Valves</td>
+<td>Control fluid flow direction and rate</td>
+<td>Any fluid</td>
+<td>All fluid power systems</td>
+</tr>
+<tr>
+<td>Filters</td>
+<td>Remove contaminants from fluid</td>
+<td>Any fluid</td>
+<td>All fluid power systems</td>
+</tr>
+</tbody>
+</table>
+<h2 id="22-pumps">2.2 Pumps</h2>
+<p>Pumps are mechanical devices that transfer energy to a fluid, causing it to move from one location to another. They are among the most common components in fluid power systems, found everywhere from basement sump pits to massive industrial cooling loops.</p>
+<h3 id="221-how-pumps-work">2.2.1 How Pumps Work</h3>
+<p>All pumps operate on the same basic principle: they create a pressure difference that forces fluid to move. The pump takes in fluid at low pressure (the suction side) and discharges it at higher pressure (the discharge side). The energy to create this pressure difference comes from an electric motor, engine, or other power source connected to the pump.</p>
+<p>There are two broad categories of pumps:</p>
+<ul>
+<li><strong>Positive displacement pumps</strong> trap a fixed volume of fluid and force it through the discharge. They deliver a consistent flow regardless of system pressure. Examples include gear pumps, piston pumps, and diaphragm pumps.</li>
+<li><strong>Dynamic (centrifugal) pumps</strong> use a spinning impeller to add velocity to the fluid, which is then converted to pressure. Their flow rate varies with system pressure. These are the most common pumps in HVAC and water systems.</li>
+</ul>
+<h4 id="diagram-pump-types-comparison">Diagram: Pump Types Comparison</h4>
+<iframe src="../../sims/pump-types-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Pump Types Comparison</summary>
+Type: diagram
+
+Bloom Taxonomy: Understand (L2)
+Bloom Verb: compare, classify
+Learning Objective: Students will be able to compare positive displacement and centrifugal pump operating principles and classify common pump types into the correct category.
+
+Purpose: Show a side-by-side visual comparison of positive displacement vs. centrifugal pump operation
+
+Layout: Split-screen with two animated pump cross-sections
+
+Left side — Positive Displacement Pump (Gear Pump):
+- Two interlocking gears rotating inside a housing
+- Fluid trapped between gear teeth and housing wall
+- Arrows showing fluid path from suction to discharge
+- Labels: "Suction Port," "Discharge Port," "Gears," "Housing"
+
+Right side — Centrifugal Pump:
+- Spinning impeller inside a volute casing
+- Fluid enters at center (eye) and exits at outer edge
+- Arrows showing radial flow pattern
+- Labels: "Suction Eye," "Impeller," "Volute Casing," "Discharge"
+
+Below each pump diagram — Classification tree:
+- Positive displacement branch: Gear, Piston, Diaphragm, Vane
+- Centrifugal branch: End-suction, Split-case, Vertical turbine, Submersible
+
+Interactive elements:
+- Hover over each pump type name to see a brief description and typical application
+- Click on either pump diagram to see a slow-motion animation of fluid flow
+
+Color scheme: Blue for fluid, gray for metal components, green arrows for flow direction
+Responsive design: Must respond to window resize events
+
+Implementation: p5.js with interactive hover tooltips
+</details>
+
+<h3 id="222-common-pump-types-in-fluid-power">2.2.2 Common Pump Types in Fluid Power</h3>
+<table>
+<thead>
+<tr>
+<th>Pump Type</th>
+<th>Category</th>
+<th>Typical Application</th>
+<th>Key Advantage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Centrifugal</td>
+<td>Dynamic</td>
+<td>HVAC chilled water, cooling towers</td>
+<td>High flow, low maintenance</td>
+</tr>
+<tr>
+<td>Gear</td>
+<td>Positive displacement</td>
+<td>Hydraulic systems, lubrication</td>
+<td>Consistent flow, handles viscous fluids</td>
+</tr>
+<tr>
+<td>Piston</td>
+<td>Positive displacement</td>
+<td>High-pressure hydraulics</td>
+<td>Very high pressure capability</td>
+</tr>
+<tr>
+<td>Diaphragm</td>
+<td>Positive displacement</td>
+<td>Chemical dosing, wastewater</td>
+<td>Handles corrosive and abrasive fluids</td>
+</tr>
+<tr>
+<td>Submersible</td>
+<td>Dynamic</td>
+<td>Sump pits, wells, wastewater</td>
+<td>Operates submerged, compact design</td>
+</tr>
+<tr>
+<td>Vane</td>
+<td>Positive displacement</td>
+<td>Vacuum systems, fuel transfer</td>
+<td>Quiet operation, self-priming</td>
+</tr>
+</tbody>
+</table>
+<h3 id="223-pump-maintenance-basics">2.2.3 Pump Maintenance Basics</h3>
+<p>Regular pump maintenance prevents costly failures and keeps systems running efficiently. Key maintenance tasks include:</p>
+<ul>
+<li><strong>Check for leaks</strong> at seals, gaskets, and pipe connections</li>
+<li><strong>Monitor vibration</strong> levels — increasing vibration often signals bearing wear or impeller imbalance</li>
+<li><strong>Inspect and replace seals</strong> before they fail completely</li>
+<li><strong>Check fluid levels and quality</strong> — contaminated or low fluid damages internal components</li>
+<li><strong>Listen for unusual sounds</strong> — cavitation (a rattling sound like marbles) indicates the pump is not receiving enough fluid</li>
+<li><strong>Verify alignment</strong> between the pump and motor shafts — misalignment causes premature bearing failure</li>
+<li><strong>Record performance data</strong> — flow rate, pressure, temperature, and power consumption</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Technician Tip: Cavitation</p>
+<p>If a pump sounds like it is pumping gravel, it may be cavitating. Cavitation happens when the fluid pressure at the suction drops below the fluid's vapor pressure, causing tiny vapor bubbles to form and then collapse violently inside the pump. This destroys impellers and seals rapidly. Common causes include clogged suction strainers, suction pipes that are too small, or fluid that is too hot.</p>
+</div>
+<h2 id="23-fans">2.3 Fans</h2>
+<p>Fans move air or gas through ductwork, enclosures, or open spaces. They are essential in HVAC, dust collection, and ventilation systems. While fans may seem straightforward, proper selection, installation, and maintenance directly affect energy consumption, noise levels, and air quality.</p>
+<h3 id="231-fan-types">2.3.1 Fan Types</h3>
+<p>Fans fall into two main categories based on airflow direction:</p>
+<ul>
+<li><strong>Axial fans</strong> move air parallel to the fan shaft (like a household box fan or airplane propeller). They are best for high-volume, low-pressure applications such as general ventilation and cooling.</li>
+<li><strong>Centrifugal (radial) fans</strong> move air perpendicular to the fan shaft by spinning it outward through a scroll-shaped housing. They handle higher pressures and are common in dust collection and HVAC air handling units.</li>
+</ul>
+<p>Key fan performance characteristics include:</p>
+<ul>
+<li><strong>CFM (Cubic Feet per Minute)</strong> — the volume of air the fan moves</li>
+<li><strong>Static pressure</strong> — the pressure the fan must overcome to push air through ducts and filters</li>
+<li><strong>RPM (Revolutions Per Minute)</strong> — the speed of the fan wheel</li>
+<li><strong>BHP (Brake Horsepower)</strong> — the power consumed by the fan</li>
+</ul>
+<h3 id="232-fan-maintenance">2.3.2 Fan Maintenance</h3>
+<p>Fan maintenance focuses on keeping the rotating assembly balanced, the drive components in good condition, and airflow unobstructed:</p>
+<ul>
+<li><strong>Inspect belts</strong> for wear, cracking, and proper tension (on belt-driven fans)</li>
+<li><strong>Check bearing lubrication</strong> and listen for grinding or squealing</li>
+<li><strong>Clean fan blades</strong> — dust buildup causes imbalance and reduces performance</li>
+<li><strong>Perform vibration analysis</strong> — excessive vibration indicates imbalance, misalignment, or bearing wear</li>
+<li><strong>Inspect and clean inlet screens and filters</strong> to ensure adequate airflow</li>
+<li><strong>Check for noise</strong> — unusual noise often indicates a developing problem</li>
+</ul>
+<h2 id="24-compressors">2.4 Compressors</h2>
+<p>Compressors increase the pressure of a gas (usually air) by reducing its volume. They are the heart of compressed air systems and also play a critical role in HVAC refrigeration cycles. Compressed air is often called the "fourth utility" after electricity, natural gas, and water because of its widespread industrial use.</p>
+<h3 id="241-compressor-types">2.4.1 Compressor Types</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Operating Principle</th>
+<th>Typical Pressure</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reciprocating (piston)</td>
+<td>Piston compresses air in a cylinder</td>
+<td>Up to 6,000 psi</td>
+<td>Small shops, high-pressure applications</td>
+</tr>
+<tr>
+<td>Rotary screw</td>
+<td>Two helical screws compress air continuously</td>
+<td>100–250 psi</td>
+<td>Industrial plants, continuous duty</td>
+</tr>
+<tr>
+<td>Rotary vane</td>
+<td>Sliding vanes in a rotor compress air</td>
+<td>50–150 psi</td>
+<td>Low-noise, moderate duty</td>
+</tr>
+<tr>
+<td>Scroll</td>
+<td>Two spiral elements compress air</td>
+<td>100–150 psi</td>
+<td>Quiet environments, medical/dental</td>
+</tr>
+<tr>
+<td>Centrifugal</td>
+<td>High-speed impeller accelerates air</td>
+<td>100–150 psi</td>
+<td>Very large volumes, oil-free air</td>
+</tr>
+</tbody>
+</table>
+<h3 id="242-compressor-maintenance">2.4.2 Compressor Maintenance</h3>
+<p>Because compressors operate at high pressures and temperatures, regular maintenance is critical for both performance and safety:</p>
+<ul>
+<li><strong>Check and change oil</strong> (on oil-lubricated types) at manufacturer-recommended intervals</li>
+<li><strong>Replace air intake filters</strong> — dirty filters reduce efficiency and increase energy consumption</li>
+<li><strong>Drain condensate</strong> from the receiver tank and drip legs daily</li>
+<li><strong>Inspect belts and couplings</strong> for wear</li>
+<li><strong>Check safety relief valves</strong> to ensure they operate correctly</li>
+<li><strong>Monitor operating temperature and pressure</strong> — high readings may indicate problems</li>
+<li><strong>Inspect air lines and fittings</strong> for leaks — compressed air leaks waste significant energy</li>
+</ul>
+<h2 id="25-valves">2.5 Valves</h2>
+<p>Valves are devices that control the flow of fluids through a system. They are present in virtually every fluid power system, from simple water faucets to complex hydraulic circuits. A technician who understands valves can diagnose and solve many common system problems.</p>
+<h3 id="251-valve-functions">2.5.1 Valve Functions</h3>
+<p>Valves serve several key functions in fluid power systems:</p>
+<ul>
+<li><strong>On/Off control</strong> — fully opening or closing a flow path (isolation valves)</li>
+<li><strong>Flow regulation</strong> — adjusting the rate of fluid flow (throttling valves)</li>
+<li><strong>Direction control</strong> — routing fluid to different parts of a system (directional control valves)</li>
+<li><strong>Pressure regulation</strong> — maintaining a set pressure level (pressure relief and reducing valves)</li>
+<li><strong>Backflow prevention</strong> — allowing flow in only one direction (check valves)</li>
+</ul>
+<h3 id="252-common-valve-types">2.5.2 Common Valve Types</h3>
+<table>
+<thead>
+<tr>
+<th>Valve Type</th>
+<th>Function</th>
+<th>How It Works</th>
+<th>Common Application</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gate valve</td>
+<td>On/off</td>
+<td>Wedge slides up/down to open/close</td>
+<td>Water mains, isolation</td>
+</tr>
+<tr>
+<td>Ball valve</td>
+<td>On/off</td>
+<td>Ball with hole rotates to align or block flow</td>
+<td>Quick shutoff, gas lines</td>
+</tr>
+<tr>
+<td>Globe valve</td>
+<td>Throttling</td>
+<td>Plug moves up/down to regulate flow</td>
+<td>Steam lines, flow control</td>
+</tr>
+<tr>
+<td>Butterfly valve</td>
+<td>On/off, throttling</td>
+<td>Disc rotates inside pipe</td>
+<td>Large HVAC ducts, water lines</td>
+</tr>
+<tr>
+<td>Check valve</td>
+<td>Backflow prevention</td>
+<td>Flap or ball allows flow in one direction only</td>
+<td>Pump discharge, water supply</td>
+</tr>
+<tr>
+<td>Solenoid valve</td>
+<td>On/off (electrically controlled)</td>
+<td>Electromagnetic coil opens/closes valve</td>
+<td>Automated systems, PLC control</td>
+</tr>
+<tr>
+<td>Pressure relief</td>
+<td>Safety/pressure regulation</td>
+<td>Spring-loaded disc opens at set pressure</td>
+<td>Safety protection in all systems</td>
+</tr>
+</tbody>
+</table>
+<h4 id="diagram-valve-types-interactive-guide">Diagram: Valve Types Interactive Guide</h4>
+<iframe src="../../sims/valve-types-guide/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Valve Types Interactive Guide</summary>
+Type: infographic
+
+Bloom Taxonomy: Remember (L1)
+Bloom Verb: identify, recognize
+Learning Objective: Students will be able to identify common valve types by appearance and recognize their function in a fluid power system.
+
+Purpose: Interactive visual guide showing cross-sections of the seven common valve types with hover-triggered descriptions
+
+Layout: Grid of seven valve cross-section illustrations, 3 columns by 3 rows (last row centered), each showing the valve in both open and closed positions
+
+Valve illustrations (each showing internal cross-section):
+1. Gate Valve — wedge-shaped gate, handwheel, body
+2. Ball Valve — sphere with bore, quarter-turn handle
+3. Globe Valve — plug and seat, handwheel, S-shaped flow path
+4. Butterfly Valve — disc on shaft, lever/gear operator
+5. Check Valve — hinged flap or spring-loaded ball
+6. Solenoid Valve — electromagnetic coil, plunger, ports
+7. Pressure Relief Valve — spring, poppet, adjustment screw
+
+Interactive elements:
+- Hover over any valve: tooltip appears with name, function, and one typical application
+- Click any valve: cross-section animates between open and closed positions
+- Color-coded border indicates function category (blue = on/off, green = throttling, orange = safety, purple = directional)
+
+Color scheme:
+- Valve body: medium gray
+- Fluid flow path: blue arrows when open
+- Blocked flow: red X when closed
+- Moving parts: highlighted in steel/silver
+
+Responsive design: Grid adjusts from 3 columns to 2 columns to 1 column on smaller screens. Must respond to window resize events.
+
+Implementation: HTML/CSS/JavaScript with SVG valve illustrations and CSS animations
+</details>
+
+<h3 id="253-valve-maintenance">2.5.3 Valve Maintenance</h3>
+<p>Valves generally require less frequent maintenance than rotating equipment, but neglecting them can lead to leaks, stuck valves, and system failures:</p>
+<ul>
+<li><strong>Exercise valves regularly</strong> — valves that sit in one position for long periods can become stuck from corrosion or scale buildup</li>
+<li><strong>Check for leaks</strong> at packing glands and body joints</li>
+<li><strong>Inspect seats and seals</strong> for wear and damage</li>
+<li><strong>Verify proper operation</strong> — ensure valves open and close fully</li>
+<li><strong>Lubricate stems and actuators</strong> as recommended by the manufacturer</li>
+</ul>
+<h2 id="26-filters">2.6 Filters</h2>
+<p>Filters remove unwanted particles, contaminants, and impurities from the fluid in a system. Clean fluid is essential for protecting components, maintaining efficiency, and ensuring product quality. A clogged or failed filter can cause damage throughout an entire system.</p>
+<h3 id="261-filter-types-and-applications">2.6.1 Filter Types and Applications</h3>
+<ul>
+<li><strong>Air intake filters</strong> protect compressors and engines from dust and debris</li>
+<li><strong>Hydraulic filters</strong> remove particles from hydraulic oil to protect pumps, valves, and actuators</li>
+<li><strong>HVAC air filters</strong> remove dust, pollen, and contaminants from building air (rated by MERV scale)</li>
+<li><strong>Water filters</strong> remove sediment, chemicals, and biological contaminants from cooling and process water</li>
+<li><strong>Dust collection filters</strong> (bag filters, cartridge filters) capture particulates from industrial air streams</li>
+</ul>
+<h3 id="262-measuring-filter-condition">2.6.2 Measuring Filter Condition</h3>
+<p>The primary indicator of filter condition is <strong>differential pressure</strong> — the pressure difference across the filter. As a filter captures contaminants, the differential pressure increases. When it reaches a manufacturer-specified limit, the filter needs cleaning or replacement.</p>
+<p>Modern systems use differential pressure sensors connected to the control system that automatically alert technicians when filters need attention. This is a simple but powerful example of data-driven maintenance.</p>
+<h4 id="diagram-filter-differential-pressure-monitor">Diagram: Filter Differential Pressure Monitor</h4>
+<iframe src="../../sims/filter-pressure-monitor/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Filter Differential Pressure Monitor</summary>
+Type: microsim
+
+Bloom Taxonomy: Apply (L3)
+Bloom Verb: demonstrate, calculate
+Learning Objective: Students will be able to demonstrate how differential pressure changes as a filter loads with contaminants and calculate when a filter needs replacement based on pressure readings.
+
+Purpose: Interactive simulation showing how filter differential pressure increases over time as contaminants accumulate, and when maintenance is triggered
+
+Canvas layout:
+- Top area: Animated cross-section of a filter element showing particle accumulation
+- Middle area: Real-time differential pressure gauge (0–10 inches of water column)
+- Bottom area: Controls and data display
+
+Visual elements:
+- Filter cross-section showing clean media on left, with particles gradually filling from the upstream side
+- Differential pressure gauge with green (0–3 inWC), yellow (3–6 inWC), and red (6+ inWC) zones
+- Trend chart showing pressure over simulated time (days)
+- Alert indicator that flashes when pressure exceeds threshold
+- Particle count display showing approximate contamination level
+
+Interactive controls:
+- Slider: "Contamination Rate" (Low / Medium / High) — controls how fast particles accumulate
+- Slider: "Filter MERV Rating" (8 / 10 / 12 / 14) — affects how many particles are captured vs. pass through
+- Button: "Replace Filter" — resets the simulation to a clean filter state
+- Button: "Start / Pause" — controls the simulation
+- Number input: "Alert Threshold" (default 5 inWC) — sets when the maintenance alert triggers
+
+Default parameters:
+- Contamination rate: Medium
+- Filter MERV rating: 10
+- Alert threshold: 5 inWC
+- Simulation speed: 1 simulated day per second
+
+Behavior:
+- As simulation runs, particles accumulate on the filter cross-section
+- Differential pressure rises on the gauge and trend chart
+- When pressure reaches the alert threshold, a maintenance alert flashes
+- If filter is not replaced, pressure continues to rise (filter bypass may occur above 8 inWC)
+- Replacing the filter resets the visual and pressure to baseline
+- Higher contamination rates cause faster pressure rise
+- Higher MERV ratings capture more particles (filter loads faster but air is cleaner)
+
+Instructional Rationale: Parameter exploration with sliders is appropriate because the Apply-level objective requires students to experiment with variables (contamination rate, MERV rating, threshold) to understand cause-and-effect relationships in filter maintenance timing.
+
+Responsive design: Must respond to window resize events. Canvas width adjusts to container.
+
+Implementation: p5.js with animated particles and gauge elements
+</details>
+
+<h3 id="263-filter-maintenance">2.6.3 Filter Maintenance</h3>
+<ul>
+<li><strong>Monitor differential pressure</strong> regularly (or rely on automated sensors)</li>
+<li><strong>Replace or clean filters on schedule</strong> — never let a filter bypass due to excessive loading</li>
+<li><strong>Use the correct replacement filter</strong> — wrong size or rating can damage equipment or reduce air quality</li>
+<li><strong>Dispose of used filters properly</strong> — some may contain hazardous materials</li>
+<li><strong>Document filter changes</strong> in the maintenance log with date, differential pressure reading, and filter type</li>
+</ul>
+<h2 id="27-introduction-to-smart-controls">2.7 Introduction to Smart Controls</h2>
+<p>Traditional fluid power systems relied on manual controls — technicians turned valves by hand, started and stopped motors with switches, and checked gauges by walking through the plant. Modern systems use <strong>smart controls</strong> that automate these tasks and collect data for analysis.</p>
+<p>Smart controls are the bridge between the mechanical components you just learned about and the AI-driven optimization you will study throughout this course. They include the hardware (controllers and sensors) and software (logic and communication protocols) that monitor and manage system operation.</p>
+<h3 id="271-programmable-logic-controllers-plcs">2.7.1 Programmable Logic Controllers (PLCs)</h3>
+<p>A <strong>Programmable Logic Controller (PLC)</strong> is a ruggedized industrial computer designed to automate control of equipment and processes. PLCs are the most common control devices in fluid power systems. They continuously:</p>
+<ol>
+<li><strong>Read inputs</strong> from sensors, switches, and other devices</li>
+<li><strong>Execute a program</strong> (control logic) that makes decisions based on those inputs</li>
+<li><strong>Write outputs</strong> to motors, valves, indicators, and other devices</li>
+</ol>
+<p>For example, a PLC controlling a cooling water pump might:</p>
+<ul>
+<li>Read the water temperature from a sensor</li>
+<li>Compare it to a setpoint (say, 85°F)</li>
+<li>If the temperature exceeds the setpoint, turn on the pump</li>
+<li>If it drops below the setpoint minus a deadband, turn off the pump</li>
+<li>Log the temperature and pump status for review</li>
+</ul>
+<p>PLCs are programmed using specialized languages. The most common is <strong>ladder logic</strong>, which uses a graphical format resembling an electrical circuit diagram. Other languages include structured text, function block diagrams, and sequential function charts.</p>
+<p>Key advantages of PLCs in fluid power:</p>
+<ul>
+<li><strong>Reliability</strong> — designed for harsh industrial environments (dust, vibration, temperature extremes)</li>
+<li><strong>Flexibility</strong> — programs can be modified without rewiring</li>
+<li><strong>Speed</strong> — scan times measured in milliseconds</li>
+<li><strong>Communication</strong> — modern PLCs connect to networks, SCADA systems, and cloud platforms</li>
+<li><strong>Expandability</strong> — modular design allows adding input/output modules as needed</li>
+</ul>
+<h4 id="diagram-plc-control-loop">Diagram: PLC Control Loop</h4>
+<iframe src="../../sims/plc-control-loop/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>PLC Control Loop</summary>
+Type: diagram
+
+Bloom Taxonomy: Understand (L2)
+Bloom Verb: explain, interpret
+Learning Objective: Students will be able to explain how a PLC reads sensor inputs, executes control logic, and drives output devices in a closed-loop control system.
+
+Purpose: Illustrate the PLC control loop cycle (Input → Process → Output → Feedback) with a concrete fluid power example
+
+Layout: Circular flow diagram with a central PLC unit and four stages arranged clockwise
+
+Elements to show:
+1. Center: PLC unit (rectangular box labeled "PLC" with indicator lights)
+2. Top (Input stage): Temperature sensor, pressure sensor, flow switch icons connected to PLC input module
+3. Right (Process stage): Ladder logic diagram snippet showing simple temperature comparison
+4. Bottom (Output stage): Motor starter, solenoid valve, indicator light icons connected to PLC output module
+5. Left (Feedback stage): Arrow from the controlled process (cooling water loop) back to the sensors
+
+Concrete example shown:
+- Temperature sensor reads 90°F → PLC input
+- Ladder logic: IF temp > 85°F THEN energize pump motor relay
+- Output module sends signal to motor starter → pump runs
+- Pump circulates cooling water → temperature drops
+- Sensor reads new temperature → cycle continues
+
+Annotations:
+- "Scan Cycle: 10-50 ms" near center PLC
+- "Analog Input (4-20 mA)" near sensor connections
+- "Digital Output (24V DC)" near motor starter connection
+- "Setpoint: 85°F" near ladder logic
+
+Interactive elements:
+- Hover over each stage to see a detailed explanation
+- Click on the ladder logic area to see the logic expand with explanation of each rung
+
+Color scheme: Green for inputs, blue for processing, orange for outputs, gray for feedback path
+Responsive design: Must respond to window resize events
+
+Implementation: HTML/CSS/JavaScript with SVG elements and hover tooltips
+</details>
+
+<h3 id="272-iot-sensors">2.7.2 IoT Sensors</h3>
+<p>The <strong>Internet of Things (IoT)</strong> has brought a new generation of sensors to fluid power systems. Unlike traditional sensors that connect only to a local PLC or gauge, IoT sensors connect to networks (Wi-Fi, cellular, or industrial protocols) and transmit data to cloud platforms where it can be stored, analyzed, and viewed from anywhere.</p>
+<p>Common IoT sensors in fluid power systems include:</p>
+<table>
+<thead>
+<tr>
+<th>Sensor Type</th>
+<th>What It Measures</th>
+<th>Typical Application</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Temperature</td>
+<td>Fluid or surface temperature (°F or °C)</td>
+<td>Bearing monitoring, HVAC, hydraulic fluid</td>
+</tr>
+<tr>
+<td>Pressure</td>
+<td>Fluid or gas pressure (PSI, bar, inWC)</td>
+<td>Filter condition, system pressure, leak detection</td>
+</tr>
+<tr>
+<td>Vibration</td>
+<td>Acceleration and frequency (g, Hz)</td>
+<td>Rotating equipment health (pumps, fans, motors)</td>
+</tr>
+<tr>
+<td>Flow</td>
+<td>Volume or mass flow rate (GPM, CFM)</td>
+<td>System performance, leak detection</td>
+</tr>
+<tr>
+<td>Current/Power</td>
+<td>Electrical consumption (amps, kW)</td>
+<td>Motor efficiency, load monitoring</td>
+</tr>
+<tr>
+<td>Level</td>
+<td>Fluid level in tanks (inches, %)</td>
+<td>Reservoir monitoring, tank level</td>
+</tr>
+<tr>
+<td>Humidity</td>
+<td>Moisture content in air (% RH)</td>
+<td>HVAC, compressed air quality</td>
+</tr>
+<tr>
+<td>Water quality</td>
+<td>pH, conductivity, turbidity</td>
+<td>Cooling water treatment</td>
+</tr>
+</tbody>
+</table>
+<h3 id="273-how-iot-sensors-transform-maintenance">2.7.3 How IoT Sensors Transform Maintenance</h3>
+<p>Traditional maintenance relies on scheduled inspections — a technician walks through the plant on a set schedule, checks gauges, listens for unusual sounds, and records readings on a clipboard. This approach has two major drawbacks:</p>
+<ol>
+<li><strong>Problems can develop between inspections</strong> — a bearing might fail the day after it was checked</li>
+<li><strong>Routine checks consume labor hours</strong> — a technician might check 100 data points and find only 1 that needs attention</li>
+</ol>
+<p>IoT sensors change this equation by providing <strong>continuous monitoring</strong>. Instead of checking a pump bearing temperature once a week, a wireless vibration sensor reports data every few minutes. If something changes, the system alerts the technician immediately — no waiting until the next inspection.</p>
+<p>This shift from <strong>time-based maintenance</strong> (check it every Tuesday) to <strong>condition-based maintenance</strong> (check it when the data says something changed) is the foundation of predictive maintenance, which you will study in depth throughout this course.</p>
+<h4 id="diagram-traditional-vs-smart-maintenance-workflow">Diagram: Traditional vs. Smart Maintenance Workflow</h4>
+<iframe src="../../sims/maintenance-workflow-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Traditional vs. Smart Maintenance Workflow</summary>
+Type: workflow
+
+Bloom Taxonomy: Analyze (L4)
+Bloom Verb: compare, differentiate
+Learning Objective: Students will be able to compare traditional time-based maintenance with IoT-enabled condition-based maintenance and differentiate the key advantages of each approach.
+
+Purpose: Side-by-side workflow comparison showing traditional scheduled maintenance versus IoT-enabled condition-based maintenance
+
+Layout: Two parallel vertical flowcharts, one for traditional and one for smart/IoT approach
+
+Left Flowchart — Traditional Time-Based Maintenance:
+1. Start: "Calendar trigger (e.g., every Tuesday)"
+   Hover: "Maintenance is scheduled by date regardless of equipment condition"
+2. Process: "Technician walks to equipment"
+   Hover: "Physical presence required at each check point"
+3. Process: "Manual readings (gauges, clipboard)"
+   Hover: "Temperature, pressure, vibration readings recorded by hand"
+4. Decision: "Any readings out of range?"
+   Hover: "Technician compares readings to known limits"
+5a. Yes → Process: "Submit work order for repair"
+   Hover: "Paper or CMMS work order created"
+5b. No → Process: "Log 'OK' and move to next equipment"
+   Hover: "95% of checks typically find no issues"
+6. End: "Repeat next scheduled period"
+
+Right Flowchart — IoT-Enabled Condition-Based Maintenance:
+1. Start: "IoT sensors stream data continuously"
+   Hover: "Wireless sensors report temperature, vibration, pressure every 1-5 minutes"
+2. Process: "Data transmitted to cloud/edge platform"
+   Hover: "Data stored and processed automatically 24/7"
+3. Process: "AI/analytics engine compares to baselines"
+   Hover: "Software detects trends, anomalies, and threshold violations"
+4. Decision: "Anomaly or trend detected?"
+   Hover: "System identifies changes before they become failures"
+5a. Yes → Process: "Automated alert sent to technician"
+   Hover: "Push notification to phone/tablet with specific issue and location"
+5b. No → Process: "Data logged, trends updated"
+   Hover: "Historical record builds for long-term analysis"
+6. End: "Continuous monitoring continues"
+
+Comparison callouts between the two flows:
+- Arrow from Traditional step 2 to IoT step 1: "Eliminates routine walk-around inspections"
+- Arrow from Traditional step 4 to IoT step 3: "Catches issues between scheduled checks"
+- Arrow from Traditional step 5b to IoT step 5b: "Builds historical data automatically"
+
+Color coding:
+- Traditional flow: orange/amber tones
+- IoT flow: blue/teal tones
+- Decision diamonds: yellow
+- Comparison arrows: green dashed
+
+Interactive elements:
+- Hover over each step to see detailed explanation
+- Click comparison arrows to see a detailed side-by-side benefit analysis
+
+Responsive design: Flows stack vertically on narrow screens. Must respond to window resize events.
+
+Implementation: HTML/CSS/JavaScript with SVG flowchart elements
+</details>
+
+<h2 id="28-real-time-data-collection">2.8 Real-Time Data Collection</h2>
+<p>Real-time data collection is the process of gathering sensor measurements from equipment as they happen, with no significant delay. This data forms the foundation for everything from simple alarm systems to sophisticated AI analytics.</p>
+<h3 id="281-data-collection-architecture">2.8.1 Data Collection Architecture</h3>
+<p>A typical real-time data collection system in a fluid power facility has three layers:</p>
+<ol>
+<li><strong>Field layer</strong> — sensors and transmitters physically attached to equipment</li>
+<li><strong>Communication layer</strong> — wires, wireless networks, or industrial protocols that carry data</li>
+<li><strong>Application layer</strong> — software platforms that store, display, and analyze data</li>
+</ol>
+<p>Common communication protocols include:</p>
+<ul>
+<li><strong>4-20 mA analog signals</strong> — traditional hardwired connection from sensor to PLC</li>
+<li><strong>Modbus</strong> — industrial serial communication protocol (widely used with PLCs)</li>
+<li><strong>BACnet</strong> — building automation protocol common in HVAC systems</li>
+<li><strong>MQTT</strong> — lightweight messaging protocol popular with IoT devices</li>
+<li><strong>OPC UA</strong> — open standard for industrial data exchange</li>
+</ul>
+<h3 id="282-what-data-to-collect">2.8.2 What Data to Collect</h3>
+<p>Not every measurement is equally valuable. Good data collection focuses on parameters that reveal equipment health and system performance. The table below shows key parameters for each major component type:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Priority 1 (Always Monitor)</th>
+<th>Priority 2 (Recommended)</th>
+<th>Priority 3 (Nice to Have)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pumps</td>
+<td>Vibration, discharge pressure</td>
+<td>Motor current, temperature</td>
+<td>Suction pressure, flow rate</td>
+</tr>
+<tr>
+<td>Fans</td>
+<td>Vibration, motor current</td>
+<td>Belt tension (where applicable)</td>
+<td>Noise level, airflow</td>
+</tr>
+<tr>
+<td>Compressors</td>
+<td>Discharge pressure, temperature</td>
+<td>Oil level/condition, current</td>
+<td>Inlet filter differential pressure</td>
+</tr>
+<tr>
+<td>Valves</td>
+<td>Position feedback</td>
+<td>Actuator response time</td>
+<td>Seat leakage</td>
+</tr>
+<tr>
+<td>Filters</td>
+<td>Differential pressure</td>
+<td>Flow rate</td>
+<td>Particle count (downstream)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="283-from-data-to-decisions">2.8.3 From Data to Decisions</h3>
+<p>Collecting data is only valuable if it leads to better decisions. Here is how raw sensor data transforms into actionable maintenance intelligence:</p>
+<ol>
+<li><strong>Data capture</strong> — sensor reads a value (e.g., pump vibration = 0.15 in/s)</li>
+<li><strong>Data transmission</strong> — value sent to controller or cloud platform</li>
+<li><strong>Data storage</strong> — value logged with timestamp in a database</li>
+<li><strong>Trend analysis</strong> — software compares current value to historical baseline</li>
+<li><strong>Alert generation</strong> — if value exceeds threshold or trend is abnormal, alert is created</li>
+<li><strong>Decision support</strong> — technician reviews alert with context (trend chart, similar equipment history)</li>
+<li><strong>Action</strong> — technician schedules maintenance, adjusts settings, or investigates further</li>
+</ol>
+<h4 id="diagram-sensor-data-to-maintenance-decision-pipeline">Diagram: Sensor Data to Maintenance Decision Pipeline</h4>
+<iframe src="../../sims/data-decision-pipeline/main.html" width="100%" height="500px" scrolling="no"></iframe>
+
+<details markdown="1">
+<summary>Sensor Data to Maintenance Decision Pipeline</summary>
+Type: microsim
+
+Bloom Taxonomy: Understand (L2)
+Bloom Verb: explain, interpret
+Learning Objective: Students will be able to explain how raw sensor data is processed through a pipeline to generate maintenance decisions, tracing concrete data values through each stage.
+
+Purpose: Step-through simulation showing how a single sensor reading travels from the physical sensor through data processing to a maintenance decision
+
+Data Visibility Requirements:
+Stage 1: Show raw sensor reading — "Pump #3 Vibration Sensor: 0.28 in/s" with timestamp
+Stage 2: Show data transmission — value arrives at cloud platform, stored in database row with fields (timestamp, sensor_id, value, unit)
+Stage 3: Show trend comparison — current value (0.28 in/s) plotted against 30-day history, showing baseline of 0.08 in/s and gradual upward trend
+Stage 4: Show threshold evaluation — value compared against alarm levels: Normal (<0.15), Warning (0.15–0.30), Critical (>0.30). Current reading falls in Warning zone.
+Stage 5: Show alert generation — alert card displays: "WARNING — Pump #3 vibration trending up. Current: 0.28 in/s. Baseline: 0.08 in/s. Rate of change: +0.04 in/s per week. Estimated time to critical: ~5 days."
+Stage 6: Show maintenance decision — technician review screen with options: "Schedule bearing inspection within 3 days" (recommended), "Continue monitoring," "Emergency shutdown"
+
+Canvas layout:
+- Main area: large display panel showing current stage content
+- Bottom: step navigation with Previous / Next buttons and stage indicator (1 of 6)
+- Right sidebar: pipeline progress indicator showing all 6 stages with current stage highlighted
+
+Interactive controls:
+- Next / Previous buttons to step through stages
+- At Stage 3: slider to adjust the "current reading" value and see how the trend and alert change
+- At Stage 5: toggle between different alert severity examples
+
+Instructional Rationale: Step-through with concrete data values is appropriate because the Understand/explain objective requires learners to trace specific data through each transformation stage. Continuous animation would obscure the data values and prevent students from studying each stage.
+
+Responsive design: Must respond to window resize events. Layout adjusts for narrow screens.
+
+Implementation: p5.js with stage-based display panels and interactive step controls
+</details>
+
+<h2 id="29-connecting-it-all-the-smart-fluid-power-system">2.9 Connecting It All: The Smart Fluid Power System</h2>
+<p>When you combine mechanical components (pumps, fans, compressors, valves, filters) with smart controls (PLCs, IoT sensors, communication networks), you get a system that can monitor itself, report its condition, and even adjust its own operation for optimal performance.</p>
+<p>Consider a complete cooling water system with smart controls:</p>
+<ol>
+<li>A <strong>centrifugal pump</strong> circulates cooling water through the loop</li>
+<li><strong>IoT temperature sensors</strong> measure water temperature at the supply and return</li>
+<li>A <strong>differential pressure sensor</strong> monitors the strainer (filter) condition</li>
+<li>A <strong>vibration sensor</strong> on the pump detects developing bearing issues</li>
+<li>A <strong>VFD (Variable Frequency Drive)</strong> adjusts pump speed based on cooling demand</li>
+<li>A <strong>PLC</strong> reads all sensor data, runs control logic, and adjusts the VFD</li>
+<li>All data flows to a <strong>cloud dashboard</strong> where technicians and AI analytics can review trends</li>
+</ol>
+<p>This integrated approach means the system can:</p>
+<ul>
+<li><strong>Automatically adjust</strong> pump speed when cooling demand changes (saving energy)</li>
+<li><strong>Alert technicians</strong> when the strainer differential pressure rises (filter needs cleaning)</li>
+<li><strong>Predict bearing failure</strong> by detecting early vibration changes (preventing unplanned downtime)</li>
+<li><strong>Log all data</strong> for historical analysis and compliance reporting</li>
+</ul>
+<p>The remaining chapters in this course will explore each specific system type in detail, building on the component knowledge and smart control concepts you learned here.</p>
+<h3 id="electrical-power-fundamentals">Electrical Power Fundamentals</h3>
+<p>Understanding basic electrical calculations is essential for any fluid power technician. Motors drive pumps, fans, and compressors, and knowing how to calculate motor power, convert between watts and horsepower, and estimate energy costs helps you size equipment, verify nameplate data, and justify efficiency upgrades.</p>
+<h4 id="worked-example-single-phase-motor-power">Worked Example: Single-Phase Motor Power</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>A single-phase motor operates at 230 V</li>
+<li>The motor draws 15 A</li>
+<li>The power factor (PF) is 0.85</li>
+</ul>
+<p><strong>Find:</strong> The power consumed in watts and the equivalent horsepower (HP)</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate power using the single-phase power formula:</li>
+</ol>
+<p>[ P = V \times I \times PF = 230 \times 15 \times 0.85 = 2{,}932.5 \text{ W} ]</p>
+<ol>
+<li>Convert watts to horsepower (1 HP = 746 W):</li>
+</ol>
+<p>[ HP = \frac{P}{746} = \frac{2{,}932.5}{746} = 3.93 \text{ HP} ]</p>
+<p><strong>Answer:</strong> The motor consumes <strong>2,932.5 W</strong> (approximately <strong>3.93 HP</strong>). Since standard motor sizes jump from 3 HP to 5 HP, this motor would be rated as a <strong>5 HP motor</strong> operating near full load.</p>
+<blockquote>
+<p><strong>Practical note:</strong> Always select the next standard motor size above the calculated load. Running a motor above its rated HP causes overheating and premature failure. Standard single-phase motor sizes are 1, 1.5, 2, 3, 5, 7.5, and 10 HP.</p>
+</blockquote>
+<h4 id="worked-example-three-phase-motor-power">Worked Example: Three-Phase Motor Power</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>A three-phase motor operates at 460 V</li>
+<li>The motor draws 28 A</li>
+<li>The power factor (PF) is 0.87</li>
+</ul>
+<p><strong>Find:</strong> The power consumed in kilowatts (kW) and horsepower (HP)</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate power using the three-phase power formula:</li>
+</ol>
+<p>[ P = V \times I \times \sqrt{3} \times PF = 460 \times 28 \times 1.732 \times 0.87 = 19{,}415 \text{ W} \approx 19.4 \text{ kW} ]</p>
+<ol>
+<li>Convert watts to horsepower:</li>
+</ol>
+<p>[ HP = \frac{P}{746} = \frac{19{,}415}{746} = 26.0 \text{ HP} ]</p>
+<p><strong>Answer:</strong> The motor consumes approximately <strong>19.4 kW</strong> (<strong>26.0 HP</strong>). This is a <strong>25 HP motor</strong> operating at full load (motors typically draw slightly more than their rated HP when fully loaded).</p>
+<blockquote>
+<p><strong>Practical note:</strong> Three-phase power is standard for motors above 5 HP in commercial and industrial facilities. The ( \sqrt{3} ) factor (approximately 1.732) accounts for the 120-degree phase offset between the three power lines. If you forget this factor, your calculation will be 42% too low.</p>
+</blockquote>
+<h4 id="worked-example-motor-efficiency-and-annual-energy-cost">Worked Example: Motor Efficiency and Annual Energy Cost</h4>
+<p><strong>Given:</strong></p>
+<ul>
+<li>A 25 HP motor has a nameplate efficiency of 91% (( \eta = 0.91 ))</li>
+<li>The motor runs 6,000 hours per year</li>
+<li>Electricity costs $0.10 per kWh</li>
+</ul>
+<p><strong>Find:</strong> The electrical input power in kW and the annual energy cost</p>
+<p><strong>Solution:</strong></p>
+<ol>
+<li>Calculate the input power required from the electrical supply:</li>
+</ol>
+<p>[ \text{Input kW} = \frac{HP \times 0.746}{\eta} = \frac{25 \times 0.746}{0.91} = \frac{18.65}{0.91} = 20.5 \text{ kW} ]</p>
+<ol>
+<li>Calculate the annual energy consumption:</li>
+</ol>
+<p>[ \text{Annual kWh} = \text{Input kW} \times \text{Hours} = 20.5 \times 6{,}000 = 123{,}000 \text{ kWh} ]</p>
+<ol>
+<li>Calculate the annual electricity cost:</li>
+</ol>
+<p>[ \text{Annual Cost} = \text{kWh} \times \text{Rate} = 123{,}000 \times \$0.10 = \$12{,}300 ]</p>
+<p><strong>Answer:</strong> The motor draws <strong>20.5 kW</strong> from the electrical supply and costs <strong>$12,300 per year</strong> to operate.</p>
+<blockquote>
+<p><strong>Practical note:</strong> The 9% efficiency loss (100% - 91%) is converted to waste heat inside the motor. This is why motor rooms need ventilation. Upgrading from a standard-efficiency motor (89%) to a premium-efficiency motor (93%) on this example would save approximately $1,000 per year — a quick payback on many motor replacements.</p>
+</blockquote>
+<h2 id="210-lab-preview-disassemble-a-pump-connect-a-sensor-and-view-data">2.10 Lab Preview: Disassemble a Pump, Connect a Sensor, and View Data</h2>
+<p>In this week's hands-on lab, you will:</p>
+<ol>
+<li><strong>Disassemble a centrifugal pump</strong> to identify the impeller, volute, shaft, seals, and bearings</li>
+<li><strong>Reassemble the pump</strong> following proper procedures</li>
+<li><strong>Install a wireless vibration sensor</strong> on the pump housing</li>
+<li><strong>Connect the sensor</strong> to a tablet or app and verify data is streaming</li>
+<li><strong>Run the pump</strong> and observe real-time vibration data on the dashboard</li>
+<li><strong>Simulate a fault</strong> (instructor will introduce an imbalance) and observe how the vibration data changes</li>
+<li><strong>Record your findings</strong> including baseline readings and fault readings</li>
+</ol>
+<p>This lab connects the mechanical knowledge from the first half of this chapter (understanding what is inside a pump) with the smart controls knowledge from the second half (using sensors and data to monitor pump health).</p>
+<h2 id="key-takeaways">Key Takeaways</h2>
+<ul>
+<li><strong>Five core components</strong> — pumps, fans, compressors, valves, and filters — are the building blocks of all fluid power systems</li>
+<li>Each component type has multiple variations suited for different applications, pressures, and fluids</li>
+<li>Regular <strong>preventive maintenance</strong> (inspections, lubrication, replacement of wear parts) keeps components running reliably</li>
+<li><strong>PLCs</strong> automate control by reading sensor inputs, executing logic, and driving outputs in a continuous scan cycle</li>
+<li><strong>IoT sensors</strong> enable continuous, real-time monitoring of equipment health from anywhere</li>
+<li>The shift from <strong>time-based to condition-based maintenance</strong> reduces both unexpected failures and wasted labor</li>
+<li><strong>Real-time data collection</strong> transforms raw sensor readings into actionable maintenance intelligence through a pipeline of capture, storage, trending, alerting, and decision support</li>
+<li>Smart controls and sensors are the foundation for the <strong>AI-driven predictive maintenance</strong> strategies you will learn in later chapters</li>
+</ul>
+<details class="question">
+<summary>Review: Can you name the five core components and one maintenance task for each?</summary>
+<ol>
+<li><strong>Pumps</strong> — Check for leaks at seals and connections</li>
+<li><strong>Fans</strong> — Inspect belts for wear and proper tension</li>
+<li><strong>Compressors</strong> — Drain condensate from the receiver tank daily</li>
+<li><strong>Valves</strong> — Exercise valves regularly to prevent them from sticking</li>
+<li><strong>Filters</strong> — Monitor differential pressure and replace when threshold is reached</li>
+</ol>
+</details>
 
 
 
 
 
 
+
+  
+  
 
 
 

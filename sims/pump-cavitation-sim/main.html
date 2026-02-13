@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cavitation Diagnosis Simulator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            overflow-x: hidden;
+        }
+        main {
+            display: flex;
+            justify-content: center;
+        }
+        #controls {
+            background: #e8ecf0;
+            padding: 10px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 24px;
+            align-items: center;
+            justify-content: center;
+            border-top: 2px solid #ccc;
+            font-size: 13px;
+        }
+        .ctrl-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ctrl-group label {
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+        .ctrl-group input[type="range"] {
+            width: 120px;
+            cursor: pointer;
+        }
+        .ctrl-group .val {
+            min-width: 48px;
+            text-align: right;
+            font-family: monospace;
+            color: #0066aa;
+            font-weight: bold;
+        }
+        .ctrl-group select {
+            padding: 2px 4px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <main></main>
+    <div id="controls">
+        <div class="ctrl-group">
+            <label>Liquid Level Above Pump:</label>
+            <input type="range" id="sliderLevel" min="-5" max="15" value="8" step="0.5">
+            <span class="val" id="valLevel">8.0 ft</span>
+        </div>
+        <div class="ctrl-group">
+            <label>Fluid Temperature:</label>
+            <input type="range" id="sliderTemp" min="60" max="200" value="80" step="1">
+            <span class="val" id="valTemp">80 &deg;F</span>
+        </div>
+        <div class="ctrl-group">
+            <label>Suction Pipe Length:</label>
+            <input type="range" id="sliderPipeLen" min="10" max="100" value="30" step="1">
+            <span class="val" id="valPipeLen">30 ft</span>
+        </div>
+        <div class="ctrl-group">
+            <label>Pump Speed:</label>
+            <input type="range" id="sliderSpeed" min="50" max="100" value="80" step="1">
+            <span class="val" id="valSpeed">80%</span>
+        </div>
+        <div class="ctrl-group">
+            <label>Suction Pipe Diameter:</label>
+            <select id="selectDiam">
+                <option value="2">2"</option>
+                <option value="3" selected>3"</option>
+                <option value="4">4"</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+    // ═══════════════════════════════════════════════════════════════════
+    //  GLOBAL CONSTANTS AND STATE
+    // ═══════════════════════════════════════════════════════════════════
+
+    const Hatm = 33.9; // ft of water at sea level
+
+    // Vapor pressure data points (temperature °F -> Hvapor in ft)
+    const vaporData = [
+        { t: 60,  h: 0.6  },
+        { t: 100, h: 2.2  },
+        { t: 150, h: 8.6  },
+        { t: 200, h: 24.7 }
+    ];
+
+    const NPSHr_100 = 12.0; // NPSHr at 100% speed in ft
+
+    // Flow rate assumption for friction calc (GPM) — typical centrifugal pump
+    const flowGPM = 200;
+
+    // Animation state
+    let bubbles = [];
+    let flowParticles = [];
+    let animTime = 0;
+    let pulsePhase = 0;
+
+    // Canvas dimensions
+    let canvasW, canvasH;
+    const drawH = 420;
+    const aspectRatio = 1.91;
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  ENGINEERING CALCULATIONS
+    // ═══════════════════════════════════════════════════════════════════
+
+    function getHvapor(tempF) {
+        // Linear interpolation through vapor pressure data points
+        if (tempF <= vaporData[0].t) return vaporData[0].h;
+        if (tempF >= vaporData[vaporData.length - 1].t) return vaporData[vaporData.length - 1].h;
+        for (let i = 0; i < vaporData.length - 1; i++) {
+            if (tempF >= vaporData[i].t && tempF <= vaporData[i + 1].t) {
+                let frac = (tempF - vaporData[i].t) / (vaporData[i + 1].t - vaporData[i].t);
+                return vaporData[i].h + frac * (vaporData[i + 1].h - vaporData[i].h);
+            }
+        }
+        return 0;
+    }
+
+    function getHfriction(pipeLengthFt, pipeDiamIn) {
+        // Simplified Darcy-Weisbach friction head loss
+        // Hf = f * (L/D) * (V^2 / (2g))
+        // Using Hazen-Williams simplified approach for water:
+        // V = 0.4085 * Q / d^2  (V in ft/s, Q in GPM, d in inches)
+        let V = 0.4085 * flowGPM / (pipeDiamIn * pipeDiamIn);
+        // Darcy friction factor for turbulent flow in steel pipe ~ 0.02
+        let f = 0.02;
+        let D_ft = pipeDiamIn / 12.0;
+        let Hf = f * (pipeLengthFt / D_ft) * (V * V) / (2 * 32.174);
+        // Add minor losses (fittings, elbows) as ~30% of pipe friction
+        return Hf * 1.3;
+    }
+
+    function getNPSHr(speedPct) {
+        // Affinity law: NPSHr scales with speed^2
+        let ratio = speedPct / 100.0;
+        return NPSHr_100 * ratio * ratio;
+    }
+
+    function readControls() {
+        let level = parseFloat(document.getElementById('sliderLevel').value);
+        let temp = parseFloat(document.getElementById('sliderTemp').value);
+        let pipeLen = parseFloat(document.getElementById('sliderPipeLen').value);
+        let speed = parseFloat(document.getElementById('sliderSpeed').value);
+        let diam = parseFloat(document.getElementById('selectDiam').value);
+
+        document.getElementById('valLevel').textContent = level.toFixed(1) + ' ft';
+        document.getElementById('valTemp').textContent = temp.toFixed(0) + ' \u00B0F';
+        document.getElementById('valPipeLen').textContent = pipeLen.toFixed(0) + ' ft';
+        document.getElementById('valSpeed').textContent = speed.toFixed(0) + '%';
+
+        let Hvapor = getHvapor(temp);
+        let Hfriction = getHfriction(pipeLen, diam);
+        let Hstatic = level;
+        let NPSHa = Hatm + Hstatic - Hfriction - Hvapor;
+        let NPSHr = getNPSHr(speed);
+        let margin = NPSHa - NPSHr;
+
+        return { Hstatic, Hvapor, Hfriction, NPSHa, NPSHr, margin, speed, temp, pipeLen, diam, level };
+    }
+
+    function getStatusColor(margin) {
+        if (margin > 3) return { r: 40, g: 180, b: 60 };       // green
+        if (margin > 0) return { r: 220, g: 180, b: 0 };       // yellow
+        return { r: 220, g: 40, b: 40 };                        // red
+    }
+
+    function getStatusText(margin) {
+        if (margin > 3) return 'OK';
+        if (margin > 0) return 'WARNING';
+        return 'CAVITATION';
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  P5.JS SETUP AND DRAW
+    // ═══════════════════════════════════════════════════════════════════
+
+    function setup() {
+        canvasW = min(windowWidth, drawH * aspectRatio);
+        canvasH = drawH;
+        let canvas = createCanvas(canvasW, canvasH);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+        initFlowParticles();
+        initBubbles();
+    }
+
+    function windowResized() {
+        canvasW = min(windowWidth, drawH * aspectRatio);
+        canvasH = drawH;
+        resizeCanvas(canvasW, canvasH);
+        initFlowParticles();
+        initBubbles();
+    }
+
+    function initFlowParticles() {
+        flowParticles = [];
+        for (let i = 0; i < 30; i++) {
+            flowParticles.push({
+                t: random(0, 1),
+                speed: random(0.003, 0.006),
+                yOff: random(-6, 6)
+            });
+        }
+    }
+
+    function initBubbles() {
+        bubbles = [];
+        for (let i = 0; i < 40; i++) {
+            bubbles.push({
+                x: random(-20, 20),
+                y: random(-20, 20),
+                r: random(2, 7),
+                vx: random(-0.5, 0.5),
+                vy: random(-1.5, -0.3),
+                life: random(0, 1),
+                speed: random(0.008, 0.02)
+            });
+        }
+    }
+
+    function draw() {
+        background(245);
+        animTime += deltaTime * 0.001;
+        pulsePhase += 0.05;
+
+        let data = readControls();
+        let sf = canvasW / 800; // scale factor
+
+        let leftW = canvasW * 0.55;
+        let rightW = canvasW * 0.45;
+
+        // Divider
+        stroke(200);
+        strokeWeight(1);
+        line(leftW, 0, leftW, canvasH);
+
+        // ── LEFT: Pump Cross-Section ────────────────────────────────
+        drawPumpDiagram(leftW, data, sf);
+
+        // ── RIGHT: NPSH Analysis ────────────────────────────────────
+        drawNPSHPanel(leftW, rightW, data, sf);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  LEFT PANEL: PUMP CROSS-SECTION DIAGRAM
+    // ═══════════════════════════════════════════════════════════════════
+
+    function drawPumpDiagram(panelW, data, sf) {
+        push();
+        let cx = panelW * 0.5;
+        let cy = canvasH * 0.42;
+        let isCavitating = data.margin < 0;
+        let isWarning = data.margin >= 0 && data.margin <= 3;
+
+        // Title
+        noStroke();
+        fill(50);
+        textAlign(CENTER, TOP);
+        textSize(max(13, 15 * sf));
+        textStyle(BOLD);
+        text('Pump Cross-Section', cx, 8);
+        textStyle(NORMAL);
+
+        // ── Suction tank / fluid level (left side) ──────────────────
+        let tankX = 16 * sf;
+        let tankW = 60 * sf;
+        let tankH = 100 * sf;
+        let tankY = cy - 20 * sf;
+        let tankBottom = tankY + tankH * 0.5;
+        let tankTop = tankY - tankH * 0.5;
+
+        // Tank outline
+        stroke(120);
+        strokeWeight(2 * sf);
+        noFill();
+        rect(tankX, tankTop, tankW, tankH, 2 * sf);
+
+        // Fluid level inside tank (map liquid level to visual)
+        let levelFrac = map(data.level, -5, 15, 0.1, 0.95);
+        levelFrac = constrain(levelFrac, 0.05, 0.98);
+        let fluidTop = lerp(tankBottom, tankTop, levelFrac);
+
+        noStroke();
+        fill(80, 150, 220, 150);
+        rect(tankX + 2, fluidTop, tankW - 4, tankBottom - fluidTop - 2, 0, 0, 2 * sf, 2 * sf);
+
+        // Surface wave
+        stroke(60, 120, 200);
+        strokeWeight(1.5 * sf);
+        noFill();
+        beginShape();
+        for (let wx = tankX + 3; wx < tankX + tankW - 3; wx += 2) {
+            let wy = fluidTop + sin((wx * 0.1) + animTime * 2) * 1.5 * sf;
+            vertex(wx, wy);
+        }
+        endShape();
+
+        // Level label
+        noStroke();
+        fill(50);
+        textSize(max(8, 9 * sf));
+        textAlign(CENTER, TOP);
+        text('Tank', tankX + tankW / 2, tankBottom + 4 * sf);
+
+        // Level arrow and value
+        let pumpCenterY = cy;
+        stroke(100);
+        strokeWeight(1 * sf);
+        // Dashed line from fluid surface
+        drawingContext.setLineDash([3, 3]);
+        line(tankX + tankW, fluidTop, tankX + tankW + 20 * sf, fluidTop);
+        drawingContext.setLineDash([]);
+
+        // ── Suction pipe ────────────────────────────────────────────
+        let pipeY = cy;
+        let pipeH = 22 * sf;
+        let pipeStartX = tankX + tankW;
+        let pipeEndX = cx - 50 * sf;
+
+        // Pipe body
+        fill(180, 185, 190);
+        stroke(130);
+        strokeWeight(1.5 * sf);
+        rect(pipeStartX, pipeY - pipeH / 2, pipeEndX - pipeStartX, pipeH, 2 * sf);
+
+        // Fluid inside suction pipe
+        noStroke();
+        fill(80, 150, 220, isCavitating ? 80 : 130);
+        rect(pipeStartX + 2, pipeY - pipeH / 2 + 2, pipeEndX - pipeStartX - 4, pipeH - 4);
+
+        // Suction label
+        fill(50);
+        textSize(max(8, 9 * sf));
+        textAlign(CENTER, BOTTOM);
+        text('Suction', (pipeStartX + pipeEndX) / 2, pipeY - pipeH / 2 - 3 * sf);
+
+        // ── Pump casing (volute) ────────────────────────────────────
+        let pumpR = 48 * sf;
+
+        // Warning/cavitation glow
+        if (isCavitating) {
+            let glowAlpha = map(sin(pulsePhase * 2), -1, 1, 40, 120);
+            noStroke();
+            fill(255, 40, 40, glowAlpha);
+            ellipse(cx, cy, pumpR * 2.8, pumpR * 2.8);
+            fill(255, 40, 40, glowAlpha * 0.5);
+            ellipse(cx, cy, pumpR * 3.2, pumpR * 3.2);
+        } else if (isWarning) {
+            let glowAlpha = map(sin(pulsePhase), -1, 1, 20, 60);
+            noStroke();
+            fill(255, 200, 0, glowAlpha);
+            ellipse(cx, cy, pumpR * 2.6, pumpR * 2.6);
+        }
+
+        // Volute casing
+        fill(190, 195, 200);
+        stroke(120);
+        strokeWeight(2.5 * sf);
+        beginShape();
+        for (let a = 0; a <= TWO_PI; a += 0.05) {
+            let rr = pumpR + (a / TWO_PI) * pumpR * 0.18;
+            vertex(cx + cos(a) * rr, cy + sin(a) * rr);
+        }
+        endShape(CLOSE);
+
+        // Fluid fill inside casing
+        noStroke();
+        fill(80, 150, 220, isCavitating ? 60 : 120);
+        ellipse(cx, cy, pumpR * 1.7, pumpR * 1.7);
+
+        // ── Impeller ────────────────────────────────────────────────
+        let impBlades = 6;
+        let impR = pumpR * 0.75;
+        let impAngle = animTime * (data.speed / 100) * 3;
+
+        stroke(150, 155, 165);
+        strokeWeight(max(2, 3 * sf));
+        noFill();
+        for (let i = 0; i < impBlades; i++) {
+            let a = impAngle + (TWO_PI / impBlades) * i;
+            let x1 = cx + cos(a) * pumpR * 0.12;
+            let y1 = cy + sin(a) * pumpR * 0.12;
+            let x2 = cx + cos(a + 0.15) * impR;
+            let y2 = cy + sin(a + 0.15) * impR;
+            line(x1, y1, x2, y2);
+        }
+
+        // Hub
+        fill(160);
+        stroke(110);
+        strokeWeight(1.5 * sf);
+        ellipse(cx, cy, pumpR * 0.22, pumpR * 0.22);
+
+        // Impeller eye label
+        noStroke();
+        fill(50);
+        textSize(max(7, 8 * sf));
+        textAlign(CENTER, CENTER);
+        text('Eye', cx, cy + pumpR * 0.32);
+
+        // ── Cavitation bubbles at impeller eye ──────────────────────
+        if (isCavitating) {
+            for (let b of bubbles) {
+                b.life += b.speed;
+                if (b.life > 1) {
+                    b.life = 0;
+                    b.x = random(-18, 18) * sf;
+                    b.y = random(-18, 18) * sf;
+                    b.r = random(2, 7) * sf;
+                }
+
+                let bx = cx + b.x + sin(animTime * 3 + b.r) * 3 * sf;
+                let by = cy + b.y + cos(animTime * 2 + b.x) * 3 * sf;
+                let alpha = sin(b.life * PI) * 200;
+
+                noStroke();
+                fill(255, 255, 255, alpha);
+                ellipse(bx, by, b.r * 2, b.r * 2);
+                // Bubble highlight
+                fill(255, 255, 255, alpha * 0.7);
+                ellipse(bx - b.r * 0.2, by - b.r * 0.2, b.r * 0.8, b.r * 0.8);
+            }
+        } else if (isWarning) {
+            // Fewer, smaller bubbles for warning state
+            for (let i = 0; i < 10; i++) {
+                let b = bubbles[i];
+                b.life += b.speed * 0.6;
+                if (b.life > 1) {
+                    b.life = 0;
+                    b.x = random(-12, 12) * sf;
+                    b.y = random(-12, 12) * sf;
+                }
+                let bx = cx + b.x;
+                let by = cy + b.y;
+                let alpha = sin(b.life * PI) * 100;
+                noStroke();
+                fill(255, 255, 255, alpha);
+                ellipse(bx, by, 3 * sf, 3 * sf);
+            }
+        }
+
+        // ── Discharge pipe ──────────────────────────────────────────
+        let dischStartX = cx + pumpR * 0.85;
+        let dischEndX = panelW - 16 * sf;
+
+        fill(180, 185, 190);
+        stroke(130);
+        strokeWeight(1.5 * sf);
+        rect(dischStartX, pipeY - pipeH / 2, dischEndX - dischStartX, pipeH, 2 * sf);
+
+        // Fluid inside discharge pipe
+        noStroke();
+        fill(80, 150, 220, 130);
+        rect(dischStartX + 2, pipeY - pipeH / 2 + 2, dischEndX - dischStartX - 4, pipeH - 4);
+
+        // Discharge label
+        fill(50);
+        textSize(max(8, 9 * sf));
+        textAlign(CENTER, BOTTOM);
+        text('Discharge', (dischStartX + dischEndX) / 2, pipeY - pipeH / 2 - 3 * sf);
+
+        // ── Flow arrows (normal operation) ──────────────────────────
+        if (!isCavitating) {
+            stroke(30, 130, 220);
+            strokeWeight(2 * sf);
+            fill(30, 130, 220);
+
+            // Suction flow arrows
+            let arrowY = pipeY;
+            for (let ax = pipeStartX + 20 * sf; ax < pipeEndX - 10 * sf; ax += 35 * sf) {
+                drawArrow(ax, arrowY, ax + 18 * sf, arrowY, 5 * sf);
+            }
+            // Discharge flow arrows
+            for (let ax = dischStartX + 15 * sf; ax < dischEndX - 20 * sf; ax += 35 * sf) {
+                drawArrow(ax, arrowY, ax + 18 * sf, arrowY, 5 * sf);
+            }
+        } else {
+            // Erratic flow in cavitation
+            stroke(220, 60, 60, 180);
+            strokeWeight(1.5 * sf);
+            fill(220, 60, 60, 180);
+            let arrowY = pipeY;
+            for (let ax = pipeStartX + 20 * sf; ax < pipeEndX - 10 * sf; ax += 40 * sf) {
+                let yJitter = sin(animTime * 5 + ax * 0.1) * 4 * sf;
+                drawArrow(ax, arrowY + yJitter, ax + 14 * sf, arrowY - yJitter, 4 * sf);
+            }
+        }
+
+        // ── Flow particles ──────────────────────────────────────────
+        for (let p of flowParticles) {
+            p.t += p.speed * (data.speed / 100);
+            if (p.t > 1) p.t -= 1;
+
+            let px, py;
+            if (p.t < 0.35) {
+                // In suction pipe
+                let frac = p.t / 0.35;
+                px = lerp(pipeStartX, pipeEndX, frac);
+                py = pipeY + p.yOff * 0.5;
+            } else if (p.t < 0.65) {
+                // Through pump (circular path)
+                let frac = (p.t - 0.35) / 0.3;
+                let angle = -PI + frac * PI;
+                px = cx + cos(angle) * pumpR * 0.5;
+                py = cy + sin(angle) * pumpR * 0.5 + p.yOff * 0.3;
+            } else {
+                // In discharge pipe
+                let frac = (p.t - 0.65) / 0.35;
+                px = lerp(dischStartX, dischEndX, frac);
+                py = pipeY + p.yOff * 0.5;
+            }
+
+            noStroke();
+            if (isCavitating && p.t > 0.25 && p.t < 0.75) {
+                fill(220, 100, 100, 160);
+            } else {
+                fill(30, 100, 200, 160);
+            }
+            ellipse(px, py, max(3, 4 * sf), max(3, 4 * sf));
+        }
+
+        // ── Status overlay ──────────────────────────────────────────
+        let statusText, statusCol;
+        if (isCavitating) {
+            statusText = 'CAVITATION!';
+            let pAlpha = map(sin(pulsePhase * 1.5), -1, 1, 160, 255);
+            statusCol = color(220, 30, 30, pAlpha);
+        } else if (isWarning) {
+            statusText = 'WARNING';
+            statusCol = color(200, 160, 0, 220);
+        } else {
+            statusText = 'NORMAL';
+            statusCol = color(30, 160, 50, 220);
+        }
+
+        textAlign(CENTER, TOP);
+        textSize(max(16, 20 * sf));
+        textStyle(BOLD);
+        noStroke();
+        // Shadow
+        fill(0, 0, 0, 50);
+        text(statusText, cx + 1, cy + pumpR + 18 * sf + 1);
+        fill(statusCol);
+        text(statusText, cx, cy + pumpR + 18 * sf);
+        textStyle(NORMAL);
+
+        // Pump label
+        fill(60);
+        textSize(max(8, 9 * sf));
+        textAlign(CENTER, TOP);
+        text('Centrifugal Pump', cx, cy + pumpR + 40 * sf);
+
+        pop();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  RIGHT PANEL: NPSH ANALYSIS
+    // ═══════════════════════════════════════════════════════════════════
+
+    function drawNPSHPanel(leftEdge, panelW, data, sf) {
+        push();
+        let px = leftEdge;
+        let cx = px + panelW / 2;
+
+        // Title
+        noStroke();
+        fill(50);
+        textAlign(CENTER, TOP);
+        textSize(max(13, 15 * sf));
+        textStyle(BOLD);
+        text('NPSH Analysis', cx, 8);
+        textStyle(NORMAL);
+
+        // ── Bar chart area ──────────────────────────────────────────
+        let barAreaTop = 36 * sf;
+        let barAreaH = canvasH * 0.42;
+        let barBottom = barAreaTop + barAreaH;
+        let barMaxVal = 50; // max ft for bar scale
+
+        let barW = 38 * sf;
+        let gap = 30 * sf;
+        let barCenterX = cx;
+        let bar1X = barCenterX - barW - gap / 2; // NPSHa
+        let bar2X = barCenterX + gap / 2;         // NPSHr
+
+        // Background grid
+        stroke(220);
+        strokeWeight(0.5);
+        textSize(max(8, 9 * sf));
+        fill(150);
+        textAlign(RIGHT, CENTER);
+        for (let v = 0; v <= barMaxVal; v += 10) {
+            let yy = map(v, 0, barMaxVal, barBottom, barAreaTop);
+            line(px + 30 * sf, yy, px + panelW - 10 * sf, yy);
+            text(v + ' ft', px + 28 * sf, yy);
+        }
+
+        // ── NPSHa bar (green) ───────────────────────────────────────
+        let npshaH = map(constrain(data.NPSHa, 0, barMaxVal), 0, barMaxVal, 0, barAreaH);
+        let npshaColor = getStatusColor(data.margin);
+
+        // Bar background
+        noStroke();
+        fill(230);
+        rect(bar1X, barAreaTop, barW, barAreaH, 3 * sf, 3 * sf, 0, 0);
+
+        // Bar fill
+        fill(npshaColor.r, npshaColor.g, npshaColor.b, 180);
+        rect(bar1X, barBottom - npshaH, barW, npshaH, 3 * sf, 3 * sf, 0, 0);
+
+        // Bar outline
+        stroke(100);
+        strokeWeight(1);
+        noFill();
+        rect(bar1X, barAreaTop, barW, barAreaH, 3 * sf, 3 * sf, 0, 0);
+
+        // NPSHa value on bar
+        noStroke();
+        fill(255);
+        textAlign(CENTER, BOTTOM);
+        textSize(max(10, 12 * sf));
+        textStyle(BOLD);
+        let npshaTextY = barBottom - npshaH + 2;
+        if (npshaH < 20 * sf) {
+            fill(npshaColor.r, npshaColor.g, npshaColor.b);
+            npshaTextY = barBottom - npshaH - 4 * sf;
+        }
+        text(data.NPSHa.toFixed(1), bar1X + barW / 2, npshaTextY);
+        textStyle(NORMAL);
+
+        // NPSHa label
+        noStroke();
+        fill(50);
+        textAlign(CENTER, TOP);
+        textSize(max(9, 11 * sf));
+        textStyle(BOLD);
+        text('NPSHa', bar1X + barW / 2, barBottom + 4 * sf);
+        textStyle(NORMAL);
+        textSize(max(7, 8 * sf));
+        fill(100);
+        text('(Available)', bar1X + barW / 2, barBottom + 18 * sf);
+
+        // ── NPSHr bar (red/orange) ──────────────────────────────────
+        let npshrH = map(constrain(data.NPSHr, 0, barMaxVal), 0, barMaxVal, 0, barAreaH);
+
+        // Bar background
+        noStroke();
+        fill(230);
+        rect(bar2X, barAreaTop, barW, barAreaH, 3 * sf, 3 * sf, 0, 0);
+
+        // Bar fill
+        fill(200, 80, 60, 180);
+        rect(bar2X, barBottom - npshrH, barW, npshrH, 3 * sf, 3 * sf, 0, 0);
+
+        // Bar outline
+        stroke(100);
+        strokeWeight(1);
+        noFill();
+        rect(bar2X, barAreaTop, barW, barAreaH, 3 * sf, 3 * sf, 0, 0);
+
+        // NPSHr value on bar
+        noStroke();
+        fill(255);
+        textAlign(CENTER, BOTTOM);
+        textSize(max(10, 12 * sf));
+        textStyle(BOLD);
+        let npshrTextY = barBottom - npshrH + 2;
+        if (npshrH < 20 * sf) {
+            fill(200, 80, 60);
+            npshrTextY = barBottom - npshrH - 4 * sf;
+        }
+        text(data.NPSHr.toFixed(1), bar2X + barW / 2, npshrTextY);
+        textStyle(NORMAL);
+
+        // NPSHr label
+        noStroke();
+        fill(50);
+        textAlign(CENTER, TOP);
+        textSize(max(9, 11 * sf));
+        textStyle(BOLD);
+        text('NPSHr', bar2X + barW / 2, barBottom + 4 * sf);
+        textStyle(NORMAL);
+        textSize(max(7, 8 * sf));
+        fill(100);
+        text('(Required)', bar2X + barW / 2, barBottom + 18 * sf);
+
+        // ── Safety margin zone (yellow band on NPSHr bar) ──────────
+        // Show the 2-3 ft safety margin above NPSHr line
+        let safetyLow = data.NPSHr;
+        let safetyHigh = data.NPSHr + 3;
+        let safetyYBottom = map(constrain(safetyLow, 0, barMaxVal), 0, barMaxVal, barBottom, barAreaTop);
+        let safetyYTop = map(constrain(safetyHigh, 0, barMaxVal), 0, barMaxVal, barBottom, barAreaTop);
+
+        // Draw yellow safety zone across both bars
+        noStroke();
+        fill(255, 220, 50, 50);
+        rect(bar1X - 3 * sf, safetyYTop, bar2X + barW - bar1X + 6 * sf, safetyYBottom - safetyYTop);
+
+        // Safety margin dashed line
+        stroke(200, 160, 0);
+        strokeWeight(1.5 * sf);
+        drawingContext.setLineDash([4, 4]);
+        line(bar1X - 6 * sf, safetyYTop, bar2X + barW + 6 * sf, safetyYTop);
+        drawingContext.setLineDash([]);
+
+        // Safety margin label
+        noStroke();
+        fill(180, 140, 0);
+        textSize(max(7, 8 * sf));
+        textAlign(LEFT, CENTER);
+        text('Safety', bar2X + barW + 8 * sf, (safetyYTop + safetyYBottom) / 2 - 5 * sf);
+        text('Margin', bar2X + barW + 8 * sf, (safetyYTop + safetyYBottom) / 2 + 7 * sf);
+
+        // ── NPSH Equation section ───────────────────────────────────
+        let eqY = barBottom + 40 * sf;
+
+        noStroke();
+        fill(50);
+        textAlign(CENTER, TOP);
+        textSize(max(10, 12 * sf));
+        textStyle(BOLD);
+        text('NPSH Equation', cx, eqY);
+        textStyle(NORMAL);
+
+        eqY += 20 * sf;
+
+        // Equation with labels
+        textSize(max(9, 10 * sf));
+        fill(60);
+        textAlign(CENTER, TOP);
+        text('NPSHa = Hatm + Hstatic - Hfriction - Hvapor', cx, eqY);
+
+        eqY += 18 * sf;
+
+        // Values line
+        textSize(max(9, 10 * sf));
+        fill(0, 100, 170);
+        let eqStr = 'NPSHa = ' + Hatm.toFixed(1) + ' + ' +
+                    (data.Hstatic >= 0 ? '' : '(') + data.Hstatic.toFixed(1) + (data.Hstatic >= 0 ? '' : ')') +
+                    ' - ' + data.Hfriction.toFixed(1) +
+                    ' - ' + data.Hvapor.toFixed(1);
+        text(eqStr, cx, eqY);
+
+        eqY += 18 * sf;
+
+        // Result
+        let resultColor = getStatusColor(data.margin);
+        fill(resultColor.r, resultColor.g, resultColor.b);
+        textStyle(BOLD);
+        textSize(max(11, 13 * sf));
+        text('NPSHa = ' + data.NPSHa.toFixed(1) + ' ft', cx, eqY);
+        textStyle(NORMAL);
+
+        eqY += 22 * sf;
+
+        // Component breakdown
+        textSize(max(8, 9 * sf));
+        textAlign(LEFT, TOP);
+        let breakX = px + 14 * sf;
+        let lineH = 14 * sf;
+
+        fill(100);
+        text('Hatm   = ' + Hatm.toFixed(1) + ' ft  (atmospheric)', breakX, eqY);
+        eqY += lineH;
+
+        fill(data.Hstatic >= 0 ? color(40, 130, 60) : color(200, 60, 40));
+        text('Hstatic = ' + data.Hstatic.toFixed(1) + ' ft  (liquid level)', breakX, eqY);
+        eqY += lineH;
+
+        fill(200, 100, 40);
+        text('Hfriction = ' + data.Hfriction.toFixed(1) + ' ft  (pipe ' + data.pipeLen.toFixed(0) + 'ft, ' + data.diam.toFixed(0) + '"dia)', breakX, eqY);
+        eqY += lineH;
+
+        fill(180, 50, 50);
+        text('Hvapor = ' + data.Hvapor.toFixed(1) + ' ft  (at ' + data.temp.toFixed(0) + '\u00B0F)', breakX, eqY);
+        eqY += lineH + 4 * sf;
+
+        fill(100);
+        text('NPSHr  = ' + data.NPSHr.toFixed(1) + ' ft  (at ' + data.speed.toFixed(0) + '% speed)', breakX, eqY);
+        eqY += lineH + 2 * sf;
+
+        // ── Margin status indicator ─────────────────────────────────
+        let statusText = getStatusText(data.margin);
+        let sCol = getStatusColor(data.margin);
+
+        // Status box
+        let statusBoxW = panelW - 28 * sf;
+        let statusBoxH = 28 * sf;
+        let statusBoxX = px + 14 * sf;
+
+        fill(sCol.r, sCol.g, sCol.b, 30);
+        stroke(sCol.r, sCol.g, sCol.b);
+        strokeWeight(2 * sf);
+        rect(statusBoxX, eqY, statusBoxW, statusBoxH, 6 * sf);
+
+        noStroke();
+        fill(sCol.r, sCol.g, sCol.b);
+        textAlign(CENTER, CENTER);
+        textSize(max(11, 13 * sf));
+        textStyle(BOLD);
+        let marginStr = 'Margin: ' + data.margin.toFixed(1) + ' ft — ' + statusText;
+        text(marginStr, px + panelW / 2, eqY + statusBoxH / 2);
+        textStyle(NORMAL);
+
+        pop();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  UTILITY: ARROW
+    // ═══════════════════════════════════════════════════════════════════
+
+    function drawArrow(x1, y1, x2, y2, headSize) {
+        line(x1, y1, x2, y2);
+        let angle = atan2(y2 - y1, x2 - x1);
+        push();
+        translate(x2, y2);
+        rotate(angle);
+        noStroke();
+        triangle(0, 0, -headSize, -headSize * 0.45, -headSize, headSize * 0.45);
+        pop();
+    }
+    </script>
+</body>
+</html>

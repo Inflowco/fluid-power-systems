@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dust Collection System Layout</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+        #sketch-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+        canvas {
+            display: block;
+            flex: 1;
+            background-color: #fafafa;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 280px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .tooltip-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .tooltip-content {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div id="sketch-container"></div>
+    <div id="tooltip" class="tooltip" style="display: none;"></div>
+
+    <script>
+        let dustSystem;
+
+        function setup() {
+            const container = document.getElementById('sketch-container');
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            const canvas = createCanvas(w, h);
+            canvas.parent('sketch-container');
+            dustSystem = new DustCollectionSystem(w, h);
+        }
+
+        function draw() {
+            background(250);
+            dustSystem.update(mouseX, mouseY);
+            dustSystem.display();
+        }
+
+        function windowResized() {
+            const container = document.getElementById('sketch-container');
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            resizeCanvas(w, h);
+            dustSystem.resize(w, h);
+        }
+
+        function mousePressed() {
+            if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
+                dustSystem.handleMousePress(mouseX, mouseY);
+                return false;
+            }
+        }
+
+        class DustCollectionSystem {
+            constructor(w, h) {
+                this.width = w;
+                this.height = h;
+                this.scale = min(w, h) / 1000;
+                this.offsetX = w * 0.05;
+                this.offsetY = h * 0.15;
+
+                // Machines with hoods
+                this.machines = [
+                    { name: 'Table Saw', x: 100, y: 150, width: 80, height: 60, active: true, color: [100, 100, 100] },
+                    { name: 'Sander', x: 100, y: 280, width: 80, height: 60, active: true, color: [120, 100, 80] },
+                    { name: 'Planer', x: 100, y: 410, width: 80, height: 60, active: true, color: [100, 100, 100] },
+                    { name: 'CNC Router', x: 100, y: 540, width: 80, height: 60, active: true, color: [110, 90, 70] }
+                ];
+
+                // Ducts and components
+                this.blastGates = [
+                    { machine: 0, x: 200, y: 180, width: 20, height: 30 },
+                    { machine: 1, x: 200, y: 310, width: 20, height: 30 },
+                    { machine: 2, x: 200, y: 440, width: 20, height: 30 },
+                    { machine: 3, x: 200, y: 570, width: 20, height: 30 }
+                ];
+
+                // Cyclone
+                this.cyclone = {
+                    x: 450,
+                    y: 300,
+                    width: 100,
+                    height: 120,
+                    name: 'Cyclone Separator',
+                    function: 'Primary dust collection via centrifugal force',
+                    specs: 'Efficiency: 85-95% for particles >10 microns'
+                };
+
+                // Baghouse
+                this.baghouse = {
+                    x: 650,
+                    y: 300,
+                    width: 100,
+                    height: 120,
+                    name: 'Baghouse Filter',
+                    function: 'Fine particle collection via filter bags',
+                    specs: '8 filter bags, Efficiency: >99.9%'
+                };
+
+                // Fan
+                this.fan = {
+                    x: 850,
+                    y: 330,
+                    width: 60,
+                    height: 60,
+                    name: 'Centrifugal Fan',
+                    function: 'Creates airflow and suction throughout system',
+                    specs: 'Capacity: 3000 CFM (all branches active)'
+                };
+
+                // Stack
+                this.stack = {
+                    x: 950,
+                    y: 300,
+                    width: 40,
+                    height: 120,
+                    name: 'Exhaust Stack',
+                    function: 'Releases clean air to atmosphere',
+                    specs: 'Silencer integrated'
+                };
+
+                // Dust containers
+                this.cycloneDrum = {
+                    x: 450,
+                    y: 460,
+                    width: 60,
+                    height: 80,
+                    name: 'Cyclone Dust Drum',
+                    function: 'Collects large dust particles',
+                    specs: '40-liter capacity'
+                };
+
+                this.bagDrum = {
+                    x: 650,
+                    y: 460,
+                    width: 60,
+                    height: 80,
+                    name: 'Baghouse Dust Drum',
+                    function: 'Collects fine filtered dust',
+                    specs: '55-liter capacity'
+                };
+
+                // Particles for animation
+                this.particles = [];
+                this.particleCount = 0;
+                this.targetParticleCount = 0;
+
+                // Display metrics
+                this.metrics = {
+                    totalCFM: 0,
+                    staticPressure: 0,
+                    activeBranches: 4
+                };
+
+                this.hoveredComponent = null;
+                this.particleSpeed = 2;
+            }
+
+            handleMousePress(mx, my) {
+                // Scale mouse coordinates to system coordinates
+                const sx = (mx - this.offsetX) / this.scale;
+                const sy = (my - this.offsetY) / this.scale;
+
+                // Check if machine hood is clicked
+                for (let machine of this.machines) {
+                    const hoodX = machine.x;
+                    const hoodY = machine.y;
+                    const hoodW = machine.width;
+                    const hoodH = machine.height;
+
+                    if (sx > hoodX && sx < hoodX + hoodW && sy > hoodY && sy < hoodY + hoodH) {
+                        machine.active = !machine.active;
+                        return;
+                    }
+                }
+            }
+
+            update(mx, my) {
+                // Update target particle count based on active machines
+                this.metrics.activeBranches = this.machines.filter(m => m.active).length;
+                this.metrics.totalCFM = 750 * this.metrics.activeBranches;
+                this.metrics.staticPressure = 3.5 - (this.metrics.activeBranches * 0.4);
+
+                this.targetParticleCount = this.metrics.activeBranches * 15;
+
+                // Add new particles
+                if (this.particles.length < this.targetParticleCount) {
+                    for (let machine of this.machines) {
+                        if (machine.active && random(1) < 0.3) {
+                            this.particles.push(new DustParticle(
+                                machine.x + machine.width,
+                                machine.y + machine.height / 2
+                            ));
+                        }
+                    }
+                }
+
+                // Update particles
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    this.particles[i].update();
+                    if (this.particles[i].isDone()) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                // Check hover over components
+                const sx = (mx - this.offsetX) / this.scale;
+                const sy = (my - this.offsetY) / this.scale;
+
+                this.hoveredComponent = null;
+
+                // Check components
+                const components = [
+                    { ...this.cyclone, id: 'cyclone' },
+                    { ...this.baghouse, id: 'baghouse' },
+                    { ...this.fan, id: 'fan' },
+                    { ...this.stack, id: 'stack' },
+                    { ...this.cycloneDrum, id: 'cycloneDrum' },
+                    { ...this.bagDrum, id: 'bagDrum' }
+                ];
+
+                for (let comp of components) {
+                    if (sx > comp.x && sx < comp.x + comp.width &&
+                        sy > comp.y && sy < comp.y + comp.height) {
+                        this.hoveredComponent = comp;
+                        break;
+                    }
+                }
+
+                // Update tooltip
+                const tooltip = document.getElementById('tooltip');
+                if (this.hoveredComponent) {
+                    const sx = this.hoveredComponent.x * this.scale + this.offsetX;
+                    const sy = this.hoveredComponent.y * this.scale + this.offsetY;
+                    tooltip.style.left = (mx + 10) + 'px';
+                    tooltip.style.top = (my + 10) + 'px';
+                    tooltip.innerHTML = `
+                        <div class="tooltip-title">${this.hoveredComponent.name}</div>
+                        <div class="tooltip-content">
+                            <strong>Function:</strong> ${this.hoveredComponent.function}<br>
+                            <strong>Specs:</strong> ${this.hoveredComponent.specs}
+                        </div>
+                    `;
+                    tooltip.style.display = 'block';
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            }
+
+            display() {
+                push();
+                translate(this.offsetX, this.offsetY);
+                scale(this.scale);
+
+                // Title and labels
+                fill(40);
+                textSize(16);
+                textAlign(LEFT);
+                text('Dust Collection System Layout', 10, 30);
+
+                // Draw background sections
+                stroke(200);
+                strokeWeight(1);
+                fill(255, 250, 240);
+                rect(80, 100, 850, 500, 5);
+
+                // Draw machines with hoods
+                for (let machine of this.machines) {
+                    this.drawMachine(machine);
+                }
+
+                // Draw ducts and main trunk
+                this.drawDuctwork();
+
+                // Draw components
+                this.drawCyclone();
+                this.drawBaghouse();
+                this.drawFan();
+                this.drawStack();
+                this.drawDustDrums();
+
+                // Draw particles
+                for (let particle of this.particles) {
+                    particle.display();
+                }
+
+                // Draw airflow arrows
+                this.drawAirflowArrows();
+
+                pop();
+
+                // Draw metrics panel
+                this.drawMetricsPanel();
+            }
+
+            drawMachine(machine) {
+                // Draw machine
+                fill(machine.color[0], machine.color[1], machine.color[2]);
+                stroke(60);
+                strokeWeight(2);
+                rect(machine.x, machine.y, machine.width, machine.height, 3);
+
+                // Draw hood
+                const hoodX = machine.x + machine.width + 5;
+                const hoodY = machine.y + 5;
+                fill(150);
+                stroke(80);
+                strokeWeight(2);
+                rect(hoodX, hoodY, 35, machine.height - 10, 2);
+
+                // Active indicator
+                if (machine.active) {
+                    fill(0, 200, 0);
+                    circle(machine.x + machine.width - 8, machine.y + 8, 8);
+                } else {
+                    fill(200, 0, 0);
+                    circle(machine.x + machine.width - 8, machine.y + 8, 8);
+                }
+
+                // Machine name
+                fill(0);
+                textSize(11);
+                textAlign(CENTER);
+                text(machine.name, machine.x + machine.width / 2, machine.y - 5);
+            }
+
+            drawDuctwork() {
+                stroke(80);
+                strokeWeight(3);
+
+                // Branch ducts
+                for (let i = 0; i < this.machines.length; i++) {
+                    const machine = this.machines[i];
+                    const blastGate = this.blastGates[i];
+
+                    // Hood to blast gate
+                    line(machine.x + machine.width + 35, machine.y + machine.height / 2,
+                         blastGate.x + blastGate.width / 2, blastGate.y + blastGate.height / 2);
+
+                    // Draw blast gate
+                    fill(machine.active ? 100 : 180);
+                    rect(blastGate.x, blastGate.y, blastGate.width, blastGate.height, 2);
+
+                    // Blast gate to main trunk
+                    const trunkY = 300;
+                    line(blastGate.x + blastGate.width / 2, blastGate.y + blastGate.height / 2,
+                         250, trunkY);
+                }
+
+                // Main trunk duct (left to right)
+                line(250, 300, 450, 300);
+
+                // Cyclone inlet
+                line(450, 300, 450, 240);
+
+                // Cyclone to baghouse
+                line(500, 300, 600, 300);
+
+                // Baghouse inlet
+                line(600, 300, 600, 240);
+
+                // Baghouse to fan
+                line(700, 300, 800, 330);
+
+                // Fan to stack
+                line(910, 330, 950, 330);
+            }
+
+            drawCyclone() {
+                // Body
+                fill(200);
+                stroke(100);
+                strokeWeight(2);
+                rect(this.cyclone.x - 30, this.cyclone.y - 20, 60, 80);
+
+                // Cone
+                fill(180);
+                quad(this.cyclone.x - 25, this.cyclone.y + 60,
+                     this.cyclone.x + 25, this.cyclone.y + 60,
+                     this.cyclone.x + 15, this.cyclone.y + 120,
+                     this.cyclone.x - 15, this.cyclone.y + 120);
+
+                // Outlet
+                fill(150);
+                circle(this.cyclone.x, this.cyclone.y - 25, 8);
+
+                // Label
+                fill(0);
+                textSize(10);
+                textAlign(CENTER);
+                text('Cyclone', this.cyclone.x, this.cyclone.y + 110);
+            }
+
+            drawBaghouse() {
+                // Main body
+                fill(210);
+                stroke(100);
+                strokeWeight(2);
+                rect(this.baghouse.x - 35, this.baghouse.y - 20, 70, 100);
+
+                // Draw filter bags (simplified)
+                fill(190);
+                for (let i = 0; i < 8; i++) {
+                    const bx = this.baghouse.x - 30 + (i % 4) * 18;
+                    const by = this.baghouse.y - 15 + floor(i / 4) * 50;
+                    rect(bx, by, 15, 45, 2);
+                }
+
+                // Label
+                fill(0);
+                textSize(10);
+                textAlign(CENTER);
+                text('Baghouse', this.baghouse.x, this.baghouse.y + 110);
+            }
+
+            drawFan() {
+                // Fan housing
+                fill(180);
+                stroke(100);
+                strokeWeight(2);
+                circle(this.fan.x, this.fan.y, 40);
+
+                // Fan blades
+                fill(100);
+                triangle(this.fan.x - 15, this.fan.y - 15,
+                         this.fan.x + 15, this.fan.y,
+                         this.fan.x - 15, this.fan.y + 15);
+                triangle(this.fan.x - 5, this.fan.y - 20,
+                         this.fan.x + 20, this.fan.y,
+                         this.fan.x - 5, this.fan.y + 20);
+
+                // Label
+                fill(0);
+                textSize(10);
+                textAlign(CENTER);
+                text('Fan', this.fan.x, this.fan.y + 55);
+            }
+
+            drawStack() {
+                // Stack pipe
+                fill(200);
+                stroke(100);
+                strokeWeight(2);
+                rect(this.stack.x - 15, this.stack.y, 30, this.stack.height);
+
+                // Silencer rings
+                stroke(100);
+                strokeWeight(1);
+                for (let i = 0; i < 4; i++) {
+                    line(this.stack.x - 15, this.stack.y + i * 30,
+                         this.stack.x + 15, this.stack.y + i * 30);
+                }
+
+                // Label
+                fill(0);
+                textSize(10);
+                textAlign(CENTER);
+                text('Stack', this.stack.x, this.stack.y + this.stack.height + 15);
+            }
+
+            drawDustDrums() {
+                // Cyclone drum
+                fill(220);
+                stroke(100);
+                strokeWeight(2);
+                rect(this.cycloneDrum.x - 20, this.cycloneDrum.y, 40, this.cycloneDrum.height);
+                fill(0);
+                textSize(9);
+                textAlign(CENTER);
+                text('Cyclone', this.cycloneDrum.x, this.cycloneDrum.y + this.cycloneDrum.height + 10);
+                text('Dust', this.cycloneDrum.x, this.cycloneDrum.y + this.cycloneDrum.height + 20);
+
+                // Baghouse drum
+                fill(220);
+                stroke(100);
+                strokeWeight(2);
+                rect(this.bagDrum.x - 20, this.bagDrum.y, 40, this.bagDrum.height);
+                fill(0);
+                textSize(9);
+                textAlign(CENTER);
+                text('Filter', this.bagDrum.x, this.bagDrum.y + this.bagDrum.height + 10);
+                text('Dust', this.bagDrum.x, this.bagDrum.y + this.bagDrum.height + 20);
+            }
+
+            drawAirflowArrows() {
+                stroke(0, 100, 200);
+                strokeWeight(2);
+                fill(0, 100, 200);
+
+                // Arrow properties for p5.js
+                const arrowSize = 8;
+
+                // Arrows in main trunk
+                this.drawArrow(300, 295, 350, 295, arrowSize);
+                this.drawArrow(550, 295, 600, 295, arrowSize);
+                this.drawArrow(700, 295, 800, 320, arrowSize);
+                this.drawArrow(850, 325, 920, 325, arrowSize);
+
+                // Arrows in branches (if machines active)
+                for (let i = 0; i < this.machines.length; i++) {
+                    if (this.machines[i].active) {
+                        const machine = this.machines[i];
+                        const blastGate = this.blastGates[i];
+                        const startX = machine.x + machine.width + 35;
+                        const startY = machine.y + machine.height / 2;
+                        const endX = blastGate.x + blastGate.width / 2;
+                        const endY = blastGate.y + blastGate.height / 2;
+
+                        // Interpolate arrow along the line
+                        const midX = (startX + endX) / 2;
+                        const midY = (startY + endY) / 2;
+                        this.drawArrow(startX, startY, midX, midY, arrowSize * 0.8);
+                    }
+                }
+            }
+
+            drawArrow(x1, y1, x2, y2, size) {
+                const angle = atan2(y2 - y1, x2 - x1);
+
+                // Arrow shaft
+                line(x1, y1, x2, y2);
+
+                // Arrow head
+                push();
+                translate(x2, y2);
+                rotate(angle);
+                fill(0, 100, 200);
+                triangle(0, 0, -size, -size / 2, -size, size / 2);
+                pop();
+            }
+
+            drawMetricsPanel() {
+                const panelX = 10;
+                const panelY = 10;
+                const panelW = 300;
+                const panelH = 90;
+
+                fill(240);
+                stroke(100);
+                strokeWeight(2);
+                rect(panelX, panelY, panelW, panelH, 5);
+
+                fill(40);
+                textSize(12);
+                textAlign(LEFT);
+                textStyle(BOLD);
+                text('System Metrics', panelX + 10, panelY + 20);
+
+                textStyle(NORMAL);
+                textSize(11);
+                text(`Total CFM: ${this.metrics.totalCFM}`, panelX + 10, panelY + 40);
+                text(`Static Pressure: ${this.metrics.staticPressure.toFixed(1)} in. H2O`, panelX + 10, panelY + 55);
+                text(`Active Branches: ${this.metrics.activeBranches}/4`, panelX + 10, panelY + 70);
+            }
+
+            resize(w, h) {
+                this.width = w;
+                this.height = h;
+                this.scale = min(w, h) / 1000;
+                this.offsetX = w * 0.05;
+                this.offsetY = h * 0.15;
+            }
+        }
+
+        class DustParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = random(0.5, 2);
+                this.vy = random(-0.5, 0.5);
+                this.size = random(2, 5);
+                this.life = 255;
+                this.maxLife = 255;
+                this.targetX = 950;
+                this.targetY = 330;
+            }
+
+            update() {
+                // Move towards target with some randomness
+                const dx = this.targetX - this.x;
+                const dy = this.targetY - this.y;
+                const distance = sqrt(dx * dx + dy * dy);
+
+                if (distance > 10) {
+                    this.vx = (dx / distance) * 2 + random(-0.3, 0.3);
+                    this.vy = (dy / distance) * 2 + random(-0.3, 0.3);
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 2;
+            }
+
+            display() {
+                fill(139, 90, 43, this.life);
+                noStroke();
+                circle(this.x, this.y, this.size);
+            }
+
+            isDone() {
+                return this.life <= 0 || this.x > 1000;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vacuum Leak Detection Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.0.0/lib/p5.js"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+</head>
+<body>
+    <main></main>
+    <script>
+    // Vacuum Leak Detection MicroSim
+    // Students evacuate a vacuum system, isolate the pump, observe pressure decay,
+    // then use detection tools to find and repair leaks.
+
+    // --- Layout ---
+    let canvasWidth, canvasHeight;
+    let schematicH = 250;   // top area: system schematic
+    let gaugeH = 200;       // middle area: gauge + trend chart
+    let controlH = 100;     // bottom area: controls and tools
+    let totalH;
+    let aspectRatio = 1.6;
+
+    // --- Simulation state ---
+    let pressure = 760;          // current pressure in Torr
+    let pumpRunning = false;
+    let isolated = false;
+    let leakFound = false;
+    let leakRepaired = false;
+    let selectedTool = -1;       // 0=spray, 1=helium, 2=ultrasonic
+    let feedbackMsg = '';
+    let feedbackColor;
+    let feedbackTimer = 0;
+
+    // --- Pressure history for trend chart ---
+    let pressureHistory = [];
+    let historyMaxPoints = 360;  // 60 seconds at 6 samples/sec (every 10 frames at 60fps)
+    let historySampleCounter = 0;
+
+    // --- Leak scenarios ---
+    let scenarios = [
+        { name: 'Small Flange Leak at Receiver', leakPointIndex: 0, leakRate: 2, bestTool: 1,
+          description: 'Slow rise: ~2 Torr/min' },
+        { name: 'Valve Stem Packing Leak', leakPointIndex: 2, leakRate: 10, bestTool: 2,
+          description: 'Moderate rise: ~10 Torr/min' },
+        { name: 'Cracked Gauge Connection', leakPointIndex: 5, leakRate: 50, bestTool: 0,
+          description: 'Fast rise: ~50 Torr/min' }
+    ];
+    let currentScenario;
+
+    // --- Leak test points (6 points on the schematic) ---
+    // Positions computed in computeLayout()
+    let leakPoints = [];
+
+    // Tool definitions
+    let tools = [
+        { name: 'Spray Bottle', shortName: 'Spray', icon: 'spray' },
+        { name: 'Helium Probe', shortName: 'Helium', icon: 'helium' },
+        { name: 'Ultrasonic Detector', shortName: 'Ultrasonic', icon: 'ultrasonic' }
+    ];
+
+    // --- Button positions ---
+    let btnEvacuate, btnIsolate, btnRepair, btnNewScenario;
+
+    // --- Animation ---
+    let pumpAngle = 0;
+    let valveAnimProgress = 0; // 0=open, 1=closed
+
+    // --- Smooth gauge needle ---
+    let displayPressure = 760;
+
+    function setup() {
+        computeCanvasSize();
+        let canvas = createCanvas(canvasWidth, canvasHeight);
+        canvas.parent(document.querySelector('main'));
+        textFont('Arial');
+        newScenario();
+    }
+
+    function computeCanvasSize() {
+        let maxW = windowWidth;
+        canvasWidth = min(maxW, 900);
+        totalH = schematicH + gaugeH + controlH;
+        canvasHeight = totalH;
+    }
+
+    function windowResized() {
+        computeCanvasSize();
+        resizeCanvas(canvasWidth, canvasHeight);
+        computeLayout();
+    }
+
+    function computeLayout() {
+        // Leak point positions on the schematic
+        let sx = canvasWidth * 0.05; // schematic left margin
+        let sw = canvasWidth * 0.9;
+        let sy = 30;
+        let sh = schematicH - 40;
+
+        // Vacuum system layout:
+        // Pump on left -> isolation valve -> receiver (big tank) -> piping to right with branches
+        let pumpX = sx + sw * 0.08;
+        let pumpY = sy + sh * 0.5;
+        let valveX = sx + sw * 0.22;
+        let receiverX = sx + sw * 0.38;
+        let receiverY = sy + sh * 0.35;
+        let receiverW = sw * 0.15;
+        let receiverH = sh * 0.45;
+        let pipeRightEnd = sx + sw * 0.92;
+        let pipeY = sy + sh * 0.5;
+
+        // 6 leak points: flanges, valve stems, gauge connections
+        leakPoints = [
+            { x: receiverX + receiverW * 0.5, y: receiverY, label: 'Receiver Flange', type: 'flange' },
+            { x: receiverX + receiverW, y: pipeY, label: 'Pipe Joint A', type: 'flange' },
+            { x: valveX, y: pipeY - 15, label: 'Valve Stem', type: 'valve' },
+            { x: sx + sw * 0.60, y: pipeY, label: 'Pipe Joint B', type: 'flange' },
+            { x: sx + sw * 0.75, y: pipeY - sh * 0.22, label: 'Branch Valve', type: 'valve' },
+            { x: sx + sw * 0.85, y: pipeY - sh * 0.05, label: 'Gauge Port', type: 'gauge' }
+        ];
+
+        // Button positions
+        let btnY = schematicH + gaugeH + 10;
+        let btnW = 90;
+        let btnH = 32;
+        let btnGap = 12;
+        let totalBtnW = btnW * 4 + btnGap * 3;
+        let btnStartX = 15;
+
+        btnEvacuate  = { x: btnStartX, y: btnY, w: btnW, h: btnH };
+        btnIsolate   = { x: btnStartX + (btnW + btnGap), y: btnY, w: btnW, h: btnH };
+        btnRepair    = { x: btnStartX + (btnW + btnGap) * 2, y: btnY, w: btnW, h: btnH };
+        btnNewScenario = { x: btnStartX + (btnW + btnGap) * 3, y: btnY, w: btnW + 20, h: btnH };
+    }
+
+    function newScenario() {
+        currentScenario = scenarios[floor(random(scenarios.length))];
+        pressure = 760;
+        displayPressure = 760;
+        pumpRunning = false;
+        isolated = false;
+        leakFound = false;
+        leakRepaired = false;
+        selectedTool = -1;
+        feedbackMsg = '';
+        feedbackTimer = 0;
+        valveAnimProgress = 0;
+        pressureHistory = [];
+        historySampleCounter = 0;
+        // Fill initial history
+        for (let i = 0; i < historyMaxPoints; i++) {
+            pressureHistory.push(760);
+        }
+        computeLayout();
+    }
+
+    function draw() {
+        background(240, 242, 245);
+
+        // --- Update simulation ---
+        updateSimulation();
+
+        // --- Draw sections ---
+        drawSchematic();
+        drawGaugeAndTrend();
+        drawControls();
+        drawFeedback();
+    }
+
+    // ============================
+    // SIMULATION UPDATE
+    // ============================
+    function updateSimulation() {
+        let dt = 1 / 60; // seconds per frame at 60fps
+
+        // Pump evacuating
+        if (pumpRunning && !isolated) {
+            // Exponential decay toward ultimate vacuum (~5 Torr)
+            let ultimate = 5;
+            let pumpSpeed = 3.0; // rate constant
+            pressure = ultimate + (pressure - ultimate) * exp(-pumpSpeed * dt);
+            pumpAngle += 0.15;
+        }
+
+        // Valve animation
+        if (isolated) {
+            valveAnimProgress = lerp(valveAnimProgress, 1, 0.08);
+        } else {
+            valveAnimProgress = lerp(valveAnimProgress, 0, 0.08);
+        }
+
+        // Leak effect (only when isolated and leak not repaired)
+        if (isolated && !leakRepaired) {
+            let leakRate = currentScenario.leakRate; // Torr per minute
+            pressure += leakRate * dt / 60.0 * 60.0; // convert per-minute to per-second, times dt
+            // Actually: leakRate Torr/min = leakRate/60 Torr/sec
+            // Per frame at 60fps: leakRate/60 * (1/60)
+            pressure += leakRate / 60.0 * dt;
+        }
+
+        // Even after repair, tiny virtual leak for realism
+        if (isolated && leakRepaired) {
+            pressure += 0.002 * dt; // negligible rise
+        }
+
+        pressure = constrain(pressure, 0, 760);
+
+        // Smooth gauge needle
+        displayPressure = lerp(displayPressure, pressure, 0.1);
+
+        // Record history (sample every 10 frames = 6 samples/sec)
+        historySampleCounter++;
+        if (historySampleCounter >= 10) {
+            historySampleCounter = 0;
+            pressureHistory.push(pressure);
+            if (pressureHistory.length > historyMaxPoints) {
+                pressureHistory.shift();
+            }
+        }
+
+        // Feedback timer
+        if (feedbackTimer > 0) {
+            feedbackTimer--;
+        }
+    }
+
+    // ============================
+    // DRAW SCHEMATIC (top area)
+    // ============================
+    function drawSchematic() {
+        push();
+        // Background for schematic area
+        fill(248, 250, 252);
+        noStroke();
+        rect(0, 0, canvasWidth, schematicH);
+
+        // Border
+        stroke(200);
+        strokeWeight(1);
+        line(0, schematicH, canvasWidth, schematicH);
+
+        // Title
+        fill(40, 50, 70);
+        noStroke();
+        textSize(14);
+        textAlign(LEFT, TOP);
+        textStyle(BOLD);
+        text('Vacuum System Schematic', 15, 8);
+        textStyle(NORMAL);
+
+        let sx = canvasWidth * 0.05;
+        let sw = canvasWidth * 0.9;
+        let sy = 30;
+        let sh = schematicH - 40;
+
+        // --- Draw main pipe (horizontal backbone) ---
+        let pipeY = sy + sh * 0.5;
+        let pipeLeft = sx + sw * 0.05;
+        let pipeRight = sx + sw * 0.92;
+
+        stroke(70, 110, 170);
+        strokeWeight(6);
+        line(pipeLeft, pipeY, pipeRight, pipeY);
+
+        // --- Draw pump ---
+        let pumpX = sx + sw * 0.08;
+        let pumpY = pipeY;
+        drawPump(pumpX, pumpY);
+
+        // --- Draw isolation valve ---
+        let valveX = sx + sw * 0.22;
+        drawIsolationValve(valveX, pipeY);
+
+        // --- Draw receiver (big tank) ---
+        let receiverX = sx + sw * 0.35;
+        let receiverY = sy + sh * 0.25;
+        let receiverW = sw * 0.15;
+        let receiverH = sh * 0.55;
+        drawReceiver(receiverX, receiverY, receiverW, receiverH, pipeY);
+
+        // --- Draw branch pipe going up ---
+        let branchX = sx + sw * 0.75;
+        stroke(70, 110, 170);
+        strokeWeight(4);
+        line(branchX, pipeY, branchX, pipeY - sh * 0.3);
+
+        // --- Draw gauge at end ---
+        let gaugeX = sx + sw * 0.85;
+        drawSmallGauge(gaugeX, pipeY);
+
+        // --- Draw leak test points ---
+        for (let i = 0; i < leakPoints.length; i++) {
+            drawLeakPoint(i);
+        }
+
+        pop();
+    }
+
+    function drawPump(cx, cy) {
+        push();
+        // Pump body
+        let pw = 50;
+        let ph = 40;
+        fill(pumpRunning ? color(100, 160, 100) : color(160, 160, 170));
+        stroke(60, 70, 80);
+        strokeWeight(2);
+        rect(cx - pw / 2, cy - ph / 2, pw, ph, 6);
+
+        // Pump label
+        fill(255);
+        noStroke();
+        textSize(9);
+        textAlign(CENTER, CENTER);
+        text('PUMP', cx, cy - 6);
+
+        // Rotating indicator
+        if (pumpRunning) {
+            stroke(50, 120, 50);
+            strokeWeight(2);
+            noFill();
+            let r = 8;
+            push();
+            translate(cx, cy + 8);
+            rotate(pumpAngle);
+            line(-r, 0, r, 0);
+            line(0, -r, 0, r);
+            pop();
+        } else {
+            fill(120);
+            noStroke();
+            textSize(8);
+            text('OFF', cx, cy + 8);
+        }
+        pop();
+    }
+
+    function drawIsolationValve(cx, cy) {
+        push();
+        // Valve body (bowtie shape)
+        let vs = 14;
+        stroke(80, 80, 90);
+        strokeWeight(2);
+
+        // Interpolate color: open=green, closed=red
+        let r = lerp(80, 200, valveAnimProgress);
+        let g = lerp(160, 60, valveAnimProgress);
+        let b = lerp(80, 60, valveAnimProgress);
+        fill(r, g, b);
+
+        // Draw bowtie
+        beginShape();
+        vertex(cx - vs, cy - vs);
+        vertex(cx + vs, cy);
+        vertex(cx - vs, cy + vs);
+        endShape(CLOSE);
+        beginShape();
+        vertex(cx + vs, cy - vs);
+        vertex(cx - vs, cy);
+        vertex(cx + vs, cy + vs);
+        endShape(CLOSE);
+
+        // Stem
+        stroke(100);
+        strokeWeight(3);
+        line(cx, cy - vs, cx, cy - vs - 12);
+
+        // Handle rotation based on valve state
+        push();
+        translate(cx, cy - vs - 12);
+        rotate(lerp(0, HALF_PI, valveAnimProgress));
+        stroke(80);
+        strokeWeight(3);
+        line(-10, 0, 10, 0);
+        pop();
+
+        // Label
+        fill(50);
+        noStroke();
+        textSize(8);
+        textAlign(CENTER, TOP);
+        text(isolated ? 'CLOSED' : 'OPEN', cx, cy + vs + 4);
+        pop();
+    }
+
+    function drawReceiver(rx, ry, rw, rh, pipeY) {
+        push();
+        // Tank body
+        fill(200, 210, 220);
+        stroke(70, 80, 100);
+        strokeWeight(2);
+        rect(rx, ry, rw, rh, 10);
+
+        // Internal shading
+        noStroke();
+        fill(180, 195, 210, 80);
+        rect(rx + 4, ry + 4, rw - 8, rh - 8, 8);
+
+        // Pressure indication inside tank
+        let fillLevel = map(constrain(pressure, 0, 760), 760, 0, 0, 1);
+        // "Vacuum" means less air inside - show as emptiness
+        fill(120, 160, 210, 40 + fillLevel * 80);
+        noStroke();
+        let fillH = rh * (1 - fillLevel) * 0.8;
+        rect(rx + 6, ry + rh - 6 - fillH, rw - 12, fillH, 4);
+
+        // Label
+        fill(50, 60, 80);
+        noStroke();
+        textSize(10);
+        textAlign(CENTER, CENTER);
+        text('Receiver', rx + rw / 2, ry + rh / 2 - 8);
+        textSize(9);
+        text(nf(displayPressure, 1, 0) + ' Torr', rx + rw / 2, ry + rh / 2 + 8);
+        pop();
+    }
+
+    function drawSmallGauge(cx, cy) {
+        push();
+        // Small gauge circle on pipe
+        fill(230, 230, 235);
+        stroke(80);
+        strokeWeight(1.5);
+        ellipse(cx, cy - 18, 24, 24);
+
+        // Needle
+        let angle = map(constrain(displayPressure, 0, 760), 0, 760, -PI * 0.75, PI * 0.75);
+        stroke(200, 50, 50);
+        strokeWeight(1.5);
+        push();
+        translate(cx, cy - 18);
+        rotate(angle - HALF_PI);
+        line(0, 0, 0, -9);
+        pop();
+
+        // Label
+        fill(50);
+        noStroke();
+        textSize(7);
+        textAlign(CENTER, TOP);
+        text('Gauge', cx, cy - 4);
+        pop();
+    }
+
+    function drawLeakPoint(index) {
+        let lp = leakPoints[index];
+        let isLeak = (index === currentScenario.leakPointIndex);
+        let r = 12;
+
+        push();
+        // Outer ring - clickable indicator
+        if (leakFound && isLeak) {
+            // Leak found: green glow pulsing
+            let pulse = sin(frameCount * 0.1) * 30 + 220;
+            fill(0, pulse, 0, 60);
+            noStroke();
+            ellipse(lp.x, lp.y, r * 3, r * 3);
+            fill(50, 200, 50);
+            stroke(30, 150, 30);
+            strokeWeight(2);
+            ellipse(lp.x, lp.y, r * 2, r * 2);
+        } else {
+            // Normal: clickable circle
+            let hovering = dist(mouseX, mouseY, lp.x, lp.y) < r * 1.5;
+            if (hovering && selectedTool >= 0) {
+                fill(255, 220, 100, 150);
+                stroke(200, 160, 0);
+                strokeWeight(2);
+            } else {
+                fill(255, 255, 255, 120);
+                stroke(100, 120, 150);
+                strokeWeight(1.5);
+            }
+            ellipse(lp.x, lp.y, r * 2, r * 2);
+
+            // Inner dot
+            fill(180, 60, 60, 100);
+            noStroke();
+            ellipse(lp.x, lp.y, 6, 6);
+        }
+
+        // Label
+        fill(40, 50, 70);
+        noStroke();
+        textSize(8);
+        textAlign(CENTER, TOP);
+        text(lp.label, lp.x, lp.y + r + 4);
+
+        // Point number
+        fill(255);
+        noStroke();
+        textSize(8);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        text(index + 1, lp.x, lp.y);
+        textStyle(NORMAL);
+        pop();
+    }
+
+    // ============================
+    // DRAW GAUGE AND TREND (middle area)
+    // ============================
+    function drawGaugeAndTrend() {
+        push();
+        let yOff = schematicH;
+
+        // Background
+        fill(255);
+        noStroke();
+        rect(0, yOff, canvasWidth, gaugeH);
+        stroke(200);
+        strokeWeight(1);
+        line(0, yOff + gaugeH, canvasWidth, yOff + gaugeH);
+
+        // --- Analog gauge (left side) ---
+        let gaugeCX = canvasWidth * 0.18;
+        let gaugeCY = yOff + gaugeH * 0.55;
+        let gaugeR = min(canvasWidth * 0.13, gaugeH * 0.40);
+        drawAnalogGauge(gaugeCX, gaugeCY, gaugeR);
+
+        // --- Digital readout ---
+        fill(30, 40, 60);
+        noStroke();
+        textSize(13);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text(nf(displayPressure, 1, 1) + ' Torr', gaugeCX, gaugeCY + gaugeR + 8);
+        textStyle(NORMAL);
+
+        // --- Trend chart (right side) ---
+        let chartLeft = canvasWidth * 0.36;
+        let chartRight = canvasWidth - 15;
+        let chartTop = yOff + 12;
+        let chartBottom = yOff + gaugeH - 18;
+        drawTrendChart(chartLeft, chartTop, chartRight - chartLeft, chartBottom - chartTop);
+
+        // --- Leak rate indicator ---
+        fill(60, 70, 90);
+        noStroke();
+        textSize(10);
+        textAlign(LEFT, TOP);
+        let leakRateText = 'Leak Rate: ';
+        if (!isolated) {
+            leakRateText += '--';
+        } else if (leakRepaired) {
+            leakRateText += '~0 Torr/min';
+        } else {
+            leakRateText += nf(currentScenario.leakRate, 1, 0) + ' Torr/min';
+        }
+        text(leakRateText, 15, yOff + 8);
+
+        // Status
+        let statusText = 'Status: ';
+        if (leakRepaired) {
+            statusText += 'Leak Repaired - System Holding';
+            fill(40, 140, 40);
+        } else if (leakFound) {
+            statusText += 'Leak Located! Click Repair.';
+            fill(200, 140, 0);
+        } else if (isolated) {
+            statusText += 'Pump Isolated - Observe Pressure Rise';
+            fill(180, 80, 30);
+        } else if (pumpRunning) {
+            statusText += 'Evacuating...';
+            fill(60, 100, 180);
+        } else {
+            statusText += 'Ready - Click Evacuate to begin';
+            fill(100);
+        }
+        textSize(10);
+        textAlign(LEFT, TOP);
+        text(statusText, 15, yOff + 22);
+
+        pop();
+    }
+
+    function drawAnalogGauge(cx, cy, r) {
+        push();
+        // Gauge face
+        fill(245, 245, 248);
+        stroke(80, 90, 110);
+        strokeWeight(2);
+        ellipse(cx, cy, r * 2, r * 2);
+
+        // Inner ring
+        noFill();
+        stroke(180);
+        strokeWeight(1);
+        ellipse(cx, cy, r * 1.8, r * 1.8);
+
+        // Scale markings
+        let startAngle = PI * 0.75;
+        let endAngle = PI * 2.25;
+        let numMajor = 8;
+        for (let i = 0; i <= numMajor; i++) {
+            let angle = lerp(startAngle, endAngle, i / numMajor);
+            let val = lerp(0, 760, i / numMajor);
+            let innerR = r * 0.72;
+            let outerR = r * 0.88;
+
+            // Tick marks
+            stroke(60);
+            strokeWeight(i % 2 === 0 ? 2 : 1);
+            line(cx + cos(angle) * innerR, cy + sin(angle) * innerR,
+                 cx + cos(angle) * outerR, cy + sin(angle) * outerR);
+
+            // Labels for major ticks
+            if (i % 2 === 0) {
+                fill(50, 55, 70);
+                noStroke();
+                textSize(max(7, r * 0.18));
+                textAlign(CENTER, CENTER);
+                let labelR = r * 0.58;
+                text(nf(val, 1, 0), cx + cos(angle) * labelR, cy + sin(angle) * labelR);
+            }
+        }
+
+        // Minor ticks
+        let numMinor = 40;
+        for (let i = 0; i <= numMinor; i++) {
+            let angle = lerp(startAngle, endAngle, i / numMinor);
+            let innerR = r * 0.82;
+            let outerR = r * 0.88;
+            stroke(140);
+            strokeWeight(0.5);
+            line(cx + cos(angle) * innerR, cy + sin(angle) * innerR,
+                 cx + cos(angle) * outerR, cy + sin(angle) * outerR);
+        }
+
+        // Needle
+        let needleAngle = map(constrain(displayPressure, 0, 760), 0, 760, startAngle, endAngle);
+        stroke(200, 40, 40);
+        strokeWeight(2);
+        let needleLen = r * 0.75;
+        line(cx, cy, cx + cos(needleAngle) * needleLen, cy + sin(needleAngle) * needleLen);
+
+        // Center hub
+        fill(80, 80, 100);
+        noStroke();
+        ellipse(cx, cy, 8, 8);
+
+        // Label
+        fill(50);
+        noStroke();
+        textSize(max(7, r * 0.16));
+        textAlign(CENTER, CENTER);
+        text('Torr', cx, cy + r * 0.3);
+        pop();
+    }
+
+    function drawTrendChart(x, y, w, h) {
+        push();
+
+        // Chart background
+        fill(252, 253, 255);
+        stroke(180);
+        strokeWeight(1);
+        rect(x, y, w, h, 3);
+
+        // Grid lines and Y-axis labels
+        let yValues = [0, 100, 200, 400, 760];
+        fill(130);
+        noStroke();
+        textSize(8);
+        textAlign(RIGHT, CENTER);
+        for (let val of yValues) {
+            let yy = map(val, 0, 760, y + h - 5, y + 5);
+            text(val, x - 4, yy);
+            stroke(230);
+            strokeWeight(0.5);
+            line(x + 1, yy, x + w - 1, yy);
+            noStroke();
+        }
+
+        // Chart title
+        fill(50, 60, 80);
+        textSize(10);
+        textAlign(CENTER, TOP);
+        textStyle(BOLD);
+        text('Pressure vs Time (60s window)', x + w / 2, y - 13);
+        textStyle(NORMAL);
+
+        // X-axis label
+        fill(100);
+        textSize(8);
+        textAlign(CENTER, TOP);
+        text('Time (seconds ago)', x + w / 2, y + h + 2);
+
+        // X-axis ticks
+        textAlign(CENTER, TOP);
+        for (let s = 0; s <= 60; s += 15) {
+            let xx = map(s, 60, 0, x + 2, x + w - 2);
+            text(s, xx, y + h + 2);
+            stroke(220);
+            strokeWeight(0.5);
+            line(xx, y + 1, xx, y + h - 1);
+            noStroke();
+        }
+
+        // Plot pressure history
+        noFill();
+        stroke(40, 100, 200);
+        strokeWeight(2);
+        beginShape();
+        for (let i = 0; i < pressureHistory.length; i++) {
+            let px = map(i, 0, historyMaxPoints - 1, x + 2, x + w - 2);
+            let py = map(pressureHistory[i], 0, 760, y + h - 5, y + 5);
+            vertex(px, py);
+        }
+        endShape();
+
+        // Fill under the curve
+        fill(40, 100, 200, 25);
+        noStroke();
+        beginShape();
+        vertex(x + 2, y + h - 5);
+        for (let i = 0; i < pressureHistory.length; i++) {
+            let px = map(i, 0, historyMaxPoints - 1, x + 2, x + w - 2);
+            let py = map(pressureHistory[i], 0, 760, y + h - 5, y + 5);
+            vertex(px, py);
+        }
+        let lastX = map(pressureHistory.length - 1, 0, historyMaxPoints - 1, x + 2, x + w - 2);
+        vertex(lastX, y + h - 5);
+        endShape(CLOSE);
+
+        pop();
+    }
+
+    // ============================
+    // DRAW CONTROLS (bottom area)
+    // ============================
+    function drawControls() {
+        push();
+        let yOff = schematicH + gaugeH;
+
+        // Background
+        fill(235, 237, 242);
+        noStroke();
+        rect(0, yOff, canvasWidth, controlH);
+
+        // Border
+        stroke(200);
+        strokeWeight(1);
+        line(0, yOff, canvasWidth, yOff);
+
+        // --- Action buttons ---
+        drawButton(btnEvacuate, 'Evacuate', pumpRunning && !isolated, color(50, 120, 190), !pumpRunning && !isolated && !leakRepaired);
+        drawButton(btnIsolate, 'Isolate', isolated, color(190, 120, 50), pumpRunning && !isolated);
+        drawButton(btnRepair, 'Repair', leakRepaired, color(50, 160, 80), leakFound && !leakRepaired);
+        drawButton(btnNewScenario, 'New Scenario', false, color(120, 80, 160), true);
+
+        // --- Tool selector ---
+        let toolStartX = canvasWidth * 0.52;
+        let toolY = yOff + 8;
+        let toolSize = 36;
+        let toolGap = 10;
+
+        fill(50, 60, 80);
+        noStroke();
+        textSize(10);
+        textAlign(LEFT, TOP);
+        textStyle(BOLD);
+        text('Detection Tools:', toolStartX, toolY);
+        textStyle(NORMAL);
+
+        for (let i = 0; i < tools.length; i++) {
+            let tx = toolStartX + i * (toolSize + toolGap + 30);
+            let ty = toolY + 18;
+            drawToolIcon(tx, ty, toolSize, i);
+        }
+
+        // Scenario info
+        fill(80, 80, 100);
+        noStroke();
+        textSize(9);
+        textAlign(LEFT, BOTTOM);
+        text('Scenario: ' + (leakRepaired || leakFound ? currentScenario.name : '???'), 15, yOff + controlH - 6);
+
+        pop();
+    }
+
+    function drawButton(btn, label, active, col, enabled) {
+        push();
+        if (enabled) {
+            if (active) {
+                fill(red(col), green(col), blue(col));
+            } else {
+                fill(red(col) * 0.7 + 70, green(col) * 0.7 + 70, blue(col) * 0.7 + 70);
+            }
+            stroke(red(col) * 0.6, green(col) * 0.6, blue(col) * 0.6);
+        } else {
+            fill(200, 200, 205);
+            stroke(170, 170, 175);
+        }
+        strokeWeight(1.5);
+        rect(btn.x, btn.y, btn.w, btn.h, 5);
+
+        // Label
+        fill(enabled ? 255 : 150);
+        noStroke();
+        textSize(11);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        text(label, btn.x + btn.w / 2, btn.y + btn.h / 2);
+        textStyle(NORMAL);
+        pop();
+    }
+
+    function drawToolIcon(x, y, size, toolIndex) {
+        push();
+        let isSelected = (selectedTool === toolIndex);
+        let hovering = mouseX > x && mouseX < x + size && mouseY > y && mouseY < y + size;
+
+        // Background
+        if (isSelected) {
+            fill(60, 130, 200);
+            stroke(40, 90, 160);
+            strokeWeight(2);
+        } else if (hovering) {
+            fill(220, 230, 245);
+            stroke(100, 130, 180);
+            strokeWeight(1.5);
+        } else {
+            fill(250);
+            stroke(160, 170, 180);
+            strokeWeight(1);
+        }
+        rect(x, y, size, size, 4);
+
+        // Icon drawing
+        let cx = x + size / 2;
+        let cy = y + size / 2;
+        fill(isSelected ? 255 : 70);
+        noStroke();
+
+        if (toolIndex === 0) {
+            // Spray bottle icon
+            stroke(isSelected ? 255 : 80);
+            strokeWeight(1.5);
+            noFill();
+            // Bottle body
+            rect(cx - 5, cy - 2, 10, 14, 2);
+            // Nozzle
+            line(cx, cy - 2, cx, cy - 8);
+            line(cx, cy - 8, cx + 6, cy - 8);
+            // Spray lines
+            strokeWeight(0.8);
+            line(cx + 7, cy - 10, cx + 11, cy - 13);
+            line(cx + 7, cy - 8, cx + 12, cy - 8);
+            line(cx + 7, cy - 6, cx + 11, cy - 3);
+        } else if (toolIndex === 1) {
+            // Helium probe icon
+            stroke(isSelected ? 255 : 80);
+            strokeWeight(1.5);
+            noFill();
+            // Probe wand
+            line(cx - 8, cy + 8, cx + 4, cy - 4);
+            // Probe tip
+            fill(isSelected ? 255 : 80);
+            ellipse(cx + 5, cy - 5, 6, 6);
+            // "He" label
+            noStroke();
+            textSize(7);
+            textAlign(CENTER, CENTER);
+            text('He', cx - 4, cy - 8);
+        } else if (toolIndex === 2) {
+            // Ultrasonic detector icon
+            stroke(isSelected ? 255 : 80);
+            strokeWeight(1.5);
+            noFill();
+            // Device body
+            rect(cx - 6, cy - 4, 12, 16, 2);
+            // Display
+            fill(isSelected ? color(200, 255, 200) : color(180, 220, 180));
+            noStroke();
+            rect(cx - 4, cy - 2, 8, 6, 1);
+            // Sound waves
+            stroke(isSelected ? 255 : 80);
+            strokeWeight(1);
+            noFill();
+            arc(cx, cy - 10, 10, 8, PI, TWO_PI);
+            arc(cx, cy - 10, 16, 12, PI, TWO_PI);
+        }
+
+        // Tool name below
+        fill(isSelected ? color(40, 100, 180) : color(80, 90, 100));
+        noStroke();
+        textSize(7);
+        textAlign(CENTER, TOP);
+        text(tools[toolIndex].shortName, cx, y + size + 2);
+
+        pop();
+    }
+
+    // ============================
+    // DRAW FEEDBACK
+    // ============================
+    function drawFeedback() {
+        if (feedbackTimer <= 0 || !feedbackMsg) return;
+
+        push();
+        let alpha = map(feedbackTimer, 0, 120, 0, 255);
+        let bgAlpha = map(feedbackTimer, 0, 120, 0, 200);
+
+        // Feedback box centered on schematic
+        let fbW = min(320, canvasWidth * 0.5);
+        let fbH = 40;
+        let fbX = canvasWidth / 2 - fbW / 2;
+        let fbY = schematicH / 2 - fbH / 2;
+
+        fill(red(feedbackColor), green(feedbackColor), blue(feedbackColor), bgAlpha * 0.3);
+        stroke(red(feedbackColor), green(feedbackColor), blue(feedbackColor), alpha);
+        strokeWeight(2);
+        rect(fbX, fbY, fbW, fbH, 8);
+
+        fill(red(feedbackColor), green(feedbackColor), blue(feedbackColor), alpha);
+        noStroke();
+        textSize(14);
+        textAlign(CENTER, CENTER);
+        textStyle(BOLD);
+        text(feedbackMsg, canvasWidth / 2, schematicH / 2);
+        textStyle(NORMAL);
+        pop();
+    }
+
+    // ============================
+    // INTERACTION
+    // ============================
+    function mousePressed() {
+        // --- Check action buttons ---
+        if (isInside(mouseX, mouseY, btnEvacuate) && !pumpRunning && !isolated && !leakRepaired) {
+            pumpRunning = true;
+            return;
+        }
+
+        if (isInside(mouseX, mouseY, btnIsolate) && pumpRunning && !isolated) {
+            isolated = true;
+            pumpRunning = false; // pump still on but isolated
+            return;
+        }
+
+        if (isInside(mouseX, mouseY, btnRepair) && leakFound && !leakRepaired) {
+            leakRepaired = true;
+            feedbackMsg = 'Leak Repaired! Pressure hold improved.';
+            feedbackColor = color(40, 160, 40);
+            feedbackTimer = 180;
+            return;
+        }
+
+        if (isInside(mouseX, mouseY, btnNewScenario)) {
+            newScenario();
+            return;
+        }
+
+        // --- Check tool selection ---
+        let toolStartX = canvasWidth * 0.52;
+        let toolY = schematicH + gaugeH + 8 + 18;
+        let toolSize = 36;
+        let toolGap = 10;
+
+        for (let i = 0; i < tools.length; i++) {
+            let tx = toolStartX + i * (toolSize + toolGap + 30);
+            if (mouseX >= tx && mouseX <= tx + toolSize && mouseY >= toolY && mouseY <= toolY + toolSize) {
+                selectedTool = i;
+                return;
+            }
+        }
+
+        // --- Check leak point clicks ---
+        if (selectedTool >= 0 && isolated && !leakFound) {
+            for (let i = 0; i < leakPoints.length; i++) {
+                let lp = leakPoints[i];
+                if (dist(mouseX, mouseY, lp.x, lp.y) < 18) {
+                    testLeakPoint(i);
+                    return;
+                }
+            }
+        }
+    }
+
+    function testLeakPoint(index) {
+        let isCorrectLocation = (index === currentScenario.leakPointIndex);
+        let isCorrectTool = (selectedTool === currentScenario.bestTool);
+
+        if (isCorrectLocation && isCorrectTool) {
+            // Correct tool at correct location
+            leakFound = true;
+            feedbackMsg = 'Leak Found! ' + currentScenario.name;
+            feedbackColor = color(40, 180, 40);
+            feedbackTimer = 240;
+        } else if (isCorrectLocation && !isCorrectTool) {
+            // Right location, wrong tool - give a hint
+            feedbackMsg = 'Faint signal... try a different tool here';
+            feedbackColor = color(200, 160, 40);
+            feedbackTimer = 120;
+        } else {
+            // Wrong location
+            feedbackMsg = 'No leak detected here';
+            feedbackColor = color(200, 60, 60);
+            feedbackTimer = 90;
+        }
+    }
+
+    function isInside(mx, my, btn) {
+        return mx >= btn.x && mx <= btn.x + btn.w && my >= btn.y && my <= btn.y + btn.h;
+    }
+    </script>
+</body>
+</html>
