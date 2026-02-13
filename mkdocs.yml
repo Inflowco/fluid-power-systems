@@ -111,6 +111,15 @@ nav:
     - Compliance Standards Navigator: sims/compliance-standards-navigator/index.md
     - Sustainability Metrics Calculator: sims/sustainability-metrics-calculator/index.md
     - Architecture Overview: sims/arch-overview/index.md
+    - CMMS Workflow: sims/cmms-workflow/index.md
+    - Lifecycle Cost Calculator: sims/lifecycle-cost-calculator/index.md
+    - SCADA Architecture: sims/scada-architecture/index.md
+    - MicroSim Template: sims/templates/index.md
+
+  - Learning Graph:
+    - Architecture Overview: learning-graph/arch-overview.md
+    - FAQ Quality Report: learning-graph/faq-quality-report.md
+
   - FAQ: faq.md
   - Glossary: glossary.md
   - How We Built This Site: how-we-built-this-site.md
