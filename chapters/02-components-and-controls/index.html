@@ -347,6 +347,8 @@
       
         
       
+        
+      
     
     
     
@@ -1126,9 +1128,32 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../05-blowers/" class="md-nav__link">
+    
+    
+      
         
+          
+        
+      
+        
+      
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../05-blowers/" class="md-nav__link">
+      
   
   
   <span class="md-ellipsis">
@@ -1142,7 +1167,13 @@
   
   
 
-      </a>
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
     </li>
   
 
@@ -1379,14 +1410,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../14-safety/" class="md-nav__link">
+      <a href="../14-ai-smart-monitoring/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    14. Safety
+    14. AI and Smart Monitoring
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15-safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15. Safety
   
 
     
@@ -2667,44 +2726,34 @@
 <h4 id="diagram-pump-types-comparison">Diagram: Pump Types Comparison</h4>
 <iframe src="../../sims/pump-types-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
 
-<details markdown="1">
+<details>
 <summary>Pump Types Comparison</summary>
-Type: diagram
-
-Bloom Taxonomy: Understand (L2)
+<p>Type: diagram</p>
+<p>Bloom Taxonomy: Understand (L2)
 Bloom Verb: compare, classify
-Learning Objective: Students will be able to compare positive displacement and centrifugal pump operating principles and classify common pump types into the correct category.
-
-Purpose: Show a side-by-side visual comparison of positive displacement vs. centrifugal pump operation
-
-Layout: Split-screen with two animated pump cross-sections
-
-Left side — Positive Displacement Pump (Gear Pump):
+Learning Objective: Students will be able to compare positive displacement and centrifugal pump operating principles and classify common pump types into the correct category.</p>
+<p>Purpose: Show a side-by-side visual comparison of positive displacement vs. centrifugal pump operation</p>
+<p>Layout: Split-screen with two animated pump cross-sections</p>
+<p>Left side — Positive Displacement Pump (Gear Pump):
 - Two interlocking gears rotating inside a housing
 - Fluid trapped between gear teeth and housing wall
 - Arrows showing fluid path from suction to discharge
-- Labels: "Suction Port," "Discharge Port," "Gears," "Housing"
-
-Right side — Centrifugal Pump:
+- Labels: "Suction Port," "Discharge Port," "Gears," "Housing"</p>
+<p>Right side — Centrifugal Pump:
 - Spinning impeller inside a volute casing
 - Fluid enters at center (eye) and exits at outer edge
 - Arrows showing radial flow pattern
-- Labels: "Suction Eye," "Impeller," "Volute Casing," "Discharge"
-
-Below each pump diagram — Classification tree:
+- Labels: "Suction Eye," "Impeller," "Volute Casing," "Discharge"</p>
+<p>Below each pump diagram — Classification tree:
 - Positive displacement branch: Gear, Piston, Diaphragm, Vane
-- Centrifugal branch: End-suction, Split-case, Vertical turbine, Submersible
-
-Interactive elements:
+- Centrifugal branch: End-suction, Split-case, Vertical turbine, Submersible</p>
+<p>Interactive elements:
 - Hover over each pump type name to see a brief description and typical application
-- Click on either pump diagram to see a slow-motion animation of fluid flow
-
-Color scheme: Blue for fluid, gray for metal components, green arrows for flow direction
-Responsive design: Must respond to window resize events
-
-Implementation: p5.js with interactive hover tooltips
+- Click on either pump diagram to see a slow-motion animation of fluid flow</p>
+<p>Color scheme: Blue for fluid, gray for metal components, green arrows for flow direction
+Responsive design: Must respond to window resize events</p>
+<p>Implementation: p5.js with interactive hover tooltips</p>
 </details>
-
 <h3 id="222-common-pump-types-in-fluid-power">2.2.2 Common Pump Types in Fluid Power</h3>
 <table>
 <thead>
@@ -2919,43 +2968,34 @@ Implementation: p5.js with interactive hover tooltips
 <h4 id="diagram-valve-types-interactive-guide">Diagram: Valve Types Interactive Guide</h4>
 <iframe src="../../sims/valve-types-guide/main.html" width="100%" height="500px" scrolling="no"></iframe>
 
-<details markdown="1">
+<details>
 <summary>Valve Types Interactive Guide</summary>
-Type: infographic
-
-Bloom Taxonomy: Remember (L1)
+<p>Type: infographic</p>
+<p>Bloom Taxonomy: Remember (L1)
 Bloom Verb: identify, recognize
-Learning Objective: Students will be able to identify common valve types by appearance and recognize their function in a fluid power system.
-
-Purpose: Interactive visual guide showing cross-sections of the seven common valve types with hover-triggered descriptions
-
-Layout: Grid of seven valve cross-section illustrations, 3 columns by 3 rows (last row centered), each showing the valve in both open and closed positions
-
-Valve illustrations (each showing internal cross-section):
+Learning Objective: Students will be able to identify common valve types by appearance and recognize their function in a fluid power system.</p>
+<p>Purpose: Interactive visual guide showing cross-sections of the seven common valve types with hover-triggered descriptions</p>
+<p>Layout: Grid of seven valve cross-section illustrations, 3 columns by 3 rows (last row centered), each showing the valve in both open and closed positions</p>
+<p>Valve illustrations (each showing internal cross-section):
 1. Gate Valve — wedge-shaped gate, handwheel, body
 2. Ball Valve — sphere with bore, quarter-turn handle
 3. Globe Valve — plug and seat, handwheel, S-shaped flow path
 4. Butterfly Valve — disc on shaft, lever/gear operator
 5. Check Valve — hinged flap or spring-loaded ball
 6. Solenoid Valve — electromagnetic coil, plunger, ports
-7. Pressure Relief Valve — spring, poppet, adjustment screw
-
-Interactive elements:
+7. Pressure Relief Valve — spring, poppet, adjustment screw</p>
+<p>Interactive elements:
 - Hover over any valve: tooltip appears with name, function, and one typical application
 - Click any valve: cross-section animates between open and closed positions
-- Color-coded border indicates function category (blue = on/off, green = throttling, orange = safety, purple = directional)
-
-Color scheme:
+- Color-coded border indicates function category (blue = on/off, green = throttling, orange = safety, purple = directional)</p>
+<p>Color scheme:
 - Valve body: medium gray
 - Fluid flow path: blue arrows when open
 - Blocked flow: red X when closed
-- Moving parts: highlighted in steel/silver
-
-Responsive design: Grid adjusts from 3 columns to 2 columns to 1 column on smaller screens. Must respond to window resize events.
-
-Implementation: HTML/CSS/JavaScript with SVG valve illustrations and CSS animations
+- Moving parts: highlighted in steel/silver</p>
+<p>Responsive design: Grid adjusts from 3 columns to 2 columns to 1 column on smaller screens. Must respond to window resize events.</p>
+<p>Implementation: HTML/CSS/JavaScript with SVG valve illustrations and CSS animations</p>
 </details>
-
 <h3 id="253-valve-maintenance">2.5.3 Valve Maintenance</h3>
 <p>Valves generally require less frequent maintenance than rotating equipment, but neglecting them can lead to leaks, stuck valves, and system failures:</p>
 <ul>
@@ -2981,57 +3021,46 @@ Implementation: HTML/CSS/JavaScript with SVG valve illustrations and CSS animati
 <h4 id="diagram-filter-differential-pressure-monitor">Diagram: Filter Differential Pressure Monitor</h4>
 <iframe src="../../sims/filter-pressure-monitor/main.html" width="100%" height="500px" scrolling="no"></iframe>
 
-<details markdown="1">
+<details>
 <summary>Filter Differential Pressure Monitor</summary>
-Type: microsim
-
-Bloom Taxonomy: Apply (L3)
+<p>Type: microsim</p>
+<p>Bloom Taxonomy: Apply (L3)
 Bloom Verb: demonstrate, calculate
-Learning Objective: Students will be able to demonstrate how differential pressure changes as a filter loads with contaminants and calculate when a filter needs replacement based on pressure readings.
-
-Purpose: Interactive simulation showing how filter differential pressure increases over time as contaminants accumulate, and when maintenance is triggered
-
-Canvas layout:
+Learning Objective: Students will be able to demonstrate how differential pressure changes as a filter loads with contaminants and calculate when a filter needs replacement based on pressure readings.</p>
+<p>Purpose: Interactive simulation showing how filter differential pressure increases over time as contaminants accumulate, and when maintenance is triggered</p>
+<p>Canvas layout:
 - Top area: Animated cross-section of a filter element showing particle accumulation
 - Middle area: Real-time differential pressure gauge (0–10 inches of water column)
-- Bottom area: Controls and data display
-
-Visual elements:
+- Bottom area: Controls and data display</p>
+<p>Visual elements:
 - Filter cross-section showing clean media on left, with particles gradually filling from the upstream side
 - Differential pressure gauge with green (0–3 inWC), yellow (3–6 inWC), and red (6+ inWC) zones
 - Trend chart showing pressure over simulated time (days)
 - Alert indicator that flashes when pressure exceeds threshold
-- Particle count display showing approximate contamination level
-
-Interactive controls:
+- Particle count display showing approximate contamination level</p>
+<p>Interactive controls:
 - Slider: "Contamination Rate" (Low / Medium / High) — controls how fast particles accumulate
 - Slider: "Filter MERV Rating" (8 / 10 / 12 / 14) — affects how many particles are captured vs. pass through
 - Button: "Replace Filter" — resets the simulation to a clean filter state
 - Button: "Start / Pause" — controls the simulation
-- Number input: "Alert Threshold" (default 5 inWC) — sets when the maintenance alert triggers
-
-Default parameters:
+- Number input: "Alert Threshold" (default 5 inWC) — sets when the maintenance alert triggers</p>
+<p>Default parameters:
 - Contamination rate: Medium
 - Filter MERV rating: 10
 - Alert threshold: 5 inWC
-- Simulation speed: 1 simulated day per second
-
-Behavior:
+- Simulation speed: 1 simulated day per second</p>
+<p>Behavior:
 - As simulation runs, particles accumulate on the filter cross-section
 - Differential pressure rises on the gauge and trend chart
 - When pressure reaches the alert threshold, a maintenance alert flashes
 - If filter is not replaced, pressure continues to rise (filter bypass may occur above 8 inWC)
 - Replacing the filter resets the visual and pressure to baseline
 - Higher contamination rates cause faster pressure rise
-- Higher MERV ratings capture more particles (filter loads faster but air is cleaner)
-
-Instructional Rationale: Parameter exploration with sliders is appropriate because the Apply-level objective requires students to experiment with variables (contamination rate, MERV rating, threshold) to understand cause-and-effect relationships in filter maintenance timing.
-
-Responsive design: Must respond to window resize events. Canvas width adjusts to container.
-
-Implementation: p5.js with animated particles and gauge elements
+- Higher MERV ratings capture more particles (filter loads faster but air is cleaner)</p>
+<p>Instructional Rationale: Parameter exploration with sliders is appropriate because the Apply-level objective requires students to experiment with variables (contamination rate, MERV rating, threshold) to understand cause-and-effect relationships in filter maintenance timing.</p>
+<p>Responsive design: Must respond to window resize events. Canvas width adjusts to container.</p>
+<p>Implementation: p5.js with animated particles and gauge elements</p>
 </details>
-
 <h3 id="263-filter-maintenance">2.6.3 Filter Maintenance</h3>
 <ul>
 <li><strong>Monitor differential pressure</strong> regularly (or rely on automated sensors)</li>
@@ -3070,48 +3099,38 @@ Implementation: p5.js with animated particles and gauge elements
 <h4 id="diagram-plc-control-loop">Diagram: PLC Control Loop</h4>
 <iframe src="../../sims/plc-control-loop/main.html" width="100%" height="500px" scrolling="no"></iframe>
 
-<details markdown="1">
+<details>
 <summary>PLC Control Loop</summary>
-Type: diagram
-
-Bloom Taxonomy: Understand (L2)
+<p>Type: diagram</p>
+<p>Bloom Taxonomy: Understand (L2)
 Bloom Verb: explain, interpret
-Learning Objective: Students will be able to explain how a PLC reads sensor inputs, executes control logic, and drives output devices in a closed-loop control system.
-
-Purpose: Illustrate the PLC control loop cycle (Input → Process → Output → Feedback) with a concrete fluid power example
-
-Layout: Circular flow diagram with a central PLC unit and four stages arranged clockwise
-
-Elements to show:
+Learning Objective: Students will be able to explain how a PLC reads sensor inputs, executes control logic, and drives output devices in a closed-loop control system.</p>
+<p>Purpose: Illustrate the PLC control loop cycle (Input → Process → Output → Feedback) with a concrete fluid power example</p>
+<p>Layout: Circular flow diagram with a central PLC unit and four stages arranged clockwise</p>
+<p>Elements to show:
 1. Center: PLC unit (rectangular box labeled "PLC" with indicator lights)
 2. Top (Input stage): Temperature sensor, pressure sensor, flow switch icons connected to PLC input module
 3. Right (Process stage): Ladder logic diagram snippet showing simple temperature comparison
 4. Bottom (Output stage): Motor starter, solenoid valve, indicator light icons connected to PLC output module
-5. Left (Feedback stage): Arrow from the controlled process (cooling water loop) back to the sensors
-
-Concrete example shown:
+5. Left (Feedback stage): Arrow from the controlled process (cooling water loop) back to the sensors</p>
+<p>Concrete example shown:
 - Temperature sensor reads 90°F → PLC input
-- Ladder logic: IF temp > 85°F THEN energize pump motor relay
+- Ladder logic: IF temp &gt; 85°F THEN energize pump motor relay
 - Output module sends signal to motor starter → pump runs
 - Pump circulates cooling water → temperature drops
-- Sensor reads new temperature → cycle continues
-
-Annotations:
+- Sensor reads new temperature → cycle continues</p>
+<p>Annotations:
 - "Scan Cycle: 10-50 ms" near center PLC
 - "Analog Input (4-20 mA)" near sensor connections
 - "Digital Output (24V DC)" near motor starter connection
-- "Setpoint: 85°F" near ladder logic
-
-Interactive elements:
+- "Setpoint: 85°F" near ladder logic</p>
+<p>Interactive elements:
 - Hover over each stage to see a detailed explanation
-- Click on the ladder logic area to see the logic expand with explanation of each rung
-
-Color scheme: Green for inputs, blue for processing, orange for outputs, gray for feedback path
-Responsive design: Must respond to window resize events
-
-Implementation: HTML/CSS/JavaScript with SVG elements and hover tooltips
+- Click on the ladder logic area to see the logic expand with explanation of each rung</p>
+<p>Color scheme: Green for inputs, blue for processing, orange for outputs, gray for feedback path
+Responsive design: Must respond to window resize events</p>
+<p>Implementation: HTML/CSS/JavaScript with SVG elements and hover tooltips</p>
 </details>
-
 <h3 id="272-iot-sensors">2.7.2 IoT Sensors</h3>
 <p>The <strong>Internet of Things (IoT)</strong> has brought a new generation of sensors to fluid power systems. Unlike traditional sensors that connect only to a local PLC or gauge, IoT sensors connect to networks (Wi-Fi, cellular, or industrial protocols) and transmit data to cloud platforms where it can be stored, analyzed, and viewed from anywhere.</p>
 <p>Common IoT sensors in fluid power systems include:</p>
@@ -3177,19 +3196,15 @@ Implementation: HTML/CSS/JavaScript with SVG elements and hover tooltips
 <h4 id="diagram-traditional-vs-smart-maintenance-workflow">Diagram: Traditional vs. Smart Maintenance Workflow</h4>
 <iframe src="../../sims/maintenance-workflow-comparison/main.html" width="100%" height="500px" scrolling="no"></iframe>
 
-<details markdown="1">
+<details>
 <summary>Traditional vs. Smart Maintenance Workflow</summary>
-Type: workflow
-
-Bloom Taxonomy: Analyze (L4)
+<p>Type: workflow</p>
+<p>Bloom Taxonomy: Analyze (L4)
 Bloom Verb: compare, differentiate
-Learning Objective: Students will be able to compare traditional time-based maintenance with IoT-enabled condition-based maintenance and differentiate the key advantages of each approach.
-
-Purpose: Side-by-side workflow comparison showing traditional scheduled maintenance versus IoT-enabled condition-based maintenance
-
-Layout: Two parallel vertical flowcharts, one for traditional and one for smart/IoT approach
-
-Left Flowchart — Traditional Time-Based Maintenance:
+Learning Objective: Students will be able to compare traditional time-based maintenance with IoT-enabled condition-based maintenance and differentiate the key advantages of each approach.</p>
+<p>Purpose: Side-by-side workflow comparison showing traditional scheduled maintenance versus IoT-enabled condition-based maintenance</p>
+<p>Layout: Two parallel vertical flowcharts, one for traditional and one for smart/IoT approach</p>
+<p>Left Flowchart — Traditional Time-Based Maintenance:
 1. Start: "Calendar trigger (e.g., every Tuesday)"
    Hover: "Maintenance is scheduled by date regardless of equipment condition"
 2. Process: "Technician walks to equipment"
@@ -3202,9 +3217,8 @@ Left Flowchart — Traditional Time-Based Maintenance:
    Hover: "Paper or CMMS work order created"
 5b. No → Process: "Log 'OK' and move to next equipment"
    Hover: "95% of checks typically find no issues"
-6. End: "Repeat next scheduled period"
-
-Right Flowchart — IoT-Enabled Condition-Based Maintenance:
+6. End: "Repeat next scheduled period"</p>
+<p>Right Flowchart — IoT-Enabled Condition-Based Maintenance:
 1. Start: "IoT sensors stream data continuously"
    Hover: "Wireless sensors report temperature, vibration, pressure every 1-5 minutes"
 2. Process: "Data transmitted to cloud/edge platform"
@@ -3217,28 +3231,22 @@ Right Flowchart — IoT-Enabled Condition-Based Maintenance:
    Hover: "Push notification to phone/tablet with specific issue and location"
 5b. No → Process: "Data logged, trends updated"
    Hover: "Historical record builds for long-term analysis"
-6. End: "Continuous monitoring continues"
-
-Comparison callouts between the two flows:
+6. End: "Continuous monitoring continues"</p>
+<p>Comparison callouts between the two flows:
 - Arrow from Traditional step 2 to IoT step 1: "Eliminates routine walk-around inspections"
 - Arrow from Traditional step 4 to IoT step 3: "Catches issues between scheduled checks"
-- Arrow from Traditional step 5b to IoT step 5b: "Builds historical data automatically"
-
-Color coding:
+- Arrow from Traditional step 5b to IoT step 5b: "Builds historical data automatically"</p>
+<p>Color coding:
 - Traditional flow: orange/amber tones
 - IoT flow: blue/teal tones
 - Decision diamonds: yellow
-- Comparison arrows: green dashed
-
-Interactive elements:
+- Comparison arrows: green dashed</p>
+<p>Interactive elements:
 - Hover over each step to see detailed explanation
-- Click comparison arrows to see a detailed side-by-side benefit analysis
-
-Responsive design: Flows stack vertically on narrow screens. Must respond to window resize events.
-
-Implementation: HTML/CSS/JavaScript with SVG flowchart elements
+- Click comparison arrows to see a detailed side-by-side benefit analysis</p>
+<p>Responsive design: Flows stack vertically on narrow screens. Must respond to window resize events.</p>
+<p>Implementation: HTML/CSS/JavaScript with SVG flowchart elements</p>
 </details>
-
 <h2 id="28-real-time-data-collection">2.8 Real-Time Data Collection</h2>
 <p>Real-time data collection is the process of gathering sensor measurements from equipment as they happen, with no significant delay. This data forms the foundation for everything from simple alarm systems to sophisticated AI analytics.</p>
 <h3 id="281-data-collection-architecture">2.8.1 Data Collection Architecture</h3>
@@ -3314,41 +3322,32 @@ Implementation: HTML/CSS/JavaScript with SVG flowchart elements
 <h4 id="diagram-sensor-data-to-maintenance-decision-pipeline">Diagram: Sensor Data to Maintenance Decision Pipeline</h4>
 <iframe src="../../sims/data-decision-pipeline/main.html" width="100%" height="500px" scrolling="no"></iframe>
 
-<details markdown="1">
+<details>
 <summary>Sensor Data to Maintenance Decision Pipeline</summary>
-Type: microsim
-
-Bloom Taxonomy: Understand (L2)
+<p>Type: microsim</p>
+<p>Bloom Taxonomy: Understand (L2)
 Bloom Verb: explain, interpret
-Learning Objective: Students will be able to explain how raw sensor data is processed through a pipeline to generate maintenance decisions, tracing concrete data values through each stage.
-
-Purpose: Step-through simulation showing how a single sensor reading travels from the physical sensor through data processing to a maintenance decision
-
-Data Visibility Requirements:
+Learning Objective: Students will be able to explain how raw sensor data is processed through a pipeline to generate maintenance decisions, tracing concrete data values through each stage.</p>
+<p>Purpose: Step-through simulation showing how a single sensor reading travels from the physical sensor through data processing to a maintenance decision</p>
+<p>Data Visibility Requirements:
 Stage 1: Show raw sensor reading — "Pump #3 Vibration Sensor: 0.28 in/s" with timestamp
 Stage 2: Show data transmission — value arrives at cloud platform, stored in database row with fields (timestamp, sensor_id, value, unit)
 Stage 3: Show trend comparison — current value (0.28 in/s) plotted against 30-day history, showing baseline of 0.08 in/s and gradual upward trend
-Stage 4: Show threshold evaluation — value compared against alarm levels: Normal (<0.15), Warning (0.15–0.30), Critical (>0.30). Current reading falls in Warning zone.
+Stage 4: Show threshold evaluation — value compared against alarm levels: Normal (&lt;0.15), Warning (0.15–0.30), Critical (&gt;0.30). Current reading falls in Warning zone.
 Stage 5: Show alert generation — alert card displays: "WARNING — Pump #3 vibration trending up. Current: 0.28 in/s. Baseline: 0.08 in/s. Rate of change: +0.04 in/s per week. Estimated time to critical: ~5 days."
-Stage 6: Show maintenance decision — technician review screen with options: "Schedule bearing inspection within 3 days" (recommended), "Continue monitoring," "Emergency shutdown"
-
-Canvas layout:
+Stage 6: Show maintenance decision — technician review screen with options: "Schedule bearing inspection within 3 days" (recommended), "Continue monitoring," "Emergency shutdown"</p>
+<p>Canvas layout:
 - Main area: large display panel showing current stage content
 - Bottom: step navigation with Previous / Next buttons and stage indicator (1 of 6)
-- Right sidebar: pipeline progress indicator showing all 6 stages with current stage highlighted
-
-Interactive controls:
+- Right sidebar: pipeline progress indicator showing all 6 stages with current stage highlighted</p>
+<p>Interactive controls:
 - Next / Previous buttons to step through stages
 - At Stage 3: slider to adjust the "current reading" value and see how the trend and alert change
-- At Stage 5: toggle between different alert severity examples
-
-Instructional Rationale: Step-through with concrete data values is appropriate because the Understand/explain objective requires learners to trace specific data through each transformation stage. Continuous animation would obscure the data values and prevent students from studying each stage.
-
-Responsive design: Must respond to window resize events. Layout adjusts for narrow screens.
-
-Implementation: p5.js with stage-based display panels and interactive step controls
+- At Stage 5: toggle between different alert severity examples</p>
+<p>Instructional Rationale: Step-through with concrete data values is appropriate because the Understand/explain objective requires learners to trace specific data through each transformation stage. Continuous animation would obscure the data values and prevent students from studying each stage.</p>
+<p>Responsive design: Must respond to window resize events. Layout adjusts for narrow screens.</p>
+<p>Implementation: p5.js with stage-based display panels and interactive step controls</p>
 </details>
-
 <h2 id="29-connecting-it-all-the-smart-fluid-power-system">2.9 Connecting It All: The Smart Fluid Power System</h2>
 <p>When you combine mechanical components (pumps, fans, compressors, valves, filters) with smart controls (PLCs, IoT sensors, communication networks), you get a system that can monitor itself, report its condition, and even adjust its own operation for optimal performance.</p>
 <p>Consider a complete cooling water system with smart controls:</p>
@@ -3461,6 +3460,10 @@ Implementation: p5.js with stage-based display panels and interactive step contr
 <li><strong>Real-time data collection</strong> transforms raw sensor readings into actionable maintenance intelligence through a pipeline of capture, storage, trending, alerting, and decision support</li>
 <li>Smart controls and sensors are the foundation for the <strong>AI-driven predictive maintenance</strong> strategies you will learn in later chapters</li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">AI Deep Dive in Chapter 14</p>
+<p>The IoT sensors, data collection pipelines, and condition-based maintenance concepts from this chapter become the input layers for sophisticated AI systems. <a href="../14-ai-smart-monitoring/">Chapter 14: AI and Smart Monitoring</a> shows how these technologies are deployed across every fluid power system type for predictive maintenance, energy optimization, and smart controls.</p>
+</div>
 <details class="question">
 <summary>Review: Can you name the five core components and one maintenance task for each?</summary>
 <ol>

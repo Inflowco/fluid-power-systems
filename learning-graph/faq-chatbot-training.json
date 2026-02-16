@@ -143,7 +143,7 @@
       "difficulty": "easy",
       "concepts": ["Course Overview"],
       "keywords": ["career", "jobs", "technician", "maintenance", "automation"],
-      "source_links": ["docs/chapters/14-safety/index.md"],
+      "source_links": ["docs/chapters/15-safety/index.md"],
       "has_example": false,
       "word_count": 104
     },
@@ -702,7 +702,7 @@
       "difficulty": "easy",
       "concepts": ["System Safety Principles", "PPE Requirements", "OSHA Standards Overview"],
       "keywords": ["safety", "hazards", "PPE", "lockout/tagout", "pressure", "injection"],
-      "source_links": ["docs/chapters/14-safety/index.md"],
+      "source_links": ["docs/chapters/15-safety/index.md"],
       "has_example": false,
       "word_count": 142
     },

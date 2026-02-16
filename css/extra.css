@@ -65,3 +65,13 @@
     margin-right: 0.3rem;
     font-weight: 900;
 }
+
+/* Upper-alpha (A, B, C, D) quiz answer formatting */
+.upper-alpha ol {
+    list-style-type: upper-alpha;
+    padding-left: 1.5em;
+}
+.upper-alpha ol li {
+    padding-left: 0.3em;
+    margin-bottom: 0.3em;
+}
